@@ -11,4 +11,20 @@ config_version=5
 [application]
 
 config/name="Pistoleros-of-santa-rose"
-config/features=PackedStringArray("4.0", "Forward Plus")
+config/features=PackedStringArray("4.1", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=480
+window/size/mode=3
+window/stretch/mode="viewport"
+window/stretch/aspect="keep_height"
+
+[layer_names]
+
+2d_render/layer_2="Shadow"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
