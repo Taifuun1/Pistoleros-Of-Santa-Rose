@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://lkirqht3aybu"]
+[gd_scene load_steps=46 format=3 uid="uid://lkirqht3aybu"]
 
 [ext_resource type="Texture2D" uid="uid://bca5p8hbh11qs" path="res://Assets/Tilesets/TemplateLowerTile.png" id="1_p8xq0"]
 [ext_resource type="Shader" path="res://Shaders/Test/TilemapWaterTest.gdshader" id="2_bbt2a"]
@@ -11,9 +11,13 @@
 [ext_resource type="Texture2D" uid="uid://brfnygkic5ao6" path="res://Assets/Tilesets/GrandCanyonTile.png" id="6_t5dx1"]
 [ext_resource type="Texture2D" uid="uid://b0g645hfgpuh0" path="res://Assets/Tilesets/GrandCanyon_n.png" id="7_wuopg"]
 [ext_resource type="Texture2D" uid="uid://dwa432bgpcb62" path="res://Assets/Tilesets/GrandCanyonTile_n.png" id="7_xrwss"]
-[ext_resource type="Texture2D" uid="uid://c2gyfgd0i7rlt" path="res://Assets/Lights/Torch.png" id="8_epdvi"]
 [ext_resource type="Shader" path="res://Shaders/Test/ShadowTest.gdshader" id="8_ttgun"]
 [ext_resource type="Texture2D" uid="uid://21r5amcru03u" path="res://Assets/Outdoor Objects/MediumCactus.png" id="9_u0idy"]
+[ext_resource type="Texture2D" uid="uid://b8spy7q3eraof" path="res://Assets/Lights/Faint.png" id="12_klt0w"]
+[ext_resource type="Texture2D" uid="uid://cjpmavxg8ndt8" path="res://Assets/Characters/Test2_40x40.png" id="15_365m4"]
+[ext_resource type="Texture2D" uid="uid://hfcmcfoxy5a2" path="res://Assets/Tilesets/Grass Lands/GrassLands.png" id="15_gucdi"]
+[ext_resource type="Texture2D" uid="uid://dnniyqjbgb3sg" path="res://Assets/Characters/Test3_40x40.png" id="16_vjn71"]
+[ext_resource type="Texture2D" uid="uid://dvjv3lbb0dx8o" path="res://Assets/Characters/Test2Animation_40x40.png" id="18_kcxr6"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yqugh"]
 shader = ExtResource("2_bbt2a")
@@ -215,6 +219,59 @@ normal_texture = ExtResource("7_xrwss")
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_olhhx"]
 polygon = PackedVector2Array(-12, 6, 0, 0, 12, 6, 0, 12)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_53hw6"]
+texture = ExtResource("15_gucdi")
+texture_region_size = Vector2i(24, 24)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_vimi3"]
+tile_shape = 1
+tile_size = Vector2i(24, 12)
+sources/5 = SubResource("TileSetAtlasSource_53hw6")
+
+[sub_resource type="Animation" id="Animation_xpotw"]
+resource_name = "Idle"
+length = 1.2
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Test2Animation40x40:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.15, 0.3, 0.45, 0.7, 1, 1.1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
+[sub_resource type="Animation" id="Animation_vnx3y"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Test2Animation40x40:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_tlb7d"]
+_data = {
+"Idle": SubResource("Animation_xpotw"),
+"RESET": SubResource("Animation_vnx3y")
+}
+
 [node name="Node2D" type="Node2D"]
 y_sort_enabled = true
 
@@ -275,7 +332,7 @@ script = SubResource("GDScript_0kggw")
 color = Color(0.776471, 0.513726, 0.0862745, 1)
 range_layer_max = 1
 shadow_color = Color(0.0745098, 0.0745098, 0.0745098, 0.964706)
-texture = ExtResource("8_epdvi")
+texture = ExtResource("12_klt0w")
 texture_scale = 3.0
 
 [node name="Shadow" type="PointLight2D" parent="Light"]
@@ -285,7 +342,7 @@ range_item_cull_mask = 2
 shadow_enabled = true
 shadow_color = Color(0, 0, 0, 1)
 shadow_filter_smooth = 5.1
-texture = ExtResource("8_epdvi")
+texture = ExtResource("12_klt0w")
 texture_scale = 3.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
@@ -311,3 +368,56 @@ texture = SubResource("CanvasTexture_n47jf")
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="Tile2"]
 occluder = SubResource("OccluderPolygon2D_olhhx")
+
+[node name="TileMap3" type="TileMap" parent="."]
+y_sort_enabled = true
+tile_set = SubResource("TileSet_vimi3")
+cell_quadrant_size = 24
+format = 2
+layer_0/y_sort_enabled = true
+layer_0/z_index = 1
+layer_0/tile_data = PackedInt32Array(2949126, 196613, 0, 3014662, 131077, 0, 3080198, 131077, 0, 3145734, 5, 0, 3211270, 65541, 0, 3276806, 262149, 0, 3342342, 262149, 0, 3407878, 262149, 0, 3473414, 262149, 0, 3538950, 65541, 0, 3604486, 5, 0, 3670022, 5, 0, 3735558, 65541, 0, 3801094, 5, 0, 3866630, 5, 0, 3932166, 262149, 0, 3997702, 5, 0, 4063238, 65541, 0, 4128774, 5, 0, 2949127, 262149, 0, 3014663, 196613, 0, 3080199, 65541, 0, 3145735, 5, 0, 3211271, 131077, 0, 3276807, 131077, 0, 3342343, 262149, 0, 3407879, 5, 0, 3473415, 5, 0, 3538951, 5, 0, 3604487, 5, 0, 3670023, 196613, 0, 3735559, 131077, 0, 3801095, 196613, 0, 3866631, 5, 0, 3932167, 65541, 0, 3997703, 131077, 0, 4063239, 5, 0, 4128775, 262149, 0, 2949128, 131077, 0, 3014664, 131077, 0, 3080200, 196613, 0, 3145736, 262149, 0, 3211272, 5, 0, 3276808, 196613, 0, 3342344, 196613, 0, 3407880, 196613, 0, 3473416, 5, 0, 3538952, 196613, 0, 3604488, 131077, 0, 3670024, 262149, 0, 3735560, 196613, 0, 3801096, 196613, 0, 3866632, 196613, 0, 3932168, 262149, 0, 3997704, 131077, 0, 4063240, 262149, 0, 4128776, 65541, 0, 2949129, 65541, 0, 3014665, 131077, 0, 3080201, 65541, 0, 3145737, 5, 0, 3211273, 65541, 0, 3276809, 65541, 0, 3342345, 65541, 0, 3407881, 262149, 0, 3473417, 262149, 0, 3538953, 65541, 0, 3604489, 262149, 0, 3670025, 196613, 0, 3735561, 131077, 0, 3801097, 196613, 0, 3866633, 196613, 0, 3932169, 196613, 0, 3997705, 131077, 0, 4063241, 65541, 0, 4128777, 131077, 0, 2949130, 5, 0, 3014666, 196613, 0, 3080202, 262149, 0, 3145738, 131077, 0, 3211274, 196613, 0, 3276810, 65541, 0, 3342346, 5, 0, 3407882, 131077, 0, 3473418, 196613, 0, 3538954, 65541, 0, 3604490, 5, 0, 3670026, 262149, 0, 3735562, 196613, 0, 3801098, 131077, 0, 3866634, 5, 0, 3932170, 5, 0, 3997706, 65541, 0, 4063242, 131077, 0, 4128778, 262149, 0, 2949131, 131077, 0, 3014667, 65541, 0, 3080203, 262149, 0, 3145739, 65541, 0, 3211275, 196613, 0, 3276811, 196613, 0, 3342347, 65541, 0, 3407883, 65541, 0, 3473419, 65541, 0, 3538955, 5, 0, 3604491, 131077, 0, 3670027, 262149, 0, 3735563, 65541, 0, 3801099, 65541, 0, 3866635, 5, 0, 3932171, 5, 0, 3997707, 65541, 0, 4063243, 196613, 0, 4128779, 65541, 0, 2949132, 65541, 0, 3014668, 196613, 0, 3080204, 65541, 0, 3145740, 262149, 0, 3211276, 262149, 0, 3276812, 262149, 0, 3342348, 5, 0, 3407884, 262149, 0, 3473420, 65541, 0, 3538956, 5, 0, 3604492, 131077, 0, 3670028, 5, 0, 3735564, 262149, 0, 3801100, 196613, 0, 3866636, 262149, 0, 3932172, 196613, 0, 3997708, 262149, 0, 4063244, 131077, 0, 4128780, 262149, 0, 2555909, 196613, 0, 2621445, 65541, 0, 2686981, 5, 0, 2752517, 196613, 0, 2818053, 5, 0, 2883589, 262149, 0, 2949125, 262149, 0, 3014661, 5, 0, 3080197, 65541, 0, 3145733, 196613, 0, 2555910, 131077, 0, 2621446, 65541, 0, 2686982, 65541, 0, 2752518, 262149, 0, 2818054, 65541, 0, 2883590, 131077, 0, 2555911, 65541, 0, 2621447, 196613, 0, 2686983, 196613, 0, 2752519, 131077, 0, 2818055, 262149, 0, 2883591, 65541, 0, 2490373, 5, 0, 2490374, 65541, 0, 2490375, 5, 0, 2031622, 65541, 0, 2097158, 5, 0, 2162694, 5, 0, 2228230, 5, 0, 2293766, 262149, 0, 2359302, 262149, 0, 2424838, 262149, 0, 2031623, 131077, 0, 2097159, 196613, 0, 2162695, 262149, 0, 2228231, 262149, 0, 2293767, 131077, 0, 2359303, 131077, 0, 2424839, 262149, 0, 2031624, 262149, 0, 2097160, 262149, 0, 2162696, 262149, 0, 2228232, 131077, 0, 2293768, 65541, 0, 2359304, 196613, 0, 2424840, 65541, 0, 2490376, 65541, 0, 2555912, 65541, 0, 2621448, 5, 0, 2686984, 5, 0, 1900553, 131077, 0, 1966089, 131077, 0, 2031625, 5, 0, 2097161, 5, 0, 1966088, 262149, 0, 2162697, 5, 0, 2228233, 196613, 0, 2293769, 65541, 0, 2359305, 196613, 0, 1966090, 196613, 0, 2031626, 65541, 0, 2097162, 65541, 0, 2162698, 196613, 0, 2228234, 196613, 0, 2293770, 196613, 0, 2359306, 262149, 0, 2031627, 131077, 0, 2097163, 262149, 0, 2162699, 5, 0, 2228235, 196613, 0, 2293771, 65541, 0, 2031628, 131077, 0, 2097164, 262149, 0, 2162700, 5, 0, 2228236, 196613, 0, 2293772, 65541, 0, 2031629, 65541, 0, 2097165, 131077, 0, 2162701, 131077, 0, 2228237, 196613, 0, 2293773, 5, 0, 2359308, 65541, 0, 2424844, 196613, 0, 2490380, 5, 0, 2555916, 65541, 0, 2621452, 262149, 0, 2359309, 131077, 0, 2424845, 196613, 0, 2490381, 262149, 0, 2555917, 65541, 0, 2621453, 131077, 0, 2686988, 196613, 0, 2752524, 65541, 0, 2818060, 5, 0, 2883596, 131077, 0, 2686989, 131077, 0, 2752525, 65541, 0, 2818061, 65541, 0, 2883597, 196613, 0, 2949133, 196613, 0, 3342349, 65541, 0, 3407885, 5, 0, 3473421, 131077, 0, 3538957, 262149, 0, 3604493, 196613, 0, 3866629, 262149, 0, 3932165, 5, 0, 3997701, 262149, 0, 4063237, 131077, 0, 4128773, 196613, 0, 4194309, 131077, 0, 4259845, 65541, 0, 4194310, 262149, 0, 4259846, 5, 0, 4325379, 5, 0, 4390915, 196613, 0, 4325380, 196613, 0, 4390916, 196613, 0, 4325381, 5, 0, 4390917, 5, 0, 4063234, 5, 0, 4128770, 262149, 0, 4194306, 262149, 0, 4259842, 5, 0, 4325378, 65541, 0, 4390914, 262149, 0, 4456450, 262149, 0, 4521986, 196613, 0, 4063235, 262149, 0, 4128771, 196613, 0, 4194307, 65541, 0, 4259843, 65541, 0, 4456451, 65541, 0, 4521987, 5, 0, 4063236, 65541, 0, 4128772, 131077, 0, 4194308, 196613, 0, 4259844, 65541, 0, 4456452, 196613, 0, 4521988, 65541, 0, 4456453, 262149, 0, 4521989, 262149, 0, 4587525, 131077, 0, 4653061, 262149, 0, 4718597, 5, 0, 4521990, 131077, 0, 4587526, 131077, 0, 4653062, 196613, 0, 4718598, 131077, 0, 4325382, 5, 0, 4390918, 65541, 0, 4456454, 5, 0, 4325383, 262149, 0, 4390919, 5, 0, 4456455, 65541, 0, 4521991, 65541, 0, 4587527, 5, 0, 4194311, 196613, 0, 4259847, 131077, 0, 4194312, 131077, 0, 4259848, 262149, 0, 4325384, 65541, 0, 4390920, 262149, 0, 4456456, 65541, 0, 4194313, 262149, 0, 4194315, 65541, 0, 4194316, 196613, 0)
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(245, 299)
+texture = ExtResource("15_365m4")
+
+[node name="Polygon2D" type="Polygon2D" parent="Sprite2D2"]
+show_behind_parent = true
+position = Vector2(2, 13)
+skew = 0.708604
+color = Color(0.211765, 0.211765, 0.211765, 0.603922)
+polygon = PackedVector2Array(0.285767, -2.63409, 7.71423, 2.63409, -0.000244141, 9.21936, -7.42871, 3.95114)
+
+[node name="Test340x40" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(186, 355)
+texture = ExtResource("16_vjn71")
+
+[node name="Polygon2D2" type="Polygon2D" parent="Test340x40"]
+show_behind_parent = true
+position = Vector2(2, 13)
+skew = 0.708604
+color = Color(0.211765, 0.211765, 0.211765, 0.603922)
+polygon = PackedVector2Array(0.285767, -2.63409, 7.71423, 2.63409, -0.000244141, 9.21936, -7.42871, 3.95114)
+
+[node name="Test2Animation40x40" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(223, 339)
+texture = ExtResource("18_kcxr6")
+hframes = 8
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Test2Animation40x40"]
+root_node = NodePath("../..")
+autoplay = "Idle"
+libraries = {
+"": SubResource("AnimationLibrary_tlb7d")
+}
+
+[node name="Polygon2D3" type="Polygon2D" parent="Test2Animation40x40"]
+show_behind_parent = true
+position = Vector2(2, 13)
+skew = 0.708604
+color = Color(0.211765, 0.211765, 0.211765, 0.603922)
+polygon = PackedVector2Array(0.285767, -2.63409, 7.71423, 2.63409, -0.000244141, 9.21936, -7.42871, 3.95114)
