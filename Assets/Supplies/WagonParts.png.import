@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://v1acjfsiwdb6"
-path="res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"
+uid="uid://dwp1mcnbbst73"
+path="res://.godot/imported/WagonParts.png-f5908e44932ac66e8cdfd6237eb8f2d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Outdoor Objects/FlowerBigViolet.png"
-dest_files=["res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"]
+source_file="res://Assets/Supplies/WagonParts.png"
+dest_files=["res://.godot/imported/WagonParts.png-f5908e44932ac66e8cdfd6237eb8f2d4.ctex"]
 
 [params]
 

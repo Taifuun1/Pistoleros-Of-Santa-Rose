@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://21r5amcru03u"
-path="res://.godot/imported/MediumCactus.png-86509e9c71e792e2d47804f7d4329a2a.ctex"
+uid="uid://j5gaj3uql7yk"
+path="res://.godot/imported/WilyCoyote_12.png-21d7ed020757a1d882eda610f79eaa82.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Outdoor Objects/MediumCactus.png"
-dest_files=["res://.godot/imported/MediumCactus.png-86509e9c71e792e2d47804f7d4329a2a.ctex"]
+source_file="res://Assets/Map Entities/WilyCoyote_12.png"
+dest_files=["res://.godot/imported/WilyCoyote_12.png-21d7ed020757a1d882eda610f79eaa82.ctex"]
 
 [params]
 

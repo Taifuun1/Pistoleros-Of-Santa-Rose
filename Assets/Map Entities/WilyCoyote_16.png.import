@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://v1acjfsiwdb6"
-path="res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"
+uid="uid://oryaexfh3dnt"
+path="res://.godot/imported/WilyCoyote_16.png-7e04cae32209240372d2d8a2c8a34b4d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Outdoor Objects/FlowerBigViolet.png"
-dest_files=["res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"]
+source_file="res://Assets/Map Entities/WilyCoyote_16.png"
+dest_files=["res://.godot/imported/WilyCoyote_16.png-7e04cae32209240372d2d8a2c8a34b4d.ctex"]
 
 [params]
 

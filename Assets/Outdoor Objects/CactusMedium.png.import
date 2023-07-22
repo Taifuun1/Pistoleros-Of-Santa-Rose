@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://v1acjfsiwdb6"
-path="res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"
+uid="uid://s0a6c5avdwvo"
+path="res://.godot/imported/CactusMedium.png-d3e7c111038efffef6a9c924081a5e3f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Outdoor Objects/FlowerBigViolet.png"
-dest_files=["res://.godot/imported/FlowerBigViolet.png-133f95198ebb3a13df73ff7fc61b450d.ctex"]
+source_file="res://Assets/Outdoor Objects/CactusMedium.png"
+dest_files=["res://.godot/imported/CactusMedium.png-d3e7c111038efffef6a9c924081a5e3f.ctex"]
 
 [params]
 
