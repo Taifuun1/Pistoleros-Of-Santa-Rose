@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Pistoleros-of-santa-rose"
+config/name="Pistoleros of Santa Rose"
 config/features=PackedStringArray("4.1", "Forward Plus")
 
 [display]
