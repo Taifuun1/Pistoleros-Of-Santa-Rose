@@ -1,17 +1,44 @@
-extends WFCPatternProcessing
-class_name WFCInputCreation
+extends Node
+
+
+#######################################
+### Input node processing functions ###
+#######################################
+
+func addInputs(_name, _path) -> void:
+	var dir = DirAccess.open(_path)
+	var inputFilenames = []
+	if dir:
+		dir.list_dir_begin()
+		var fileName = dir.get_next()
+		while fileName != "":
+			if not dir.current_is_dir() and fileName.get_extension().matchn("tscn"):
+				inputFilenames.append(fileName)
+			fileName = dir.get_next()
+	for fileName in inputFilenames:
+		MultiThreading.mutex.lock()
+		add_child(load("res://Level Generation/WFC Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instantiate())
+		MultiThreading.mutex.unlock()
+	await get_tree().process_frame
+
+func removeInputs() -> void:
+	MultiThreading.mutex.lock()
+	for _inputNode in get_children():
+		_inputNode.clear()
+		_inputNode.free()
+	MultiThreading.mutex.unlock()
 
 
 ################################
 ### Input creation functions ###
 ################################
 
-func assignAllInputs() -> void:
+func assignInputsForInputSet() -> Array:
 	var _inputsInArray = []
 	var _inputs = []
 	
 	MultiThreading.mutex.lock()
-	for _inputNode in $Inputs.get_children():
+	for _inputNode in get_children():
 		_inputNode.create()
 		var _input = createInputFromNode(_inputNode)
 		for _i in range(4):
@@ -23,15 +50,15 @@ func assignAllInputs() -> void:
 		for _input in _inputArray:
 			_inputs.append(transformInputToPackedInt32Array(_input))
 	MultiThreading.mutex.unlock()
-
-	allInputs = _inputs
+	
+	return _inputs
 
 func createInputFromNode(_inputNode) -> Array:
 	var _input = []
 	for x in range(_inputNode.gridSize.x):
 		_input.append([])
 		for y in range(_inputNode.gridSize.y):
-			_input[x].append(_inputNode.get_cell_source_id(0, Vector2(x,y)))
+			_input[x].append(_inputNode.get_cell_source_id(0, Vector2i(x,y)))
 	return _input
 
 func createInputPattern() -> Array:

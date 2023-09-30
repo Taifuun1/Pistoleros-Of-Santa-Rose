@@ -1,15 +1,12 @@
-extends WFCInputCreation
-class_name WaveFunctionCollapse
-
-var isEdgeTileCheckDone = true
+extends WFCPatternProcessing
+class_name WaveFunctionCollapseTileMap
 
 
 func _ready():
 	set_process(false)
 
 func _process(_delta):
-	if !edgeTiles.is_empty() and isEdgeTileCheckDone:
-		isEdgeTileCheckDone = false
+	if !edgeTiles.is_empty():
 		var _tile = getRandomLowestEntropyEdgeTile()
 		if _tile == null:
 			return
@@ -40,8 +37,7 @@ func isTileLegible(_tile) -> bool:
 		var _legibleInputs = doesTileHaveLegibleInputs(_tile, _match)
 		if typeof(_legibleInputs) != TYPE_BOOL:
 			for _legibleTile in _legibleInputs.tiles:
-				generatedTiles[Vector2(_legibleTile.x, _legibleTile.y)] = _legibleInputs.tiles[_legibleTile]
-				set_cell(0, _legibleTile.floor(), _legibleInputs.tiles[_legibleTile], Vector2i(0, 0))
+				generatedTiles[Vector2i(_legibleTile.x, _legibleTile.y)] = _legibleInputs.tiles[_legibleTile]
 			for _edgeTile in _legibleInputs.edgeTiles.add:
 				var _edgeTileIndex = helperFunctions.checkIfArrayOfClassesHasValue(edgeTiles, "position", _edgeTile.position)
 				if _edgeTileIndex == -1:
@@ -111,11 +107,11 @@ func addToTilesToBeChanged(_tile, _pattern, _currentTestTiles = {}) -> Dictionar
 	var _i = 0
 	for _x in range(-1, 2):
 		for _y in range(-1, 2):
-			var _checkedTile = Vector2(_tile.x + _x, _tile.y + _y)
+			var _checkedTile = Vector2i(_tile.x + _x, _tile.y + _y)
 			if (
 				!_testTiles.has(_checkedTile) and
 				!generatedTiles.has(_checkedTile) and
-				helperFunctions.isTileInsideGrid(_checkedTile, gridSize)
+				helperFunctions.isTileInsideGrid(_checkedTile)
 			):
 				_testTiles[_checkedTile] = _pattern[_i]
 			_i += 1
@@ -125,7 +121,7 @@ func addToTilesToBeCheckedForEdgeTiles(_tile, _currentEdgeTiles = {}) -> Diction
 	var _newEdgeTiles = _currentEdgeTiles.duplicate(true)
 	for x in range(-2, 3):
 		for y in range(-2, 3):
-			var _checkedTile = Vector2(_tile.x + x, _tile.y + y)
+			var _checkedTile = Vector2i(_tile.x + x, _tile.y + y)
 			if !_newEdgeTiles.has(_checkedTile):
 				var _edgeTile = edgeTile.edgeTile.new()
 				_edgeTile.setValues(_checkedTile)
@@ -136,17 +132,17 @@ func getEdgeTilesForTile(_tile, _tilesToBeChanged, _currentEdgeTiles) -> Array:
 	var _newEdgeTiles = _currentEdgeTiles.duplicate(true)
 	for x in range(_tile.x - 1,  _tile.x + 2):
 		for y in range(_tile.y - 1,  _tile.y + 2):
-			var _newEdgeTileIndex = helperFunctions.checkIfArrayOfClassesHasValue(_newEdgeTiles, "position", Vector2(x,y))
-			if _tile == Vector2(x,y) and _newEdgeTileIndex != -1:
+			var _newEdgeTileIndex = helperFunctions.checkIfArrayOfClassesHasValue(_newEdgeTiles, "position", Vector2i(x,y))
+			if _tile == Vector2i(x,y) and _newEdgeTileIndex != -1:
 				_newEdgeTiles.remove_at(_newEdgeTileIndex)
 			elif (
-				!isPatternFull(Vector2(x,y), _tilesToBeChanged) and
+				!isPatternFull(Vector2i(x,y), _tilesToBeChanged) and
 				_newEdgeTileIndex == -1 and
-				!nonLegibleTiles.has(Vector2(x,y)) and
-				!helperFunctions.isTileOutsideGrid(_tile, gridSize)
+				!nonLegibleTiles.has(Vector2i(x,y)) and
+				!helperFunctions.isTileOutsideGrid(_tile)
 			):
 				var _newEdgeTile = edgeTile.edgeTile.new()
-				_newEdgeTile.setValues(Vector2(x,y))
+				_newEdgeTile.setValues(Vector2i(x,y))
 				_newEdgeTiles.append(_newEdgeTile)
 			elif _newEdgeTileIndex != -1:
 				_newEdgeTiles.remove_at(_newEdgeTileIndex)
@@ -191,7 +187,7 @@ func getNewEdgeTiles(_tilesToBeChanged, _tilesToBeCheckedForEdgeTiles) -> Dictio
 			!nonLegibleTiles.has(_edgeTile.position) and
 			_addEdgeTileIndex == -1 and
 			!isPatternFull(_edgeTile.position, _tilesToBeChanged) and
-			!helperFunctions.isTileOutsideGrid(_edgeTile.position, gridSize)
+			!helperFunctions.isTileOutsideGrid(_edgeTile.position)
 		):
 			var _newEdgeTile = edgeTile.edgeTile.new()
 			_newEdgeTile.setValues(_edgeTile.position)
@@ -221,19 +217,18 @@ func drawPattern(_tile, _pattern) -> void:
 	var _index = 0
 	for x in range(3):
 		for y in range(3):
-			var _drawnTile = Vector2(_tile.x + (x - 1), _tile.y + (y - 1))
-			set_cell(0, _drawnTile, _pattern[_index], Vector2i(0, 0))
+			var _drawnTile = Vector2i(_tile.x + (x - 1), _tile.y + (y - 1))
 			generatedTiles[_drawnTile] = _pattern[_index]
 			_index += 1
 
 func placeCornerPatterns() -> void:
-	drawPattern(Vector2(1, 1), getRandomPattern())
+	drawPattern(Vector2i(1, 1), getRandomPattern())
 	
 	var _edgeTiles = []
 	var _newEdgeTile1 = edgeTile.edgeTile.new()
 	var _newEdgeTile2 = edgeTile.edgeTile.new()
-	_newEdgeTile1.setValues(Vector2(1,2))
-	_newEdgeTile2.setValues(Vector2(2,1))
+	_newEdgeTile1.setValues(Vector2i(1,2))
+	_newEdgeTile2.setValues(Vector2i(2,1))
 	_edgeTiles.append(_newEdgeTile1)
 	_edgeTiles.append(_newEdgeTile2)
 	
@@ -250,22 +245,20 @@ func trimGenerationEdges() -> void:
 	clear()
 	for _tile in _generatedTilesCopy:
 		if (
-			_tile.x > 4 and
-			_tile.y > 4 and
-			_tile.x < gridSize.x - 4 and
-			_tile.y < gridSize.y - 4
+			_tile.x > 0 and
+			_tile.y > 0 and
+			_tile.x < WaveFunctionCollapse.gridSize.x - 1 and
+			_tile.y < WaveFunctionCollapse.gridSize.y - 1
 		):
 			_trimmedGeneratedTiles[_tile] = _generatedTilesCopy[_tile]
-			set_cell(0, _tile, _generatedTilesCopy[_tile], Vector2(0, 0))
 	generatedTiles = _trimmedGeneratedTiles
 
 func fillEmptyGenerationTiles(_fillTile, _fillEdges = null) -> void:
-	for _x in range(gridSize.x):
-		for _y in range(gridSize.y):
-			var _tile = Vector2(_x, _y)
+	for _x in range(WaveFunctionCollapse.gridSize.x):
+		for _y in range(WaveFunctionCollapse.gridSize.y):
+			var _tile = Vector2i(_x, _y)
 			if !generatedTiles.has(_tile):
 				generatedTiles[_tile] = _fillTile
-				set_cell(0, _tile, _fillTile, Vector2(0, 0))
 	if _fillEdges != null:
 		for x in range(generatedTiles.size()):
 			if generatedTiles[x][0].tile == tiles.DOOR_CLOSED:
@@ -279,33 +272,6 @@ func fillEmptyGenerationTiles(_fillTile, _fillEdges = null) -> void:
 		for y in range(1, generatedTiles[0].size() - 1):
 			if generatedTiles[generatedTiles.size() - 1][y].tile == tiles.DOOR_CLOSED:
 				generatedTiles[generatedTiles.size() - 1][y].tile = tiles[_fillEdges]
-
-
-#######################################
-### Input node processing functions ###
-#######################################
-
-func addInputs(_name, _path) -> void:
-	var dir = DirAccess.open(_path)
-	var inputFilenames = []
-	if dir:
-		dir.list_dir_begin()
-		var fileName = dir.get_next()
-		while fileName != "":
-			if not dir.current_is_dir() and fileName.get_extension().matchn("tscn"):
-				inputFilenames.append(fileName)
-			fileName = dir.get_next()
-	for fileName in inputFilenames:
-		MultiThreading.mutex.lock()
-		$Inputs.add_child(load("res://Level Generation/WFC Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instance())
-		MultiThreading.mutex.unlock()
-
-func removeInputs() -> void:
-	MultiThreading.mutex.lock()
-	for _inputNode in $Inputs.get_children():
-		_inputNode.clear()
-		_inputNode.free()
-	MultiThreading.mutex.unlock()
 
 
 ########################
@@ -323,7 +289,7 @@ func getRandomLowestEntropyEdgeTile() -> Object:
 	return _lowestEntropyEdgeTiles[randi() % _lowestEntropyEdgeTiles.size()]
 
 func getRandomPattern() -> PackedInt32Array:
-	if allInputs.size() != 0:
-		return allInputs[randi() % allInputs.size()]
+	if inputs.size() != 0:
+		return inputs[randi() % inputs.size()]
 	push_error("No valid inputs!")
 	return PackedInt32Array()
