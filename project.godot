@@ -16,18 +16,57 @@ config/features=PackedStringArray("4.1", "Forward Plus")
 [autoload]
 
 MultiThreading="*res://Globals/MultiThreading.gd"
+WaveFunctionCollapse="*res://Globals/WaveFunctionCollapse.gd"
 
 [display]
 
 window/size/viewport_width=640
 window/size/viewport_height=480
-window/size/mode=3
 window/stretch/mode="viewport"
 window/stretch/aspect="keep_height"
 
 [editor]
 
 script/templates_search_path="res://Script Templates"
+
+[input]
+
+MOVE_UP={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":87,"key_label":0,"unicode":119,"echo":false,"script":null)
+]
+}
+MOVE_RIGHT_UP={
+"deadzone": 0.5,
+"events": []
+}
+MOVE_RIGHT={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":100,"echo":false,"script":null)
+]
+}
+MOVE_RIGHT_DOWN={
+"deadzone": 0.5,
+"events": []
+}
+MOVE_DOWN={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":83,"key_label":0,"unicode":115,"echo":false,"script":null)
+]
+}
+MOVE_LEFT_DOWN={
+"deadzone": 0.5,
+"events": []
+}
+MOVE_LEFT={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":65,"key_label":0,"unicode":97,"echo":false,"script":null)
+]
+}
+MOVE_LEFT_UP={
+"deadzone": 0.5,
+"events": []
+}
 
 [layer_names]
 

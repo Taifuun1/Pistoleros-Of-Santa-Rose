@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bo80dkcn54ne0"]
 
-[ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Level Generation/Test/TestWFCGeneration.tres" id="1_hvogl"]
+[ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.tres" id="1_hvogl"]
 [ext_resource type="Script" path="res://Level Generation/WFC Generation/InputTemplate.gd" id="2_2s6xl"]
 
 [node name="TestWFCGenerationInput" type="TileMap"]

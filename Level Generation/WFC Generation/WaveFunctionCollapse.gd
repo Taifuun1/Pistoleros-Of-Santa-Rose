@@ -1,6 +1,8 @@
 extends WFCPatternProcessing
 class_name WaveFunctionCollapseTileMap
 
+var generatedChunk
+
 
 func _ready():
 	set_process(false)
@@ -16,19 +18,22 @@ func _process(_delta):
 		
 		getMatchesForEdgeTiles()
 		edgeTiles.sort_custom(helperFunctions.sortToLowestEntropy)
-		
-		$CanvasLayer/EdgeTilesDraw.resetEdgeTilesDraw()
-		$CanvasLayer/EdgeTilesDraw.addAllEdgeTiles(edgeTiles)
-		isEdgeTileCheckDone = true
 	else:
-#		trimGenerationEdges()
-		fillEmptyGenerationTiles(24)
+		trimGenerationEdges()
+		fillEmptyGenerationTiles(0)
+		var _generatedChunk = Vector2i(0, 0)
+		if generatedChunk.x > 0 or generatedChunk.x < 0:
+			_generatedChunk.x = generatedChunk.x * 50
+		if generatedChunk.y > 0 or generatedChunk.y < 0:
+			_generatedChunk.y = generatedChunk.y * 50
+		$"../../Tiles".setTiles(generatedTiles, { x = _generatedChunk.x, y = _generatedChunk.y })
 		set_process(false)
+		queue_free()
 
-func generateMap() -> void:
-	assignAllInputs()
-	placeCornerPatterns()
+func generateChunk(_generatedChunk) -> void:
+	generatedChunk = _generatedChunk
 	
+	placeCornerPatterns()
 	set_process(true)
 
 func isTileLegible(_tile) -> bool:

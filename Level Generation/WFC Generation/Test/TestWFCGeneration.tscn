@@ -1,0 +1,74 @@
+[gd_scene load_steps=11 format=3 uid="uid://bgfkeghxtow1q"]
+
+[ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.gd" id="1_1wqma"]
+[ext_resource type="Texture2D" uid="uid://b7kkr10o1jmka" path="res://Assets/Tilesets/Test/ChunkTest.png" id="1_e11i0"]
+[ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.tres" id="2_rlwhk"]
+[ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/Tiles.gd" id="3_l5wjf"]
+[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Level Generation/WFC Generation/WFCInputCreation.tscn" id="4_fof5q"]
+[ext_resource type="Texture2D" uid="uid://dbspsh7t7o4uq" path="res://Assets/Map Entities/Wagon.png" id="5_87bo1"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pdlbl"]
+texture = ExtResource("1_e11i0")
+texture_region_size = Vector2i(1200, 600)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_cskme"]
+tile_size = Vector2i(1200, 300)
+sources/0 = SubResource("TileSetAtlasSource_pdlbl")
+
+[sub_resource type="GDScript" id="GDScript_h0032"]
+script/source = "extends CharacterBody2D
+
+@export var speed = 300
+
+
+func get_input():
+	var input_direction = Input.get_vector(\"MOVE_LEFT\", \"MOVE_RIGHT\", \"MOVE_UP\", \"MOVE_DOWN\")
+	velocity = Vector2(input_direction.x * speed, input_direction.y * speed / 2)
+
+func _physics_process(_delta):
+	get_input()
+	move_and_slide()
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n1lq1"]
+size = Vector2(15, 12)
+
+[node name="Node2D" type="Node2D"]
+
+[node name="WFCChunks" type="TileMap" parent="."]
+y_sort_enabled = true
+tile_set = SubResource("TileSet_cskme")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("1_1wqma")
+
+[node name="Tiles" type="TileMap" parent="."]
+y_sort_enabled = true
+tile_set = ExtResource("2_rlwhk")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("3_l5wjf")
+
+[node name="WFCInputCreation" parent="." instance=ExtResource("4_fof5q")]
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(207, 179)
+script = SubResource("GDScript_h0032")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+texture = ExtResource("5_87bo1")
+region_enabled = true
+region_rect = Rect2(144, 0, 24, 24)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+position = Vector2(-0.5, 0)
+shape = SubResource("RectangleShape2D_n1lq1")
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(0.15, 0.15)
+
+[node name="ChunkCheckTimer" type="Timer" parent="."]
+wait_time = 2.0
+
+[connection signal="timeout" from="ChunkCheckTimer" to="WFCChunks" method="_checkChunks"]
