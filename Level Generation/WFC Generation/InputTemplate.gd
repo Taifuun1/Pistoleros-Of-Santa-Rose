@@ -1,6 +1,6 @@
 extends TileMap
 
-var gridSize = Vector2(0,0)
+var gridSize = Vector2i(0,0)
 
 
 func create():

@@ -93,10 +93,10 @@ func placeDoor(_room, _checkIfNoDoorsInCorner):
 		var _tile
 		if _checkIfNoDoorsInCorner:
 			_tile = _room.walls[randi() % _room.walls.size()]
-			var _up = _tile + Vector2(0, -1)
-			var _down = _tile + Vector2(0, 1)
-			var _left = _tile + Vector2(-1, 0)
-			var _right = _tile + Vector2(1, 0)
+			var _up = _tile + Vector2i(0, -1)
+			var _down = _tile + Vector2i(0, 1)
+			var _left = _tile + Vector2i(-1, 0)
+			var _right = _tile + Vector2i(1, 0)
 #			if (
 #				!isOutSideTileMap(_up) and
 #				!isOutSideTileMap(_down) and
@@ -184,7 +184,7 @@ func placeRandomInteractables(_interactables):
 #							grid[_randomSpawnableTile.x][_randomSpawnableTile.y].interactable = Globals.interactables.FOUNTAIN
 #			"gems":
 #				for _i in range(randi() % 81 + 20):
-#					var _randomSpawnableTile = Vector2(randi() % int(Globals.gridSize.x), randi() % int(Globals.gridSize.y))
+#					var _randomSpawnableTile = Vector2i(randi() % int(Globals.gridSize.x), randi() % int(Globals.gridSize.y))
 #					if (
 #						grid[_randomSpawnableTile.x][_randomSpawnableTile.y].interactable == null and
 #						(
@@ -211,7 +211,7 @@ func resetLevel():
 	for x in range(grid.size()):
 		for y in range(grid[x].size()):
 			if grid[x][y].critter != null:
-				get_node("/root/World/Critters/{critterId}".format({ "critterId": grid[x][y].critter })).addCritterBackToPopulation(Vector2(x, y), self)
+				get_node("/root/World/Critters/{critterId}".format({ "critterId": grid[x][y].critter })).addCritterBackToPopulation(Vector2i(x, y), self)
 			grid[x][y].tile = -1
 			grid[x][y].tileMetaData = {
 				"xFlip": false,
@@ -268,9 +268,9 @@ func getAndCleanUpRooms(_tileTypes):
 		for y in range(grid[x].size()):
 			for _tileType in _tileTypes:
 				pass
-#				if grid[x][y].tile == Globals.tiles[_tileType.floor] and !isTileAlreadyInARoom(Vector2(x,y)):
+#				if grid[x][y].tile == Globals.tiles[_tileType.floor] and !isTileAlreadyInARoom(Vector2i(x,y)):
 #					rooms.append({
-#						"floors": getRoom(Vector2(x, y), _tileType),
+#						"floors": getRoom(Vector2i(x, y), _tileType),
 #						"walls": []
 #					})
 #					break
@@ -299,33 +299,33 @@ func getSpawnableTiles(_openTiles, _spawnableItemTiles, _spawnableCritterTiles, 
 #			for _tile in _openTiles:
 #				if useAreas:
 #					for _area in areas:
-#						if _area.has(Vector2(x, y)) and _area.size() > 75:
-#							openTiles.append(Vector2(x, y))
+#						if _area.has(Vector2i(x, y)) and _area.size() > 75:
+#							openTiles.append(Vector2i(x, y))
 #							break
 #				elif grid[x][y].tile == Globals.tiles[_tile]:
-#					openTiles.append(Vector2(x, y))
+#					openTiles.append(Vector2i(x, y))
 #					break
 #	for x in Globals.gridSize.x:
 #		for y in Globals.gridSize.y:
 #			for _tile in _spawnableItemTiles:
 #				if useAreas:
 #					for _area in areas:
-#						if _area.has(Vector2(x, y)) and _area.size() > 75:
-#							spawnableItemTiles.append(Vector2(x, y))
+#						if _area.has(Vector2i(x, y)) and _area.size() > 75:
+#							spawnableItemTiles.append(Vector2i(x, y))
 #							break
 #				elif grid[x][y].tile == Globals.tiles[_tile]:
-#					spawnableItemTiles.append(Vector2(x, y))
+#					spawnableItemTiles.append(Vector2i(x, y))
 #					break
 #	for x in Globals.gridSize.x:
 #		for y in Globals.gridSize.y:
 #			for _tile in _spawnableCritterTiles:
 #				if useAreas:
 #					for _area in areas:
-#						if _area.has(Vector2(x, y)) and _area.size() > 75:
-#							spawnableCritterTiles.append(Vector2(x, y))
+#						if _area.has(Vector2i(x, y)) and _area.size() > 75:
+#							spawnableCritterTiles.append(Vector2i(x, y))
 #							break
 #				elif grid[x][y].tile == Globals.tiles[_tile]:
-#					spawnableCritterTiles.append(Vector2(x, y))
+#					spawnableCritterTiles.append(Vector2i(x, y))
 #					break
 #	if _floorTiles != null:
 #		for x in Globals.gridSize.x:
@@ -333,11 +333,11 @@ func getSpawnableTiles(_openTiles, _spawnableItemTiles, _spawnableCritterTiles, 
 #				for _tile in _floorTiles:
 #					if useAreas:
 #						for _area in areas:
-#							if _area.has(Vector2(x, y)) and _area.size() > 75:
-#								floorTiles.append(Vector2(x, y))
+#							if _area.has(Vector2i(x, y)) and _area.size() > 75:
+#								floorTiles.append(Vector2i(x, y))
 #								break
 #					elif grid[x][y].tile == Globals.tiles[_tile]:
-#						floorTiles.append(Vector2(x, y))
+#						floorTiles.append(Vector2i(x, y))
 #						break
 
 func isTileAlreadyInARoom(_tile):
@@ -366,19 +366,19 @@ func isTileAlreadyInAnArea(_tile):
 func checkAdjacentTilesForOpenSpace(_position, _checkForSingleOpenSpace = false, checkForCritters = false, _shuffleDirections = true):
 	var _openTiles = []
 	var _directions = [
-		Vector2(-1, -1),
-		Vector2(0, -1),
-		Vector2(1, -1),
-		Vector2(1, 0),
-		Vector2(1, 1),
-		Vector2(0, 1),
-		Vector2(-1, 1),
-		Vector2(-1, 0)
+		Vector2i(-1, -1),
+		Vector2i(0, -1),
+		Vector2i(1, -1),
+		Vector2i(1, 0),
+		Vector2i(1, 1),
+		Vector2i(0, 1),
+		Vector2i(-1, 1),
+		Vector2i(-1, 0)
 	]
 	if _shuffleDirections:
 		_directions.shuffle()
 	for _direction in _directions:
-		var _checkedTilePosition = Vector2(_position.x + _direction.x, _position.y + _direction.y)
+		var _checkedTilePosition = Vector2i(_position.x + _direction.x, _position.y + _direction.y)
 #		if !isOutSideTileMap(_checkedTilePosition):
 #			var _checkedTileInGrid = grid[_checkedTilePosition.x][_checkedTilePosition.y]
 #			if Globals.isTileFree(_checkedTilePosition, grid):
@@ -396,17 +396,17 @@ func checkAdjacentTilesForOpenSpace(_position, _checkForSingleOpenSpace = false,
 func checkAdjacentTilesForTile(_tile, _tileTypes, _checkForTile = true):
 	var _tiles = []
 	var _directions = [
-		Vector2(-1, -1),
-		Vector2(0, -1),
-		Vector2(1, -1),
-		Vector2(1, 0),
-		Vector2(1, 1),
-		Vector2(0, 1),
-		Vector2(-1, 1),
-		Vector2(-1, 0)
+		Vector2i(-1, -1),
+		Vector2i(0, -1),
+		Vector2i(1, -1),
+		Vector2i(1, 0),
+		Vector2i(1, 1),
+		Vector2i(0, 1),
+		Vector2i(-1, 1),
+		Vector2i(-1, 0)
 	]
 	for _direction in _directions:
-		var _checkedTilePosition = Vector2(_tile.x + _direction.x, _tile.y + _direction.y)
+		var _checkedTilePosition = Vector2i(_tile.x + _direction.x, _tile.y + _direction.y)
 #		if !isOutSideTileMap(_checkedTilePosition):
 #			if isTileOneOfTypes(_checkedTilePosition, _tileTypes) and _checkForTile:
 #				_tiles.append(_checkedTilePosition)
@@ -424,8 +424,8 @@ func whichTilesAreOpenAndFreeOfCritters(_tile, _distance):
 	var _legibleTiles = []
 	for x in range(_tile.x - _distance, _tile.x + _distance + 1):
 		for y in range(_tile.y - _distance, _tile.y + _distance + 1):
-			if isTileOpenAndFreeOfCritters(Vector2(x,y)):
-				_legibleTiles.append(Vector2(x,y))
+			if isTileOpenAndFreeOfCritters(Vector2i(x,y)):
+				_legibleTiles.append(Vector2i(x,y))
 	return _legibleTiles
 
 func isTileOpenAndFreeOfCritters(_tile):
@@ -478,7 +478,7 @@ func calculatePath(pathStartPosition, pathEndPosition):
 #	var points = []
 #	for x in (grid.size()):
 #		for y in (grid[x].size()):
-#			var point = Vector2(x, y)
+#			var point = Vector2i(x, y)
 #			if isTileIllegibleInPathfind(point, _illegibleTiles):
 #				continue
 #			points.append(point)
@@ -489,14 +489,14 @@ func calculatePath(pathStartPosition, pathEndPosition):
 #	for point in points:
 #		var pointIndex = id(point)
 #		var pointsRelative = PoolVector2Array([
-#			Vector2(point.x, point.y - 1),
-#			Vector2(point.x + 1, point.y - 1),
-#			Vector2(point.x + 1, point.y),
-#			Vector2(point.x + 1, point.y + 1),
-#			Vector2(point.x, point.y + 1),
-#			Vector2(point.x - 1, point.y + 1),
-#			Vector2(point.x - 1, point.y),
-#			Vector2(point.x - 1, point.y - 1)
+#			Vector2i(point.x, point.y - 1),
+#			Vector2i(point.x + 1, point.y - 1),
+#			Vector2i(point.x + 1, point.y),
+#			Vector2i(point.x + 1, point.y + 1),
+#			Vector2i(point.x, point.y + 1),
+#			Vector2i(point.x - 1, point.y + 1),
+#			Vector2i(point.x - 1, point.y),
+#			Vector2i(point.x - 1, point.y - 1)
 #		])
 #		for pointRelative in pointsRelative:
 #			var pointRelativeIndex = id(pointRelative)
@@ -519,14 +519,14 @@ func isTileIllegibleInPathfind(_point, _illegibleTiles):
 #	else:
 #		astarNode.add_point(_pointId, point, 1.0)
 #		var pointsRelative = PoolVector2Array([
-#			Vector2(point.x, point.y - 1),
-#			Vector2(point.x + 1, point.y - 1),
-#			Vector2(point.x + 1, point.y),
-#			Vector2(point.x + 1, point.y + 1),
-#			Vector2(point.x, point.y + 1),
-#			Vector2(point.x - 1, point.y + 1),
-#			Vector2(point.x - 1, point.y),
-#			Vector2(point.x - 1, point.y - 1)
+#			Vector2i(point.x, point.y - 1),
+#			Vector2i(point.x + 1, point.y - 1),
+#			Vector2i(point.x + 1, point.y),
+#			Vector2i(point.x + 1, point.y + 1),
+#			Vector2i(point.x, point.y + 1),
+#			Vector2i(point.x - 1, point.y + 1),
+#			Vector2i(point.x - 1, point.y),
+#			Vector2i(point.x - 1, point.y - 1)
 #		])
 #		for pointRelative in pointsRelative:
 #			var pointRelativeIndex = id(pointRelative)
@@ -550,7 +550,7 @@ func addLegibleWeighedTiles(_illegibleTiles, _pointWeighting):
 	var points = []
 	for x in (grid.size()):
 		for y in (grid[x].size()):
-			var point = Vector2(x, y)
+			var point = Vector2i(x, y)
 			if isTileIllegibleInPathfind(point, _illegibleTiles):
 				continue
 			else:
@@ -566,14 +566,14 @@ func addLegibleWeighedTiles(_illegibleTiles, _pointWeighting):
 #	for point in points:
 #		var pointIndex = id(point)
 #		var pointsRelative = PoolVector2Array([
-#			Vector2(point.x, point.y - 1),
-#			Vector2(point.x + 1, point.y - 1),
-#			Vector2(point.x + 1, point.y),
-#			Vector2(point.x + 1, point.y + 1),
-#			Vector2(point.x, point.y + 1),
-#			Vector2(point.x - 1, point.y + 1),
-#			Vector2(point.x - 1, point.y),
-#			Vector2(point.x - 1, point.y - 1)
+#			Vector2i(point.x, point.y - 1),
+#			Vector2i(point.x + 1, point.y - 1),
+#			Vector2i(point.x + 1, point.y),
+#			Vector2i(point.x + 1, point.y + 1),
+#			Vector2i(point.x, point.y + 1),
+#			Vector2i(point.x - 1, point.y + 1),
+#			Vector2i(point.x - 1, point.y),
+#			Vector2i(point.x - 1, point.y - 1)
 #		])
 #		for pointRelative in pointsRelative:
 #			var pointRelativeIndex = id(pointRelative)
@@ -592,7 +592,7 @@ func addLegibleWeighedTiles(_illegibleTiles, _pointWeighting):
 #func getGenerationGrid():
 #	for x in range(grid.size()):
 #		for y in range(grid[x].size()):
-#			grid[x][y].tile = get_cellv(Vector2(x,y))
+#			grid[x][y].tile = get_cellv(Vector2i(x,y))
 #			grid[x][y].tileMetaData = {
 #				"xFlip": is_cell_x_flipped(x, y),
 #				"yFlip": is_cell_y_flipped(x, y)
@@ -602,14 +602,14 @@ func getCritterTile(_critter):
 	for x in range(grid.size()):
 		for y in range(grid[x].size()):
 			if grid[x][y].critter == _critter:
-				return Vector2(x, y)
+				return Vector2i(x, y)
 	return false
 
 func getTilePosition(_tile):
 	for x in range(grid.size()):
 		for y in range(grid[x].size()):
 			if _tile == grid[x][y].tile:
-				return Vector2(x, y)
+				return Vector2i(x, y)
 	return false
 
 func placeCritterOnTypeOfTile(_tile, _critter):
@@ -632,10 +632,10 @@ func placeCritterOnTypeOfTile(_tile, _critter):
 #				if typeof(_item.tiles) == TYPE_VECTOR2_ARRAY:
 #					for x in range(_item.tiles[0].x, _item.tiles[1].x + 1):
 #						for y in range(_item.tiles[0].y, _item.tiles[1].y + 1):
-#							if randi() % 101 <= _item.chance and Globals.isTileFree(Vector2(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
+#							if randi() % 101 <= _item.chance and Globals.isTileFree(Vector2i(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
 #								$"/root/World/Items/Items".createItem(
 #									$"/root/World/Items/Items".getRandomItemByItemTypes(_item.items.types, _item.items.randomByRarity),
-#									Vector2(x, y),
+#									Vector2i(x, y),
 #									1,
 #									false,
 #									{},
@@ -655,10 +655,10 @@ func placeCritterOnTypeOfTile(_tile, _critter):
 #				if typeof(_item.tiles) == TYPE_VECTOR2_ARRAY:
 #					for x in range(_item.tiles[0].x, _item.tiles[1].x + 1):
 #						for y in range(_item.tiles[0].y, _item.tiles[1].y + 1):
-#							if randi() % 101 <= _item.chance and Globals.isTileFree(Vector2(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
+#							if randi() % 101 <= _item.chance and Globals.isTileFree(Vector2i(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
 #								$"/root/World/Items/Items".createItem(
 #									_item.items.names[randi() % _item.items.names.size()],
-#									Vector2(x, y),
+#									Vector2i(x, y),
 #									1,
 #									false,
 #									{},
@@ -686,10 +686,10 @@ func placePresetCritters(_critters, _level):
 #				if typeof(_critter.tiles) == TYPE_VECTOR2_ARRAY:
 #					for x in range(_critter.tiles[0].x, _critter.tiles[1].x + 1):
 #						for y in range(_critter.tiles[0].y, _critter.tiles[1].y + 1):
-#							if randi() % 101 <= _critter.chance and Globals.isTileFree(Vector2(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
+#							if randi() % 101 <= _critter.chance and Globals.isTileFree(Vector2i(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
 #								$"/root/World/Items/Items".createItem(
 #									$"/root/World/Items/Items".getRandomItemByItemTypes(_critter.critters.races, _critter.critters.randomByRarity),
-#									Vector2(x, y),
+#									Vector2i(x, y),
 #									false,
 #									{},
 #									_level,
@@ -709,12 +709,12 @@ func placePresetCritters(_critters, _level):
 #				if typeof(_critter.tiles) == TYPE_ARRAY:
 #					for x in range(_critter.tiles[0].x, _critter.tiles[1].x + 1):
 #						for y in range(_critter.tiles[0].y, _critter.tiles[1].y + 1):
-#							if randi() % 101 <= _critter.chance and Globals.isTileFree(Vector2(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
+#							if randi() % 101 <= _critter.chance and Globals.isTileFree(Vector2i(x, y), grid) and grid[x][y].tile != Globals.tiles.DOOR_CLOSED:
 #								var _isDeactivated = null
 #								if _critter.has("isDeactivated"): _isDeactivated = _critter.isDeactivated
 #								$"/root/World/Critters/Critters".spawnCritter(
 #									_critter.critters.names[randi() % _critter.critters.names.size()],
-#									Vector2(x, y),
+#									Vector2i(x, y),
 #									_isDeactivated,
 #									true,
 #									_level
@@ -810,14 +810,14 @@ func loadLevel(_levelData):
 		for y in _levelData.grid[str(x)].size():
 			grid[x][y] = _levelData.grid[str(x)][str(y)]
 	for index in _levelData.openTiles.size():
-		openTiles.append(Vector2(_levelData.openTiles[str(index)].x, _levelData.openTiles[str(index)].y))
+		openTiles.append(Vector2i(_levelData.openTiles[str(index)].x, _levelData.openTiles[str(index)].y))
 	for index in _levelData.spawnableItemTiles.size():
-		spawnableItemTiles.append(Vector2(_levelData.spawnableItemTiles[str(index)].x, _levelData.spawnableItemTiles[str(index)].y))
+		spawnableItemTiles.append(Vector2i(_levelData.spawnableItemTiles[str(index)].x, _levelData.spawnableItemTiles[str(index)].y))
 	for index in _levelData.spawnableCritterTiles.size():
-		spawnableCritterTiles.append(Vector2(_levelData.spawnableCritterTiles[str(index)].x, _levelData.spawnableCritterTiles[str(index)].y))
+		spawnableCritterTiles.append(Vector2i(_levelData.spawnableCritterTiles[str(index)].x, _levelData.spawnableCritterTiles[str(index)].y))
 	for index in _levelData.floorTiles.size():
-		floorTiles.append(Vector2(_levelData.floorTiles[str(index)].x, _levelData.floorTiles[str(index)].y))
+		floorTiles.append(Vector2i(_levelData.floorTiles[str(index)].x, _levelData.floorTiles[str(index)].y))
 	for key in _levelData.stairs.keys():
-		stairs[key] = Vector2(_levelData.stairs[key].x, _levelData.stairs[key].y)
+		stairs[key] = Vector2i(_levelData.stairs[key].x, _levelData.stairs[key].y)
 	
 #	doFinalPathfinding()

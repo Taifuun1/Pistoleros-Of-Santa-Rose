@@ -17,9 +17,9 @@ func getPartialPatternForTile(_tile, _generatedTiles, _testTiles = null) -> Pack
 	var _i = 0
 	for _x in range(-1, 2):
 		for _y in range(-1, 2):
-			var _checkedTile = Vector2(_tile.x + _x, _tile.y + _y).floor()
-			if _testTiles != null and _testTiles.has(Vector2(_x, _y)):
-				_partialPattern[_i] = _testTiles[Vector2(_x, _y)]
+			var _checkedTile = Vector2i(_tile.x + _x, _tile.y + _y)
+			if _testTiles != null and _testTiles.has(Vector2i(_x, _y)):
+				_partialPattern[_i] = _testTiles[Vector2i(_x, _y)]
 			elif _generatedTiles.has(_checkedTile):
 				_partialPattern[_i] = _generatedTiles[_checkedTile]
 			else:
@@ -29,7 +29,7 @@ func getPartialPatternForTile(_tile, _generatedTiles, _testTiles = null) -> Pack
 
 func findAllPartialPatternMatches(_partialPattern) -> Array:
 	var _matches = []
-	for _inputPattern in allInputs:
+	for _inputPattern in inputs:
 		var _match = isPartialPatternAMatch(_partialPattern, _inputPattern)
 		if _match and !doesMatchesHavePattern(_partialPattern, _matches):
 			_matches.append(_inputPattern)
@@ -45,7 +45,7 @@ func isPatternFull(_tile, _tilesToBeChanged) -> bool:
 	var _partialPattern = getPartialPatternForTile(_tile, generatedTiles)
 	var _tileCount = 0
 	for _adjacentTileDirection in adjacentTileDirections:
-		var _adjacentTile = Vector2(_tile.x + _adjacentTileDirection.x, _tile.y + _adjacentTileDirection.y)
+		var _adjacentTile = Vector2i(_tile.x + _adjacentTileDirection.x, _tile.y + _adjacentTileDirection.y)
 		if (
 			(
 				_tilesToBeChanged.has(_adjacentTile)
