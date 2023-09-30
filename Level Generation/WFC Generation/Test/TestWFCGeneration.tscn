@@ -1,20 +1,13 @@
-[gd_scene load_steps=11 format=3 uid="uid://bgfkeghxtow1q"]
+[gd_scene load_steps=9 format=3 uid="uid://bgfkeghxtow1q"]
 
 [ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.gd" id="1_1wqma"]
-[ext_resource type="Texture2D" uid="uid://b7kkr10o1jmka" path="res://Assets/Tilesets/Test/ChunkTest.png" id="1_e11i0"]
 [ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.tres" id="2_rlwhk"]
 [ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/Tiles.gd" id="3_l5wjf"]
 [ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Level Generation/WFC Generation/WFCInputCreation.tscn" id="4_fof5q"]
 [ext_resource type="Texture2D" uid="uid://dbspsh7t7o4uq" path="res://Assets/Map Entities/Wagon.png" id="5_87bo1"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pdlbl"]
-texture = ExtResource("1_e11i0")
-texture_region_size = Vector2i(1200, 600)
-0:0/0 = 0
-
 [sub_resource type="TileSet" id="TileSet_cskme"]
 tile_size = Vector2i(1200, 300)
-sources/0 = SubResource("TileSetAtlasSource_pdlbl")
 
 [sub_resource type="GDScript" id="GDScript_h0032"]
 script/source = "extends CharacterBody2D
