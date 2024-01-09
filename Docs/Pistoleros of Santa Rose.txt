@@ -1,0 +1,520 @@
+	Pistoleros of Santa Rose
+
+-Isometric Open World RPG with Random Elements
+
+:Towns
+	*Shops
+	*Quest starting points
+	*Lots of NPC's all around
+	*Activities
+		*Saloon games?
+			*Poker
+			*Blackjack
+		*Horse racing?
+			*Course for each village
+		*Wild west shootout?
+			*Friendly bouts for money, non-lethal
+			*Grievance settling, lethal
+
+:Quests
+	*Main quests
+		*Each quest is a story arc for a main cast character
+		*Usually involves farming money for an item or a pass
+		*Quest event
+			*End of the quest
+			*Happens at specific location
+			*Cutscene galore
+			*Leads to next quest
+	*Side quests
+		*Random objectives, locations and items/loot
+			*Law side quests
+				*Catch fugitives
+				*Mine minerals
+				*Gather plants
+				*Herd cows
+			*Fugitive side quests
+				*Beat lawkeepers
+				*Rob a bank
+				*Rob a wagon
+				*Blow up mine
+		*Uses previous locations sometimes
+
+:Locations
+	*Permanent
+		*Towns
+		*Main quest locations(some?)
+		*World map?
+	*Temporary
+		*Non-town locations
+
+:Dungeons
+	*Locations
+		*Caves
+		*Mines
+		*Hill tops
+		*Mountain tops
+	*Loot
+		*Plants
+			*Both common and rare ones
+			*Easy to acquire once found
+			*Lilypads
+				*
+			*Flowers
+				*
+			*Cacti
+				*
+		*Minerals
+			*Valuable and relatively common, but needs a lot of work to acquire
+			*Gold
+			*Silver
+			*Copper
+			*Gems
+				*Rare
+				*Sapphires
+				*Ruby
+				*Emerald
+		*Old equipment
+			*Rather rare
+			*Can be easy or hard to acquire
+			*Functional equipment
+				*Can still be used
+				*Weapons
+				*Ammo
+				*Comestibles
+			*Worn equipment
+				*Can be sold for scrap
+				*Weapons
+				*Tools
+				*Food utensils
+
+:Combat
+	*Types
+		*Minor encounters (Overworld combat)
+			*Smaller and weaker enemy groups don't trigger a fight
+			*Minor encounters stop the group and drain resources
+		*Major encounters (Location combat)
+			*Turn based combat
+			*Each turn has everyone take a turn to act
+			*Characters have different stats and abilities based on class, equipment and something else too?
+	*Major encounter combat
+		*Every character takes a turn
+			*Characters initiative decides who goes first
+			*Even initiative makes it random which character goes first
+		*Actions
+			*Attacks
+				*Weapons have different attacks
+				*Some unique weapons have unique attacks
+			*Abilities
+				*Character specific
+				*Usable items
+			*Take cover
+				*Taking cover changes first or more hits on character to hit, graze or miss
+			*Run
+				*Attempt escape from fight
+				*Result
+					*Fail, lose turn for whole team
+					*Barely escape, escape, take damage and enemies are immobilized at location for a very short time
+					*Comfortably escape, escape and enemies are dazed at location for a short time
+					*Easily escape, escape and enemies disappear from location
+	*Hits
+		*Hit pattern
+			*A pattern that decides on which turns character will hit, miss, crit or graze
+			*Depends on weapon and character traits
+
+:Actors
+	*Body Types
+		*Average
+		*Large
+		*Small
+		*Slender
+		*Slender and tall
+		*Wide
+	*Stats
+		*Six-shootin'
+			*Weapon requirements
+			*Carrying capacity at locations
+		*High tailin'
+			*Initiative
+			*Location movespeed
+			*
+		*Taffyin'
+			*Shop haggling
+			*Most NPC interactions
+			*Some combat actions
+	*Traits
+		*Characters can have traits that enchance or lessen attacks and abilities
+		*Traits can also be used outside of fights in some cases
+		*Traits that can be gained through items or purchases?
+
+:References
+	*Lucky Luke
+		*In some village or town
+		*Can talk to for a short cutscene of actually shooting faster than his shadow
+		*Talk to Daltons(and the dog) somewhere?
+	*RDR2
+		*Lenny quest reference in some saloon
+			*Arthur looking for Lenny
+			*Talk to Arthur for funny reference
+				*Arthur will find Lenny if you know Lennys location?
+		*Dutch somewhere
+			*Lumbago
+			*Talking about a plan and faith to Arthur
+	*The good, the bad, and the ugly
+		*Shootout scene somewhere?
+		*Just talk to the characters separately?
+
+:Skill checks
+	*Based on stats
+	*Roll dice, compare with stat
+	*Types
+		*Terrain movement and clearance
+		*NPC interactions
+		*Mining and plant gathering checks
+
+:Enemies
+	*Parties on world map
+	*Location parties
+		*Individual actors running around
+		*Initiating combat
+			*Minigame of some sort?
+				*Touching a character from other party
+					*Dipping
+					*Diving
+					*Juking
+	*Recurring enemies
+		*Enemies can change depending on circumstances
+		*Doing something in a location can change enemy spawns
+			*Eg. Clearing out an animal nest or poisoning it will cause it to stop spawning
+		*Enemy spawners
+			*Animal
+				*Spider nests
+				*Coyote caves
+				*Bear caves
+			*Outlaw
+				*Bandit camp
+			*Law
+				*Lawkeeper camp
+
+:Weapons
+	*Revolvers
+		*
+	*Rifles
+		*
+	*Shotguns
+		*
+
+?Major events
+	*Train robbery
+	*Bank robbery
+	*Something with a company and a mine
+	*Ghost town
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-2?id=74026#9
+	*Jail break
+		*Main party member, who has to be rescued?
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-2?id=74026#1
+	*Caravan trip over the mountains
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-25?id=74039#1
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-35?id=74070#16
+	*Family feud
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-12?id=74008#12
+	*Indians
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-17?id=74020#1
+	*Gold rush
+		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-20?id=74028#1
+
+_____
+
+https://en.wikipedia.org/wiki/Justicia_carnea
+https://en.wikipedia.org/wiki/Lilium
+https://www.britannica.com/plant/lily
+water lily
+
+https://www.legendsofamerica.com/we-slang/
+https://www.northpolewest.com/Cowboy-Lingo-Dictionary_ep_71.html
+https://petticoatsandpistols.com/2017/03/15/wild-west-words-outlaw-name/
+https://rkcowles.wordpress.com/2014/07/05/old-west-slang-a-l/
+https://gardenerspath.com/plants/flowers/best-fuchsia-varieties/
+https://www.historyhit.com/what-did-cowboys-eat/
+hardtack
+https://chipschweiger.medium.com/what-did-cowboys-eat-f09e7bbab5b0
+
+https://www.cowboysindians.com/2020/10/cocktails-of-the-west/
+https://www.nebraskapress.unl.edu/bison/9780803238480/
+https://www.reddit.com/r/AskHistorians/comments/285y5g/what_else_did_people_drink_in_wild_west_saloons/
+
+https://www.legendsofamerica.com/we-slang/10/
+
+Prairie Tenor – Coyote. Prairillon – A small prairie. Prat – Buttock, behind.
+prairie-dogging
+
+https://www.hhhistory.com/2015/01/saloon-girls-of-wild-west.html
+https://en.wikipedia.org/wiki/Fannie_Porter
+https://books.google.fi/books/about/Legendary_Watering_Holes.html?id=tFKeV0Do3NsC&redir_esc=y
+
+coffee, beans, biscuits, and stews
+
+http://histropedia.com/timeline/80cwtpg9bg0t/Colt-revolvers
+https://en.wikipedia.org/wiki/Category:Colt_revolvers
+https://www.google.com/search?q=volcanic+pistol&tbm=isch&sa=X&ved=2ahUKEwjMifH_55WAAxUfDRAIHbgfD8EQ0pQJegQIChAB&biw=1278&bih=1279
+
+https://www.legendsofamerica.com/we-slang/
+https://www.insp.com/blog/old-west-cowboy-speak/
+https://ridesouthdakota.com/rushmore-horseback-riding/cowboy-dictionary/
+
+-Place names
+
+:Areas
+*Santa Luz
+*Sandy Cross
+*Onyxridge
+*Dry Peak
+
+:Towns and villages
+*Guajohuila
+*Queretor
+*El Tecoo
+
+copper branch
+prospector creek
+windy trail
+dullpeaks
+grand springs
+dusty trail
+clearsprings
+scorpions stead
+barrenrun
+
+:Waterfalls
+*Feather Rapids
+*Narrow Falls
+*Little Creek Falls
+*Whitewater Falls
+*Cottlewood Falls
+*Chattawa Falls
+*Beaver Brook Falls
+
+?Saloons
+*Copper Penny Saloon
+*Silver Dollar Saloon
+*Prospectors Saloon
+*J.D. Matthews Saloon
+*Up's Bottom
+
+?Farms
+*Berry Ridge Farms
+*Buffalo Hill Farms
+*Freedom Gardens
+*Pinewood Fields
+
+?Rivers
+*Woodbel Brook
+*Shimmering Creek
+*Surging Beckett
+*Cobalt Creek
+
+?Graveyards
+*Devilswood Graveyards
+*Blackburn Graveyard
+*White Angel Cemetery
+
+?Grasslands
+*Staffield Grasslands
+*Virwich Meadow
+*Keelworth Range
+*Mossy Prairie
+*Ivory Badger Territory
+
+?Forests
+*Short-Tailed Bear Forest
+
+?Mountain Passes
+*Rattlesnake Path
+*Roxtoy Pass
+*Pilrose Pass
+*Thunder Canyon
+*The Windy Gorge
+*Canyon
+*Gap
+*Patton Pass
+
+?Roads
+*Shepherds Walk
+*Path
+*Trail
+*Passage
+
+?Mines
+*Twin Creek Mines
+*Iron Baron Mining Companies
+*West Field Mines
+*Apex Empire Company
+*Mineral Foundations Company
+*Southstone Mining
+*Gold Springs Mining Corporation
+
+?Caves
+*Buxmis Caves
+*Smithmont Shelter
+*Hasrich Hollows
+
+?Hideouts
+*Bittervale Escape
+*Proudshield Retreat
+*The Blind Haunt
+
+
+
+
+Indigo Valley
+Grimview Necropolis
+Chaos Crypts
+Keelhaul Cavern
+Lagoon of gold
+Bay of Davy Jones'
+Flying Dutchman Pub
+
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fimg.freepik.com%2Fpremium-photo%2Famerican-wild-west-nature-landscape-sunset-panoramic-art-illustration_87538-3152.jpg&tbnid=7WgA3d0aXJhtNM&vet=12ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygGegUIARDiAQ..i&imgrefurl=https%3A%2F%2Fwww.freepik.com%2Fpremium-photo%2Famerican-wild-west-nature-landscape-sunset-panoramic-art-illustration_31903144.htm&docid=XEOhCRqJWhG80M&w=626&h=352&q=wild%20west%20landscape&ved=2ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygGegUIARDiAQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fimg.freepik.com%2Fpremium-photo%2Famerican-wild-west-nature-landscape-sunset-spectacular-art-illustration_87538-3154.jpg&tbnid=nAzC1M38MuSgwM&vet=12ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygIegUIARDmAQ..i&imgrefurl=https%3A%2F%2Fwww.freepik.com%2Fpremium-photo%2Famerican-wild-west-nature-landscape-sunset-spectacular-art-illustration_31903154.htm&docid=N21VRjZKTe8YjM&w=626&h=352&q=wild%20west%20landscape&ved=2ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygIegUIARDmAQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fimg.cdn-pictorem.com%2Fuploads%2Fcollection%2FL%2FLM5QBC9UQB%2F900_Lou-Freeman_Stoecklein%2520Ranch_Lou%2520Freeman%2520copyright%25201020-151.jpg&tbnid=VQiOqNRRCW0HnM&vet=12ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygMegUIARDvAQ..i&imgrefurl=https%3A%2F%2Fwww.pictorem.com%2F96940%2F%2520%25C2%25A9Lou%2520Freeman%2520Wild%2520West%2520Landscapes%25201020%2520151.html&docid=GPYOAMdumM5IVM&w=900&h=600&q=wild%20west%20landscape&ved=2ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygMegUIARDvAQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fpreviews.123rf.com%2Fimages%2Fdeyangeorgiev%2Fdeyangeorgiev1211%2Fdeyangeorgiev121100265%2F16513787-red-desert-wild-west-landscape.jpg&tbnid=Ohcn1M2WRf6UqM&vet=12ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygQegUIARD5AQ..i&imgrefurl=https%3A%2F%2Fwww.123rf.com%2Fphoto_16513787_red-desert-wild-west-landscape.html&docid=Z86LjggADAfpRM&w=1300&h=863&q=wild%20west%20landscape&ved=2ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygQegUIARD5AQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fe0.pxfuel.com%2Fwallpapers%2F1016%2F206%2Fdesktop-wallpaper-old-west-old-west-wild-west-landscape.jpg&tbnid=2RVQc6LdD4MlOM&vet=12ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygKegUIARDrAQ..i&imgrefurl=https%3A%2F%2Fwww.pxfuel.com%2Fen%2Fdesktop-wallpaper-adqor&docid=o5ymiM8_CUzCZM&w=850&h=531&q=wild%20west%20landscape&ved=2ahUKEwj5luSQ-KyAAxWHFBAIHeEMAvoQMygKegUIARDrAQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fpreviews.123rf.com%2Fimages%2Fdeyangeorgiev%2Fdeyangeorgiev1211%2Fdeyangeorgiev121100265%2F16513787-red-desert-wild-west-landscape.jpg&tbnid=Ohcn1M2WRf6UqM&vet=12ahUKEwjPiseX-KyAAxVUFBAIHdPXAboQMygBegUIARDYAQ..i&imgrefurl=https%3A%2F%2Fwww.123rf.com%2Fphoto_16513787_red-desert-wild-west-landscape.html&docid=Z86LjggADAfpRM&w=1300&h=863&q=wild%20west%20landscape%20desert&ved=2ahUKEwjPiseX-KyAAxVUFBAIHdPXAboQMygBegUIARDYAQ
+https://www.google.com/imgres?imgurl=https%3A%2F%2Fimg.freepik.com%2Ffree-vector%2Fwild-desert-landscape-daytime-scene_1308-50629.jpg%3Fw%3D2000&tbnid=FQQLhJPVzJ1AyM&vet=12ahUKEwjPiseX-KyAAxVUFBAIHdPXAboQMygKegUIARDwAQ..i&imgrefurl=https%3A%2F%2Fwww.freepik.com%2Ffree-photos-vectors%2Fwild-west-background&docid=AMvJpXWzY8jeFM&w=2000&h=1250&q=wild%20west%20landscape%20desert&ved=2ahUKEwjPiseX-KyAAxVUFBAIHdPXAboQMygKegUIARDwAQ
+
+https://a-z-animals.com/blog/the-dont-tread-on-me-rattlesnakes-surprising-history/
+https://www.pbs.org/edens/canyonlands/canyonlands.htm
+https://www.palomar.edu/users/scrouthamel/wildlife.htm
+https://france-amerique.com/lucky-luke-a-cowboy-in-paris/
+
+_____
+
+
+
+:Robber
+*Ladrona/Ladrón
+El ladron
+El salteador
+
+highwayman
+salteador de caminos
+bandolero
+
+bandit
+badida/bandido
+el bandido
+el bandolero
+
+gunslinger
+pistolero
+
+https://es.wikipedia.org/wiki/Salteador_de_caminos
+https://es.wikipedia.org/wiki/Viejo_Oeste#Bandidos
+https://es.wikipedia.org/wiki/Dick_Turpin
+https://es.wikipedia.org/wiki/Salteador_de_caminos
+
+gunmen
+gunfighters
+goons
+gunslingers
+
+lasso
+lariat
+chaps/chaparevas
+rodeo
+buckeroo/vacero
+mustang/mustengo
+bandolier/bandolera
+stampede/stampeda
+ranch/rancho
+
+barroom, ginmill, taproom
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://namingpower.com/cowboy-names/
+
+presley
+bonnie
+rylan
+wesley fordham
+vincent
+rayn
+Eisley Emmeline
+Gwyneth Olive
+Prairie Rose
+Poppy Lucinda
+Lincoln Wyland
+Delphinium Vi
+Brantley Axel
+Everleigh Star
+Raelen Kristian
+Wichita Remington
+Brycen Conner
+Josiah Tennessee
+Morrison Chance
+Paige Alice
+Ramsey Elliott
+Rory Clay
+Oakley Branson
+Luke Jeremy
+Silas Gray
+Kenzie Victoria
+Daniela Hope
+Rosalie Kylee
+Sadie Amelia
+Alexandra Micah
+Kipley Dodd
+Cecily Carolina
+Ryder Stanley
+Jane Jennifer
+Cassidy Montana
+Kansas Fielder
+Penelope Lavina
+Dodson Campbell
+Barrett Hank
+Polly Priscilla
+Dawson Cody
+Weston Huck
+Dusty Lawson
+Cece Lia Trinity
+Dodge Stone
+Sanorah Dale
+Buckley Sawyer
+Bennie Willow
+Owen Beckett
+Laramie Savanna
+Urie Tamie
+Walker Langley
+Cooper Jameson
+Adelaide Bretagne
+Tyler Dempsey
+Murray Hilcher
+Larrabee Hudde
+Josie Indiana
+Howell Ezekiel
+Danae Ashley
+Sedona Rain
+Granger Britton
+Ellis Colton
+Hazel Destin
+Presley Marie
+Juniper Hope
+MeadowLee Mason
+Felicia Lynn
+Layton Riley
+Huxley Kipp
+
+This right here is private property. Mine, in fact.
+I'm gon' have to ask you to leave mah property - and I do mean right the hell now.
