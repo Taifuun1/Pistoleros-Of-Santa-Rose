@@ -74,11 +74,11 @@
 			*Selfish
 			*Tries to get what he wants, no matter the cost
 		*Relationship with main cast
-			*Goes directly against rest of the cast in their arcs
+			*Goes directly against rest of the cast in their themes
 		*Story arc
 			*Train robbery arc (fifth and final main quest)
 		*Synopsis
-			*Live is worth living your way, even if others don't see or want it
+			*Life is worth living your way, even if others don't see or want it
 
 ## Side cast
 	*Important main quest characters
@@ -105,14 +105,23 @@
 		*Poker cheaters
 			*Main antagonist for ghost town quest
 			*Lucky luke issue 2
-		*
+		*Rival gangs
+			*Contribute as antagonists in different parts of the map and story
+			*All gangs are present at the train robbery, as they all want the loot or the train destroyed
+				*Rival gangs create chaos and a distraction at the train robbery  
+			*Bandidos of El Sacramento
+				*Hispanic rival gang
+			*Running Deers
+				*Native gang
+			*Freedom Riders
+				*Anti-government gang
         
 
 
 ## Outline
 
 Story begins as the main cast is separated. Walker wakes up next to a forest pond, and goes looking for the party. Different party
-members are slowly discovered, as the situation clears slowly. Main cast personalities and goals are established during this
+members are slowly discovered, as the situation clears up. Main cast personalities and goals are established during this
 section. Main cast was separated as a result of a robbery attempt gone awry. The main cast are bandits, looking to make a living
 in a fictional wild west. The larger area (state?) that they inhabit is called Santa Rose, and their band has gained infamy through
 their misdeeds, and so have gained the nickname "Pistoleros of Santa Rose".
@@ -147,7 +156,7 @@ During the the trip, they are confronted with some natives. They will not let th
 Manuel manages to befriend some of the Indians and gets the crew to throw a party with the natives. The Indians agree to let the
 caravan through. However, Walker gets too drunk and accidentally vandalizes the tribes totem pole. The caravan escapes just barely.
 
-After the caravan trip, the party now only needs an explosive expert to handle the explosives. Eventually, they hear of a ghost
+After the caravan trip the party only needs an explosive expert to handle the explosives. Eventually, they hear of a ghost
 town prospector hermit, who's been trying to find gold in an abandoned town for years. They go meet the prospector, but the hermit
 is unwilling to help or even engage the crew. Morrison is empathetic to the lonely hermit and insists that they try to help him.
 

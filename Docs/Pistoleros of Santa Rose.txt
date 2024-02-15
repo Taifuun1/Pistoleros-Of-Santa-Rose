@@ -2,7 +2,7 @@
 
 -Isometric Open World RPG with Random Elements
 
-:Towns
+:Resupply areas
 	*Shops
 	*Quest starting points
 	*Lots of NPC's all around
@@ -194,6 +194,13 @@
 				*Bandit camp
 			*Law
 				*Lawkeeper camp
+
+:Animals
+	*Marten
+	*Pika
+	*Weasel
+	*Badger
+	*Gold-mantled ground squirrel
 
 :Weapons
 	*Revolvers
