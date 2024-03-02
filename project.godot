@@ -20,10 +20,11 @@ WaveFunctionCollapse="*res://Globals/WaveFunctionCollapse.gd"
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=480
+window/size/viewport_width=638
+window/size/viewport_height=358
+window/size/mode=3
 window/stretch/mode="viewport"
-window/stretch/aspect="keep_height"
+window/stretch/scale_mode="integer"
 
 [editor]
 
