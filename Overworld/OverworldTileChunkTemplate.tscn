@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8y8ry3iy1a0o"]
+
+[ext_resource type="TileSet" uid="uid://dd8sir4kvrp6t" path="res://Tilesets/OverworldTileset.tres" id="1_fperh"]
+
+[node name="OverworldTileChunkTemplate" type="TileMap"]
+y_sort_enabled = true
+tile_set = ExtResource("1_fperh")
+format = 2
+layer_0/y_sort_enabled = true

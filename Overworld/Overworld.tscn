@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://coobutj7mt8js"]
+
+[ext_resource type="Script" path="res://Overworld/Overworld.gd" id="1_2gavc"]
+[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerActor.tscn" id="2_lu5tb"]
+[ext_resource type="PackedScene" uid="uid://c8y8ry3iy1a0o" path="res://Overworld/OverworldTileChunkTemplate.tscn" id="3_cx6mi"]
+
+[sub_resource type="TileSet" id="TileSet_4f8r2"]
+tile_size = Vector2i(1536, 390)
+
+[node name="Overworld" type="TileMap"]
+tile_set = SubResource("TileSet_4f8r2")
+format = 2
+script = ExtResource("1_2gavc")
+
+[node name="Chunks" type="Node2D" parent="."]
+
+[node name="OverworldTileChunkTemplate" parent="." instance=ExtResource("3_cx6mi")]
+
+[node name="PlayerActor" parent="." instance=ExtResource("2_lu5tb")]
