@@ -17,7 +17,7 @@ func addInputs(_name, _path) -> void:
 			fileName = dir.get_next()
 	for fileName in inputFilenames:
 		MultiThreading.mutex.lock()
-		add_child(load("res://Level Generation/WFC Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instantiate())
+		add_child(load("res://Location Generation/WFC Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instantiate())
 		MultiThreading.mutex.unlock()
 	await get_tree().process_frame
 

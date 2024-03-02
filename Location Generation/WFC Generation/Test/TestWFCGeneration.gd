@@ -1,6 +1,6 @@
 extends TileMap
 
-@onready var waveFunctionCollapse = preload("res://Level Generation/WFC Generation/WaveFunctionCollapse.tscn")
+@onready var waveFunctionCollapse = preload("res://Location Generation/WFC Generation/WaveFunctionCollapse.tscn")
 
 var generatedChunks = [
 	Vector2i(0,0)
@@ -16,7 +16,7 @@ var currentlyLoadedChunks = [
 ]
 
 func _ready():
-	$"../WFCInputCreation".addInputs("Test", "res://Level Generation/WFC Generation/Test/Inputs")
+	$"../WFCInputCreation".addInputs("Test", "res://Location Generation/WFC Generation/Test/Inputs")
 	WaveFunctionCollapse.inputs.grass = $"../WFCInputCreation".assignInputsForInputSet()
 	$"../WFCInputCreation".removeInputs()
 	generateStartingChunks()

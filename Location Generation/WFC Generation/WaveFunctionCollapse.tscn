@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk0qdt4chs8js"]
+
+[ext_resource type="Script" path="res://Location Generation/WFC Generation/WaveFunctionCollapse.gd" id="1_ycngw"]
+
+[node name="WaveFunctionCollapse" type="TileMap"]
+format = 2
+script = ExtResource("1_ycngw")

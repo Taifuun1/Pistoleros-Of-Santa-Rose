@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cn8q643uhqn1j"]
 
-[ext_resource type="Script" path="res://Level Generation/BaseLevel.gd" id="1"]
+[ext_resource type="Script" path="res://Location Generation/BaseLevel.gd" id="1"]
 
 [node name="BaseLevel" type="TileMap"]
 format = 2

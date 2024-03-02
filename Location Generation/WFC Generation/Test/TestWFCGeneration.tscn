@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://bgfkeghxtow1q"]
 
-[ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.gd" id="1_1wqma"]
-[ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Level Generation/WFC Generation/Test/TestWFCGeneration.tres" id="2_rlwhk"]
-[ext_resource type="Script" path="res://Level Generation/WFC Generation/Test/Tiles.gd" id="3_l5wjf"]
-[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Level Generation/WFC Generation/WFCInputCreation.tscn" id="4_fof5q"]
+[ext_resource type="Script" path="res://Location Generation/WFC Generation/Test/TestWFCGeneration.gd" id="1_1wqma"]
+[ext_resource type="TileSet" uid="uid://bdus6wjm4q20w" path="res://Location Generation/WFC Generation/Test/TestWFCGeneration.tres" id="2_rlwhk"]
+[ext_resource type="Script" path="res://Location Generation/WFC Generation/Test/Tiles.gd" id="3_l5wjf"]
+[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location Generation/WFC Generation/WFCInputCreation.tscn" id="4_fof5q"]
 [ext_resource type="Texture2D" uid="uid://dbspsh7t7o4uq" path="res://Assets/Map Entities/Wagon.png" id="5_87bo1"]
 
 [sub_resource type="TileSet" id="TileSet_cskme"]
@@ -59,7 +59,6 @@ position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_n1lq1")
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
-zoom = Vector2(0.15, 0.15)
 
 [node name="ChunkCheckTimer" type="Timer" parent="."]
 wait_time = 2.0

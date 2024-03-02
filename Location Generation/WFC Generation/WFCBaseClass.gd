@@ -1,9 +1,9 @@
 extends TileMap
 class_name WFCBaseClass
 
-@onready var constants = preload("res://Level Generation/WFC Generation/WFCConstants.gd").new()
-@onready var edgeTile = preload("res://Level Generation/WFC Generation/EdgeTile.gd")
-@onready var helperFunctions = preload("res://Level Generation/WFC Generation/WFCHelperFunctions.gd").new()
+@onready var constants = preload("res://Location Generation/WFC Generation/WFCConstants.gd").new()
+@onready var edgeTile = preload("res://Location Generation/WFC Generation/EdgeTile.gd")
+@onready var helperFunctions = preload("res://Location Generation/WFC Generation/WFCHelperFunctions.gd").new()
 
 @onready var tiles = constants.tiles
 @onready var adjacentTileDirections = constants.adjacentTileDirections
