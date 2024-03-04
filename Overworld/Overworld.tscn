@@ -16,4 +16,8 @@ script = ExtResource("1_2gavc")
 
 [node name="OverworldTileChunkTemplate" parent="." instance=ExtResource("3_cx6mi")]
 
-[node name="PlayerActor" parent="." instance=ExtResource("2_lu5tb")]
+[node name="Locations" type="Node2D" parent="."]
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="PlayerActor" parent="Actors" instance=ExtResource("2_lu5tb")]

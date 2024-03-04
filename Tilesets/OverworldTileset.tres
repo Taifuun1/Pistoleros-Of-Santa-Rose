@@ -1,0 +1,107 @@
+[gd_resource type="TileSet" load_steps=16 format=3 uid="uid://dd8sir4kvrp6t"]
+
+[ext_resource type="Texture2D" uid="uid://xelj5vck4g5d" path="res://Assets/Tilesets/Grande Cañón/GrandeCañónOverworld.png" id="1_bueph"]
+[ext_resource type="Texture2D" uid="uid://b4bs4s77mr3el" path="res://Assets/Tilesets/Grass Lands/GrassLandsOverworld.png" id="2_gdfq2"]
+[ext_resource type="Texture2D" uid="uid://dg0eclh66jky" path="res://Assets/Tilesets/Prairie/PrairieOverworld.png" id="3_ppvsy"]
+[ext_resource type="Texture2D" uid="uid://dwmyvs4h65ppx" path="res://Assets/Tilesets/Rocky Hills/RockyHillsOverworld.png" id="4_vx1e8"]
+[ext_resource type="Texture2D" uid="uid://bdn5wsc5cvbh8" path="res://Assets/Tilesets/Wild West/WildWestOverworld.png" id="5_3u4ad"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_xnha5"]
+diffuse_texture = ExtResource("1_bueph")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e8fap"]
+resource_name = "Grande Cañón"
+texture = SubResource("CanvasTexture_xnha5")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_rg3hm"]
+diffuse_texture = ExtResource("2_gdfq2")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_66pqy"]
+texture = SubResource("CanvasTexture_rg3hm")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_lg313"]
+diffuse_texture = ExtResource("3_ppvsy")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cqs2a"]
+texture = SubResource("CanvasTexture_lg313")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_tinlc"]
+diffuse_texture = ExtResource("4_vx1e8")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dv0wm"]
+texture = SubResource("CanvasTexture_tinlc")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_oi8io"]
+diffuse_texture = ExtResource("5_3u4ad")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ksapm"]
+texture = SubResource("CanvasTexture_oi8io")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+
+[resource]
+tile_shape = 1
+tile_size = Vector2i(24, 12)
+sources/1 = SubResource("TileSetAtlasSource_e8fap")
+sources/3 = SubResource("TileSetAtlasSource_66pqy")
+sources/5 = SubResource("TileSetAtlasSource_cqs2a")
+sources/6 = SubResource("TileSetAtlasSource_dv0wm")
+sources/7 = SubResource("TileSetAtlasSource_ksapm")
