@@ -1,6 +1,8 @@
 extends CharacterBody2D
 
-@export var speed = 250
+@export var speed = 100
+
+var transparentShader = load("res://Shaders/Transparent.tres")
 
 
 func get_input():
@@ -8,7 +10,7 @@ func get_input():
 	velocity = Vector2(input_direction.x * speed, input_direction.y * speed / 2)
 	
 	if velocity == Vector2(0, 0):
-		$AnimationPlayer.play("Idle")
+		$AnimationPlayer.play("Idle Outline")
 	#else:
 		#$AnimationPlayer.play("Run")
 		#if velocity.x == 0:
@@ -20,5 +22,15 @@ func get_input():
 
 func _physics_process(_delta):
 	get_input()
-	#move_and_slide()
-	move_and_collide(_delta * velocity, false, 0.001)
+	move_and_slide()
+	#move_and_collide(_delta * velocity, false, 0.001)
+
+
+func _on_area_2d_body_entered(body):
+	if body.has_node("Sprite2D"):
+		body.get_node("Sprite2D").material = transparentShader
+
+
+func _on_area_2d_body_exited(body):
+	if body.has_node("Sprite2D"):
+		body.get_node("Sprite2D").material = null

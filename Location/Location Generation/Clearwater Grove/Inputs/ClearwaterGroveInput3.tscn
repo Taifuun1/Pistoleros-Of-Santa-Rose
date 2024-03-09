@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://crmknk82thghx"]
+
+[ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_522qb"]
+[ext_resource type="Script" path="res://Location/Location Generation/InputTemplate.gd" id="2_mu4wa"]
+
+[node name="TileMap" type="TileMap"]
+y_sort_enabled = true
+tile_set = ExtResource("1_522qb")
+format = 2
+layer_0/y_sort_enabled = true
+layer_0/tile_data = PackedInt32Array(0, 3, 0, 1, 3, 0, 2, 3, 0, 65536, 3, 0, 131072, 3, 0, 131073, 3, 0, 131074, 3, 0, 65537, 3, 0, 65538, 3, 0)
+script = ExtResource("2_mu4wa")

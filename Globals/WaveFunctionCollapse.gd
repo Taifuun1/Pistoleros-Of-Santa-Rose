@@ -1,5 +1,5 @@
 extends Node
 
-var gridSize = Vector2i(50,50)
+var gridSize = Vector2i(24, 48)
 
 var inputs = {}

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://docllrl8hvf3k"]
+
+[ext_resource type="Script" path="res://Location/Location Generation/WFCChunkGenerator.gd" id="1_asj1o"]
+[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/WFCInputCreation.tscn" id="2_er4mm"]
+
+[node name="WFCChunkGenerator" type="Node2D"]
+script = ExtResource("1_asj1o")
+
+[node name="WFCInputCreation" parent="." instance=ExtResource("2_er4mm")]

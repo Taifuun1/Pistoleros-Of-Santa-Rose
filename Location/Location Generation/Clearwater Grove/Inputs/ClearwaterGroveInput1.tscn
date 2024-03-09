@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfq8hfks4io35"]
+
+[ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_qhxv3"]
+[ext_resource type="Script" path="res://Location/Location Generation/InputTemplate.gd" id="2_q87kk"]
+
+[node name="ClearwaterGrove" type="TileMap"]
+y_sort_enabled = true
+tile_set = ExtResource("1_qhxv3")
+format = 2
+layer_0/y_sort_enabled = true
+layer_0/tile_data = PackedInt32Array(0, 3, 0, 65536, 1, 0, 131072, 1, 0, 196608, 1, 0, 1, 3, 0, 65537, 1, 0, 196609, 1, 0, 2, 3, 0, 65538, 3, 0, 131074, 1, 0, 196610, 1, 0, 131073, 1, 0, 327680, 1, 0, 327681, 1, 0, 327682, 1, 0, 262144, 3, 0, 262145, 3, 0, 262146, 3, 0, 4, 3, 0, 65540, 3, 0, 131076, 3, 0, 196612, 3, 0, 262148, 1, 0, 327684, 1, 0, 5, 3, 0, 65541, 3, 0, 131077, 3, 0, 196613, 3, 0, 262149, 1, 0, 3, 3, 0, 65539, 3, 0, 131075, 1, 0, 196611, 1, 0, 262147, 1, 0, 327683, 1, 0, 327685, 1, 0)
+script = ExtResource("2_q87kk")

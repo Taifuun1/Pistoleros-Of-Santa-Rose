@@ -1,0 +1,31 @@
+[gd_resource type="TileSet" load_steps=7 format=3 uid="uid://kc6nv2luoiie"]
+
+[ext_resource type="Texture2D" uid="uid://c6880r8f6me7y" path="res://Assets/Tilesets/WFCGeneration.png" id="1_kowpl"]
+[ext_resource type="Texture2D" uid="uid://d08l2m3sxb16b" path="res://Assets/Tilesets/WFCGeneration2.png" id="2_vak4d"]
+[ext_resource type="Texture2D" uid="uid://bknt103pq2s2k" path="res://Assets/Tilesets/WFCGeneration3.png" id="3_sk5b5"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vojls"]
+resource_name = "Water"
+texture = ExtResource("1_kowpl")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2l4ha"]
+resource_name = "Forest1"
+texture = ExtResource("2_vak4d")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xcmh2"]
+resource_name = "Forest2"
+texture = ExtResource("3_sk5b5")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+
+[resource]
+tile_shape = 1
+tile_size = Vector2i(24, 12)
+sources/0 = SubResource("TileSetAtlasSource_vojls")
+sources/1 = SubResource("TileSetAtlasSource_2l4ha")
+sources/3 = SubResource("TileSetAtlasSource_xcmh2")

@@ -3,9 +3,12 @@ class_name WaveFunctionCollapseTileMap
 
 var generatedChunk
 
+signal generationCompleted(tile: int, toTile: int, areaSize: int)
+
 
 func _ready():
 	set_process(false)
+	generationCompleted.connect($"../".processTiles)
 
 func _process(_delta):
 	if !edgeTiles.is_empty():
@@ -26,9 +29,10 @@ func _process(_delta):
 			_generatedChunk.x = generatedChunk.x * 50
 		if generatedChunk.y > 0 or generatedChunk.y < 0:
 			_generatedChunk.y = generatedChunk.y * 50
-		$"../../Tiles".setTiles(generatedTiles, { x = _generatedChunk.x, y = _generatedChunk.y })
+		$"../..".setTiles(generatedTiles)
 		set_process(false)
-		queue_free()
+		#queue_free()
+		generationCompleted.emit(3, 1, 4)
 
 func generateChunk(_generatedChunk) -> void:
 	generatedChunk = _generatedChunk
@@ -265,18 +269,19 @@ func fillEmptyGenerationTiles(_fillTile, _fillEdges = null) -> void:
 			if !generatedTiles.has(_tile):
 				generatedTiles[_tile] = _fillTile
 	if _fillEdges != null:
-		for x in range(generatedTiles.size()):
-			if generatedTiles[x][0].tile == tiles.DOOR_CLOSED:
-				generatedTiles[x][0].tile = tiles[_fillEdges]
-		for x in range(generatedTiles.size()):
-			if generatedTiles[x][generatedTiles[x].size() - 1].tile == tiles.DOOR_CLOSED:
-				generatedTiles[x][generatedTiles[x].size() - 1].tile = tiles[_fillEdges]
-		for y in range(1, generatedTiles[0].size() - 1):
-			if generatedTiles[0][y].tile == tiles.DOOR_CLOSED:
-				generatedTiles[0][y].tile = tiles[_fillEdges]
-		for y in range(1, generatedTiles[0].size() - 1):
-			if generatedTiles[generatedTiles.size() - 1][y].tile == tiles.DOOR_CLOSED:
-				generatedTiles[generatedTiles.size() - 1][y].tile = tiles[_fillEdges]
+		pass
+		#for x in range(generatedTiles.size()):
+			#if generatedTiles[x][0].tile == tiles.DOOR_CLOSED:
+				#generatedTiles[x][0].tile = tiles[_fillEdges]
+		#for x in range(generatedTiles.size()):
+			#if generatedTiles[x][generatedTiles[x].size() - 1].tile == tiles.DOOR_CLOSED:
+				#generatedTiles[x][generatedTiles[x].size() - 1].tile = tiles[_fillEdges]
+		#for y in range(1, generatedTiles[0].size() - 1):
+			#if generatedTiles[0][y].tile == tiles.DOOR_CLOSED:
+				#generatedTiles[0][y].tile = tiles[_fillEdges]
+		#for y in range(1, generatedTiles[0].size() - 1):
+			#if generatedTiles[generatedTiles.size() - 1][y].tile == tiles.DOOR_CLOSED:
+				#generatedTiles[generatedTiles.size() - 1][y].tile = tiles[_fillEdges]
 
 
 ########################

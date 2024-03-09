@@ -5,8 +5,8 @@ extends Node
 ### Input node processing functions ###
 #######################################
 
-func addInputs(_name, _path) -> void:
-	var dir = DirAccess.open(_path)
+func addInputs(_name) -> void:
+	var dir = DirAccess.open("res://Location/Location Generation/{name}/Inputs".format({ "name": _name }))
 	var inputFilenames = []
 	if dir:
 		dir.list_dir_begin()
@@ -17,7 +17,7 @@ func addInputs(_name, _path) -> void:
 			fileName = dir.get_next()
 	for fileName in inputFilenames:
 		MultiThreading.mutex.lock()
-		add_child(load("res://Location Generation/WFC Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instantiate())
+		add_child(load("res://Location/Location Generation/{name}/Inputs/{fileName}".format({ name = _name, fileName = fileName })).instantiate())
 		MultiThreading.mutex.unlock()
 	await get_tree().process_frame
 

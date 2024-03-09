@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgo6jkucqfe12"]
+
+[ext_resource type="Script" path="res://Nodes/DynamicSprite/DynamicSprite.gd" id="1_b7wlp"]
+
+[node name="DynamicSprite" type="StaticBody2D"]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_b7wlp")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+offset = Vector2(0, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
