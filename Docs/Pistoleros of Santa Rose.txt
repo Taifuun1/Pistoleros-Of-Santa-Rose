@@ -256,6 +256,7 @@ prairie-dogging
 
 https://www.hhhistory.com/2015/01/saloon-girls-of-wild-west.html
 https://en.wikipedia.org/wiki/Fannie_Porter
+https://en.wikipedia.org/wiki/Kitty_Leroy
 https://books.google.fi/books/about/Legendary_Watering_Holes.html?id=tFKeV0Do3NsC&redir_esc=y
 
 coffee, beans, biscuits, and stews
@@ -267,6 +268,16 @@ https://www.google.com/search?q=volcanic+pistol&tbm=isch&sa=X&ved=2ahUKEwjMifH_5
 https://www.legendsofamerica.com/we-slang/
 https://www.insp.com/blog/old-west-cowboy-speak/
 https://ridesouthdakota.com/rushmore-horseback-riding/cowboy-dictionary/
+
+Clearhill
+Snakeflats
+Dusty Trail
+Little Summit
+Fairpeaks
+Lazysprings
+Oatman
+Virginia
+Silverton
 
 -Place names
 
@@ -333,6 +344,24 @@ barrenrun
 
 ?Forests
 *Short-Tailed Bear Forest
+*Littlehill Grove
+*Deepwater Grove
+*Redbadger Forest
+*Coleland Wood
+*Oakfail Woodland
+*Little Mockingbird Timberland
+*Short-Tailed Hedgehog Covert
+*Flemheller Grove
+*Kinimiota Woods
+*Lush Quagmire Woodland
+*Pygmy Duck Wilds
+*Rusty Jaguar Wood
+*Applemer Wilds
+*Magical Spruce Grove
+*Falcon Woods
+*Deadlams Forest
+*Monkmar Wilds
+*Meritham Wood
 
 ?Mountain Passes
 *Rattlesnake Path
