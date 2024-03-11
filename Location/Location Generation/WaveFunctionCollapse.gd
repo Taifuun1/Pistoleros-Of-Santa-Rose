@@ -8,7 +8,7 @@ signal generationCompleted(tile: int, toTile: int, areaSize: int)
 
 func _ready():
 	set_process(false)
-	generationCompleted.connect($"../".processTiles)
+	generationCompleted.connect($"../..".processTiles)
 
 func _process(_delta):
 	if !edgeTiles.is_empty():

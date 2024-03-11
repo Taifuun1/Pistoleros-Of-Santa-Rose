@@ -1,4 +1,4 @@
-extends AStarHelper
+extends AStar
 
 @export var noiseTest = FastNoiseLite.new()
 
@@ -8,8 +8,14 @@ func _ready():
 
 func init():
 	noiseTest.seed = randi()
-	#generateWater()
+	generateWater()
 	$WFCChunkGenerator.generateChunk("Clearwater Grove")
+
+func processTiles(tile: int, toTile: int, areaSize: int):
+	#$ChunkProcessor.cleanUpTile(tile, toTile, areaSize)
+	$ChunkProcessor.getChunkOpenBorderTiles()
+	$ChunkProcessor.connectBorderEntrances()
+	$ChunkProcessor.addTrees("Birch", 4)
 
 func generateWater():
 	var tilePosition = local_to_map(Vector2(0, 0))
@@ -22,6 +28,7 @@ func generateWater():
 				tile = 1
 			set_cell(0, Vector2i(tilePosition.x - 120 + x, tilePosition.y - 120 + y), 0, Vector2(tile, 0))
 
-func setTiles(_tiles):
-	for _tile in _tiles:
-		set_cell(0, Vector2i(_tile.x, _tile.y), _tiles[_tile], Vector2(0, 0))
+func setTiles(tiles):
+	for tile in tiles:
+		if get_cell_source_id(0, tile) == 0 and get_cell_atlas_coords(0, tile) == Vector2i(0, 0):
+			set_cell(0, Vector2i(tile.x, tile.y), tiles[tile], Vector2(0, 0))

@@ -1,15 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://dd2grmiyvq04d"]
+[gd_scene load_steps=7 format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
 [ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGrove.gd" id="1_m33h7"]
+[ext_resource type="FastNoiseLite" uid="uid://chkel2jhfn71y" path="res://Location/Location Generation/Noise Maps/ClearwaterGrovePonds.tres" id="3_3f8rh"]
 [ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerActor.tscn" id="3_ptpse"]
 [ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/WFCChunkGenerator.tscn" id="3_y2lwj"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_mcmdr"]
-noise_type = 3
-frequency = 0.1
-fractal_lacunarity = 1.5
-fractal_gain = 0.4
+[ext_resource type="PackedScene" uid="uid://c60dx2f3r0a8n" path="res://Location/Location Generation/ChunkProcessor.tscn" id="5_w0ig6"]
 
 [node name="ClearwaterGrove" type="Node2D"]
 
@@ -19,9 +15,11 @@ tile_set = ExtResource("1_3s7mu")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("1_m33h7")
-noiseTest = SubResource("FastNoiseLite_mcmdr")
+noiseTest = ExtResource("3_3f8rh")
 
 [node name="WFCChunkGenerator" parent="TileMap" instance=ExtResource("3_y2lwj")]
+
+[node name="ChunkProcessor" parent="TileMap" instance=ExtResource("5_w0ig6")]
 
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true

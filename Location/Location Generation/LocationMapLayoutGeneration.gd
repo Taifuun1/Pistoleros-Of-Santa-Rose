@@ -22,13 +22,13 @@ func generateMap(type: String = "Clearwater Grove"):
 	for tile in tiles:
 		$TileMap.set_cell(0, tile, 0, Vector2i(0, 0))
 	
-	$TileMap.init()
+	$TileMap.initAStar()
 	var newTiles = []
 	for tile in tiles:
 		print(tile)
-		print($TileMap.astarNode.get_id_path(Vector2i(0, 0), tile))
+		print($TileMap.astarGridNode.get_id_path(Vector2i(0, 0), tile))
 		print()
-		if !$TileMap.astarNode.get_id_path(Vector2i(0, 0), tile).is_empty():
+		if !$TileMap.astarGridNode.get_id_path(Vector2i(0, 0), tile).is_empty():
 			newTiles.append(tile)
 	tiles = newTiles
 	
