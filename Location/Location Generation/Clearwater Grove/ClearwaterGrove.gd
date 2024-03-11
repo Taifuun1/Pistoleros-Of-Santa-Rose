@@ -1,13 +1,14 @@
-extends TileMap
+extends AStarHelper
 
 @export var noiseTest = FastNoiseLite.new()
+
 
 func _ready():
 	init()
 
 func init():
 	noiseTest.seed = randi()
-	generateWater()
+	#generateWater()
 	$WFCChunkGenerator.generateChunk("Clearwater Grove")
 
 func generateWater():

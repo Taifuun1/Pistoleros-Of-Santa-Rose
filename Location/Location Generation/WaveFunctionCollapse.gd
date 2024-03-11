@@ -22,7 +22,7 @@ func _process(_delta):
 		getMatchesForEdgeTiles()
 		edgeTiles.sort_custom(helperFunctions.sortToLowestEntropy)
 	else:
-		trimGenerationEdges()
+		#trimGenerationEdges()
 		fillEmptyGenerationTiles(0)
 		var _generatedChunk = Vector2i(0, 0)
 		if generatedChunk.x > 0 or generatedChunk.x < 0:
