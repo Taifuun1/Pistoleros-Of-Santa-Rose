@@ -16,11 +16,10 @@ var edgeTiles = []
 var nonLegibleTiles = []
 
 
-func selectInputSet(_set):
-	inputs = WaveFunctionCollapse.inputs[_set]
+func selectInputSet(inputSet) -> void:
+	inputs = WaveFunctionCollapse.inputs[inputSet]
 
 func resetGeneration() -> void:
-	inputs.clear()
 	generatedTiles.clear()
 	edgeTiles.clear()
 	nonLegibleTiles.clear()

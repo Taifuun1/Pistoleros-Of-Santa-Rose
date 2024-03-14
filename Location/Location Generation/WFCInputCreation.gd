@@ -1,5 +1,15 @@
 extends Node
 
+signal done
+
+
+func initWFCGeneration(inputs: Array):
+	done.connect(Callable($"../..", "initWFCGenerationFinished"))
+	for input in inputs:
+		addInputs(input)
+		WaveFunctionCollapse.inputs[input] = assignInputsForInputSet()
+		removeInputs()
+	done.emit()
 
 #######################################
 ### Input node processing functions ###

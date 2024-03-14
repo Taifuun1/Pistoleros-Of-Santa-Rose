@@ -1,25 +1,68 @@
-[gd_scene load_steps=7 format=3 uid="uid://dd2grmiyvq04d"]
+[gd_scene load_steps=12 format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
-[ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGrove.gd" id="1_m33h7"]
-[ext_resource type="FastNoiseLite" uid="uid://chkel2jhfn71y" path="res://Location/Location Generation/Noise Maps/ClearwaterGrovePonds.tres" id="3_3f8rh"]
-[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerActor.tscn" id="3_ptpse"]
+[ext_resource type="Script" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
+[ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGroveGeneration.gd" id="3_3gfy0"]
+[ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGroveChunk.gd" id="3_esotd"]
+[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerLocationActor.tscn" id="3_ptpse"]
 [ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/WFCChunkGenerator.tscn" id="3_y2lwj"]
+[ext_resource type="FastNoiseLite" uid="uid://chkel2jhfn71y" path="res://Location/Location Generation/Noise Maps/ClearwaterGrovePonds.tres" id="5_l2qiy"]
 [ext_resource type="PackedScene" uid="uid://c60dx2f3r0a8n" path="res://Location/Location Generation/ChunkProcessor.tscn" id="5_w0ig6"]
+[ext_resource type="PackedScene" uid="uid://365qx512icmc" path="res://Location/Location Generation/LocationMapLayoutGeneration.tscn" id="7_7rsor"]
+[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/WFCInputCreation.tscn" id="8_rqtc4"]
+[ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="10_t2ahg"]
 
 [node name="ClearwaterGrove" type="Node2D"]
+script = ExtResource("1_m33h7")
 
-[node name="TileMap" type="TileMap" parent="."]
+[node name="Map" type="TileMap" parent="."]
 y_sort_enabled = true
 tile_set = ExtResource("1_3s7mu")
 format = 2
 layer_0/y_sort_enabled = true
-script = ExtResource("1_m33h7")
-noiseTest = ExtResource("3_3f8rh")
+script = ExtResource("3_esotd")
 
-[node name="WFCChunkGenerator" parent="TileMap" instance=ExtResource("3_y2lwj")]
+[node name="ChunkGenerators" type="Node2D" parent="."]
 
-[node name="ChunkProcessor" parent="TileMap" instance=ExtResource("5_w0ig6")]
+[node name="Gen1" type="TileMap" parent="ChunkGenerators"]
+y_sort_enabled = true
+tile_set = ExtResource("1_3s7mu")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("3_3gfy0")
+noiseTest = ExtResource("5_l2qiy")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen1" instance=ExtResource("3_y2lwj")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen1" instance=ExtResource("5_w0ig6")]
+
+[node name="Gen2" type="TileMap" parent="ChunkGenerators"]
+y_sort_enabled = true
+tile_set = ExtResource("1_3s7mu")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("3_3gfy0")
+noiseTest = ExtResource("5_l2qiy")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen2" instance=ExtResource("3_y2lwj")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen2" instance=ExtResource("5_w0ig6")]
+
+[node name="Gen3" type="TileMap" parent="ChunkGenerators"]
+y_sort_enabled = true
+tile_set = ExtResource("1_3s7mu")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("3_3gfy0")
+noiseTest = ExtResource("5_l2qiy")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen3" instance=ExtResource("3_y2lwj")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen3" instance=ExtResource("5_w0ig6")]
+
+[node name="LocationMapLayoutGeneration" parent="ChunkGenerators" instance=ExtResource("7_7rsor")]
+
+[node name="WFCInputCreation" parent="ChunkGenerators" instance=ExtResource("8_rqtc4")]
 
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -33,3 +76,13 @@ y_sort_enabled = true
 y_sort_enabled = true
 
 [node name="Collisions" type="Node2D" parent="Entities"]
+
+[node name="UI" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Loading" parent="UI" instance=ExtResource("10_t2ahg")]
+layout_mode = 1

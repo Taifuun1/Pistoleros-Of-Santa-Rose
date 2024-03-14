@@ -20,5 +20,3 @@ script = ExtResource("1_1xig6")
 tile_set = SubResource("TileSet_6e2h0")
 format = 2
 script = ExtResource("3_m0tk3")
-
-[node name="Camera2D" type="Camera2D" parent="."]

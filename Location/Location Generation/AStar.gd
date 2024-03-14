@@ -11,14 +11,14 @@ func calculatePath(astarNode, pathStartPosition, pathEndPosition):
 
 func initPathfindingAstarNode():
 	pathfindingAstarNode.clear()
-	var walkableTiles = addWalkableTiles(pathfindingAstarNode, 3)
+	var walkableTiles = addWalkableTiles(pathfindingAstarNode, 2)
 	connectWalkableCells(pathfindingAstarNode, walkableTiles)
 
 func initWeightedAstarNode():
 	weightedAstarNode.clear()
 	var walkableTiles = addWalkableTiles(weightedAstarNode)
 	for tile in walkableTiles:
-		if get_cell_source_id(0, tile) == 1 or get_cell_source_id(0, tile) == 3:
+		if get_cell_source_id(0, tile) == 1 or get_cell_source_id(0, tile) == 2:
 			weightedAstarNode.set_point_weight_scale(id(tile), randi() % 10)
 	connectWalkableCells(weightedAstarNode, walkableTiles)
 
