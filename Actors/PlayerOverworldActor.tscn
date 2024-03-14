@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://dvlk3muixwpyx"]
+
+[ext_resource type="Script" path="res://Actors/PlayerOverworldActor.gd" id="1_npyk4"]
+[ext_resource type="Texture2D" uid="uid://dnjti4qgdalu6" path="res://Assets/Comestibles/BeanCan.png" id="2_5x60w"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_54y5m"]
+radius = 8.0
+
+[node name="PlayerOverworldActor" type="CharacterBody2D"]
+script = ExtResource("1_npyk4")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_5x60w")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_54y5m")

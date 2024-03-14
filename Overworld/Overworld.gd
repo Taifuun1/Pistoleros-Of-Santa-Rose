@@ -19,9 +19,9 @@ var loadingChunk = true
 func _process(_delta):
 	if currentChunk == null:
 		init()
-	if !loadingChunk and local_to_map($Actors/PlayerActor.position) != currentChunk:
+	if !loadingChunk and local_to_map($Actors/PlayerOverworldActor.position) != currentChunk:
 		loadingChunk = true
-		currentChunk = local_to_map($Actors/PlayerActor.position)
+		currentChunk = local_to_map($Actors/PlayerOverworldActor.position)
 		var newCurrentlyLoadedChunks = getAdjacentChunks()
 		setAdjacentChunks(newCurrentlyLoadedChunks)
 		currentlyLoadedChunks = newCurrentlyLoadedChunks
@@ -35,7 +35,7 @@ func init(spawnChunk: Vector2i = Vector2i(8, 11), spawnLocation: Vector2i = Vect
 	setAdjacentChunks(newCurrentlyLoadedChunks)
 	currentlyLoadedChunks = newCurrentlyLoadedChunks
 	removeNodes()
-	$Actors/PlayerActor.position = Vector2i(map_to_local(spawnChunk)) + spawnLocation
+	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(spawnChunk)) + spawnLocation
 	loadingChunk = false
 
 
@@ -53,7 +53,7 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> void:
 	if "locations" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
 		var locations = $Chunks.get_children()[$Chunks.get_child_count() - 1].locations
 		for location in locations:
-			createLocation(location, locations[location].position, locations[location].shape)
+			createLocation(location, locations[location].position, locations[location].shape, locations[location].pregenerated)
 
 func setAdjacentChunks(newAdjacentChunks: Array) -> void:
 	for previousAdjacentChunk in currentlyLoadedChunks:
@@ -109,7 +109,7 @@ func unloadChunk(chunk: Vector2i) -> void:
 ### Location functions ###
 ##########################
 
-func createLocation(locationName: String, locationPosition: Vector2i, tiles: Array):
+func createLocation(locationName: String, locationPosition: Vector2i, tiles: Array, pregenerated: bool = false):
 	var area = Area2D.new()
 	var areaShape = CollisionShape2D.new()
 	var areaShapeCollision = ConvexPolygonShape2D.new()
@@ -127,11 +127,14 @@ func createLocation(locationName: String, locationPosition: Vector2i, tiles: Arr
 	
 	$Locations.add_child(area)
 	$Locations.get_node("{locationName}".format({ "locationName": locationName })).add_child(areaShape)
-	$Locations.get_node("{locationName}".format({ "locationName": locationName })).body_entered.connect(enterLocation.bind(locationName))
+	$Locations.get_node("{locationName}".format({ "locationName": locationName })).body_entered.connect(enterLocation.bind(locationName, pregenerated))
 
-func enterLocation(body: Node2D, locationName: String):
-	get_tree().change_scene_to_file("res://Location/Locations/{locationName}.tscn".format({ "locationName": locationName }))
-
+func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
+	if pregenerated:
+		get_tree().change_scene_to_file("res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
+	else:
+		var noWhitespacelocationName = locationName.replace(" ", "")
+		get_tree().change_scene_to_file("res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
 
 ########################
 ### Helper functions ###

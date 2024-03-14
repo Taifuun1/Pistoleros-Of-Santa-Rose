@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://k57dncn8y8bh"]
 
 [ext_resource type="TileSet" uid="uid://ccboijvx3jv1n" path="res://Tilesets/Test/LocationTilesetTest.tres" id="1_oxvlo"]
-[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerActor.tscn" id="2_x70su"]
+[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerLocationActor.tscn" id="2_x70su"]
 
 [node name="AnimationTest" type="Node2D"]
 
