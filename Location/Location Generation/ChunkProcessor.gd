@@ -165,7 +165,7 @@ func calculateHalfwayPoint(openBorder, halfwayPoint) -> Vector2i:
 				halfwayPointTile.y = 47
 	return halfwayPointTile
 
-func randomizeTreesrandomizeTrees(treeChance: int):
+func randomizeTrees(treeChance: int):
 	for cell in $"..".generatedChunkTiles:
 		if randi() % 100 < treeChance:
 			$"..".generatedChunkTiles[cell] = 2

@@ -22,7 +22,7 @@ func _ready():
 	generateStartingChunks()
 
 func _checkChunks():
-	var _playerLocationVector2 = Vector2(local_to_map($"../Player".position))
+	var _playerLocationVector2 = Vector2i(local_to_map($"../Player".position))
 	var _edgeChunksToBeChecked = []
 	for _edgeChunk in edgeChunks:
 		if _playerLocationVector2.distance_to(_edgeChunk) <= 2 and !(_edgeChunk in currentlyLoadedChunks):
@@ -63,7 +63,7 @@ func _checkChunks():
 			_generatedChunkToLocal.x = _chunk.x * 50 + WaveFunctionCollapse.gridSize.x / 2
 		if _chunk.y > 0 or _chunk.y < 0:
 			_generatedChunkToLocal.y = _chunk.y * 50 + WaveFunctionCollapse.gridSize.y / 2
-		$"../Tiles".set_cell(0, _generatedChunkToLocal, 2, Vector2(0, 0))
+		$"../Tiles".set_cell(0, _generatedChunkToLocal, 2, Vector2i(0, 0))
 	
 	$"../ChunkCheckTimer".start()
 

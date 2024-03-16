@@ -32,7 +32,7 @@ func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
 	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunkTiles, name)
 
 func generateWater():
-	var tilePosition = local_to_map(Vector2(0, 0))
+	var tilePosition = local_to_map(Vector2i(0, 0))
 	for x in range(24):
 		for y in range(48):
 			var noise = noiseTest.get_noise_2d(tilePosition.x + x, tilePosition.y + y)
@@ -46,4 +46,4 @@ func generateWater():
 
 func setTiles(tiles):
 	for tile in tiles:
-		set_cell(0, Vector2i(tile.x, tile.y), tiles[tile], Vector2(0, 0))
+		set_cell(0, Vector2i(tile.x, tile.y), tiles[tile], Vector2i(0, 0))

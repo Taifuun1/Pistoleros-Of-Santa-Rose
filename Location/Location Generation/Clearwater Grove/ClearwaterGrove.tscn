@@ -1,7 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://dd2grmiyvq04d"]
+[gd_scene load_steps=13 format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
 [ext_resource type="Script" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
+[ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_3cuy1"]
 [ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGroveGeneration.gd" id="3_3gfy0"]
 [ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGroveChunk.gd" id="3_esotd"]
 [ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerLocationActor.tscn" id="3_ptpse"]
@@ -17,7 +18,7 @@ script = ExtResource("1_m33h7")
 
 [node name="Map" type="TileMap" parent="."]
 y_sort_enabled = true
-tile_set = ExtResource("1_3s7mu")
+tile_set = ExtResource("2_3cuy1")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("3_esotd")

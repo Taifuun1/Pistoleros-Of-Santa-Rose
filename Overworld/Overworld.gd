@@ -86,7 +86,7 @@ func setTiles(chunk: Vector2i, tiles: Dictionary) -> void:
 	for key in tiles:
 		$OverworldTileChunkTemplate.set_cell(0, Vector2i(
 			$OverworldTileChunkTemplate.local_to_map(
-				Vector2(
+				Vector2i(
 					map_to_local(chunk).x - (32 * 24),
 					map_to_local(chunk).y - (32 * 6)
 				)
@@ -98,7 +98,7 @@ func unloadChunk(chunk: Vector2i) -> void:
 		for y in range(64):
 			$OverworldTileChunkTemplate.erase_cell(0, Vector2i(
 				$OverworldTileChunkTemplate.local_to_map(
-					Vector2(
+					Vector2i(
 						map_to_local(chunk).x - (32 * 24),
 						map_to_local(chunk).y - (32 * 6)
 					)
@@ -118,7 +118,7 @@ func createLocation(locationName: String, locationPosition: Vector2i, tiles: Arr
 		chunkMappedTiles.append($OverworldTileChunkTemplate.map_to_local(tile))
 	
 	area.name = locationName
-	area.position = Vector2(
+	area.position = Vector2i(
 		map_to_local(currentChunk).x - (32 * 24) + ($OverworldTileChunkTemplate.map_to_local(locationPosition).x),
 		map_to_local(currentChunk).y - (32 * 6) + ($OverworldTileChunkTemplate.map_to_local(locationPosition).y)
 	)

@@ -26,7 +26,7 @@ func addWalkableTiles(astarNode, illegibleId = null):
 	var points = []
 	for x in WaveFunctionCollapse.gridSize.x:
 		for y in WaveFunctionCollapse.gridSize.y:
-			var point = Vector2(x, y)
+			var point = Vector2i(x, y)
 			#for illegibleId in illegibleIds:
 			if get_cell_source_id(0, point) == illegibleId:
 					#set_cell(0, point, 1, Vector2i(0, 0))
@@ -41,17 +41,17 @@ func connectWalkableCells(astarNode, points):
 		var pointsRelative
 		if int(point.y) % 2 == 0:
 			pointsRelative = PackedVector2Array([
-				Vector2(point.x, point.y - 1),
-				Vector2(point.x, point.y + 1),
-				Vector2(point.x - 1, point.y + 1),
-				Vector2(point.x - 1, point.y - 1)
+				Vector2i(point.x, point.y - 1),
+				Vector2i(point.x, point.y + 1),
+				Vector2i(point.x - 1, point.y + 1),
+				Vector2i(point.x - 1, point.y - 1)
 			])
 		else:
 			pointsRelative = PackedVector2Array([
-				Vector2(point.x, point.y - 1),
-				Vector2(point.x, point.y + 1),
-				Vector2(point.x + 1, point.y + 1),
-				Vector2(point.x + 1, point.y - 1)
+				Vector2i(point.x, point.y - 1),
+				Vector2i(point.x, point.y + 1),
+				Vector2i(point.x + 1, point.y + 1),
+				Vector2i(point.x + 1, point.y - 1)
 			])
 		for pointRelative in pointsRelative:
 				var pointRelativeIndex = id(pointRelative)

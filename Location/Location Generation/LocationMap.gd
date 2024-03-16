@@ -25,9 +25,21 @@ func chunkFinished(generatedChunk: Vector2i, tiles: Dictionary, idleGenerator: S
 	generatedChunks[generatedChunk] = tiles
 	if currentChunk == null and generatedChunk == Vector2i(0, 0):
 		currentChunk = Vector2i(0, 0)
-		$Map.setTiles(generatedChunks[currentChunk])
-		addTrees("Birch", 4)
-		$UI/Loading.hide()
+		#$Map.setTiles(generatedChunks[currentChunk])
+		for cell in generatedChunks[currentChunk]:
+			print(cell)
+		print()
+		var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk])
+		for tileType in tileTypes:
+			match tileType:
+				"water":
+					$Map.setTerrainTiles(tileTypes[tileType], 0, 1)
+				"ground":
+					$Map.setTerrainTiles(tileTypes[tileType], 0, 0)
+				"trees":
+					$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
+		addTrees(tileTypes.trees, "Birch", 4)
+		#$UI/Loading.hide()
 	print()
 	print("finished")
 	print("chunk count:", generatedChunks.size())

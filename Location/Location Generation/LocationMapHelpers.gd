@@ -1,14 +1,39 @@
 extends Node2D
 class_name LocationMapHelpers
 
+var currentGeneration = "Clearwater Grove"
+
 var dynamicSprite = load("res://Nodes/DynamicSprite/DynamicSprite.tscn")
 
 
-func addTrees(treeType: String, treeTypeAmount: int):
+func transformWFCTilesToMapTiles(tiles: Dictionary):
+	var mapTiles = {
+		"water": [],
+		"ground": [],
+		"trees": []
+	}
+	for tile in tiles:
+		match currentGeneration:
+			"Clearwater Grove":
+				if tiles[tile] == 0:
+					if !mapTiles.water.has(tile):
+						print(typeof(tile))
+						mapTiles.water.append(tile)
+				elif tiles[tile] == 1:
+					if !mapTiles.ground.has(tile):
+						mapTiles.ground.append(tile)
+				elif tiles[tile] == 2:
+					if !mapTiles.trees.has(tile):
+						mapTiles.trees.append(tile)
+	return mapTiles
+
+func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 	var treeSprites = { "type": "Outdoor Objects", "sprites": []}
 	for index in range(1, treeTypeAmount + 1):
 		treeSprites.sprites.append("{treeType}{index}".format({ "treeType": treeType, "index": index }))
-	for cell in $Map.get_used_cells_by_id(0, 2, Vector2i(0, 0)):
+	#for cell in $Map.get_used_cells_by_id(0, 2, Vector2i(0, 0)):
+	for cell in tiles:
+		print(cell)
 		var tree = dynamicSprite.instantiate()
 		tree.init(treeSprites)
 		tree.position = $Map.map_to_local(cell)
