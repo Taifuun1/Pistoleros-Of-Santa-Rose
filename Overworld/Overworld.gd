@@ -131,10 +131,10 @@ func createLocation(locationName: String, locationPosition: Vector2i, tiles: Arr
 
 func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
 	if pregenerated:
-		get_tree().change_scene_to_file("res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
+		get_tree().call_deferred("change_scene_to_file", "res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
 	else:
 		var noWhitespacelocationName = locationName.replace(" ", "")
-		get_tree().change_scene_to_file("res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
+		get_tree().call_deferred("change_scene_to_file", "res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
 
 ########################
 ### Helper functions ###
