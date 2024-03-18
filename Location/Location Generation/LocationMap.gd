@@ -26,23 +26,10 @@ func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: St
 				Vector2i(12, 0),
 				Vector2i(12, 1)
 			],
-			"halfwayTile": Vector2i(11, 1)
+			"halfwayTile": Vector2i(11, -10)
 		}
 		changeChunk("bottom")
-		#currentChunk = Vector2i(0, 0)
-		#$Map.setTiles(generatedChunks[currentChunk])
-		#var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk])
-		#for tileType in tileTypes:
-			#match tileType:
-				#"water":
-					#$Map.setTerrainTiles(tileTypes[tileType], 0, 1)
-				#"ground":
-					#$Map.setTerrainTiles(tileTypes[tileType], 0, 0)
-				#"trees":
-					#$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
-		#addTrees(tileTypes.trees, "Birch", 4)
-		#addExits(openBorderTiles)
-		#$UI/Loading.hide()
+		$UI/Loading.hide()
 	print()
 	print("finished generating", generatedChunk)
 	print("chunk count:", generatedChunks.size())

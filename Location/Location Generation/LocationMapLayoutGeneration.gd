@@ -5,15 +5,18 @@ var tiles = [Vector2i(0, 0)]
 var borderTiles = [Vector2i(0, 0)]
 
 
+func _ready():
+	generateMapLayout()
+
 func generateMapLayout(type: String = "Clearwater Grove") -> Array:
 	match type:
 		"Clearwater Grove":
 			createClearwaterGroveMapLayout()
 	
-	for index in 10:
-		var randomTile = tiles[randi() % tiles.size()]
-		if randomTile != Vector2i(0, 0):
-			tiles.erase(randomTile)
+	#for index in 10:
+		#var randomTile = tiles[randi() % tiles.size()]
+		#if randomTile != Vector2i(0, 0):
+			#tiles.erase(randomTile)
 	
 	for tile in tiles:
 		$TileMap.set_cell(0, tile, 0, Vector2i(0, 0))

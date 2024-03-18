@@ -29,6 +29,7 @@ func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
 	$ChunkProcessor.connectBorderEntrances()
 	$ChunkProcessor.randomizeTrees(15)
 	generatedChunk.openBorders = $ChunkProcessor.transformOpenBordersToTiles()
+	$ChunkProcessor.cleanUpBorders()
 	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunk.duplicate(true), name)
 
 func generateWater():

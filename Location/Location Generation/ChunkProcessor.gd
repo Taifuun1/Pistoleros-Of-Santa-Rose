@@ -4,7 +4,13 @@ var selectedOpenBorderTiles = {
 	"left": [],
 	"right": [],
 	"top": [],
-	"bottom": [],
+	"bottom": []
+}
+var nonSelectedOpenBorderTiles = {
+	"left": [],
+	"right": [],
+	"top": [],
+	"bottom": []
 }
 
 
@@ -105,6 +111,8 @@ func getChunkOpenBorderTiles():
 			firstOpenTile = null
 			tilesOpen = false
 	
+	nonSelectedOpenBorderTiles = openBorderTiles.duplicate(true)
+	
 	for border in openBorderTiles:
 		var newBorder = []
 		for openBorder in openBorderTiles[border]:
@@ -112,17 +120,13 @@ func getChunkOpenBorderTiles():
 				newBorder.append(openBorder)
 		openBorderTiles[border] = newBorder
 	
-	print($"../../LocationMapLayoutGeneration".tiles)
 	for border in openBorderTiles:
-		print($"..".generatedChunkPosition + HelperVariables.cardinalDirections[border])
-		print($"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[border]))
 		if !$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[border]):
 			selectedOpenBorderTiles[border] = null
 			continue
 		if openBorderTiles[border].is_empty():
 			openBorderTiles[border].append(generateOpenBorder(border))
 		selectedOpenBorderTiles[border] = openBorderTiles[border][randi() % openBorderTiles[border].size()]
-	print(selectedOpenBorderTiles)
 
 func transformOpenBordersToTiles():
 	var borderTiles = {
@@ -317,7 +321,70 @@ func calculateHalfwayPoint(openBorder, halfwayPoint) -> Vector2i:
 func randomizeTrees(treeChance: int):
 	for cell in $"..".generatedChunk.tiles:
 		if $"..".generatedChunk.tiles[cell] == 2 and randi() % 100 < treeChance:
-			$"..".generatedChunk.tiles[cell] = 2
+			$"..".generatedChunk.tiles[cell] = 1
+
+func cleanUpBorders():
+	for y in range(0, WaveFunctionCollapse.gridSize.y):
+		if (
+			$"..".generatedChunk.tiles[Vector2i(0, y)] != 2 and
+			(
+				(
+					$"..".generatedChunk.openBorders.left == null
+				) or
+				(
+					$"..".generatedChunk.openBorders.left != null and
+					!$"..".generatedChunk.openBorders.left.tiles.has(Vector2i(0, y))
+				)
+			)
+		):
+			$"..".generatedChunk.tiles[Vector2i(0, y)] = 2
+	
+	for y in range(0, WaveFunctionCollapse.gridSize.y):
+		if (
+			$"..".generatedChunk.tiles[Vector2i(23, y)] != 2 and
+			(
+				(
+					$"..".generatedChunk.openBorders.right == null
+				) or
+				(
+					$"..".generatedChunk.openBorders.right != null and
+					!$"..".generatedChunk.openBorders.right.tiles.has(Vector2i(23, y))
+				)
+			)
+		):
+			$"..".generatedChunk.tiles[Vector2i(23, y)] = 2
+	
+	for x in range(0, WaveFunctionCollapse.gridSize.x):
+		for y in range(2):
+			if (
+				$"..".generatedChunk.tiles[Vector2i(x, y)] != 2 and
+				(
+					(
+						$"..".generatedChunk.openBorders.top == null
+					) or
+					(
+						$"..".generatedChunk.openBorders.top != null and
+						!$"..".generatedChunk.openBorders.top.tiles.has(Vector2i(x, y))
+					)
+				)
+			):
+				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
+	
+	for x in range(0, WaveFunctionCollapse.gridSize.x):
+		for y in range(46, 48):
+			if (
+				$"..".generatedChunk.tiles[Vector2i(x, y)] != 2 and
+				(
+					(
+						$"..".generatedChunk.openBorders.bottom == null
+					) or
+					(
+						$"..".generatedChunk.openBorders.bottom != null and
+						!$"..".generatedChunk.openBorders.bottom.tiles.has(Vector2i(x, y))
+					)
+				)
+			):
+				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
 
 func cleanUpTile(tile: int, toTile: int, areaSize: int):
 	var areas = []
