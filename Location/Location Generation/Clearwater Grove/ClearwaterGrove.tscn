@@ -76,7 +76,7 @@ y_sort_enabled = true
 [node name="OutdoorObjects" type="Node2D" parent="Entities"]
 y_sort_enabled = true
 
-[node name="Collisions" type="Node2D" parent="Entities"]
+[node name="Exits" type="Node2D" parent="Entities"]
 
 [node name="UI" type="Control" parent="."]
 visible = false

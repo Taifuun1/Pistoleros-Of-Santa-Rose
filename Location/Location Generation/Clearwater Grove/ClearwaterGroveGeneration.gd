@@ -5,7 +5,7 @@ extends AStar
 signal generationCompleted(tile: int, toTile: int, areaSize: int)
 
 var generatedChunkPosition
-var generatedChunkTiles = {}
+var generatedChunk = {}
 
 
 func _ready():
@@ -13,7 +13,7 @@ func _ready():
 
 func initGeneration(selectedChunk: Vector2i):
 	generatedChunkPosition = selectedChunk
-	generatedChunkTiles = {}
+	generatedChunk = {}
 	
 	print("genning", generatedChunkPosition)
 	
@@ -21,15 +21,15 @@ func initGeneration(selectedChunk: Vector2i):
 	$WFCChunkGenerator.generateChunk("Clearwater Grove", generatedChunkPosition)
 
 func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
-	generatedChunkTiles = tiles
+	generatedChunk.tiles = tiles
 	generateWater()
-	setTiles(generatedChunkTiles)
+	#setTiles(generatedChunk)
 	#$ChunkProcessor.cleanUpTile(tile, toTile, areaSize)
 	$ChunkProcessor.getChunkOpenBorderTiles()
 	$ChunkProcessor.connectBorderEntrances()
 	$ChunkProcessor.randomizeTrees(15)
-	clear()
-	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunkTiles, name)
+	generatedChunk.openBorders = $ChunkProcessor.transformOpenBordersToTiles()
+	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunk.duplicate(true), name)
 
 func generateWater():
 	var tilePosition = local_to_map(Vector2i(0, 0))
@@ -42,8 +42,4 @@ func generateWater():
 				tile = 0
 			
 			if tile == 0:
-				generatedChunkTiles[Vector2i(x, y)] = tile
-
-func setTiles(tiles):
-	for tile in tiles:
-		set_cell(0, Vector2i(tile.x, tile.y), tiles[tile], Vector2i(0, 0))
+				generatedChunk.tiles[Vector2i(x, y)] = tile

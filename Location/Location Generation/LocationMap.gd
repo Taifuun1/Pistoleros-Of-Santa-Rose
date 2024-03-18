@@ -1,14 +1,5 @@
 extends LocationMapHelpers
 
-var emptyChunks = []
-var currentlyGeneratingChunks = []
-var idleGenerators = ["Gen1", "Gen2", "Gen3"]
-var chunkPriority = null
-
-var generatedChunks = {}
-
-var currentChunk = null
-
 
 func _ready():
 	randomize()
@@ -17,31 +8,43 @@ func _ready():
 
 func initWFCGenerationFinished():
 	emptyChunks.append_array($ChunkGenerators/LocationMapLayoutGeneration.generateMapLayout())
+	emptyChunks.erase(Vector2i(0, 0))
 	for idleGenerator in 3:
 		generateNewChunk()
 
-func chunkFinished(generatedChunk: Vector2i, tiles: Dictionary, idleGenerator: String):
+func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: String):
 	idleGenerators.append(idleGenerator)
-	generatedChunks[generatedChunk] = tiles
-	if currentChunk == null and generatedChunk == Vector2i(0, 0):
+	generatedChunks[generatedChunk] = data
+	if currentChunk == Vector2i(0, 0) and generatedChunk == Vector2i(0, 0):
 		currentChunk = Vector2i(0, 0)
+		generatedChunks[generatedChunk].openBorders.top = {
+			"firstOpenTile": Vector2i(11, 0),
+			"lastOpenTile": Vector2i(12, 1),
+			"tiles": [
+				Vector2i(11, 0),
+				Vector2i(11, 1),
+				Vector2i(12, 0),
+				Vector2i(12, 1)
+			],
+			"halfwayTile": Vector2i(11, 1)
+		}
+		changeChunk("bottom")
+		#currentChunk = Vector2i(0, 0)
 		#$Map.setTiles(generatedChunks[currentChunk])
-		for cell in generatedChunks[currentChunk]:
-			print(cell)
-		print()
-		var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk])
-		for tileType in tileTypes:
-			match tileType:
-				"water":
-					$Map.setTerrainTiles(tileTypes[tileType], 0, 1)
-				"ground":
-					$Map.setTerrainTiles(tileTypes[tileType], 0, 0)
-				"trees":
-					$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
-		addTrees(tileTypes.trees, "Birch", 4)
+		#var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk])
+		#for tileType in tileTypes:
+			#match tileType:
+				#"water":
+					#$Map.setTerrainTiles(tileTypes[tileType], 0, 1)
+				#"ground":
+					#$Map.setTerrainTiles(tileTypes[tileType], 0, 0)
+				#"trees":
+					#$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
+		#addTrees(tileTypes.trees, "Birch", 4)
+		#addExits(openBorderTiles)
 		#$UI/Loading.hide()
 	print()
-	print("finished")
+	print("finished generating", generatedChunk)
 	print("chunk count:", generatedChunks.size())
 	print("empty chunk count:", emptyChunks.size())
 	generateNewChunk()

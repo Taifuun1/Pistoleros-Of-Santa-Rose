@@ -9,27 +9,24 @@ class_name AStar
 func calculatePath(astarNode, pathStartPosition, pathEndPosition):
 	return astarNode.get_point_path(id(pathStartPosition), id(pathEndPosition))
 
-func initPathfindingAstarNode():
+func initPathfindingAstarNode(tiles: Dictionary):
 	pathfindingAstarNode.clear()
-	var walkableTiles = addWalkableTiles(pathfindingAstarNode, 2)
+	var walkableTiles = addWalkableTiles(pathfindingAstarNode, tiles, [0, 2])
 	connectWalkableCells(pathfindingAstarNode, walkableTiles)
 
-func initWeightedAstarNode():
+func initWeightedAstarNode(tiles: Dictionary):
 	weightedAstarNode.clear()
-	var walkableTiles = addWalkableTiles(weightedAstarNode)
+	var walkableTiles = addWalkableTiles(weightedAstarNode, tiles, [0])
 	for tile in walkableTiles:
-		if get_cell_source_id(0, tile) == 1 or get_cell_source_id(0, tile) == 2:
-			weightedAstarNode.set_point_weight_scale(id(tile), randi() % 10)
+		weightedAstarNode.set_point_weight_scale(id(tile), randi() % 100)
 	connectWalkableCells(weightedAstarNode, walkableTiles)
 
-func addWalkableTiles(astarNode, illegibleId = null):
+func addWalkableTiles(astarNode, tiles, illegibleIds = null):
 	var points = []
 	for x in WaveFunctionCollapse.gridSize.x:
 		for y in WaveFunctionCollapse.gridSize.y:
 			var point = Vector2i(x, y)
-			#for illegibleId in illegibleIds:
-			if get_cell_source_id(0, point) == illegibleId:
-					#set_cell(0, point, 1, Vector2i(0, 0))
+			if isTileIllegible(tiles[point], illegibleIds):
 				continue
 			points.append(point)
 			astarNode.add_point(id(point), point, 1.0)
@@ -54,12 +51,18 @@ func connectWalkableCells(astarNode, points):
 				Vector2i(point.x + 1, point.y - 1)
 			])
 		for pointRelative in pointsRelative:
-				var pointRelativeIndex = id(pointRelative)
-				if HelperFunctions.isOutSideTileMap(pointRelative):
-					continue
-				if not astarNode.has_point(pointRelativeIndex):
-					continue
-				astarNode.connect_points(pointIndex, pointRelativeIndex, false)
+			var pointRelativeIndex = id(pointRelative)
+			if HelperFunctions.isOutSideTileMap(pointRelative):
+				continue
+			if not astarNode.has_point(pointRelativeIndex):
+				continue
+			astarNode.connect_points(pointIndex, pointRelativeIndex, false)
+
+func isTileIllegible(tile, illegibleIds):
+	for illegibleId in illegibleIds:
+		if tile == illegibleId:
+			return true
+	return false
 
 func hasPoint(point):
 	return pathfindingAstarNode.has_point(id(point))

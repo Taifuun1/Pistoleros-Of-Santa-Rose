@@ -43,6 +43,6 @@ func isTileAlreadyInAnArea(tile, areas):
 
 func isTileOneOfTypes(tilePosition: Vector2i, tileTypes):
 	for tileType in tileTypes:
-		if $"..".generatedChunkTiles[tilePosition] == tileType:
+		if $"..".generatedChunk.tiles[tilePosition] == tileType:
 			return true
 	return false

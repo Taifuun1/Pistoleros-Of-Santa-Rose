@@ -25,7 +25,6 @@ func generateMapLayout(type: String = "Clearwater Grove") -> Array:
 			newTiles.append(tile)
 	tiles = newTiles
 	
-	tiles.erase(Vector2i(0, 0))
 	$TileMap.clear()
 	
 	return tiles
