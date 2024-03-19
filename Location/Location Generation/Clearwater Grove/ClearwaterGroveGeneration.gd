@@ -25,11 +25,12 @@ func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
 	generateWater()
 	#setTiles(generatedChunk)
 	#$ChunkProcessor.cleanUpTile(tile, toTile, areaSize)
-	$ChunkProcessor.getChunkOpenBorderTiles()
+	$ChunkProcessor.getOpenBorderTiles()
 	$ChunkProcessor.connectBorderEntrances()
 	$ChunkProcessor.randomizeTrees(15)
-	generatedChunk.openBorders = $ChunkProcessor.transformOpenBordersToTiles()
-	$ChunkProcessor.cleanUpBorders()
+	$ChunkProcessor.transformOpenBordersToTiles()
+	$ChunkProcessor.fillVisibleEmptyTiles()
+	#$ChunkProcessor.cleanUpBorders()
 	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunk.duplicate(true), name)
 
 func generateWater():
@@ -39,7 +40,7 @@ func generateWater():
 			var noise = noiseTest.get_noise_2d(tilePosition.x + x, tilePosition.y + y)
 			
 			var tile = 1
-			if noise > 0.35:
+			if noise > 0.1:
 				tile = 0
 			
 			if tile == 0:

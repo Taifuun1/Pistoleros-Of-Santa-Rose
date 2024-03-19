@@ -1,7 +1,7 @@
 extends Node2D
 class_name LocationMapHelpers
 
-var dynamicSprite = load("res://Nodes/DynamicSprite/DynamicSprite.tscn")
+var dynamicSprite = load("res://Nodes/Dynamic Sprite/DynamicSprite.tscn")
 
 var currentGeneration = "Clearwater Grove"
 

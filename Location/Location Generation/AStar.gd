@@ -6,7 +6,13 @@ class_name AStar
 
 
 
-func calculatePath(astarNode, pathStartPosition, pathEndPosition):
+func calculatePath(astarNode, pathStartPosition, pathEndPosition, tile1, tile2):
+	if !hasPoint(pathStartPosition):
+		print("No point a", pathStartPosition)
+		print(tile1, " ", tile2)
+	if !hasPoint(pathEndPosition):
+		print("No point e", pathEndPosition)
+		print(tile1, " ", tile2)
 	return astarNode.get_point_path(id(pathStartPosition), id(pathEndPosition))
 
 func initPathfindingAstarNode(tiles: Dictionary):
@@ -16,9 +22,12 @@ func initPathfindingAstarNode(tiles: Dictionary):
 
 func initWeightedAstarNode(tiles: Dictionary):
 	weightedAstarNode.clear()
-	var walkableTiles = addWalkableTiles(weightedAstarNode, tiles, [0])
+	var walkableTiles = addWalkableTiles(weightedAstarNode, tiles, [])
 	for tile in walkableTiles:
-		weightedAstarNode.set_point_weight_scale(id(tile), randi() % 100)
+		if tiles[tile] == 0:
+			weightedAstarNode.set_point_weight_scale(id(tile), 5)
+		else:
+			weightedAstarNode.set_point_weight_scale(id(tile), 1)
 	connectWalkableCells(weightedAstarNode, walkableTiles)
 
 func addWalkableTiles(astarNode, tiles, illegibleIds = null):

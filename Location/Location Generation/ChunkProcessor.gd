@@ -21,21 +21,28 @@ func connectBorderEntrances():
 		for otherOpenBorder in selectedOpenBorderTiles:
 			if (
 				openBorder != otherOpenBorder and
-				$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[openBorder]) and
+				(
+					(
+						$"..".generatedChunkPosition == Vector2i(0, 0) and
+						openBorder == "top"
+					) or
+					$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[openBorder])
+				) and
 				$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[otherOpenBorder]) and
-				$"..".calculatePath($"..".pathfindingAstarNode, selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint).is_empty()
+				$"..".calculatePath($"..".pathfindingAstarNode, selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint, $"..".generatedChunk.tiles[selectedOpenBorderTiles[openBorder].halfwayPoint], $"..".generatedChunk.tiles[selectedOpenBorderTiles[otherOpenBorder].halfwayPoint]).is_empty()
 			):
 				connectBorderEntrance(selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint)
 
 func connectBorderEntrance(openBorder, otherOpenBorder):
-	var path = $"..".calculatePath($"..".weightedAstarNode, openBorder, otherOpenBorder)
+	var path = $"..".calculatePath($"..".weightedAstarNode, openBorder, otherOpenBorder, $"..".generatedChunk.tiles[openBorder], $"..".generatedChunk.tiles[otherOpenBorder])
+	print("connecting ", path)
 	for tile in path:
 		var tileI = Vector2i(tile.x, tile.y)
 		$"..".generatedChunk.tiles[tileI] = 1
 	$"..".initPathfindingAstarNode($"..".generatedChunk.tiles)
 	$"..".initWeightedAstarNode($"..".generatedChunk.tiles)
 
-func getChunkOpenBorderTiles():
+func getOpenBorderTiles():
 	var openBorderTiles = {
 		"left": [],
 		"right": [],
@@ -127,6 +134,45 @@ func getChunkOpenBorderTiles():
 		if openBorderTiles[border].is_empty():
 			openBorderTiles[border].append(generateOpenBorder(border))
 		selectedOpenBorderTiles[border] = openBorderTiles[border][randi() % openBorderTiles[border].size()]
+	
+	if $"..".generatedChunkPosition == Vector2i(0, 0):
+		selectedOpenBorderTiles.top = {
+			"firstOpenTile": 22,
+			"lastOpenTile": 25,
+			"halfwayPoint": Vector2i(11, 1)
+		}
+		$"..".generatedChunk.tiles[Vector2i(11, 0)] = 1
+		$"..".generatedChunk.tiles[Vector2i(11, 1)] = 1
+		$"..".generatedChunk.tiles[Vector2i(12, 0)] = 1
+		$"..".generatedChunk.tiles[Vector2i(12, 1)] = 1
+
+func fillVisibleEmptyTiles():
+	for border in $"..".generatedChunk.openBorders:
+		if $"..".generatedChunk.openBorders[border] != null:
+			for tile in $"..".generatedChunk.openBorders[border].tiles:
+				if border == "top" or border == "bottom":
+					for index in range(1, 5):
+						$"..".generatedChunk.tiles[tile + (HelperVariables.cardinalDirections[border] * index)] = 1
+				else:
+					for index in range(1, 3):
+						$"..".generatedChunk.tiles[tile + (HelperVariables.cardinalDirections[border] * index)] = 1
+	
+	for x in range(-2, WaveFunctionCollapse.gridSize.x + 2):
+		for y in range(-4, WaveFunctionCollapse.gridSize.y + 4):
+			if (
+				!$"..".generatedChunk.tiles.has(Vector2i(x, y)) and
+				!checkIfTileIsOpenBorder(Vector2i(x, y))
+			):
+				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
+
+func checkIfTileIsOpenBorder(tile):
+	for border in $"..".generatedChunk.openBorders:
+		if (
+			$"..".generatedChunk.openBorders[border] != null and
+			$"..".generatedChunk.openBorders[border].tiles.has(tile)
+		):
+			return true
+	return false
 
 func transformOpenBordersToTiles():
 	var borderTiles = {
@@ -140,7 +186,8 @@ func transformOpenBordersToTiles():
 			borderTiles[openBorder] = null
 			continue
 		borderTiles[openBorder] = transformOpenBorderToTiles(openBorder, selectedOpenBorderTiles[openBorder])
-	return borderTiles
+	
+	$"..".generatedChunk.openBorders = borderTiles
 
 func transformOpenBorderToTiles(border, tiles):
 	var openBorder = {}
@@ -272,6 +319,7 @@ func transformOpenBorderToTiles(border, tiles):
 
 func generateOpenBorder(border):
 	var openBorder = {}
+	var tiles = []
 	
 	if border == "left" or border == "right":
 		var firstOpenTile = Vector2i(0, (randi() % (WaveFunctionCollapse.gridSize.y - 8)) + 4)
@@ -282,17 +330,33 @@ func generateOpenBorder(border):
 			"lastOpenTile": firstOpenTile.y + 4,
 			"halfwayPoint": firstOpenTile + Vector2i(0, 2)
 		}
+		for index in 4:
+			tiles.append(Vector2i(firstOpenTile.x, firstOpenTile.y + index))
 	else:
-		var firstOpenTile = Vector2i((randi() % (WaveFunctionCollapse.gridSize.x - 5)) + 2, 0)
+		var firstOpenTile = Vector2i((randi() % (WaveFunctionCollapse.gridSize.x - 4)) + 2, 0)
 		if border == "bottom":
 			firstOpenTile.y = 46
 		if firstOpenTile.x % 2 == 1:
 			firstOpenTile.y += 1
+			tiles.append(Vector2i(firstOpenTile.x / 2, firstOpenTile.y))
+			tiles.append(Vector2i(firstOpenTile.x / 2 + 1, firstOpenTile.y - 1))
+			tiles.append(Vector2i(firstOpenTile.x / 2 + 1, firstOpenTile.y))
+			tiles.append(Vector2i(firstOpenTile.x / 2 + 2, firstOpenTile.y - 1))
+		else:
+			for x in 2:
+				for y in 2:
+					tiles.append(Vector2i(firstOpenTile.x / 2 + x, firstOpenTile.y + y))
 		openBorder = {
 			"firstOpenTile": firstOpenTile.x,
 			"lastOpenTile": firstOpenTile.x + 4,
-			"halfwayPoint": (firstOpenTile + Vector2i(2, 0)) / 2
+			"halfwayPoint": Vector2i(firstOpenTile.x / 2, firstOpenTile.y)
 		}
+	
+	for tile in tiles:
+		$"..".generatedChunk.tiles[tile] = 1
+	
+	print("border ", border)
+	print(openBorder)
 	
 	return openBorder
 

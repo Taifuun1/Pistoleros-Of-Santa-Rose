@@ -17,17 +17,6 @@ func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: St
 	generatedChunks[generatedChunk] = data
 	if currentChunk == Vector2i(0, 0) and generatedChunk == Vector2i(0, 0):
 		currentChunk = Vector2i(0, 0)
-		generatedChunks[generatedChunk].openBorders.top = {
-			"firstOpenTile": Vector2i(11, 0),
-			"lastOpenTile": Vector2i(12, 1),
-			"tiles": [
-				Vector2i(11, 0),
-				Vector2i(11, 1),
-				Vector2i(12, 0),
-				Vector2i(12, 1)
-			],
-			"halfwayTile": Vector2i(11, -10)
-		}
 		changeChunk("bottom")
 		$UI/Loading.hide()
 	print()

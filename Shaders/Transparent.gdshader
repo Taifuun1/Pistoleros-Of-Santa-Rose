@@ -6,6 +6,9 @@ void vertex() {
 
 void fragment() {
 	COLOR = texture(TEXTURE, UV) * vec4(COLOR.r, COLOR.g, COLOR.b, 0.1);
+	
+	//clamp(TIME, 1.0, 0.1)
+	//COLOR.a = smoothstep(0.0, 0.5, TIME);
 	// Called for every pixel the material is visible on.
 }
 
