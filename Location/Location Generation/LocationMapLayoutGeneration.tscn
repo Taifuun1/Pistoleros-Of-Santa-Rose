@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Location/Location Generation/LocationMapLayoutGeneration.gd" id="1_1xig6"]
 [ext_resource type="Texture2D" uid="uid://h3o4aop3fncs" path="res://Assets/Tilesets/TemplateTile.png" id="2_02xvg"]
-[ext_resource type="Script" path="res://Location/Location Generation/AStarGrid.gd" id="3_m0tk3"]
+[ext_resource type="Script" path="res://Nodes/AStar/AStarGrid.gd" id="3_m0tk3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rb7jk"]
 texture = ExtResource("2_02xvg")

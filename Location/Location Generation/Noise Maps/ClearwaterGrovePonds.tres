@@ -3,5 +3,6 @@
 [resource]
 noise_type = 3
 frequency = 0.1
-fractal_lacunarity = 1.5
-fractal_gain = 0.4
+fractal_type = 2
+fractal_lacunarity = 1.0
+fractal_gain = 0.0

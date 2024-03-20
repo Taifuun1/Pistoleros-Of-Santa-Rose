@@ -1,4 +1,4 @@
-extends TileMap
+extends Node2D
 class_name AStar
 
 @onready var pathfindingAstarNode = AStar2D.new()

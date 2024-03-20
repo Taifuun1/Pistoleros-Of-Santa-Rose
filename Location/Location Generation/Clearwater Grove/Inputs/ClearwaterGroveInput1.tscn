@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cfq8hfks4io35"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_qhxv3"]
-[ext_resource type="Script" path="res://Location/Location Generation/InputTemplate.gd" id="2_q87kk"]
+[ext_resource type="Script" path="res://Location/Location Generation/Wave Function Collapse/InputTemplate.gd" id="2_q87kk"]
 
 [node name="ClearwaterGrove" type="TileMap"]
 y_sort_enabled = true

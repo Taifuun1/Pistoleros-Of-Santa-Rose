@@ -1,6 +1,6 @@
 extends TileMap
 
-@onready var waveFunctionCollapse = preload("res://Location/Location Generation/WaveFunctionCollapse.tscn")
+@onready var waveFunctionCollapse = preload("res://Location/Location Generation/Wave Function Collapse/WaveFunctionCollapse.tscn")
 
 var generatedChunks = [
 	Vector2i(0,0)

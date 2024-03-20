@@ -1,6 +1,6 @@
 extends AStar
 
-@export var noiseTest = FastNoiseLite.new()
+#@export var waterNoise = FastNoiseLite.new()
 
 signal generationCompleted(tile: int, toTile: int, areaSize: int)
 
@@ -17,31 +17,18 @@ func initGeneration(selectedChunk: Vector2i):
 	
 	print("genning", generatedChunkPosition)
 	
-	noiseTest.seed = randi()
 	$WFCChunkGenerator.generateChunk("Clearwater Grove", generatedChunkPosition)
 
 func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
 	generatedChunk.tiles = tiles
-	generateWater()
+	$ChunkProcessor.generateWater()
 	#setTiles(generatedChunk)
 	#$ChunkProcessor.cleanUpTile(tile, toTile, areaSize)
 	$ChunkProcessor.getOpenBorderTiles()
 	$ChunkProcessor.connectBorderEntrances()
-	$ChunkProcessor.randomizeTrees(15)
+	#$ChunkProcessor.randomizeTrees(15)
+	$ChunkProcessor.randomizeTileToTile(1, 2, 15)
 	$ChunkProcessor.transformOpenBordersToTiles()
 	$ChunkProcessor.fillVisibleEmptyTiles()
 	#$ChunkProcessor.cleanUpBorders()
 	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunk.duplicate(true), name)
-
-func generateWater():
-	var tilePosition = local_to_map(Vector2i(0, 0))
-	for x in range(24):
-		for y in range(48):
-			var noise = noiseTest.get_noise_2d(tilePosition.x + x, tilePosition.y + y)
-			
-			var tile = 1
-			if noise > 0.1:
-				tile = 0
-			
-			if tile == 0:
-				generatedChunk.tiles[Vector2i(x, y)] = tile

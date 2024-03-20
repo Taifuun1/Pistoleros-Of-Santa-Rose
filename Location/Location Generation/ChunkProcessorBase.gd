@@ -1,6 +1,30 @@
-extends Node2D
-class_name ChunkProcessorHelperFunctions
+extends AStar
+class_name ChunkProcessorBase
 
+var waterNoise = load("res://Location/Location Generation/Noise Maps/ClearwaterGroveLakes.tres")
+
+
+func calculateHalfwayPoint(openBorder, halfwayPoint) -> Vector2i:
+	var halfwayPointTile = Vector2i(0, 0)
+	if openBorder == "left" or openBorder == "right":
+		halfwayPointTile.y = halfwayPoint
+		if openBorder == "left":
+			halfwayPointTile.x = 0
+		if openBorder == "right":
+			halfwayPointTile.x = 23
+	elif openBorder == "top" or openBorder == "bottom":
+		halfwayPointTile.x = halfwayPoint / 2
+		if halfwayPoint % 2 == 0:
+			if openBorder == "top":
+				halfwayPointTile.y = 0
+			if openBorder == "bottom":
+				halfwayPointTile.y = 46
+		else:
+			if openBorder == "top":
+				halfwayPointTile.y = 1
+			if openBorder == "bottom":
+				halfwayPointTile.y = 47
+	return halfwayPointTile
 
 func checkAdjacentTilesForTile(_tile, _tileTypes, _checkForTile = true):
 	var _tiles = []
@@ -33,6 +57,15 @@ func getArea(tile, tileType):
 				adjacentTiles.append(adjacentTile)
 				areaTiles.append(adjacentTile)
 	return areaTiles
+
+func isTileInOpenBorder(tile):
+	for border in $"..".generatedChunk.openBorders:
+		if (
+			$"..".generatedChunk.openBorders[border] != null and
+			$"..".generatedChunk.openBorders[border].tiles.has(tile)
+		):
+			return true
+	return false
 
 func isTileAlreadyInAnArea(tile, areas):
 	for area in areas:

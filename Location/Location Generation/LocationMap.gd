@@ -1,4 +1,4 @@
-extends LocationMapHelpers
+extends LocationMapBase
 
 
 func _ready():
@@ -34,22 +34,3 @@ func generateNewChunk():
 		chunkPriority = null
 		return
 	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front())
-
-func setChunkPriority(chunk: Vector2i):
-	chunkPriority = chunk
-
-func generateChunks(thread):
-	while(!emptyChunks.is_empty()):
-		var chunkGenerationDone = false
-		var generatorName = generateNewChunk()
-		while !chunkGenerationDone:
-			MultiThreading.semaphore.wait()
-			get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).doWFCGenerationCycle()
-			
-	call_deferred("checkIfThreadsAreDone")
-	thread.call_deferred("wait_to_finish")
-
-func checkIfAGeneratorIsIdle():
-	if idleGenerators.is_empty():
-		return null
-	return 

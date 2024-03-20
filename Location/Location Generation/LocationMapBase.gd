@@ -1,5 +1,5 @@
 extends Node2D
-class_name LocationMapHelpers
+class_name LocationMapBase
 
 var dynamicSprite = load("res://Nodes/Dynamic Sprite/DynamicSprite.tscn")
 
@@ -15,17 +15,8 @@ var generatedChunks = {}
 var currentChunk = Vector2i(0, 0)
 
 
-func resetChunk():
-	$Map.clear()
-	for node in $Entities/OutdoorObjects.get_children():
-		node.queue_free()
-	for node in $Entities/Exits.get_children():
-		node.queue_free()
-
-func checkIfChangeChunk(body, direction, directionRelative):
-	print("direction: ", directionRelative)
-	if body.name == "PlayerActor":
-		changeChunk(direction, directionRelative)
+func setChunkPriority(chunk: Vector2i):
+	chunkPriority = chunk
 
 func changeChunk(direction, directionRelative = Vector2i(0, 0)):
 	resetChunk()
@@ -151,3 +142,15 @@ func createCollisionWithPosition(collisionPosition: Vector2i, shape: Array):
 	areaShape.shape = areaShapeCollision
 	
 	return areaShape
+
+func checkIfChangeChunk(body, direction, directionRelative):
+	print("direction: ", directionRelative)
+	if body.name == "PlayerActor":
+		changeChunk(direction, directionRelative)
+
+func resetChunk():
+	$Map.clear()
+	for node in $Entities/OutdoorObjects.get_children():
+		node.queue_free()
+	for node in $Entities/Exits.get_children():
+		node.queue_free()

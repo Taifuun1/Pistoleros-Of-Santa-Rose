@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var waveFunctionCollapse = preload("res://Location/Location Generation/WaveFunctionCollapse.tscn")
+@onready var waveFunctionCollapse = preload("res://Location/Location Generation/Wave Function Collapse/WaveFunctionCollapse.tscn")
 
 
 func generateChunk(input: String, generatedChunkPosition: Vector2i):

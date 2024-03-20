@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://by1sy8j6ekgk4"]
 
-[ext_resource type="Script" path="res://Location/Location Generation/WFCInputCreation.gd" id="1_vimcu"]
+[ext_resource type="Script" path="res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.gd" id="1_vimcu"]
 
 [node name="WFCInputCreation" type="Node2D"]
 script = ExtResource("1_vimcu")
