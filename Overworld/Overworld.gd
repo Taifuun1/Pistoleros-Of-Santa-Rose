@@ -25,17 +25,18 @@ func _process(_delta):
 		var newCurrentlyLoadedChunks = getAdjacentChunks()
 		setAdjacentChunks(newCurrentlyLoadedChunks)
 		currentlyLoadedChunks = newCurrentlyLoadedChunks
+		removeFarawayLocations()
 		removeNodes()
 		loadingChunk = false
 
-func init(spawnChunk: Vector2i = Vector2i(8, 11), spawnLocation: Vector2i = Vector2i(0, 0)) -> void:
-	currentChunk = spawnChunk
+func init() -> void:
+	currentChunk = Overworld.spawnChunk
 	setChunk()
 	var newCurrentlyLoadedChunks = getAdjacentChunks()
 	setAdjacentChunks(newCurrentlyLoadedChunks)
 	currentlyLoadedChunks = newCurrentlyLoadedChunks
 	removeNodes()
-	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(spawnChunk)) + spawnLocation
+	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(Overworld.spawnChunk)) + Overworld.spawnTile
 	loadingChunk = false
 
 
@@ -53,7 +54,8 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> void:
 	if "locations" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
 		var locations = $Chunks.get_children()[$Chunks.get_child_count() - 1].locations
 		for location in locations:
-			createLocation(location, locations[location].position, locations[location].shape, locations[location].pregenerated)
+			if !isLocationLoaded(location):
+				createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
 
 func setAdjacentChunks(newAdjacentChunks: Array) -> void:
 	for previousAdjacentChunk in currentlyLoadedChunks:
@@ -74,8 +76,8 @@ func getAdjacentChunks() -> Array:
 
 func getChunkTiles(node: Node2D) -> Dictionary:
 	var tiles = {}
-	for x in range(64):
-		for y in range(64):
+	for x in range(HelperVariables.overworldChunkSize.x):
+		for y in range(HelperVariables.overworldChunkSize.y):
 			tiles[Vector2i(x, y)] = {
 				"id": node.get_node("OverworldTileChunkTemplate").get_cell_source_id(0, Vector2i(x,y)),
 				"coords": node.get_node("OverworldTileChunkTemplate").get_cell_atlas_coords(0, Vector2i(x,y))
@@ -104,41 +106,72 @@ func unloadChunk(chunk: Vector2i) -> void:
 					)
 				)
 			) + Vector2i(x ,y) - Vector2i(1, 1))
+	
 
 ##########################
 ### Location functions ###
 ##########################
 
-func createLocation(locationName: String, locationPosition: Vector2i, tiles: Array, pregenerated: bool = false):
+func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
+	if body.name == "PlayerOverworldActor":
+		if pregenerated:
+			get_tree().call_deferred("change_scene_to_file", "res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
+		else:
+			var noWhitespacelocationName = locationName.replace(" ", "")
+			get_tree().call_deferred("change_scene_to_file", "res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
+
+func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool = false):
 	var area = Area2D.new()
-	var areaShape = CollisionShape2D.new()
-	var areaShapeCollision = ConvexPolygonShape2D.new()
-	var chunkMappedTiles = PackedVector2Array()
-	for tile in tiles:
-		chunkMappedTiles.append($OverworldTileChunkTemplate.map_to_local(tile))
-	
 	area.name = locationName
-	area.position = Vector2i(
-		map_to_local(currentChunk).x - (32 * 24) + ($OverworldTileChunkTemplate.map_to_local(locationPosition).x),
-		map_to_local(currentChunk).y - (32 * 6) + ($OverworldTileChunkTemplate.map_to_local(locationPosition).y)
-	)
-	areaShapeCollision.set_point_cloud(chunkMappedTiles)
-	areaShape.shape = areaShapeCollision
-	
 	$Locations.add_child(area)
-	$Locations.get_node("{locationName}".format({ "locationName": locationName })).add_child(areaShape)
+	
+	for tile in tiles:
+		$Locations.get_node("{locationName}".format({ "locationName": locationName })).add_child(
+			createCollisionWithPosition(
+				tile,
+				chunkPosition,
+				PackedVector2Array([
+					Vector2i(-1, -1),
+					Vector2i(-1, 0),
+					Vector2i(0, 0),
+					Vector2i(-1, 1)
+				])
+			)
+		)
+	
 	$Locations.get_node("{locationName}".format({ "locationName": locationName })).body_entered.connect(enterLocation.bind(locationName, pregenerated))
 
-func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
-	if pregenerated:
-		get_tree().call_deferred("change_scene_to_file", "res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
-	else:
-		var noWhitespacelocationName = locationName.replace(" ", "")
-		get_tree().call_deferred("change_scene_to_file", "res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
+func isLocationLoaded(locationName):
+	for location in $Locations.get_children():
+		print(location.name)
+		if location.name == locationName:
+			return true
+	return false
+
+func removeFarawayLocations():
+	for location in $Locations.get_children():
+		var locationArea = location.get_child(0)
+		if local_to_map(locationArea.position) != currentChunk and !currentlyLoadedChunks.has(local_to_map(locationArea.position)):
+			location.queue_free()
 
 ########################
 ### Helper functions ###
 ########################
+
+func createCollisionWithPosition(collisionPosition: Vector2i, chunkPosition: Vector2i, shape: Array):
+	var areaShape = CollisionShape2D.new()
+	var areaShapeCollision = ConvexPolygonShape2D.new()
+	var chunkMappedTiles = PackedVector2Array()
+	
+	for point in shape:
+		chunkMappedTiles.append(Vector2i($OverworldTileChunkTemplate.map_to_local(point)))
+	areaShapeCollision.set_point_cloud(chunkMappedTiles)
+	
+	areaShape.name = str(currentChunk) + str(collisionPosition)
+	areaShape.position = Vector2i(map_to_local(chunkPosition) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(collisionPosition))
+	areaShape.shape = areaShapeCollision
+	
+	return areaShape
 
 func removeNodes() -> void:
 	for _node in $Chunks.get_children():

@@ -1,8 +1,9 @@
-[gd_scene load_steps=26 format=3 uid="uid://bv4nj3hnjc8im"]
+[gd_scene load_steps=36 format=3 uid="uid://bv4nj3hnjc8im"]
 
 [ext_resource type="Script" path="res://Actors/PlayerLocationActor.gd" id="1_c7mty"]
 [ext_resource type="Texture2D" uid="uid://dvjv3lbb0dx8o" path="res://Assets/Characters/Test/Test2Animation_40x40.png" id="2_hbh6m"]
 [ext_resource type="Texture2D" uid="uid://ddcjiuo272i2d" path="res://Assets/Characters/Test/Test2Animation_40x40_run_smears_4_outline.png" id="3_4p4mj"]
+[ext_resource type="Texture2D" uid="uid://b1fn778spn2eb" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyRun.png" id="4_eu21m"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_88dve"]
 radius = 4.0
@@ -71,6 +72,38 @@ region = Rect2(240, 0, 40, 40)
 atlas = ExtResource("3_4p4mj")
 region = Rect2(280, 0, 40, 40)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_apfc1"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(0, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e4k7p"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(40, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u2id0"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(80, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mo5pw"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(120, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7p1ms"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(160, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nywm4"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(200, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_450eu"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(240, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atdgs"]
+atlas = ExtResource("4_eu21m")
+region = Rect2(280, 0, 40, 40)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_ddvav"]
 animations = [{
 "frames": [{
@@ -130,6 +163,35 @@ animations = [{
 "loop": true,
 "name": &"IdleOutline",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_apfc1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e4k7p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u2id0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mo5pw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7p1ms")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nywm4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_450eu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atdgs")
+}],
+"loop": true,
+"name": &"Run",
+"speed": 5.0
 }]
 
 [sub_resource type="Animation" id="Animation_feuy0"]
@@ -179,11 +241,29 @@ tracks/0/keys = {
 "values": [0]
 }
 
+[sub_resource type="Animation" id="Animation_0daao"]
+resource_name = "Run"
+length = 1.15
+step = 0.15
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5fada"]
 _data = {
 "Idle": SubResource("Animation_feuy0"),
 "Idle Outline": SubResource("Animation_lgk1x"),
-"RESET": SubResource("Animation_ow15p")
+"RESET": SubResource("Animation_ow15p"),
+"Run": SubResource("Animation_0daao")
 }
 
 [node name="PlayerActor" type="CharacterBody2D"]
@@ -196,7 +276,7 @@ shape = SubResource("CircleShape2D_88dve")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ddvav")
-animation = &"IdleOutline"
+animation = &"Run"
 offset = Vector2(0, -15)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

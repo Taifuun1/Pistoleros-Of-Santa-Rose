@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dvlk3muixwpyx" path="res://Actors/PlayerOverworldActor.tscn" id="3_q70do"]
 
 [sub_resource type="TileSet" id="TileSet_4f8r2"]
-tile_size = Vector2i(1536, 390)
+tile_size = Vector2i(1536, 384)
 
 [node name="Overworld" type="TileMap"]
 tile_set = SubResource("TileSet_4f8r2")

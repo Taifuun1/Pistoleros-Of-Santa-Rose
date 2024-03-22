@@ -13,15 +13,31 @@ var chunkPriority = null
 var generatedChunks = {}
 
 var currentChunk = Vector2i(0, 0)
+var movedDirection = "bottom"
 
+
+func _ready():
+	set_process(false)
+
+func _process(delta):
+	if generatedChunks.has(currentChunk):
+		changeChunk()
+		set_process(false)
 
 func setChunkPriority(chunk: Vector2i):
 	chunkPriority = chunk
 
-func changeChunk(direction, directionRelative = Vector2i(0, 0)):
+func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0)):
 	resetChunk()
 	currentChunk += directionRelative
+	movedDirection = direction
 	print("changed to ", currentChunk)
+	print(chunkPriority)
+	if !generatedChunks.has(currentChunk):
+		print("waiting for chunk to generate")
+		chunkPriority = currentChunk
+		set_process(true)
+		return
 	var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk].tiles)
 	for tileType in tileTypes:
 		match tileType:
@@ -35,11 +51,11 @@ func changeChunk(direction, directionRelative = Vector2i(0, 0)):
 	addExits()
 	
 	var newDirection = "left"
-	if direction == "left":
+	if movedDirection == "left":
 		newDirection = "right"
-	elif direction == "top":
+	elif movedDirection == "top":
 		newDirection = "bottom"
-	elif direction == "bottom":
+	elif movedDirection == "bottom":
 		newDirection = "top"
 	$Entities/Actors/PlayerActor.position = $Map.map_to_local(generatedChunks[currentChunk].openBorders[newDirection].halfwayTile)
 
@@ -68,7 +84,7 @@ func addExits():
 			"left": Vector2i(-2, 0),
 			"right": Vector2i(2, 0),
 			"top": Vector2i(0, -5),
-			"bottom": Vector2i(0, 3)
+			"bottom": Vector2i(0, 5)
 		}
 		var direction = directions[openBorder]
 		addExit(generatedChunks[currentChunk].openBorders[openBorder], openBorder, direction)
@@ -144,8 +160,12 @@ func createCollisionWithPosition(collisionPosition: Vector2i, shape: Array):
 	return areaShape
 
 func checkIfChangeChunk(body, direction, directionRelative):
-	print("direction: ", directionRelative)
 	if body.name == "PlayerActor":
+		if direction == "top" and directionRelative == Vector2i(0, -1) and currentChunk == Vector2i(0, 0):
+			Overworld.spawnChunk = Vector2i(8, 12)
+			Overworld.spawnTile = Vector2i(25, 57)
+			get_tree().call_deferred("change_scene_to_file", "res://Overworld/Overworld.tscn")
+			return
 		changeChunk(direction, directionRelative)
 
 func resetChunk():

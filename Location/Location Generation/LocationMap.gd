@@ -15,10 +15,10 @@ func initWFCGenerationFinished():
 func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: String):
 	idleGenerators.append(idleGenerator)
 	generatedChunks[generatedChunk] = data
-	if currentChunk == Vector2i(0, 0) and generatedChunk == Vector2i(0, 0):
-		currentChunk = Vector2i(0, 0)
-		changeChunk("bottom")
-		$UI/Loading.hide()
+	#if currentChunk == Vector2i(0, 0) and generatedChunk == Vector2i(0, 0):
+		#currentChunk = Vector2i(0, 0)
+		#changeChunk("bottom")
+		#$UI/Loading.hide()
 	print()
 	print("finished generating", generatedChunk)
 	print("chunk count:", generatedChunks.size())
@@ -29,7 +29,7 @@ func generateNewChunk():
 	if emptyChunks.is_empty():
 		return
 	var generatorName = idleGenerators.pop_front()
-	if chunkPriority != null:
+	if chunkPriority != null and !generatedChunks.has(chunkPriority):
 		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority)
 		chunkPriority = null
 		return

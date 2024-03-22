@@ -11,14 +11,16 @@ func get_input():
 	
 	if velocity == Vector2(0, 0):
 		$AnimationPlayer.play("Idle Outline")
-	#else:
-		#$AnimationPlayer.play("Run")
-		#if velocity.x == 0:
-			#pass
-		#elif velocity.x < 0:
-			#$Sprite2D.set_flip_h(true)
-		#else:
-			#$Sprite2D.set_flip_h(false)
+		$AnimatedSprite2D.animation = "IdleOutline"
+	else:
+		$AnimationPlayer.play("Run")
+		$AnimatedSprite2D.animation = "Run"
+		if velocity.x == 0:
+			pass
+		elif velocity.x < 0:
+			$AnimatedSprite2D.set_flip_h(true)
+		else:
+			$AnimatedSprite2D.set_flip_h(false)
 
 func _physics_process(_delta):
 	get_input()

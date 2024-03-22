@@ -1,6 +1,8 @@
 extends Node
 
 
+var overworldChunkSize = Vector2i(64, 64)
+
 var cardinalDirections = {
 	"left": Vector2i(-1, 0),
 	"right": Vector2i(1, 0),

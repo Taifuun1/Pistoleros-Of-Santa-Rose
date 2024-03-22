@@ -19,7 +19,7 @@ func initGeneration(selectedChunk: Vector2i):
 	
 	$WFCChunkGenerator.generateChunk("Clearwater Grove", generatedChunkPosition)
 
-func processTiles(tiles: Dictionary, tile: int, toTile: int, areaSize: int):
+func processTiles(tiles: Dictionary):
 	generatedChunk.tiles = tiles
 	$ChunkProcessor.generateWater()
 	#setTiles(generatedChunk)

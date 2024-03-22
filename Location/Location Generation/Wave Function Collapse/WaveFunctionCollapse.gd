@@ -30,7 +30,7 @@ func _process(_delta):
 		if generatedChunk.y > 0 or generatedChunk.y < 0:
 			_generatedChunk.y = generatedChunk.y * 50
 		set_process(false)
-		generationCompleted.emit(generatedTiles, 2, 1, 4)
+		generationCompleted.emit(generatedTiles)
 
 func generateChunk(_generatedChunk) -> void:
 	generatedChunk = _generatedChunk
