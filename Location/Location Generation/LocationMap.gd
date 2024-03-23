@@ -30,7 +30,7 @@ func generateNewChunk():
 		return
 	var generatorName = idleGenerators.pop_front()
 	if chunkPriority != null and !generatedChunks.has(chunkPriority):
-		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority)
+		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority, currentGeneration)
 		chunkPriority = null
 		return
-	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front())
+	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front(), currentGeneration)

@@ -1,6 +1,8 @@
 extends AStar
 
-#@export var waterNoise = FastNoiseLite.new()
+#@export var noise = FastNoiseLite.new()
+
+var chunkGenerationTypes
 
 signal generationCompleted(tile: int, toTile: int, areaSize: int)
 
@@ -11,9 +13,11 @@ var generatedChunk = {}
 func _ready():
 	set_process_thread_group(PROCESS_THREAD_GROUP_SUB_THREAD)
 
-func initGeneration(selectedChunk: Vector2i):
+func initGeneration(selectedChunk: Vector2i, generatedLocation: String):
 	generatedChunkPosition = selectedChunk
 	generatedChunk = {}
+	
+	chunkGenerationTypes = load("res://Data/Location Generation/{generatedLocation}.gd".format({ "generatedLocation": generatedLocation.replace(" ", "") })).new().chunkGenerationTypes
 	
 	print("genning", generatedChunkPosition)
 	
@@ -21,14 +25,20 @@ func initGeneration(selectedChunk: Vector2i):
 
 func processTiles(tiles: Dictionary):
 	generatedChunk.tiles = tiles
-	$ChunkProcessor.generateWater()
-	#setTiles(generatedChunk)
-	#$ChunkProcessor.cleanUpTile(tile, toTile, areaSize)
-	$ChunkProcessor.getOpenBorderTiles()
-	$ChunkProcessor.connectBorderEntrances()
-	#$ChunkProcessor.randomizeTrees(15)
-	$ChunkProcessor.randomizeTileToTile(1, 2, 15)
-	$ChunkProcessor.transformOpenBordersToTiles()
-	$ChunkProcessor.fillVisibleEmptyTiles()
-	#$ChunkProcessor.cleanUpBorders()
+	
+	var chanceTable = []
+	for type in chunkGenerationTypes.chance:
+		for tableItem in chunkGenerationTypes.chance[type]:
+			chanceTable.append(type)
+	
+	var generationType = chanceTable[randi() % chanceTable.size()]
+	print("generationType ", generationType)
+	var generationCommands = chunkGenerationTypes.types[generationType]
+	
+	for generationCommand in generationCommands:
+		if generationCommands[generationCommand] == null:
+			Callable($ChunkProcessor, generationCommand).call()
+			continue
+		Callable($ChunkProcessor, generationCommand).call(generationCommands[generationCommand])
+
 	$"../..".call_thread_safe("chunkFinished", generatedChunkPosition, generatedChunk.duplicate(true), name)

@@ -14,15 +14,15 @@ var nonSelectedOpenBorderTiles = {
 }
 
 
-func generateWater():
-	waterNoise.seed = randi()
+func generateFromNoiseMap(parameters):
+	parameters.noiseMap.seed = randi()
 	var tilePosition = $"..".local_to_map(Vector2i(0, 0))
 	for x in range(24):
 		for y in range(48):
-			var noise = waterNoise.get_noise_2d(tilePosition.x + x, tilePosition.y + y)
+			var noise = parameters.noiseMap.get_noise_2d(tilePosition.x + x, tilePosition.y + y)
 			
 			var tile = 1
-			if noise > 0.1:
+			if noise > parameters.noiseCutoff:
 				tile = 0
 			
 			if tile == 0:
@@ -365,10 +365,10 @@ func transformOpenBorderToTiles(border, tiles):
 	
 	return openBorder
 
-func randomizeTileToTile(toTileType: int, fromTileType: int, tileChance: int):
+func randomizeTileToTile(parameters):
 	for cell in $"..".generatedChunk.tiles:
-		if $"..".generatedChunk.tiles[cell] == fromTileType and randi() % 100 < tileChance:
-			$"..".generatedChunk.tiles[cell] = toTileType
+		if $"..".generatedChunk.tiles[cell] == parameters.fromTileType and randi() % 100 < parameters.tileChance:
+			$"..".generatedChunk.tiles[cell] = parameters.toTileType
 
 func cleanUpBorders():
 	for y in range(0, WaveFunctionCollapse.gridSize.y):
@@ -433,14 +433,14 @@ func cleanUpBorders():
 			):
 				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
 
-func cleanUpTile(tile: int, toTile: int, areaSize: int):
+func cleanUpTile(parameters):
 	var areas = []
 	for x in range(24):
 		for y in range(48):
-			if $"..".generatedChunk.tiles[Vector2i(x, y)] == tile and !isTileAlreadyInAnArea(Vector2i(x, y), areas):
-				areas.append(getArea(Vector2i(x, y), tile))
+			if $"..".generatedChunk.tiles[Vector2i(x, y)] == parameters.fromTile and !isTileAlreadyInAnArea(Vector2i(x, y), areas):
+				areas.append(getArea(Vector2i(x, y), parameters.fromTile))
 	
 	for area in areas:
-		if area.size() < areaSize:
+		if area.size() < parameters.areaSize:
 			for tilePosition in area:
-				$"..".generatedChunk.tiles[tilePosition] = toTile
+				$"..".generatedChunk.tiles[tilePosition] = parameters.toTile
