@@ -19,7 +19,7 @@ func initGeneration(selectedChunk: Vector2i, generatedLocation: String):
 	
 	chunkGenerationTypes = load("res://Data/Location Generation/{generatedLocation}.gd".format({ "generatedLocation": generatedLocation.replace(" ", "") })).new().chunkGenerationTypes
 	
-	print("genning", generatedChunkPosition)
+	#print("genning", generatedChunkPosition)
 	
 	$WFCChunkGenerator.generateChunk("Clearwater Grove", generatedChunkPosition)
 
@@ -32,7 +32,7 @@ func processTiles(tiles: Dictionary):
 			chanceTable.append(type)
 	
 	var generationType = chanceTable[randi() % chanceTable.size()]
-	print("generationType ", generationType)
+	#print("generationType ", generationType)
 	var generationCommands = chunkGenerationTypes.types[generationType]
 	
 	for generationCommand in generationCommands:

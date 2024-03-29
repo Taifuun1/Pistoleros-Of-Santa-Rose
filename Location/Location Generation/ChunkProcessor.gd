@@ -147,13 +147,14 @@ func connectBorderEntrances():
 					$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[openBorder])
 				) and
 				$"../../LocationMapLayoutGeneration".tiles.has($"..".generatedChunkPosition + HelperVariables.cardinalDirections[otherOpenBorder]) and
-				$"..".calculatePath($"..".pathfindingAstarNode, selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint, $"..".generatedChunk.tiles[selectedOpenBorderTiles[openBorder].halfwayPoint], $"..".generatedChunk.tiles[selectedOpenBorderTiles[otherOpenBorder].halfwayPoint]).is_empty()
+				$"..".calculatePath($"..".pathfindingAstarNode, selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint).is_empty()
+				#$"..".calculatePath($"..".pathfindingAstarNode, selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint, $"..".generatedChunk.tiles[selectedOpenBorderTiles[openBorder].halfwayPoint], $"..".generatedChunk.tiles[selectedOpenBorderTiles[otherOpenBorder].halfwayPoint]).is_empty()
 			):
 				connectBorderEntrance(selectedOpenBorderTiles[openBorder].halfwayPoint, selectedOpenBorderTiles[otherOpenBorder].halfwayPoint)
 
 func connectBorderEntrance(openBorder, otherOpenBorder):
-	var path = $"..".calculatePath($"..".weightedAstarNode, openBorder, otherOpenBorder, $"..".generatedChunk.tiles[openBorder], $"..".generatedChunk.tiles[otherOpenBorder])
-	print("connecting ", path)
+	var path = $"..".calculatePath($"..".weightedAstarNode, openBorder, otherOpenBorder)
+	#var path = $"..".calculatePath($"..".weightedAstarNode, openBorder, otherOpenBorder, $"..".generatedChunk.tiles[openBorder], $"..".generatedChunk.tiles[otherOpenBorder])
 	for tile in path:
 		var tileI = Vector2i(tile.x, tile.y)
 		$"..".generatedChunk.tiles[tileI] = 1
@@ -231,9 +232,6 @@ func generateOpenBorder(border):
 	
 	for tile in tiles:
 		$"..".generatedChunk.tiles[tile] = 1
-	
-	print("border ", border)
-	print(openBorder)
 	
 	return openBorder
 

@@ -143,7 +143,6 @@ func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array,
 
 func isLocationLoaded(locationName):
 	for location in $Locations.get_children():
-		print(location.name)
 		if location.name == locationName:
 			return true
 	return false

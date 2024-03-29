@@ -2,6 +2,8 @@ extends Node
 
 
 var overworldChunkSize = Vector2i(64, 64)
+var locationChunkSize = Vector2i(24, 48)
+var tileSize = Vector2i(24, 12)
 
 var cardinalDirections = {
 	"left": Vector2i(-1, 0),

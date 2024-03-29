@@ -5,14 +5,21 @@ class_name AStar
 @onready var weightedAstarNode = AStar2D.new()
 
 
-
-func calculatePath(astarNode, pathStartPosition, pathEndPosition, tile1, tile2):
-	if !hasPoint(pathStartPosition):
-		print("No point a", pathStartPosition)
-		print(tile1, " ", tile2)
-	if !hasPoint(pathEndPosition):
-		print("No point e", pathEndPosition)
-		print(tile1, " ", tile2)
+#func calculatePath(astarNode, pathStartPosition, pathEndPosition, tile1, tile2):
+	#if !hasPoint(pathStartPosition):
+		#print("No point a", pathStartPosition)
+		#print(tile1, " ", tile2)
+	#if !hasPoint(pathEndPosition):
+		#print("No point e", pathEndPosition)
+		#print(tile1, " ", tile2)
+func calculatePath(astarNode, pathStartPosition, pathEndPosition):
+	print()
+	print(astarNode.get_point_connections(id(pathStartPosition)))
+	print(astarNode.get_point_connections(id(pathEndPosition)))
+	for item in astarNode.get_point_connections(id(pathStartPosition)):
+		print(astarNode.get_point_position(item))
+	for item in astarNode.get_point_connections(id(pathEndPosition)):
+		print(astarNode.get_point_position(item))
 	return astarNode.get_point_path(id(pathStartPosition), id(pathEndPosition))
 
 func initPathfindingAstarNode(tiles: Dictionary):
@@ -32,8 +39,8 @@ func initWeightedAstarNode(tiles: Dictionary):
 
 func addWalkableTiles(astarNode, tiles, illegibleIds = null):
 	var points = []
-	for x in WaveFunctionCollapse.gridSize.x:
-		for y in WaveFunctionCollapse.gridSize.y:
+	for x in HelperVariables.locationChunkSize.x:
+		for y in HelperVariables.locationChunkSize.y:
 			var point = Vector2i(x, y)
 			if isTileIllegible(tiles[point], illegibleIds):
 				continue

@@ -4,6 +4,7 @@ extends LocationMapBase
 func _ready():
 	randomize()
 	setChunkPriority(Vector2i(0, 0))
+	$Entities/Actors/PlayerActor.position = $Map.map_to_local(Vector2i(11, 1))
 	$ChunkGenerators/WFCInputCreation.initWFCGeneration(["Clearwater Grove"])
 
 func initWFCGenerationFinished():
@@ -15,14 +16,7 @@ func initWFCGenerationFinished():
 func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: String):
 	idleGenerators.append(idleGenerator)
 	generatedChunks[generatedChunk] = data
-	#if currentChunk == Vector2i(0, 0) and generatedChunk == Vector2i(0, 0):
-		#currentChunk = Vector2i(0, 0)
-		#changeChunk("bottom")
-		#$UI/Loading.hide()
-	print()
-	print("finished generating", generatedChunk)
-	print("chunk count:", generatedChunks.size())
-	print("empty chunk count:", emptyChunks.size())
+	#print("finished generating", generatedChunk)
 	generateNewChunk()
 
 func generateNewChunk():

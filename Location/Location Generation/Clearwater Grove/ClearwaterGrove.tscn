@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dd2grmiyvq04d"]
+[gd_scene load_steps=15 format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
 [ext_resource type="Script" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
@@ -11,6 +11,15 @@
 [ext_resource type="PackedScene" uid="uid://365qx512icmc" path="res://Location/Location Generation/LocationMapLayoutGeneration.tscn" id="7_7rsor"]
 [ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.tscn" id="8_rqtc4"]
 [ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="10_t2ahg"]
+[ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/NPCActor.tscn" id="11_ipqrn"]
+[ext_resource type="Script" path="res://Actors/AI.gd" id="12_pq735"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_5ks3n"]
+vertices = PackedVector2Array(578, 398, 10, 398, 10, 4, 578, 4)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, -6, 588, -6, 588, 408, 0, 408)])
+parsed_geometry_type = 1
+source_geometry_group_name = &"Map"
 
 [node name="ClearwaterGrove" type="Node2D"]
 script = ExtResource("1_m33h7")
@@ -69,10 +78,24 @@ y_sort_enabled = true
 
 [node name="PlayerActor" parent="Entities/Actors" instance=ExtResource("3_ptpse")]
 
+[node name="NpcActor" parent="Entities/Actors" instance=ExtResource("11_ipqrn")]
+position = Vector2(131, 71)
+
 [node name="OutdoorObjects" type="Node2D" parent="Entities"]
 y_sort_enabled = true
 
 [node name="Exits" type="Node2D" parent="Entities"]
+
+[node name="AI" type="Node2D" parent="."]
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="AI"]
+navigation_polygon = SubResource("NavigationPolygon_5ks3n")
+
+[node name="Pathfinding" type="Node2D" parent="AI"]
+script = ExtResource("12_pq735")
+
+[node name="Timer" type="Timer" parent="AI/Pathfinding"]
+autostart = true
 
 [node name="UI" type="Control" parent="."]
 visible = false
@@ -83,3 +106,5 @@ offset_bottom = 40.0
 
 [node name="Loading" parent="UI" instance=ExtResource("10_t2ahg")]
 layout_mode = 1
+
+[connection signal="timeout" from="AI/Pathfinding/Timer" to="AI/Pathfinding" method="_on_timer_timeout"]

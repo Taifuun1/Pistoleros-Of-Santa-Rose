@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3 uid="uid://b5cua2845tcsx"]
+
+[ext_resource type="Script" path="res://Actors/AI.gd" id="1_3skn0"]
+[ext_resource type="Texture2D" uid="uid://c8xl7wuvuiv01" path="res://Assets/Comestibles/ApplePie.png" id="2_dyk53"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_eanew"]
+radius = 2.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_aer0l"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_dyk53")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="NpcActor" type="CharacterBody2D"]
+collision_mask = 3
+motion_mode = 1
+wall_min_slide_angle = 0.0
+
+[node name="AI" type="Node2D" parent="."]
+script = ExtResource("1_3skn0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_eanew")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_desired_distance = 7.0
+path_postprocessing = 1
+debug_enabled = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_aer0l")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../AnimatedSprite2D")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="calculatePath"]

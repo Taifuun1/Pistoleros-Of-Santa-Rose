@@ -31,10 +31,7 @@ func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0))
 	resetChunk()
 	currentChunk += directionRelative
 	movedDirection = direction
-	print("changed to ", currentChunk)
-	print(chunkPriority)
 	if !generatedChunks.has(currentChunk):
-		print("waiting for chunk to generate")
 		chunkPriority = currentChunk
 		set_process(true)
 		return
@@ -49,6 +46,10 @@ func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0))
 				$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
 	addTrees(tileTypes.trees, "Birch", 4)
 	addExits()
+	
+	# get_tree().current_scene.get_node("AI/NavigationRegion2D").bake_navigation_polygon()
+	
+	$AI/Pathfinding.initPathfindingAstarNode(generatedChunks[currentChunk].tiles)
 	
 	var newDirection = "left"
 	if movedDirection == "left":
@@ -137,6 +138,7 @@ func createCollision(collisionPosition: Vector2i, shape: Array):
 	
 	for point in shape:
 		chunkMappedTiles.append(Vector2i($Map.map_to_local(point)))
+	#shape[2]
 	areaShapeCollision.set_point_cloud(chunkMappedTiles)
 	
 	areaShape.name = str(currentChunk) + str(collisionPosition)

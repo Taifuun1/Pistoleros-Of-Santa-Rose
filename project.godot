@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Pistoleros of Santa Rose"
+run/main_scene="res://Overworld/Overworld.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 
 [autoload]
@@ -19,6 +20,7 @@ MultiThreading="*res://Globals/MultiThreading.gd"
 WaveFunctionCollapse="*res://Globals/WaveFunctionCollapse.gd"
 HelperFunctions="*res://Globals/HelperFunctions.gd"
 HelperVariables="*res://Globals/HelperVariables.gd"
+Overworld="*res://Globals/Overworld.gd"
 
 [display]
 
@@ -79,6 +81,10 @@ TOGGLE_MOVEMENT_SPEED={
 [layer_names]
 
 2d_render/layer_2="Shadow"
+
+[navigation]
+
+2d/default_edge_connection_margin=2.0
 
 [rendering]
 
