@@ -19,12 +19,12 @@
 :Quests
 	*Main quests
 		*Each quest is a story arc for a main cast character
-		*Usually involves farming money for an item or a pass
+		*Usually involves farming money for an item or a pass with a showdown at the end
 		*Quest event
 			*End of the quest
 			*Happens at specific location
 			*Cutscene galore
-			*Leads to next quest
+			*Leads to the next quest
 	*Side quests
 		*Random objectives, locations and items/loot
 			*Law side quests
@@ -34,9 +34,9 @@
 				*Herd cows
 			*Fugitive side quests
 				*Beat lawkeepers
-				*Rob a bank
+				*Rob a farmstead
 				*Rob a wagon
-				*Blow up mine
+				*Blow up a mine
 		*Uses previous locations sometimes
 
 :Locations
@@ -136,11 +136,11 @@
 		*High tailin'
 			*Initiative
 			*Location movespeed
-			*
+			*Combat actions
 		*Taffyin'
 			*Shop haggling
 			*Most NPC interactions
-			*Some combat actions
+			*Combat actions
 	*Traits
 		*Characters can have traits that enchance or lessen attacks and abilities
 		*Traits can also be used outside of fights in some cases
@@ -161,7 +161,7 @@
 			*Talking about a plan and faith to Arthur
 	*The good, the bad, and the ugly
 		*Shootout scene somewhere?
-		*Just talk to the characters separately?
+		*Just talk to the characters?
 
 :Skill checks
 	*Based on stats
@@ -188,7 +188,7 @@
 		*Enemy spawners
 			*Animal
 				*Spider nests
-				*Coyote caves
+				*Coyote dens
 				*Bear caves
 			*Outlaw
 				*Bandit camp
@@ -230,6 +230,14 @@
 		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-20?id=74028#1
 
 _____
+
+600
+318
+
+1.5
+0.4
+
+Outlaws of santa luz
 
 https://en.wikipedia.org/wiki/Justicia_carnea
 https://en.wikipedia.org/wiki/Lilium
@@ -392,6 +400,7 @@ barrenrun
 *Buxmis Caves
 *Smithmont Shelter
 *Hasrich Hollows
+Overhang
 
 ?Hideouts
 *Bittervale Escape
@@ -552,5 +561,6 @@ Felicia Lynn
 Layton Riley
 Huxley Kipp
 
+Mah name's Texas Freedom.
 This right here is private property. Mine, in fact.
 I'm gon' have to ask you to leave mah property - and I do mean right the hell now.

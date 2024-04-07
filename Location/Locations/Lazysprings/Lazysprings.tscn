@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Location/Locations/Lazysprings/Lazysprings.gd" id="1_p7y85"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_aerp6"]
-[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/PlayerLocationActor.tscn" id="3_i55ce"]
+[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/Location/PlayerLocationActor.tscn" id="3_i55ce"]
 [ext_resource type="Texture2D" uid="uid://be605mr72mv17" path="res://Assets/Buildings/Saloon2.png" id="4_d1mob"]
 
 [node name="Lazysprings" type="Node2D"]

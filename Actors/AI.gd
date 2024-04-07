@@ -1,6 +1,6 @@
 extends AStar
 
-var speed = 25
+var speed = 75
 
 var aIType = "passive"
 
@@ -51,7 +51,7 @@ func _on_timer_timeout():
 	if currentMovementTarget == null and movementPath.is_empty():
 		match aIType:
 			"passive":
-				if randi() % 1 == 0:
+				if randi() % 2 == 0:
 					var randomNearbyPosition = Vector2i(get_tree().current_scene.get_node("Entities/Actors/NpcActor").position) + Vector2i(((randi() % 4 + 1) + -2) * HelperVariables.tileSize.x, ((randi() % 4 + 1) + -2) * HelperVariables.tileSize.y)
 					if get_tree().current_scene.has_node("Map"):
 						movementPath = get_tree().current_scene.get_node("AI/Pathfinding").calculatePath(pathfindingAstarNode, get_tree().current_scene.get_node("Map").local_to_map(to_local(get_tree().current_scene.get_node("Entities/Actors/NpcActor").position - Vector2(0, HelperVariables.tileSize.y / 2))), get_tree().current_scene.get_node("Map").local_to_map(to_local(randomNearbyPosition)))

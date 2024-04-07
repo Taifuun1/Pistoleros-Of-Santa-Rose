@@ -19,7 +19,7 @@ var movedDirection = "bottom"
 func _ready():
 	set_process(false)
 
-func _process(delta):
+func _process(_delta):
 	if generatedChunks.has(currentChunk):
 		changeChunk()
 		set_process(false)
@@ -165,7 +165,7 @@ func checkIfChangeChunk(body, direction, directionRelative):
 	if body.name == "PlayerActor":
 		if direction == "top" and directionRelative == Vector2i(0, -1) and currentChunk == Vector2i(0, 0):
 			Overworld.spawnChunk = Vector2i(8, 12)
-			Overworld.spawnTile = Vector2i(25, 57)
+			Overworld.spawnTile = Vector2i(26, 56)
 			get_tree().call_deferred("change_scene_to_file", "res://Overworld/Overworld.tscn")
 			return
 		changeChunk(direction, directionRelative)

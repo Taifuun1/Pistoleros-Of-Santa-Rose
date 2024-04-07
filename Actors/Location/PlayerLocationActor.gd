@@ -22,6 +22,7 @@ func get_input():
 		else:
 			$AnimatedSprite2D.set_flip_h(false)
 
+
 func _physics_process(_delta):
 	get_input()
 	move_and_slide()

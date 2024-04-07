@@ -1,6 +1,6 @@
 [gd_scene load_steps=32 format=3 uid="uid://dvlk3muixwpyx"]
 
-[ext_resource type="Script" path="res://Actors/PlayerOverworldActor.gd" id="1_npyk4"]
+[ext_resource type="Script" path="res://Actors/Overworld/PlayerOverworldActor.gd" id="1_npyk4"]
 [ext_resource type="Texture2D" uid="uid://dyg8kxe5bq1ia" path="res://Assets/Map Entities/Wagon/WagonUp.png" id="2_10jsh"]
 [ext_resource type="Texture2D" uid="uid://brqhktrw1fgpt" path="res://Assets/Map Entities/Wagon/WagonDown.png" id="2_vdlb4"]
 [ext_resource type="Texture2D" uid="uid://cijnovywmwynw" path="res://Assets/Map Entities/Wagon/WagonUpSide.png" id="3_7x7ga"]
@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://hlkhq0c7nqoa" path="res://Assets/Map Entities/Wagon/WagonSide.png" id="4_m3wwf"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_54y5m"]
-radius = 4.0
+radius = 3.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q34jo"]
 atlas = ExtResource("2_vdlb4")
@@ -259,9 +259,12 @@ _data = {
 }
 
 [node name="PlayerOverworldActor" type="CharacterBody2D"]
+motion_mode = 1
+wall_min_slide_angle = 0.0
 script = ExtResource("1_npyk4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
 shape = SubResource("CircleShape2D_54y5m")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

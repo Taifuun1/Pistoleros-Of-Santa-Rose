@@ -13,13 +13,15 @@ class_name AStar
 		#print("No point e", pathEndPosition)
 		#print(tile1, " ", tile2)
 func calculatePath(astarNode, pathStartPosition, pathEndPosition):
-	print()
-	print(astarNode.get_point_connections(id(pathStartPosition)))
-	print(astarNode.get_point_connections(id(pathEndPosition)))
-	for item in astarNode.get_point_connections(id(pathStartPosition)):
-		print(astarNode.get_point_position(item))
-	for item in astarNode.get_point_connections(id(pathEndPosition)):
-		print(astarNode.get_point_position(item))
+	#print()
+	#print(astarNode.get_point_connections(id(pathStartPosition)))
+	#print(astarNode.get_point_connections(id(pathEndPosition)))
+	#for item in astarNode.get_point_connections(id(pathStartPosition)):
+		#print(astarNode.get_point_position(item))
+	#for item in astarNode.get_point_connections(id(pathEndPosition)):
+		#print(astarNode.get_point_position(item))
+	if !astarNode.has_point(id(pathStartPosition)) or !astarNode.has_point(id(pathEndPosition)):
+		return []
 	return astarNode.get_point_path(id(pathStartPosition), id(pathEndPosition))
 
 func initPathfindingAstarNode(tiles: Dictionary):

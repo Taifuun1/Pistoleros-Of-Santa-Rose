@@ -1,11 +1,27 @@
 extends Node2D
 
+var actorName = ""
 
-# Called when the node enters the scene tree for the first time.
+var walkingSpeed
+var runningSpeed
+
+var hp
+var ap
+
+var stats = {
+	"sixShootin": -1,
+	"highTailin": -1,
+	"taffyin": -1
+}
+
+var weaponStats = {
+	"revolver": -1,
+	"rifle": -1,
+	"explosive": -1
+}
+
+var perks = []
+
+
 func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
 	pass

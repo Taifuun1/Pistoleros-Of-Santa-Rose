@@ -1,16 +1,5 @@
 extends TileMap
 
-var adjacentChunkDirections = [
-	Vector2i(0, -1),
-	Vector2i(1, -1),
-	Vector2i(1, 0),
-	Vector2i(1, 1),
-	Vector2i(0, 1),
-	Vector2i(-1, 1),
-	Vector2i(-1, 0),
-	Vector2i(-1, -1),
-]
-
 var currentChunk = null
 var currentlyLoadedChunks = []
 var loadingChunk = true
@@ -19,7 +8,7 @@ var loadingChunk = true
 func _process(_delta):
 	if currentChunk == null:
 		init()
-	if !loadingChunk and local_to_map($Actors/PlayerOverworldActor.position) != currentChunk:
+	if !loadingChunk and local_to_map(to_local($Actors/PlayerOverworldActor.position)) != currentChunk:
 		loadingChunk = true
 		currentChunk = local_to_map($Actors/PlayerOverworldActor.position)
 		var newCurrentlyLoadedChunks = getAdjacentChunks()
@@ -36,7 +25,7 @@ func init() -> void:
 	setAdjacentChunks(newCurrentlyLoadedChunks)
 	currentlyLoadedChunks = newCurrentlyLoadedChunks
 	removeNodes()
-	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(Overworld.spawnChunk)) + Overworld.spawnTile
+	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(Overworld.spawnChunk) - $OverworldTileChunkTemplate.map_to_local(HelperVariables.overworldChunkSize / 2) + $OverworldTileChunkTemplate.map_to_local(Overworld.spawnTile))
 	loadingChunk = false
 
 
@@ -69,7 +58,7 @@ func setAdjacentChunks(newAdjacentChunks: Array) -> void:
 
 func getAdjacentChunks() -> Array:
 	var adjacentChunks = []
-	for adjacentChunkDirection in adjacentChunkDirections:
+	for adjacentChunkDirection in HelperVariables.adjacentDirections:
 		var adjacentChunkLocation = currentChunk + adjacentChunkDirection
 		adjacentChunks.append(adjacentChunkLocation)
 	return adjacentChunks

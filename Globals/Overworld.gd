@@ -1,4 +1,4 @@
 extends Node
 
-var spawnChunk = Vector2i(8, 12)
-var spawnTile = Vector2i(0, 0)
+var spawnChunk = Vector2i(1, 22)
+var spawnTile = Vector2i(32, 0)

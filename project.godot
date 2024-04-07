@@ -21,6 +21,7 @@ WaveFunctionCollapse="*res://Globals/WaveFunctionCollapse.gd"
 HelperFunctions="*res://Globals/HelperFunctions.gd"
 HelperVariables="*res://Globals/HelperVariables.gd"
 Overworld="*res://Globals/Overworld.gd"
+Fight="*res://Globals/Fight.gd"
 
 [display]
 
