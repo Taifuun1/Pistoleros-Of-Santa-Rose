@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://cn7ew0rsr5gxi"]
+
+[ext_resource type="Texture2D" uid="uid://c5c41qixj4k3p" path="res://Assets/UI/DialogBackground.png" id="1_wo5xe"]
+[ext_resource type="Script" path="res://UI/Dialog/Dialog.gd" id="2_ifm4b"]
+
+[node name="Dialog" type="CanvasLayer"]
+visible = false
+script = ExtResource("2_ifm4b")
+
+[node name="DialogBackground" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(0, 96)
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("1_wo5xe")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="Text" type="RichTextLabel" parent="DialogBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+bbcode_enabled = true
