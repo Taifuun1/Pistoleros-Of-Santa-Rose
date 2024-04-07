@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://m6sc6o8jpjy8"
-path="res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"
+uid="uid://dck733v6lt2uo"
+path="res://.godot/imported/WalkerLangleyDraw.png-03cb5b433fa056dbb2c2ac8f9024a2e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHillsOverworld.png"
-dest_files=["res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"]
+source_file="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDraw.png"
+dest_files=["res://.godot/imported/WalkerLangleyDraw.png-03cb5b433fa056dbb2c2ac8f9024a2e6.ctex"]
 
 [params]
 

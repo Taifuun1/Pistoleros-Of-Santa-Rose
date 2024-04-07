@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://m6sc6o8jpjy8"
-path="res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"
+uid="uid://cu78o0nttb5uq"
+path="res://.godot/imported/LocationsOverworld.png-88d9710f177bd4e93cebea7e3719882f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHillsOverworld.png"
-dest_files=["res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"]
+source_file="res://Assets/Tilesets/Locations/LocationsOverworld.png"
+dest_files=["res://.godot/imported/LocationsOverworld.png-88d9710f177bd4e93cebea7e3719882f.ctex"]
 
 [params]
 

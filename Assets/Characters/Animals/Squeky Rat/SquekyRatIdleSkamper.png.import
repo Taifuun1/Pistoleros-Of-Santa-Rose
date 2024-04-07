@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://m6sc6o8jpjy8"
-path="res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"
+uid="uid://bpewxvgf1lcjo"
+path="res://.godot/imported/SquekyRatIdleSkamper.png-969f43f1c58d1f330c47d5b9ab7e1ac9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHillsOverworld.png"
-dest_files=["res://.godot/imported/RockyHillsOverworld.png-ca90da39c591f1312aa301fe95f8ee8a.ctex"]
+source_file="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleSkamper.png"
+dest_files=["res://.godot/imported/SquekyRatIdleSkamper.png-969f43f1c58d1f330c47d5b9ab7e1ac9.ctex"]
 
 [params]
 
