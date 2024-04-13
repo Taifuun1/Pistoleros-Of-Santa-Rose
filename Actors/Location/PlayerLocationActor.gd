@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var speed = 100
+@export var speed = 125
 
 var transparentShader = load("res://Shaders/Transparent.tres")
 

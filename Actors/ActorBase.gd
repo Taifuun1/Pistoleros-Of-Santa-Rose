@@ -1,4 +1,5 @@
 extends Node2D
+class_name ActorBase
 
 var actorName = ""
 
@@ -23,5 +24,13 @@ var weaponStats = {
 var perks = []
 
 
-func _ready():
-	pass
+func init(actorData: Dictionary):
+	actorName = actorData.actorName
+	
+	hp = actorData.hp
+	ap = actorData.ap
+	
+	stats = actorData.stats
+	
+	weaponStats = actorData.weaponStats
+
