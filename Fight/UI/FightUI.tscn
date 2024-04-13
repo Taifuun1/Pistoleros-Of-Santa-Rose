@@ -1,0 +1,65 @@
+[gd_scene load_steps=3 format=3 uid="uid://bc7rpjuhb524c"]
+
+[ext_resource type="Script" path="res://Fight/UI/FightUI.gd" id="1_2qgxu"]
+[ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Fight/UI/FightButton.tscn" id="1_drfjl"]
+
+[node name="FightUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2qgxu")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer"]
+layout_mode = 2
+columns = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(212, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(212, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer2"]
+layout_mode = 2
+columns = 2
+
+[node name="FightButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+layout_mode = 2
+text = "Attack"
+
+[node name="FightButton2" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+layout_mode = 2
+text = "Ability
+"
+
+[node name="FightButton3" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+layout_mode = 2
+text = "Item"
+
+[node name="FightButton4" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+layout_mode = 2
+text = "Escape
+"
+
+[node name="PanelContainer3" type="PanelContainer" parent="VBoxContainer/GridContainer"]
+custom_minimum_size = Vector2(212, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/FightButton" to="." method="_on_fight_button_pressed"]
