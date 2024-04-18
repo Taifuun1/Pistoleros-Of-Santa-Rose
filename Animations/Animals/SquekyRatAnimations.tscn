@@ -1,6 +1,6 @@
 [gd_scene load_steps=22 format=3 uid="uid://qkjv430rm164"]
 
-[ext_resource type="Script" path="res://Animations/BaseAnimations.gd" id="1_4ah4r"]
+[ext_resource type="Script" path="res://Animations/Animations.gd" id="1_4ah4r"]
 [ext_resource type="Texture2D" uid="uid://cv6autr7s2cwk" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdle.png" id="1_fg38m"]
 [ext_resource type="Texture2D" uid="uid://516te1wd2roy" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleAttack.png" id="1_rmtup"]
 [ext_resource type="Texture2D" uid="uid://b7neaqud6v72g" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleLook.png" id="2_hefv2"]

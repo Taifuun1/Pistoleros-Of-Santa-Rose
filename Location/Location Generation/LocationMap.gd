@@ -16,7 +16,6 @@ func initWFCGenerationFinished():
 func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: String):
 	idleGenerators.append(idleGenerator)
 	generatedChunks[generatedChunk] = data
-	#print("finished generating", generatedChunk)
 	generateNewChunk()
 
 func generateNewChunk():

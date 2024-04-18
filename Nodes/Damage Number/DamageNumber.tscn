@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://bfjgww2c0wct8"]
+
+[ext_resource type="Script" path="res://Nodes/Damage Number/DamageNumber.gd" id="1_t4f4c"]
+
+[node name="DamageNumber" type="RichTextLabel"]
+size_flags_horizontal = 0
+size_flags_vertical = 0
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+threaded = true
+script = ExtResource("1_t4f4c")

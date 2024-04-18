@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://tt6jng5rv6nq"]
+[gd_scene load_steps=3 format=3 uid="uid://tt6jng5rv6nq"]
 
 [ext_resource type="Script" path="res://Actors/Fight/FightActor.gd" id="1_3o4kd"]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_hyeh5"]
+radius = 8.0
+
 [node name="FightActor" type="Node2D"]
 script = ExtResource("1_3o4kd")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_hyeh5")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]
