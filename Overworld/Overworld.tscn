@@ -8,8 +8,10 @@
 tile_size = Vector2i(1536, 384)
 
 [node name="Overworld" type="TileMap"]
+y_sort_enabled = true
 tile_set = SubResource("TileSet_4f8r2")
 format = 2
+layer_0/y_sort_enabled = true
 script = ExtResource("1_2gavc")
 
 [node name="Chunks" type="Node2D" parent="."]
@@ -18,6 +20,20 @@ script = ExtResource("1_2gavc")
 
 [node name="Locations" type="Node2D" parent="."]
 
+[node name="Spawnpoints" type="Node2D" parent="."]
+
+[node name="Animals" type="Node2D" parent="Spawnpoints"]
+
 [node name="Actors" type="Node2D" parent="."]
+y_sort_enabled = true
 
 [node name="PlayerOverworldActor" parent="Actors" instance=ExtResource("3_q70do")]
+
+[node name="Animals" type="Node2D" parent="Actors"]
+
+[node name="Timers" type="Node2D" parent="."]
+
+[node name="AnimalSpawnPointTimer" type="Timer" parent="Timers"]
+wait_time = 10.0
+
+[connection signal="timeout" from="Timers/AnimalSpawnPointTimer" to="." method="_on_animal_spawn_point_timer_timeout"]

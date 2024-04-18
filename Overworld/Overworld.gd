@@ -158,9 +158,22 @@ func createCollisionWithPosition(collisionPosition: Vector2i, chunkPosition: Vec
 	areaShape.name = str(currentChunk) + str(collisionPosition)
 	areaShape.position = Vector2i(map_to_local(chunkPosition) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(collisionPosition))
 	areaShape.shape = areaShapeCollision
+	areaShape.z_index = 1
 	
 	return areaShape
 
 func removeNodes() -> void:
 	for _node in $Chunks.get_children():
 		_node.queue_free()
+
+
+#######################
+### Timer functions ###
+#######################
+
+func _on_animal_spawn_point_timer_timeout():
+	checkActorSpawns("Animals")
+
+func checkActorSpawns(actorType):
+	for spawnPoint in get_node("Spawnpoints/{actorType}".format({ "actorType": actorType })).get_children():
+		spawnPoint.checkForSpawn()
