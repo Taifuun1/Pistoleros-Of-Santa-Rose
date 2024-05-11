@@ -84,7 +84,11 @@ position = Vector2(131, 71)
 [node name="OutdoorObjects" type="Node2D" parent="Entities"]
 y_sort_enabled = true
 
+[node name="Interactables" type="Node2D" parent="Entities"]
+y_sort_enabled = true
+
 [node name="Exits" type="Node2D" parent="Entities"]
+y_sort_enabled = true
 
 [node name="AI" type="Node2D" parent="."]
 

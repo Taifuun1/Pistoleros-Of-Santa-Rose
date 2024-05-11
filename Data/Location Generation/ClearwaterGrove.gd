@@ -21,7 +21,16 @@ var chunkGenerationTypes = {
 				"tileChance": 15
 			},
 			"transformOpenBordersToTiles": null,
-			"fillVisibleEmptyTiles": null
+			"fillVisibleEmptyTiles": null,
+			"countTileTypes": null,
+			"addInteractables": [
+				{
+					"name": "Golden Alexander",
+					"type": "Flowers",
+					"count": [3, 13],
+					"tileType": "grass"
+				}
+			]
 		},
 		"sparse forest": {
 			"generateFromNoiseMap": {
@@ -41,7 +50,16 @@ var chunkGenerationTypes = {
 				"tileChance": 15
 			},
 			"transformOpenBordersToTiles": null,
-			"fillVisibleEmptyTiles": null
+			"fillVisibleEmptyTiles": null,
+			"countTileTypes": null,
+			"addInteractables": [
+				{
+					"name": "Golden Alexander",
+					"type": "Flowers",
+					"count": [3, 13],
+					"tileType": "grass"
+				}
+			]
 		},
 		"lakes": {
 			"generateFromNoiseMap": {
@@ -61,7 +79,16 @@ var chunkGenerationTypes = {
 				"tileChance": 15
 			},
 			"transformOpenBordersToTiles": null,
-			"fillVisibleEmptyTiles": null
+			"fillVisibleEmptyTiles": null,
+			"countTileTypes": null,
+			"addInteractables": [
+				{
+					"name": "Golden Alexander",
+					"type": "Flowers",
+					"count": [3, 13],
+					"tileType": "grass"
+				}
+			]
 		}
 	}
 }

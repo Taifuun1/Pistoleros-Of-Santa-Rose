@@ -180,6 +180,26 @@ func fillVisibleEmptyTiles():
 			):
 				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
 
+func countTileTypes():
+	for x in WaveFunctionCollapse.gridSize.x:
+		for y in WaveFunctionCollapse.gridSize.y:
+			if $"..".generatedChunk.tiles[Vector2i(x, y)] == 0:
+				$"..".tileTypes.water.append(Vector2i(x, y))
+			elif $"..".generatedChunk.tiles[Vector2i(x, y)] == 1:
+				$"..".tileTypes.grass.append(Vector2i(x, y))
+			elif $"..".generatedChunk.tiles[Vector2i(x, y)] == 2:
+				$"..".tileTypes.forest.append(Vector2i(x, y))
+
+func addInteractables(interactables):
+	var interactableNode = load("res://Location/Entities/Interactable/Interactable.tscn")
+	for interactable in interactables:
+		for count in randi() % interactable.count[1] + interactable.count[0]:
+			var interactablePosition = $"..".tileTypes[interactable.tileType][randi() % $"..".tileTypes[interactable.tileType].size()]
+			$"..".interactables[interactablePosition] = {
+				"name": interactable.name,
+				"type": interactable.type
+			}
+
 func transformOpenBordersToTiles():
 	var borderTiles = {
 		"left": [],

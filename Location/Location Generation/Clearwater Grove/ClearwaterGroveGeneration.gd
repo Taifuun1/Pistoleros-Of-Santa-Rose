@@ -4,10 +4,14 @@ extends AStar
 
 var chunkGenerationTypes
 
-signal generationCompleted(tile: int, toTile: int, areaSize: int)
-
 var generatedChunkPosition
 var generatedChunk = {}
+var tileTypes = {
+	"water": [],
+	"grass": [],
+	"forest": []
+}
+var interactables = {}
 
 
 func _ready():
@@ -25,6 +29,7 @@ func initGeneration(selectedChunk: Vector2i, generatedLocation: String):
 
 func processTiles(tiles: Dictionary):
 	generatedChunk.tiles = tiles
+	generatedChunk.interactables = interactables
 	
 	var chanceTable = []
 	for type in chunkGenerationTypes.chance:

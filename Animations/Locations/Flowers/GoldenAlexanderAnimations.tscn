@@ -1,0 +1,76 @@
+[gd_scene load_steps=9 format=3 uid="uid://cgpyy7ecku3hq"]
+
+[ext_resource type="Script" path="res://Animations/Animations.gd" id="1_wdfxw"]
+[ext_resource type="Texture2D" uid="uid://bql50tkwd0pms" path="res://Assets/Outdoor Objects/Interactables/GoldenAlexanderSway.png" id="2_82bcg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f503m"]
+atlas = ExtResource("2_82bcg")
+region = Rect2(0, 0, 12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_562hh"]
+atlas = ExtResource("2_82bcg")
+region = Rect2(12, 0, 12, 12)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ddvav"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f503m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_562hh")
+}],
+"loop": true,
+"name": &"Sway",
+"speed": 5.0
+}]
+
+[sub_resource type="Animation" id="Animation_77dnj"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_4fv5u"]
+resource_name = "Sway"
+length = 2.0
+step = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5fada"]
+_data = {
+"RESET": SubResource("Animation_77dnj"),
+"Sway": SubResource("Animation_4fv5u")
+}
+
+[node name="Animation" type="Node2D"]
+script = ExtResource("1_wdfxw")
+
+[node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ddvav")
+animation = &"Sway"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_5fada")
+}

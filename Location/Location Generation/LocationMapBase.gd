@@ -46,6 +46,7 @@ func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0))
 				$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
 	addTrees(tileTypes.trees, "Birch", 4)
 	addExits()
+	addInteractables(generatedChunks[currentChunk].interactables)
 	
 	# get_tree().current_scene.get_node("AI/NavigationRegion2D").bake_navigation_polygon()
 	
@@ -131,6 +132,14 @@ func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 			)
 		)
 
+func addInteractables(interactables):
+	var interactableNode = load("res://Location/Entities/Interactable/Interactable.tscn")
+	for interactable in interactables:
+		var newInteractable = interactableNode.instantiate()
+		newInteractable.init(interactables[interactable].type, interactables[interactable].name, $Map.map_to_local(interactable))
+		interactables[interactable] = interactables[interactable].name
+		$Entities/Interactables.add_child(newInteractable)
+
 func createCollision(collisionPosition: Vector2i, shape: Array):
 	var areaShape = CollisionShape2D.new()
 	var areaShapeCollision = ConvexPolygonShape2D.new()
@@ -164,8 +173,8 @@ func createCollisionWithPosition(collisionPosition: Vector2i, shape: Array):
 func checkIfChangeChunk(body, direction, directionRelative):
 	if body.name == "PlayerActor":
 		if direction == "top" and directionRelative == Vector2i(0, -1) and currentChunk == Vector2i(0, 0):
-			Overworld.spawnChunk = Vector2i(8, 12)
-			Overworld.spawnTile = Vector2i(26, 56)
+			Overworld.spawnChunk = Vector2i(8, 18)
+			Overworld.spawnTile = Vector2i(26, 62)
 			get_tree().call_deferred("change_scene_to_file", "res://Overworld/Overworld.tscn")
 			return
 		changeChunk(direction, directionRelative)
