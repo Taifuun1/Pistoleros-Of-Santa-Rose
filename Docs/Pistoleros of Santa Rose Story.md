@@ -88,10 +88,10 @@
 		*Mousie/Shakie Chickenpants
 			*Coward
 		*Cass Billidy/Juniper Alice/Rosalie Star
-            *Bill Cassidy-like
-        *Powell
-            *Gold mine prospector hermit
-            *Lucky luke issue 2
+			*Bill Cassidy-like
+		*Powell
+			*Gold mine prospector hermit
+			*Lucky luke issue 2
 	*Antagonists
 		*Law keeper officer
 			*RDR2 sheriff antagonist
@@ -115,7 +115,7 @@
 				*Native gang
 			*Freedom Riders
 				*Anti-government gang
-        
+		
 
 
 ## Outline
@@ -187,13 +187,13 @@ to the sunset, and beyond. Story ends with the sun setting and tumbleweeds rolli
 
 ## Ideas
 
-    *Story ideas
-        *Get caravan over the mountains to get the oxen that dragged the caravan.
-        *Participate in a gold rush, that leads to confrontation with natives.
-        *Convince a ghost town gold miner hermit to join the robbery (as an explosives expert).
+	*Story ideas
+		*Get caravan over the mountains to get the oxen that dragged the caravan.
+		*Participate in a gold rush, that leads to confrontation with natives.
+		*Convince a ghost town gold miner hermit to join the robbery (as an explosives expert).
 
-    *Historical reference ideas
-        *Bill Cassidy
+	*Historical reference ideas
+		*Bill Cassidy
 
 ## Notes
 

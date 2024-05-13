@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://cwuqyqbihv8xj" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangeyRun2.png" id="5_7g2kv"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_88dve"]
-radius = 4.0
+radius = 5.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eca1b"]
 atlas = ExtResource("2_hbh6m")
@@ -347,8 +347,10 @@ _data = {
 }
 
 [node name="PlayerActor" type="CharacterBody2D"]
+y_sort_enabled = true
 collision_mask = 3
 motion_mode = 1
+wall_min_slide_angle = 0.0
 script = ExtResource("1_c7mty")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

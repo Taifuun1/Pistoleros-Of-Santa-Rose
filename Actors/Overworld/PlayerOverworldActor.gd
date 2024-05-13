@@ -1,7 +1,8 @@
-extends CharacterBody2D
+extends OverworldActorBase
 
-@export var speed = 350
 
+func _ready():
+	speed = 350
 
 func get_input():
 	var input_direction = Input.get_vector("MOVE_LEFT", "MOVE_RIGHT", "MOVE_UP", "MOVE_DOWN")

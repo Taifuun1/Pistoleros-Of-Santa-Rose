@@ -1,4 +1,4 @@
-[gd_scene load_steps=92 format=3 uid="uid://lkirqht3aybu"]
+[gd_scene load_steps=95 format=3 uid="uid://lkirqht3aybu"]
 
 [ext_resource type="Shader" path="res://Shaders/Test/TilemapWaterTest.gdshader" id="2_bbt2a"]
 [ext_resource type="Texture2D" uid="uid://dj71emhaqahnd" path="res://Shaders/Test/TilemapWaterNoise1Test.tres" id="2_mp70a"]
@@ -16,7 +16,9 @@
 [ext_resource type="Texture2D" uid="uid://b4bs4s77mr3el" path="res://Assets/Tilesets/Grass Lands/GrassLandsOverworld.png" id="14_x3s4t"]
 [ext_resource type="Texture2D" uid="uid://hfcmcfoxy5a2" path="res://Assets/Tilesets/Grass Lands/GrassLands.png" id="15_gucdi"]
 [ext_resource type="Texture2D" uid="uid://wn4po35uwa16" path="res://Assets/Tilesets/Grass Lands/GrassLandsOverworld_n.png" id="15_ukbc0"]
+[ext_resource type="Texture2D" uid="uid://d1pr0i3es2807" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdle.png" id="19_flbmn"]
 [ext_resource type="Texture2D" uid="uid://dwa432bgpcb62" path="res://Assets/Tilesets/Test/GrandCanyonTile_n.png" id="19_h0on6"]
+[ext_resource type="Texture2D" uid="uid://cp64fv8xfinm7" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdle_n.png" id="20_d08hf"]
 [ext_resource type="Texture2D" uid="uid://cjpmavxg8ndt8" path="res://Assets/Characters/Test/Test2_40x40.png" id="20_v371k"]
 [ext_resource type="Texture2D" uid="uid://dnniyqjbgb3sg" path="res://Assets/Characters/Test/Test3_40x40.png" id="21_vfrcg"]
 [ext_resource type="Texture2D" uid="uid://dvjv3lbb0dx8o" path="res://Assets/Characters/Test/Test2Animation_40x40.png" id="22_iju5a"]
@@ -461,6 +463,10 @@ normal_texture = ExtResource("19_h0on6")
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_olhhx"]
 polygon = PackedVector2Array(-12, 6, 0, 0, 12, 6, 0, 12)
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_abm0n"]
+diffuse_texture = ExtResource("19_flbmn")
+normal_texture = ExtResource("20_d08hf")
+
 [sub_resource type="Animation" id="Animation_xpotw"]
 resource_name = "Idle"
 length = 1.2
@@ -517,6 +523,18 @@ tracks/2/keys = {
 "update": 1,
 "values": [2]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TestWagonAnimation3:frame")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [2]
+}
 
 [sub_resource type="Animation" id="Animation_j3yh0"]
 resource_name = "Wagon Side Move"
@@ -554,10 +572,10 @@ tracks/2/path = NodePath("TestWagonAnimation3:frame")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": []
+"values": [2, 3, 2, 3, 2, 3, 4, 5, 4, 5]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_tlb7d"]
@@ -704,7 +722,6 @@ texture = ExtResource("12_klt0w")
 texture_scale = 0.5
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-visible = false
 z_index = 2
 material = SubResource("ShaderMaterial_e8130")
 position = Vector2(771, 116)
@@ -732,6 +749,19 @@ position = Vector2(245, 299)
 texture = ExtResource("20_v371k")
 
 [node name="Polygon2D" type="Polygon2D" parent="Sprite2D2"]
+show_behind_parent = true
+position = Vector2(2, 13)
+skew = 0.708604
+color = Color(0.211765, 0.211765, 0.211765, 0.603922)
+polygon = PackedVector2Array(0.285767, -2.63409, 7.71423, 2.63409, -0.000244141, 9.21936, -7.42871, 3.95114)
+
+[node name="Sprite2D3" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(482, 414)
+texture = SubResource("CanvasTexture_abm0n")
+hframes = 8
+
+[node name="Polygon2D" type="Polygon2D" parent="Sprite2D3"]
 show_behind_parent = true
 position = Vector2(2, 13)
 skew = 0.708604
@@ -880,5 +910,5 @@ scale = Vector2(2, 2)
 texture = ExtResource("26_xbr0v")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(37, 20)
+position = Vector2(84, 143)
 anchor_mode = 0

@@ -28,9 +28,11 @@ y_sort_enabled = true
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Entities/Buildings"]
 position = Vector2(247, 208)
+disable_mode = 1
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Entities/Buildings/StaticBody2D"]
-polygon = PackedVector2Array(-18, 57, -90, 21, -18, -15, 54, 21)
+polygon = PackedVector2Array(-18, 32, -90, -4, -18, -40, 54, -4)
 
 [node name="Sprite2D" type="Sprite2D" parent="Entities/Buildings/StaticBody2D"]
 texture = ExtResource("4_d1mob")
+offset = Vector2(0, -20)

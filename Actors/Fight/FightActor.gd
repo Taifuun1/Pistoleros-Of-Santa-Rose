@@ -5,6 +5,7 @@ signal actorSelected
 
 func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
+	animations.init("Idle")
 	name = actorNameInit
 	animations.name = actorNameInit
 	if actorSide == "enemy team":
