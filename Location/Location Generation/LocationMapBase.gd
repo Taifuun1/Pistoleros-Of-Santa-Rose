@@ -46,7 +46,9 @@ func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0))
 				$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
 	addTrees(tileTypes.trees, "Birch", 4)
 	addExits()
-	addInteractables(generatedChunks[currentChunk].interactables)
+	if typeof(generatedChunks[currentChunk].interactables) == TYPE_ARRAY:
+		generatedChunks[currentChunk].interactables = getInteractablePositions(generatedChunks[currentChunk].interactables, tileTypes.ground)
+	addInteractables(generatedChunks[currentChunk].interactables, tileTypes.ground)
 	
 	# get_tree().current_scene.get_node("AI/NavigationRegion2D").bake_navigation_polygon()
 	
@@ -115,30 +117,42 @@ func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 	#for cell in $Map.get_used_cells_by_id(0, 2, Vector2i(0, 0)):
 	for cell in tiles:
 		var tree = dynamicSprite.instantiate()
+		$"Entities/OutdoorObjects".add_child(tree)
 		tree.init(treeSprites)
 		tree.position = $Map.map_to_local(cell)
 		tree.name = str(currentChunk) + str(cell)
-		$"Entities/OutdoorObjects".add_child(tree)
 		
 		get_node("Entities/OutdoorObjects/{tree}".format({ "tree": str(currentChunk) + str(cell) })).call_deferred("add_child",
 			createCollision(
 				cell,
 				PackedVector2Array([
+					Vector2i(0, 0),
 					Vector2i(-1, -1),
 					Vector2i(-1, 0),
-					Vector2i(0, 0),
 					Vector2i(-1, 1)
 				])
 			)
 		)
 
-func addInteractables(interactables):
+func addInteractables(interactables, tiles):
 	var interactableNode = load("res://Location/Entities/Interactable/Interactable.tscn")
-	for interactable in interactables:
+	var newInteractables = interactables
+	for interactablePosition in newInteractables:
 		var newInteractable = interactableNode.instantiate()
-		newInteractable.init(interactables[interactable].type, interactables[interactable].name, $Map.map_to_local(interactable))
-		interactables[interactable] = interactables[interactable].name
+		newInteractable.init(newInteractables[interactablePosition].type, newInteractables[interactablePosition].name, Vector2i($Map.map_to_local(interactablePosition)))
 		$Entities/Interactables.add_child(newInteractable)
+
+func getInteractablePositions(interactables, tiles):
+	var newInteractables = {}
+	for interactable in interactables:
+		for count in interactable.count:
+			var interactablePosition = tiles[randi() % tiles.size()]
+			newInteractables[interactablePosition] = {
+				"name": interactable.name,
+				"type": interactable.type,
+				"tileType": interactable.tileType
+			}
+	return newInteractables
 
 func createCollision(collisionPosition: Vector2i, shape: Array):
 	var areaShape = CollisionShape2D.new()
@@ -181,7 +195,7 @@ func checkIfChangeChunk(body, direction, directionRelative):
 
 func resetChunk():
 	$Map.clear()
-	for node in $Entities/OutdoorObjects.get_children():
-		node.queue_free()
-	for node in $Entities/Exits.get_children():
-		node.queue_free()
+	for entityNode in $Entities.get_children():
+		for node in entityNode.get_children():
+			if node.name != "PlayerActor" and node.name != "LocationActor":
+				node.queue_free()

@@ -11,7 +11,7 @@ var tileTypes = {
 	"grass": [],
 	"forest": []
 }
-var interactables = {}
+var interactables = []
 
 
 func _ready():
@@ -25,7 +25,7 @@ func initGeneration(selectedChunk: Vector2i, generatedLocation: String):
 	
 	#print("genning", generatedChunkPosition)
 	
-	$WFCChunkGenerator.generateChunk("Clearwater Grove", generatedChunkPosition)
+	$WFCChunkGenerator.generateChunk(generatedLocation, generatedChunkPosition)
 
 func processTiles(tiles: Dictionary):
 	generatedChunk.tiles = tiles

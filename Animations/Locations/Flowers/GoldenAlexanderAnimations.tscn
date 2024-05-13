@@ -1,7 +1,28 @@
-[gd_scene load_steps=9 format=3 uid="uid://cgpyy7ecku3hq"]
+[gd_scene load_steps=16 format=3 uid="uid://cgpyy7ecku3hq"]
 
 [ext_resource type="Script" path="res://Animations/Animations.gd" id="1_wdfxw"]
 [ext_resource type="Texture2D" uid="uid://bql50tkwd0pms" path="res://Assets/Outdoor Objects/Interactables/GoldenAlexanderSway.png" id="2_82bcg"]
+[ext_resource type="Texture2D" uid="uid://cyrvae6u5mbn7" path="res://Assets/Outdoor Objects/Interactables/GoldenAlexanderShake.png" id="2_t61mb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vk0cn"]
+atlas = ExtResource("2_t61mb")
+region = Rect2(0, 0, 14, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h1q4y"]
+atlas = ExtResource("2_t61mb")
+region = Rect2(14, 0, 14, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bkb4d"]
+atlas = ExtResource("2_t61mb")
+region = Rect2(28, 0, 14, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rk5aq"]
+atlas = ExtResource("2_t61mb")
+region = Rect2(42, 0, 14, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nq6uw"]
+atlas = ExtResource("2_t61mb")
+region = Rect2(56, 0, 14, 12)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f503m"]
 atlas = ExtResource("2_82bcg")
@@ -13,6 +34,26 @@ region = Rect2(12, 0, 12, 12)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ddvav"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vk0cn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h1q4y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bkb4d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rk5aq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nq6uw")
+}],
+"loop": true,
+"name": &"Shake",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_f503m")
@@ -57,9 +98,27 @@ tracks/0/keys = {
 "values": [0, 1]
 }
 
+[sub_resource type="Animation" id="Animation_ii724"]
+resource_name = "Shake"
+length = 0.6
+step = 0.12
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.24, 0.36, 0.48),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5fada"]
 _data = {
 "RESET": SubResource("Animation_77dnj"),
+"Shake": SubResource("Animation_ii724"),
 "Sway": SubResource("Animation_4fv5u")
 }
 
@@ -68,9 +127,12 @@ script = ExtResource("1_wdfxw")
 
 [node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ddvav")
-animation = &"Sway"
+animation = &"Shake"
+offset = Vector2(0, -3)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_5fada")
 }
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

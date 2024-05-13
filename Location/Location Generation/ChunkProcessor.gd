@@ -191,14 +191,15 @@ func countTileTypes():
 				$"..".tileTypes.forest.append(Vector2i(x, y))
 
 func addInteractables(interactables):
-	var interactableNode = load("res://Location/Entities/Interactable/Interactable.tscn")
 	for interactable in interactables:
-		for count in randi() % interactable.count[1] + interactable.count[0]:
-			var interactablePosition = $"..".tileTypes[interactable.tileType][randi() % $"..".tileTypes[interactable.tileType].size()]
-			$"..".interactables[interactablePosition] = {
+		$"..".interactables.append(
+			{
 				"name": interactable.name,
-				"type": interactable.type
+				"type": interactable.type,
+				"count": randi() % interactable.count[1] + interactable.count[0],
+				"tileType": interactable.tileType
 			}
+		)
 
 func transformOpenBordersToTiles():
 	var borderTiles = {

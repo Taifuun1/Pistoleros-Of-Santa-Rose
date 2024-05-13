@@ -8,3 +8,8 @@ func init(sprites: Dictionary, collisionSize: int = 0, collisionPosition: Vector
 	if collisionSize != 0:
 		$CollisionShape2D.shape.radius = collisionSize
 		$CollisionShape2D.position = collisionPosition
+	#var swayTween = get_tree().create_tween().set_loops()
+	#swayTween.tween_property(self, "skew", skew + -.02, 3)
+	#swayTween.tween_interval(.75)
+	#swayTween.tween_property(self, "skew", skew + .02, 3)
+	#swayTween.tween_interval(.75)

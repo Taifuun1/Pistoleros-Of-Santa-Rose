@@ -22,13 +22,12 @@ var chunkGenerationTypes = {
 			},
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
-			"countTileTypes": null,
 			"addInteractables": [
 				{
 					"name": "Golden Alexander",
 					"type": "Flowers",
 					"count": [3, 13],
-					"tileType": "grass"
+					"tileType": "ground"
 				}
 			]
 		},
@@ -51,13 +50,12 @@ var chunkGenerationTypes = {
 			},
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
-			"countTileTypes": null,
 			"addInteractables": [
 				{
 					"name": "Golden Alexander",
 					"type": "Flowers",
 					"count": [3, 13],
-					"tileType": "grass"
+					"tileType": "ground"
 				}
 			]
 		},
@@ -80,13 +78,12 @@ var chunkGenerationTypes = {
 			},
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
-			"countTileTypes": null,
 			"addInteractables": [
 				{
 					"name": "Golden Alexander",
 					"type": "Flowers",
 					"count": [3, 13],
-					"tileType": "grass"
+					"tileType": "ground"
 				}
 			]
 		}
