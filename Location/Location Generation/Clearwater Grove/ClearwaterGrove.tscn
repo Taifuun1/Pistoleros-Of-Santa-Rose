@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://365qx512icmc" path="res://Location/Location Generation/LocationMapLayoutGeneration.tscn" id="7_7rsor"]
 [ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.tscn" id="8_rqtc4"]
 [ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="10_t2ahg"]
-[ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/Location/NPCLocationActor.tscn" id="11_ipqrn"]
+[ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/Location/LocationActor.tscn" id="11_ipqrn"]
 [ext_resource type="Script" path="res://Actors/AI.gd" id="12_pq735"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_5ks3n"]
@@ -78,8 +78,7 @@ y_sort_enabled = true
 
 [node name="PlayerActor" parent="Entities/Actors" instance=ExtResource("3_ptpse")]
 
-[node name="NpcActor" parent="Entities/Actors" instance=ExtResource("11_ipqrn")]
-position = Vector2(131, 71)
+[node name="LocationActor" parent="Entities/Actors" instance=ExtResource("11_ipqrn")]
 
 [node name="OutdoorObjects" type="Node2D" parent="Entities"]
 y_sort_enabled = true

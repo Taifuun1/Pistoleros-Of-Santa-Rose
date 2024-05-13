@@ -17,7 +17,7 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="NpcActor" type="CharacterBody2D"]
+[node name="LocationActor" type="CharacterBody2D"]
 collision_mask = 3
 motion_mode = 1
 wall_min_slide_angle = 0.0
