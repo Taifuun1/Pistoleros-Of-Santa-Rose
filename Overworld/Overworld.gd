@@ -1,5 +1,7 @@
 extends TileMap
 
+@onready var spawnPointInstance = preload("res://Overworld/OverworldSpawnpoint.tscn")
+
 var currentChunk = null
 var currentlyLoadedChunks = []
 var loadingChunk = true
@@ -14,7 +16,7 @@ func _process(_delta):
 		var newCurrentlyLoadedChunks = getAdjacentChunks()
 		setAdjacentChunks(newCurrentlyLoadedChunks)
 		currentlyLoadedChunks = newCurrentlyLoadedChunks
-		removeFarawayLocations()
+		removeFarawayObjects()
 		removeNodes()
 		loadingChunk = false
 
@@ -43,8 +45,19 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> void:
 	if "locations" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
 		var locations = $Chunks.get_children()[$Chunks.get_child_count() - 1].locations
 		for location in locations:
-			if !isLocationLoaded(location):
+			if !isOverworldObjectLoaded(location, "Locations"):
 				createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
+	if "spawnPoints" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
+		var spawnPoints = $Chunks.get_children()[$Chunks.get_child_count() - 1].spawnPoints
+		for actorName in spawnPoints:
+			if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
+				createSpawnPoint(
+					actorName,
+					spawnPoints[actorName].type,
+					Vector2i(map_to_local(chunkLocation) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(spawnPoints[actorName].tiles[0])),
+					spawnPoints[actorName].chance,
+					spawnPoints[actorName].maximum
+				)
 
 func setAdjacentChunks(newAdjacentChunks: Array) -> void:
 	for previousAdjacentChunk in currentlyLoadedChunks:
@@ -69,7 +82,8 @@ func getChunkTiles(node: Node2D) -> Dictionary:
 		for y in range(HelperVariables.overworldChunkSize.y):
 			tiles[Vector2i(x, y)] = {
 				"id": node.get_node("OverworldTileChunkTemplate").get_cell_source_id(0, Vector2i(x,y)),
-				"coords": node.get_node("OverworldTileChunkTemplate").get_cell_atlas_coords(0, Vector2i(x,y))
+				"coords": node.get_node("OverworldTileChunkTemplate").get_cell_atlas_coords(0, Vector2i(x,y)),
+				"alternative": node.get_node("OverworldTileChunkTemplate").get_cell_alternative_tile(0, Vector2i(x,y))
 			}
 	return tiles
 
@@ -82,7 +96,7 @@ func setTiles(chunk: Vector2i, tiles: Dictionary) -> void:
 					map_to_local(chunk).y - (32 * 6)
 				)
 			)
-		) + key - Vector2i(1, 1), tiles[key].id, tiles[key].coords)
+		) + key - Vector2i(1, 1), tiles[key].id, tiles[key].coords, tiles[key].alternative)
 
 func unloadChunk(chunk: Vector2i) -> void:
 	for x in range(64):
@@ -109,7 +123,7 @@ func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
 			var noWhitespacelocationName = locationName.replace(" ", "")
 			get_tree().call_deferred("change_scene_to_file", "res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
 
-func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool = false):
+func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool):
 	var area = Area2D.new()
 	area.name = locationName
 	$Locations.add_child(area)
@@ -130,17 +144,27 @@ func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array,
 	
 	$Locations.get_node("{locationName}".format({ "locationName": locationName })).body_entered.connect(enterLocation.bind(locationName, pregenerated))
 
-func isLocationLoaded(locationName):
-	for location in $Locations.get_children():
-		if location.name == locationName:
+func createSpawnPoint(actorName, actorType, spawnPosition, spawnChance, spawnMaximum):
+	var newSpawnPoint = spawnPointInstance.instantiate()
+	newSpawnPoint.name = actorName + str(Overworld.overworldSpawnpointIdCount)
+	Overworld.overworldSpawnpointIdCount += 1
+	newSpawnPoint.init(actorName, actorType, spawnPosition, spawnChance, spawnMaximum)
+	$Spawnpoints.add_child(newSpawnPoint)
+
+func isOverworldObjectLoaded(objectName, objectType):
+	for object in get_node("{objectType}".format({ "objectType": objectType })).get_children():
+		if object.name.find(objectName) != -1:
 			return true
 	return false
 
-func removeFarawayLocations():
+func removeFarawayObjects():
 	for location in $Locations.get_children():
 		var locationArea = location.get_child(0)
 		if local_to_map(locationArea.position) != currentChunk and !currentlyLoadedChunks.has(local_to_map(locationArea.position)):
 			location.queue_free()
+	for spawnpoint in $Spawnpoints.get_children():
+		if local_to_map(spawnpoint.spawnPoint) != currentChunk and !currentlyLoadedChunks.has(local_to_map(spawnpoint.spawnPoint)):
+			spawnpoint.queue_free()
 
 ########################
 ### Helper functions ###
@@ -172,8 +196,9 @@ func removeNodes() -> void:
 #######################
 
 func _on_animal_spawn_point_timer_timeout():
-	checkActorSpawns("Animals")
+	checkActorSpawns()
 
-func checkActorSpawns(actorType):
-	for spawnPoint in get_node("Spawnpoints/{actorType}".format({ "actorType": actorType })).get_children():
+func checkActorSpawns():
+	for spawnPoint in get_node("Spawnpoints").get_children():
 		spawnPoint.checkForSpawn()
+	$Timers/SpawnPointTimer.start()

@@ -22,18 +22,19 @@ script = ExtResource("1_2gavc")
 
 [node name="Spawnpoints" type="Node2D" parent="."]
 
-[node name="Animals" type="Node2D" parent="Spawnpoints"]
-
 [node name="Actors" type="Node2D" parent="."]
 y_sort_enabled = true
 
 [node name="PlayerOverworldActor" parent="Actors" instance=ExtResource("3_q70do")]
+speed = null
 
 [node name="Animals" type="Node2D" parent="Actors"]
+y_sort_enabled = true
 
 [node name="Timers" type="Node2D" parent="."]
 
-[node name="AnimalSpawnPointTimer" type="Timer" parent="Timers"]
+[node name="SpawnPointTimer" type="Timer" parent="Timers"]
 wait_time = 10.0
+autostart = true
 
-[connection signal="timeout" from="Timers/AnimalSpawnPointTimer" to="." method="_on_animal_spawn_point_timer_timeout"]
+[connection signal="timeout" from="Timers/SpawnPointTimer" to="." method="_on_animal_spawn_point_timer_timeout"]
