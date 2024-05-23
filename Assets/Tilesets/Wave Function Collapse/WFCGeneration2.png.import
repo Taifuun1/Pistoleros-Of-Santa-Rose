@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rgcbdahwvplp"
-path="res://.godot/imported/Birch.png-f4466326ffc4f85bf6094fbb699bc919.ctex"
+uid="uid://d08l2m3sxb16b"
+path="res://.godot/imported/WFCGeneration2.png-af1ba73c2c16028d03661cfb873d7755.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Outdoor Objects/Birch.png"
-dest_files=["res://.godot/imported/Birch.png-f4466326ffc4f85bf6094fbb699bc919.ctex"]
+source_file="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration2.png"
+dest_files=["res://.godot/imported/WFCGeneration2.png-af1ba73c2c16028d03661cfb873d7755.ctex"]
 
 [params]
 

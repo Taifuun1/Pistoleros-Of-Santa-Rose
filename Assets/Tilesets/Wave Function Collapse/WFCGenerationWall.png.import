@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6880r8f6me7y"
-path="res://.godot/imported/WFCGeneration.png-24e566bd222cf979f917c624dc2e1e49.ctex"
+uid="uid://det4fwdapvbdg"
+path="res://.godot/imported/WFCGenerationWall.png-3e10a4a28f7aad3a087ba615c8dbf1ee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/WFCGeneration.png"
-dest_files=["res://.godot/imported/WFCGeneration.png-24e566bd222cf979f917c624dc2e1e49.ctex"]
+source_file="res://Assets/Tilesets/Wave Function Collapse/WFCGenerationWall.png"
+dest_files=["res://.godot/imported/WFCGenerationWall.png-3e10a4a28f7aad3a087ba615c8dbf1ee.ctex"]
 
 [params]
 

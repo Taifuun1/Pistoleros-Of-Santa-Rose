@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d08l2m3sxb16b"
-path="res://.godot/imported/WFCGeneration2.png-f28f5aa72f0e9b3bec4b52b2fb8751e1.ctex"
+uid="uid://cbtre1q6owabb"
+path="res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/WFCGeneration2.png"
-dest_files=["res://.godot/imported/WFCGeneration2.png-f28f5aa72f0e9b3bec4b52b2fb8751e1.ctex"]
+source_file="res://Assets/Tilesets/Rocky Hills/RockyHills2.png"
+dest_files=["res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"]
 
 [params]
 
