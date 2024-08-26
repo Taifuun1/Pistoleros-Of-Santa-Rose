@@ -3,6 +3,8 @@ extends Node2D
 @onready var fightActor = preload("res://Actors/Fight/FightActor.tscn")
 @onready var damageNumber = preload("res://Nodes/Damage Number/DamageNumber.tscn")
 
+var outlineShader = load("res://Shaders/Outline.tres")
+
 signal actorDone
 
 var fightActors = {
@@ -177,15 +179,25 @@ func init(actors: Dictionary):
 				var index = 0
 				for actorPosition in actors[actorSide][actorType][actorName].positions:
 					var newFightActor = fightActor.instantiate()
+					var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index})
 					$Actors.add_child(newFightActor)
-					$Actors.get_children()[$Actors.get_child_count() - 1].init(load("res://Data/Actors/{actorType}/{actorName}.gd".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).new().data)
-					$Actors.get_children()[$Actors.get_child_count() - 1].initFightActor(actorType, "{actorName}{index}".format({ "actorName": actorName, "index": index}), actorPosition, actorSide)
-					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind("{actorName}{index}".format({ "actorName": actorName, "index": index})))
-					fightActors[actorSide]["{actorName}{index}".format({ "actorName": actorName, "index": index})] = {
-						 "actorPosition": actorPosition
-					}
+					$Actors.get_children()[$Actors.get_child_count() - 1].init(
+						load("res://Data/Actors/{actorType}/{actorName}.gd".format(
+							{ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") }
+						)
+					).new().data)
+					$Actors.get_children()[$Actors.get_child_count() - 1].initFightActor(
+						actorType,
+						actorNameIndexed,
+						actorPosition,
+						actorSide
+					)
+					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind(actorNameIndexed))
+					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
+					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
 					index += 1
 	createTurnOrder()
+	selectActor()
 
 func _process(_delta):
 	if !playerAction:
@@ -217,7 +229,7 @@ func createTurnOrder():
 		newTurnOrder.append(actor.actorName)
 	turnOrder = newTurnOrder
 
-func checkIfActorDead(actor):
+func checkIfActorDead(actor) -> bool:
 	if actor.hp <= 0:
 		if turnOrder.has(actor.name):
 			turnOrder.remove_at(turnOrder.find(actor.name))
@@ -226,7 +238,9 @@ func checkIfActorDead(actor):
 				fightActors[actorSide].erase(actor.name)
 				break
 		actor.queue_free()
-	checkIfSideIsDead()
+		checkIfSideIsDead()
+		return true
+	return false
 
 func checkIfSideIsDead():
 	for fightSide in fightActors:
@@ -235,8 +249,11 @@ func checkIfSideIsDead():
 			set_process(false)
 			
 
-func selectActor(actorPosition):
-	selectedActor = actorPosition
+func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
+	if selectedActor != null:
+		get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
+	selectedActor = actorName
+	get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = outlineShader
 
 func isPlayerActing(actor):
 	for actorName in fightActors["player team"]:
@@ -249,16 +266,23 @@ func createDamageNumber(damage, targetPosition):
 	add_child(newDamageNumber)
 	newDamageNumber.init(damage, "red", targetPosition)
 
+func actorFrameHit():
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
+	var targetActor = get_node("Actors/{actorName}".format({ "actorName": selectedActor }))
+	var damage = actor.weaponStats.revolver
+	targetActor.hp -= damage
+	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
+	if checkIfActorDead(targetActor):
+		selectActor()
+	actorDone.emit()
+
 
 func _on_fight_ui_attack():
+	if selectedActor == null:
+		selectActor()
 	if playerAction:
-		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
-		var targetActor = get_node("Actors/{actorName}".format({ "actorName": selectedActor }))
-		var damage = actor.weaponStats.revolver
-		targetActor.hp -= damage
-		createDamageNumber(damage, targetActor.position - Vector2(4, 24))
-		checkIfActorDead(targetActor)
-	actorDone.emit()
+		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+		actor.get_node(str(actor.name)).playAnimation("Draw", true, true)
 
 func _on_actor_done():
 	if turnOrder.is_empty():

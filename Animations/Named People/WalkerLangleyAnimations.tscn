@@ -95,7 +95,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_5ovtg")
 }],
-"loop": true,
+"loop": false,
 "name": &"Draw",
 "speed": 5.0
 }, {
@@ -124,7 +124,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_j6qic")
 }],
-"loop": true,
+"loop": false,
 "name": &"Idle",
 "speed": 5.0
 }, {
@@ -137,7 +137,6 @@ animations = [{
 [sub_resource type="Animation" id="Animation_rjctr"]
 resource_name = "Draw"
 length = 1.45
-loop_mode = 1
 step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -204,4 +203,5 @@ libraries = {
 "": SubResource("AnimationLibrary_5fada")
 }
 
+[connection signal="frame_changed" from="AnimationSprite" to="." method="_on_animation_sprite_frame_changed"]
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

@@ -5,7 +5,8 @@ signal actorSelected
 
 func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
-	animations.init("Idle")
+	var frameHit = FrameData.frameData.animationHits[wornWeapon.type]
+	animations.init("Idle", frameHit)
 	name = actorNameInit
 	animations.name = actorNameInit
 	if actorSide == "enemy team":
@@ -23,3 +24,10 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 		not event.is_pressed()
 	):
 		actorSelected.emit()
+
+
+func _on_area_2d_mouse_entered() -> void:
+	$Highlight.show()
+
+func _on_area_2d_mouse_exited() -> void:
+	$Highlight.hide()

@@ -18,6 +18,9 @@ var data = {
 	"meleeStats": {
 		"punch": 0,
 		"kick": 0,
-		"scratch": 2
+		"scratch": 1
+	},
+	"wornWeapon": {
+		"type": "scratch"
 	}
 }

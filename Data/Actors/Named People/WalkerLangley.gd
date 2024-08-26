@@ -19,5 +19,8 @@ var data = {
 		"punch": 2,
 		"kick": 2,
 		"scratch": 0
+	},
+	"wornWeapon": {
+		"type": "revolver"
 	}
 }

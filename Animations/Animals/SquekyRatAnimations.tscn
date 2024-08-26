@@ -35,20 +35,20 @@ region = Rect2(0, 0, 24, 24)
 atlas = ExtResource("2_hefv2")
 region = Rect2(24, 0, 24, 24)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_6dpp5"]
-atlas = ExtResource("3_co5kq")
-region = Rect2(0, 0, 24, 24)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_36aty"]
-atlas = ExtResource("3_co5kq")
-region = Rect2(24, 0, 24, 24)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_cjdpr"]
 atlas = ExtResource("4_o55gy")
 region = Rect2(0, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2hdu5"]
 atlas = ExtResource("4_o55gy")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6dpp5"]
+atlas = ExtResource("3_co5kq")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_36aty"]
+atlas = ExtResource("3_co5kq")
 region = Rect2(24, 0, 24, 24)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ddvav"]
@@ -94,24 +94,24 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_6dpp5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_36aty")
-}],
-"loop": true,
-"name": &"Skamper",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_cjdpr")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_2hdu5")
 }],
 "loop": true,
-"name": &"Skidadle",
+"name": &"Run",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6dpp5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_36aty")
+}],
+"loop": true,
+"name": &"Walk",
 "speed": 5.0
 }]
 
@@ -156,7 +156,7 @@ script = ExtResource("1_4ah4r")
 
 [node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ddvav")
-animation = &"Idle"
+animation = &"Run"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {

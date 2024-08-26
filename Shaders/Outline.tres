@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d38j0kbfdsmhc"]
+
+[ext_resource type="Shader" path="res://Shaders/Outline.gdshader" id="1_btiqy"]
+
+[resource]
+shader = ExtResource("1_btiqy")
+shader_parameter/color = Color(0.985993, 0, 0.557271, 1)
+shader_parameter/width = 1.0
+shader_parameter/pattern = 0
+shader_parameter/inside = false
+shader_parameter/add_margins = true
