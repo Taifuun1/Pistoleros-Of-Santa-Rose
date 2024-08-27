@@ -199,20 +199,18 @@ func init(actors: Dictionary):
 	createTurnOrder()
 	selectActor()
 
-func _process(_delta):
-	if !playerAction:
-		processEnemyTurn()
-
 func processEnemyTurn():
-	var actorName = turnOrder.pop_front()
+	var actorName = turnOrder.front()
 	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-	var targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
-	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
-	var damage = actor.meleeStats.scratch
-	targetActor.hp -= damage
-	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
-	checkIfActorDead(targetActor)
-	actorDone.emit()
+	#var targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
+	#var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
+	actor.get_node(str(actor.name)).playAnimation("Melee", true, true)
+	print("processed")
+	#var damage = actor.meleeStats.scratch
+	#targetActor.hp -= damage
+	#createDamageNumber(damage, targetActor.position - Vector2(4, 24))
+	#checkIfActorDead(targetActor)
+	#actorDone.emit()
 
 func createTurnOrder():
 	var actorsHighTailin = []
@@ -267,9 +265,15 @@ func createDamageNumber(damage, targetPosition):
 	newDamageNumber.init(damage, "red", targetPosition)
 
 func actorFrameHit():
+	print("hit")
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
-	var targetActor = get_node("Actors/{actorName}".format({ "actorName": selectedActor }))
-	var damage = actor.weaponStats.revolver
+	var targetActorName
+	if playerAction:
+		targetActorName = selectedActor
+	else:
+		targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
+	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
+	var damage = actor["{attackRange}Stats".format({ "attackRange": actor.weapon.range })][actor.weapon.type]
 	targetActor.hp -= damage
 	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
 	if checkIfActorDead(targetActor):
@@ -282,7 +286,7 @@ func _on_fight_ui_attack():
 		selectActor()
 	if playerAction:
 		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-		actor.get_node(str(actor.name)).playAnimation("Draw", true, true)
+		actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 
 func _on_actor_done():
 	if turnOrder.is_empty():
@@ -290,4 +294,6 @@ func _on_actor_done():
 	if isPlayerActing(turnOrder.front()):
 		playerAction = true
 		return
+	#if !playerAction:
 	playerAction = false
+	processEnemyTurn()

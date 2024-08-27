@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://qkjv430rm164"]
+[gd_scene load_steps=23 format=3 uid="uid://qkjv430rm164"]
 
 [ext_resource type="Script" path="res://Animations/Animations.gd" id="1_4ah4r"]
 [ext_resource type="Texture2D" uid="uid://cv6autr7s2cwk" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdle.png" id="1_fg38m"]
@@ -6,6 +6,14 @@
 [ext_resource type="Texture2D" uid="uid://b7neaqud6v72g" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleLook.png" id="2_hefv2"]
 [ext_resource type="Texture2D" uid="uid://bpewxvgf1lcjo" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleSkamper.png" id="3_co5kq"]
 [ext_resource type="Texture2D" uid="uid://by7rwuad6kvk7" path="res://Assets/Characters/Animals/Squeky Rat/SquekyRatIdleSkidadle.png" id="4_o55gy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t0i0s"]
+atlas = ExtResource("2_hefv2")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cubny"]
+atlas = ExtResource("2_hefv2")
+region = Rect2(24, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0si0j"]
 atlas = ExtResource("1_rmtup")
@@ -27,14 +35,6 @@ region = Rect2(72, 0, 24, 24)
 atlas = ExtResource("1_rmtup")
 region = Rect2(96, 0, 24, 24)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_t0i0s"]
-atlas = ExtResource("2_hefv2")
-region = Rect2(0, 0, 24, 24)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cubny"]
-atlas = ExtResource("2_hefv2")
-region = Rect2(24, 0, 24, 24)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_cjdpr"]
 atlas = ExtResource("4_o55gy")
 region = Rect2(0, 0, 24, 24)
@@ -55,26 +55,6 @@ region = Rect2(24, 0, 24, 24)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0si0j")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_d73n0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_fjjm7")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_y6vv0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_k81a8")
-}],
-"loop": true,
-"name": &"Attack",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
 "texture": ExtResource("1_fg38m")
 }],
 "loop": true,
@@ -90,6 +70,26 @@ animations = [{
 }],
 "loop": true,
 "name": &"Idle Look",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0si0j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d73n0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fjjm7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6vv0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k81a8")
+}],
+"loop": true,
+"name": &"Melee",
 "speed": 5.0
 }, {
 "frames": [{
@@ -130,6 +130,22 @@ tracks/0/keys = {
 "values": [0]
 }
 
+[sub_resource type="Animation" id="Animation_cjser"]
+resource_name = "Melee"
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4]
+}
+
 [sub_resource type="Animation" id="Animation_77dnj"]
 length = 0.001
 tracks/0/type = "value"
@@ -144,10 +160,23 @@ tracks/0/keys = {
 "update": 1,
 "values": [0]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimationSprite:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5fada"]
 _data = {
 "Idle": SubResource("Animation_pbcab"),
+"Melee": SubResource("Animation_cjser"),
 "RESET": SubResource("Animation_77dnj")
 }
 
@@ -156,9 +185,12 @@ script = ExtResource("1_4ah4r")
 
 [node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ddvav")
-animation = &"Run"
+animation = &"Melee"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_5fada")
 }
+
+[connection signal="frame_changed" from="AnimationSprite" to="." method="_on_animation_sprite_frame_changed"]
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

@@ -5,7 +5,7 @@ signal actorSelected
 
 func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
-	var frameHit = FrameData.frameData.animationHits[wornWeapon.type]
+	var frameHit = FrameData.frameData.animationHits[weapon.type]
 	animations.init("Idle", frameHit)
 	name = actorNameInit
 	animations.name = actorNameInit

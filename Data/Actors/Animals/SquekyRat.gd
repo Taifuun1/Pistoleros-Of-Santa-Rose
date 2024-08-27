@@ -20,7 +20,8 @@ var data = {
 		"kick": 0,
 		"scratch": 1
 	},
-	"wornWeapon": {
+	"weapon": {
+		"range": "melee",
 		"type": "scratch"
 	}
 }

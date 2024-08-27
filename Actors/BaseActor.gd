@@ -27,8 +27,9 @@ var meleeStats = {
 
 var perks = []
 
-var wornWeapon = {
-	"type": "revolver"
+var weapon = {
+	"range": null,
+	"type": null
 }
 
 
@@ -42,4 +43,4 @@ func init(actorData: Dictionary):
 	weaponStats = actorData.weaponStats
 	meleeStats = actorData.meleeStats
 	
-	wornWeapon = actorData.wornWeapon
+	weapon = actorData.weapon
