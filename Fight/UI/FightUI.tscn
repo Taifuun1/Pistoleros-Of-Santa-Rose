@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bc7rpjuhb524c"]
+[gd_scene load_steps=5 format=3 uid="uid://bc7rpjuhb524c"]
 
 [ext_resource type="Script" path="res://Fight/UI/FightUI.gd" id="1_2qgxu"]
 [ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Fight/UI/FightButton.tscn" id="1_drfjl"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_w5ldf"]
+[ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
 
 [node name="FightUI" type="Control"]
 layout_mode = 3
@@ -11,6 +13,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("1_w5ldf")
 script = ExtResource("1_2qgxu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -31,6 +34,245 @@ columns = 3
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/GridContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Data" type="VBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="NameContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data"]
+layout_mode = 2
+
+[node name="NameTitle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
+text = "Name"
+
+[node name="Name" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
+
+[node name="NameTitle2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Name2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="HPContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data"]
+layout_mode = 2
+
+[node name="HPTitle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
+text = "HP"
+
+[node name="HP" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
+
+[node name="HPTitle2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="HP2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Stats" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 3
+
+[node name="SixShootinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SixShootinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="SixShootin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+
+[node name="HighTailinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HighTailinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="HighTailin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TaffyinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TaffyinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="Taffyin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="RevolverContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RevolverTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="Revolver" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="RifleContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RifleTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="Rifle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="ShotgunContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShotgunTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="Shotgun" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 7
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SixShootin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+bbcode_enabled = true
+scroll_active = false
+
+[node name="HighTailin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Taffyin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+bbcode_enabled = true
+scroll_active = false
+
 [node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -41,20 +283,24 @@ columns = 2
 
 [node name="FightButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
+theme = null
 text = "Attack"
 
 [node name="FightButton2" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
+theme = null
 text = "Ability
 "
 
 [node name="FightButton3" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
+theme = null
 text = "Item"
 
 [node name="FightButton4" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
-text = "Escape
+theme = null
+text = "Duck
 "
 
 [node name="PanelContainer3" type="PanelContainer" parent="VBoxContainer/GridContainer"]

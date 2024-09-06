@@ -198,19 +198,16 @@ func init(actors: Dictionary):
 					index += 1
 	createTurnOrder()
 	selectActor()
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+	$CanvasLayer/FightUI.setPlayerCharacterStats({
+		"Name": actor.actorName,
+		"HP": actor.hp
+	})
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
 	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-	#var targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
-	#var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
 	actor.get_node(str(actor.name)).playAnimation("Melee", true, true)
-	print("processed")
-	#var damage = actor.meleeStats.scratch
-	#targetActor.hp -= damage
-	#createDamageNumber(damage, targetActor.position - Vector2(4, 24))
-	#checkIfActorDead(targetActor)
-	#actorDone.emit()
 
 func createTurnOrder():
 	var actorsHighTailin = []
@@ -265,7 +262,6 @@ func createDamageNumber(damage, targetPosition):
 	newDamageNumber.init(damage, "red", targetPosition)
 
 func actorFrameHit():
-	print("hit")
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
 	var targetActorName
 	if playerAction:
@@ -273,7 +269,11 @@ func actorFrameHit():
 	else:
 		targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
 	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
-	var damage = actor["{attackRange}Stats".format({ "attackRange": actor.weapon.range })][actor.weapon.type]
+	var damage
+	if actor.weapon.type == "melee":
+		damage = 2
+	else :
+		damage = actor.stats.damage[actor.weapon.type][actor.weapon.weapon]
 	targetActor.hp -= damage
 	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
 	if checkIfActorDead(targetActor):
@@ -293,6 +293,11 @@ func _on_actor_done():
 		createTurnOrder()
 	if isPlayerActing(turnOrder.front()):
 		playerAction = true
+		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+		$CanvasLayer/FightUI.setPlayerCharacterStats({
+			"Name": actor.actorName,
+			"HP": actor.hp
+		})
 		return
 	#if !playerAction:
 	playerAction = false
