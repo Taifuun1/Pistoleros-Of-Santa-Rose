@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://ce2thwvlne3vr"]
+
+[ext_resource type="Script" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.gd" id="1_lmsom"]
+
+[node name="RichTextLabelExtended" type="RichTextLabel"]
+custom_minimum_size = Vector2(0, 12)
+offset_bottom = 12.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+autowrap_mode = 0
+script = ExtResource("1_lmsom")
