@@ -1,46 +1,55 @@
 extends Node2D
 class_name ActorBase
 
-var actorName = ""
+var actorName
 
 var walkingSpeed
 var runningSpeed
 
 var hp
-var ap
 
 var stats = {
 	"sixShootin": -1,
 	"highTailin": -1,
-	"taffyin": -1
-}
-var weaponStats = {
-	"revolver": -1,
-	"rifle": -1,
-	"explosive": -1
-}
-var meleeStats = {
-	"punch": -1,
-	"kick": -1,
-	"scratch": -1
+	"taffyin": -1,
+	"damage": {
+		"lead": {
+			"revolver": -1,
+			"rifle": -1,
+			"explosive": -1
+		},
+		"explosive": {
+			"gunpowder": -1,
+			"liquid": -1,
+			"shrapnel": -1
+		}
+	}
 }
 
-var perks = []
+var rodeo = null
 
 var weapon = {
 	"range": null,
 	"type": null
+}
+var equipment = {
+	"hat": null,
+	"jacket": null,
+	"trousers": null,
+	"boots": null
 }
 
 
 func init(actorData: Dictionary):
 	actorName = actorData.actorName
 	
+	walkingSpeed = actorData.walkingSpeed
+	runningSpeed = actorData.runningSpeed
+	
 	hp = actorData.hp
-	ap = actorData.ap
 	
 	stats = actorData.stats
-	weaponStats = actorData.weaponStats
-	meleeStats = actorData.meleeStats
+	rodeo = actorData.rodeo
 	
 	weapon = actorData.weapon
+	#equipment = actorData.equipment

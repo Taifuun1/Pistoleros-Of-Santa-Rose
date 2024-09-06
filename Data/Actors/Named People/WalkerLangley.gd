@@ -4,24 +4,28 @@ extends Node
 var data = {
 	"actorName": "Walker Langley",
 	"hp": 12,
-	"ap": 2,
+	"walkingSpeed": 75,
+	"runningSpeed": 25,
 	"stats": {
 		"sixShootin": 3,
 		"highTailin": 6,
-		"taffyin": 2
+		"taffyin": 2,
+		"damage": {
+			"lead": {
+				"revolver": 1,
+				"rifle": 1,
+				"explosive": 1
+			},
+			"explosive": {
+				"gunpowder": 1,
+				"liquid": 1,
+				"shrapnel": 1
+			}
+		}
 	},
-	"weaponStats": {
-		"revolver": 1,
-		"rifle": 2,
-		"explosive": 1
-	},
-	"meleeStats": {
-		"punch": 2,
-		"kick": 2,
-		"scratch": 0
-	},
+	"rodeo": "leaders duck",
 	"weapon": {
-		"range": "weapon",
-		"type": "revolver"
+		"type": "lead",
+		"weapon": "revolver"
 	}
 }

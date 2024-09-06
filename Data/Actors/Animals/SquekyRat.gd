@@ -4,24 +4,16 @@ extends Node
 var data = {
 	"actorName": "Squeky rat",
 	"hp": 2,
-	"ap": 1,
+	"walkingSpeed": 75,
+	"runningSpeed": 25,
 	"stats": {
 		"sixShootin": 1,
 		"highTailin": 7,
 		"taffyin": -2
 	},
-	"weaponStats": {
-		"revolver": 0,
-		"rifle": 0,
-		"explosive": 0
-	},
-	"meleeStats": {
-		"punch": 0,
-		"kick": 0,
-		"scratch": 1
-	},
+	"rodeo": null,
 	"weapon": {
-		"range": "melee",
-		"type": "scratch"
+		"type": "melee",
+		"weapon": "scratch"
 	}
 }
