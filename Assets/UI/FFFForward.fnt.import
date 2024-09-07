@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://cwt10dycv78e3"
+path="res://.godot/imported/FFFForward.fnt-85dfe7c7cd4f312889c36101c535e540.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFFForward.fnt"
+dest_files=["res://.godot/imported/FFFForward.fnt-85dfe7c7cd4f312889c36101c535e540.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

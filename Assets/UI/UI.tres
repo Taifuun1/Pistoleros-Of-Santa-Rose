@@ -1,0 +1,22 @@
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://c40khsw7ty1da"]
+
+[ext_resource type="FontFile" uid="uid://cwt10dycv78e3" path="res://Assets/UI/FFFForward.fnt" id="1_87myq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lqpfp"]
+bg_color = Color(1, 0.690196, 0.6, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7bk0n"]
+bg_color = Color(0.848354, 0.495306, 0.323097, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.48242, 0.230011, 0.0747058, 1)
+
+[resource]
+default_font = ExtResource("1_87myq")
+default_font_size = 16
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/styles/normal = SubResource("StyleBoxFlat_lqpfp")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_7bk0n")
+RichTextLabel/font_sizes/normal_font_size = 16

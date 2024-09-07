@@ -2,18 +2,18 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dvrn7v47lju12"
-path="res://.godot/imported/docktrin.ttf-217a57fbac5e89082e58e80318f9ad86.fontdata"
+uid="uid://ofy6tpd6c8c0"
+path="res://.godot/imported/Pixeled.ttf-1fae7232d25a6399d6138e6e9a57cec1.fontdata"
 
 [deps]
 
-source_file="res://Assets/UI/docktrin.ttf"
-dest_files=["res://.godot/imported/docktrin.ttf-217a57fbac5e89082e58e80318f9ad86.fontdata"]
+source_file="res://Assets/UI/Pixeled.ttf"
+dest_files=["res://.godot/imported/Pixeled.ttf-1fae7232d25a6399d6138e6e9a57cec1.fontdata"]
 
 [params]
 
 Rendering=null
-antialiasing=0
+antialiasing=1
 generate_mipmaps=false
 disable_embedded_bitmaps=true
 multichannel_signed_distance_field=false
@@ -21,20 +21,14 @@ msdf_pixel_range=8
 msdf_size=48
 allow_system_fallback=true
 force_autohinter=false
-hinting=2
+hinting=1
 subpixel_positioning=1
 oversampling=0.0
 Fallbacks=null
 fallbacks=[]
 Compress=null
-compress=false
-preload=[{
-"chars": [],
-"glyphs": [],
-"name": "New Configuration",
-"size": Vector2i(16, 0),
-"variation_embolden": 0.0
-}]
+compress=true
+preload=[]
 language_support={}
 script_support={}
 opentype_features={}
