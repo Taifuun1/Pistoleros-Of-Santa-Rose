@@ -31,9 +31,9 @@ var colors = {  }
 	#colors.red = "#cf0000"
 	
 
-func createRichTextLabel(text, color = null, textAlignment = null):
+func setRichTextLabel(labelText, color = null, textAlignment = null):
 	clear()
-	var bbcode = str(text)
+	var bbcode = str(labelText)
 	if color != null:
 		bbcode = bbcode.join(["[color=%s]" % colors[color.to_lower()], "[/color]"])
 	if textAlignment != null:
@@ -41,10 +41,10 @@ func createRichTextLabel(text, color = null, textAlignment = null):
 	append_text(bbcode)
 		#push_error("Error appending bbcode.")
 
-func createRichTextLabelImage(imgSrc):
+func setRichTextLabelImage(imgSrc):
 	append_text("[img]{%s}[/img]" % imgSrc)
 
-#func createRichTextLabelForGameConsole(_critterName, _text):
+#func setRichTextLabelForGameConsole(_critterName, _text):
 	#var _bbcode = str(_critterName) + ": "
 	#_bbcode = _bbcode.join(["[color=%s]" % colors.flavorMessage, "[/color]"])
 	#_bbcode += str(_text)

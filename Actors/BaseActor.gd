@@ -16,7 +16,7 @@ var stats = {
 		"lead": {
 			"revolver": -1,
 			"rifle": -1,
-			"explosive": -1
+			"shotgun": -1
 		},
 		"explosive": {
 			"gunpowder": -1,

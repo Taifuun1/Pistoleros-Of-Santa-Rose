@@ -30,5 +30,5 @@ func checkForSpawn():
 
 
 func _on_tree_exiting():
-	for actorName in actors:
-		get_tree().current_scene.get_node("Actors/{actorType}/{actorName}".format({ "actorType": actorType, "actorName": actorName })).queue_free()
+	for actorNameExitingTree in actors:
+		get_tree().current_scene.get_node("Actors/{actorType}/{actorName}".format({ "actorType": actorType, "actorName": actorNameExitingTree })).queue_free()

@@ -8,7 +8,7 @@ var frameHit = false
 signal onAnimationFrameHit
 
 
-func init(initIdleAnimation, initAnimationFrameHit):
+func init(initIdleAnimation, initAnimationFrameHit = -1):
 	idleAnimation = initIdleAnimation
 	animationFrameHit = initAnimationFrameHit
 

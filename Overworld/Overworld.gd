@@ -116,6 +116,7 @@ func unloadChunk(chunk: Vector2i) -> void:
 ##########################
 
 func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
+	Locations.currentLocation = locationName
 	if body.name == "PlayerOverworldActor":
 		if pregenerated:
 			get_tree().call_deferred("change_scene_to_file", "res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
