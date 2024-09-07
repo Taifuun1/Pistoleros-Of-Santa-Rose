@@ -198,11 +198,7 @@ func init(actors: Dictionary):
 					index += 1
 	createTurnOrder()
 	selectActor()
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	$CanvasLayer/FightUI.setPlayerCharacterStats({
-		"Name": actor.actorName,
-		"HP": actor.hp
-	})
+	setActorCharacterStats()
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
@@ -261,6 +257,20 @@ func createDamageNumber(damage, targetPosition):
 	add_child(newDamageNumber)
 	newDamageNumber.init(damage, "red", targetPosition)
 
+func setActorCharacterStats():
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+	$CanvasLayer/FightUI.setPlayerCharacterStats({
+		"Name": actor.actorName,
+		"HP": actor.hp
+	}, {
+		"SixShootin": actor.stats.sixShootin,
+		"HighTailin": actor.stats.highTailin,
+		"Taffyin": actor.stats.taffyin,
+		"Revolver": actor.stats.damage.lead.revolver,
+		"Rifle": actor.stats.damage.lead.rifle,
+		"Shotgun": actor.stats.damage.lead.shotgun
+	})
+
 func actorFrameHit():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
 	var targetActorName
@@ -293,11 +303,7 @@ func _on_actor_done():
 		createTurnOrder()
 	if isPlayerActing(turnOrder.front()):
 		playerAction = true
-		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-		$CanvasLayer/FightUI.setPlayerCharacterStats({
-			"Name": actor.actorName,
-			"HP": actor.hp
-		})
+		setActorCharacterStats()
 		return
 	#if !playerAction:
 	playerAction = false

@@ -1,11 +1,21 @@
-[gd_scene load_steps=5 format=3 uid="uid://bc7rpjuhb524c"]
+[gd_scene load_steps=14 format=3 uid="uid://bc7rpjuhb524c"]
 
 [ext_resource type="Script" path="res://Fight/UI/FightUI.gd" id="1_2qgxu"]
 [ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Fight/UI/FightButton.tscn" id="1_drfjl"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_w5ldf"]
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
+[ext_resource type="Texture2D" uid="uid://cjocgotg0hgx5" path="res://Assets/Icons/SixShootinIcon.png" id="4_8ob0s"]
+[ext_resource type="Script" path="res://UI/Miscellaneous/AddTooltip.gd" id="4_8sf7b"]
+[ext_resource type="Texture2D" uid="uid://6gju4eo6vq5g" path="res://Assets/Icons/HP.png" id="4_vga8u"]
+[ext_resource type="PackedScene" uid="uid://dm8v87vsh2qow" path="res://UI/Tooltip/Tooltip.tscn" id="5_5ysdm"]
+[ext_resource type="Texture2D" uid="uid://bss3bqrqmrnsd" path="res://Assets/Icons/HighTailinIcon.png" id="5_docnv"]
+[ext_resource type="Texture2D" uid="uid://0ubbng08j00g" path="res://Assets/Icons/TaffyinIcon.png" id="6_0he6b"]
+[ext_resource type="Texture2D" uid="uid://7lfh3mc1k4yr" path="res://Assets/Icons/RevolverIcon.png" id="7_gux81"]
+[ext_resource type="Texture2D" uid="uid://d4bch7qystpkq" path="res://Assets/Icons/RifleIcon.png" id="8_caqsy"]
+[ext_resource type="Texture2D" uid="uid://cffnwqca80qo2" path="res://Assets/Icons/ShotgunIcon.png" id="9_u3ffq"]
 
 [node name="FightUI" type="Control"]
+texture_filter = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,7 +47,9 @@ size_flags_horizontal = 3
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/GridContainer/PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer"]
 layout_mode = 2
@@ -51,66 +63,21 @@ size_flags_vertical = 3
 [node name="NameContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data"]
 layout_mode = 2
 
-[node name="NameTitle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" instance=ExtResource("3_f1det")]
-layout_mode = 2
-text = "Name"
-
 [node name="Name" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" instance=ExtResource("3_f1det")]
 layout_mode = 2
 
-[node name="NameTitle2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer"]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
-
-[node name="Name2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer"]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
-
 [node name="HPContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data"]
 layout_mode = 2
+alignment = 1
 
-[node name="HPTitle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" instance=ExtResource("3_f1det")]
+[node name="TextureRect7" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer"]
 layout_mode = 2
-text = "HP"
+mouse_filter = 2
+texture = ExtResource("4_vga8u")
+stretch_mode = 5
 
 [node name="HP" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" instance=ExtResource("3_f1det")]
 layout_mode = 2
-
-[node name="HPTitle2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer"]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
-
-[node name="HP2" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer"]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
 
 [node name="Stats" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer"]
 layout_mode = 2
@@ -120,32 +87,27 @@ columns = 3
 [node name="SixShootinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 0
+script = ExtResource("4_8sf7b")
 
-[node name="SixShootinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect6" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 6
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
+mouse_filter = 2
+texture = ExtResource("4_8ob0s")
+stretch_mode = 5
 
-[node name="SixShootin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="SixShootin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" instance=ExtResource("3_f1det")]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 6
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-autowrap_mode = 0
+mouse_filter = 2
+
+[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" instance=ExtResource("5_5ysdm")]
 
 [node name="HighTailinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HighTailinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 7
@@ -154,20 +116,20 @@ bbcode_enabled = true
 text = "-"
 scroll_active = false
 
-[node name="HighTailin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect5" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer"]
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-bbcode_enabled = true
-text = "-"
-scroll_active = false
+texture = ExtResource("5_docnv")
+stretch_mode = 5
+
+[node name="HighTailin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
 
 [node name="TaffyinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="TaffyinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 7
@@ -176,20 +138,20 @@ bbcode_enabled = true
 text = "-"
 scroll_active = false
 
-[node name="Taffyin" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect4" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer"]
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-bbcode_enabled = true
-text = "-"
-scroll_active = false
+texture = ExtResource("6_0he6b")
+stretch_mode = 5
+
+[node name="Taffyin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
 
 [node name="RevolverContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="RevolverTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 7
@@ -198,20 +160,20 @@ bbcode_enabled = true
 text = "-"
 scroll_active = false
 
-[node name="Revolver" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect3" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer"]
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-bbcode_enabled = true
-text = "-"
-scroll_active = false
+texture = ExtResource("7_gux81")
+stretch_mode = 5
+
+[node name="Revolver" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
 
 [node name="RifleContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="RifleTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 7
@@ -220,20 +182,20 @@ bbcode_enabled = true
 text = "-"
 scroll_active = false
 
-[node name="Rifle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer"]
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-bbcode_enabled = true
-text = "-"
-scroll_active = false
+texture = ExtResource("8_caqsy")
+stretch_mode = 5
+
+[node name="Rifle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
 
 [node name="ShotgunContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ShotgunTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
+[node name="ShotgunIcon" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 7
@@ -242,14 +204,13 @@ bbcode_enabled = true
 text = "-"
 scroll_active = false
 
-[node name="Shotgun" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
-custom_minimum_size = Vector2(0, 12)
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer"]
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-bbcode_enabled = true
-text = "-"
-scroll_active = false
+texture = ExtResource("9_u3ffq")
+stretch_mode = 5
+
+[node name="Shotgun" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" instance=ExtResource("3_f1det")]
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer"]
 layout_mode = 2
@@ -281,23 +242,23 @@ size_flags_horizontal = 3
 layout_mode = 2
 columns = 2
 
-[node name="FightButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+[node name="AttackButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
 theme = null
 text = "Attack"
 
-[node name="FightButton2" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+[node name="AbilityButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
 theme = null
 text = "Ability
 "
 
-[node name="FightButton3" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+[node name="ItemButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
 theme = null
 text = "Item"
 
-[node name="FightButton4" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
+[node name="DuckButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" instance=ExtResource("1_drfjl")]
 layout_mode = 2
 theme = null
 text = "Duck
@@ -307,4 +268,6 @@ text = "Duck
 layout_mode = 2
 size_flags_horizontal = 3
 
-[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/FightButton" to="." method="_on_fight_button_pressed"]
+[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" method="_on_mouse_entered" binds= ["Six Shootin", "Text for Six Shootin"]]
+[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" method="_on_mouse_exited"]
+[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/AttackButton" to="." method="_on_fight_button_pressed"]
