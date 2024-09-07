@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.gd" id="1_lmsom"]
 
 [node name="RichTextLabelExtended" type="RichTextLabel"]
-custom_minimum_size = Vector2(0, 12)
+texture_filter = 1
+clip_contents = false
 offset_bottom = 12.0
 size_flags_horizontal = 3
-size_flags_vertical = 4
+size_flags_vertical = 3
 bbcode_enabled = true
-text = "-"
 scroll_active = false
 autowrap_mode = 0
 script = ExtResource("1_lmsom")

@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://dm8v87vsh2qow"]
+
+[ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="1_4sdvw"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_aw3v0"]
+[ext_resource type="Script" path="res://UI/Tooltip/Tooltip.gd" id="2_qv6mp"]
+
+[node name="Tooltip" type="CanvasLayer"]
+layer = 2
+visible = false
+
+[node name="Tooltip" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(48, 48)
+offset_right = 200.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme = ExtResource("1_aw3v0")
+script = ExtResource("2_qv6mp")
+
+[node name="MarginContainer" type="MarginContainer" parent="Tooltip"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Tooltip/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" parent="Tooltip/MarginContainer/VBoxContainer" instance=ExtResource("1_4sdvw")]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Text" parent="Tooltip/MarginContainer/VBoxContainer" instance=ExtResource("1_4sdvw")]
+layout_mode = 2
+mouse_filter = 2
