@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://yvehyufg7q0q"
+path="res://.godot/imported/PixeledPinkGradient2.fnt-d6f19dff20c6f46a84a7c5327f5428b2.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/PixeledPinkGradient2.fnt"
+dest_files=["res://.godot/imported/PixeledPinkGradient2.fnt-d6f19dff20c6f46a84a7c5327f5428b2.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

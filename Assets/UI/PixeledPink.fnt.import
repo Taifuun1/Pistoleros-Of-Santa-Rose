@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://caowx63tqf2at"
+path="res://.godot/imported/PixeledPink.fnt-a69fa06f71d7fd8dc5ddc441159327df.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/PixeledPink.fnt"
+dest_files=["res://.godot/imported/PixeledPink.fnt-a69fa06f71d7fd8dc5ddc441159327df.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

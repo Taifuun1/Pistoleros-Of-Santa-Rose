@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://cu3ytb4o32oi0"
+path="res://.godot/imported/Unnamed.fnt-d1ced7bd0447aa55722c16d1d9792d83.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/Unnamed.fnt"
+dest_files=["res://.godot/imported/Unnamed.fnt-d1ced7bd0447aa55722c16d1d9792d83.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2
