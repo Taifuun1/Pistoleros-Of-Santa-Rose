@@ -1,6 +1,9 @@
 extends ActorBase
 
 signal actorSelected
+signal actorTurn
+
+var items = []
 
 
 func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
@@ -15,7 +18,15 @@ func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
 	add_child(animations)
 	
 	position = Fight.fightPositions[actorSide][actorPosition.column][actorPosition.row]
+	#position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
+	actorTurn.connect(toggleActorTurn)
 
+
+func toggleActorTurn():
+	if !$Highlight2.visible:
+		$Highlight2.show()
+		return
+	$Highlight2.hide()
 
 func _on_area_2d_input_event(_viewport, event, _shape_idx):
 	if(
@@ -24,7 +35,6 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 		not event.is_pressed()
 	):
 		actorSelected.emit()
-
 
 func _on_area_2d_mouse_entered() -> void:
 	$Highlight.show()

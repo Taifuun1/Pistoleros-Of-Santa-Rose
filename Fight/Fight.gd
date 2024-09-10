@@ -7,6 +7,8 @@ var outlineShader = load("res://Shaders/Outline.tres")
 
 signal actorDone
 
+var playerHasControl = false
+
 var fightActors = {
 	"player team": {
 		
@@ -28,18 +30,18 @@ func _ready():
 				"Named People": {
 					"Walker Langley": {
 						"positions": [
-							#{
-								#"column": 1,
-								#"row": 1
-							#},
+							{
+								"column": 1,
+								"row": 1
+							},
 							{
 								"column": 1,
 								"row": 2
 							},
-							#{
-								#"column": 1,
-								#"row": 3
-							#},
+							{
+								"column": 1,
+								"row": 3
+							},
 							#{
 								#"column": 1,
 								#"row": 4
@@ -112,10 +114,10 @@ func _ready():
 								"column": 1,
 								"row": 3
 							},
-							{
-								"column": 1,
-								"row": 4
-							},
+							#{
+								#"column": 1,
+								#"row": 4
+							#},
 							#{
 								#"column": 2,
 								#"row": 1
@@ -199,6 +201,9 @@ func init(actors: Dictionary):
 	createTurnOrder()
 	selectActor()
 	setActorCharacterStats()
+	setActorCharacterItems()
+	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
+	playerHasControl = true
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
@@ -271,18 +276,22 @@ func setActorCharacterStats():
 		"Shotgun": actor.stats.damage.lead.shotgun
 	})
 
+func setActorCharacterItems():
+	$CanvasLayer/FightUI.setPlayerCharacterItems([1, 2, 3, 4])
+
 func actorFrameHit():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
 	var targetActorName
 	if playerAction:
 		targetActorName = selectedActor
 	else:
+		actor.actorTurn.emit()
 		targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
 	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
 	var damage
 	if actor.weapon.type == "melee":
 		damage = 2
-	else :
+	else:
 		damage = actor.stats.damage[actor.weapon.type][actor.weapon.weapon]
 	targetActor.hp -= damage
 	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
@@ -294,17 +303,23 @@ func actorFrameHit():
 func _on_fight_ui_attack():
 	if selectedActor == null:
 		selectActor()
-	if playerAction:
+	if playerHasControl and playerAction:
 		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+		actor.actorTurn.emit()
+		playerHasControl = false
 		actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 
 func _on_actor_done():
 	if turnOrder.is_empty():
 		createTurnOrder()
+	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
 	if isPlayerActing(turnOrder.front()):
 		playerAction = true
 		setActorCharacterStats()
+		setActorCharacterItems()
+		playerHasControl = true
 		return
 	#if !playerAction:
 	playerAction = false
 	processEnemyTurn()
+	playerHasControl = false
