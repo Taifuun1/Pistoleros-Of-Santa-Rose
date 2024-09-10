@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c60dx2f3r0a8n"]
 
-[ext_resource type="Script" path="res://Location/Location Generation/ChunkProcessor.gd" id="1_mn6v3"]
+[ext_resource type="Script" path="res://Location/Location Generation/Chunk Generation/ChunkProcessor.gd" id="1_mn6v3"]
 
 [node name="ChunkProcessor" type="Node2D"]
 script = ExtResource("1_mn6v3")

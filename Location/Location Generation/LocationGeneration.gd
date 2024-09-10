@@ -23,8 +23,6 @@ func initGeneration(selectedChunk: Vector2i, generatedLocation: String):
 	
 	chunkGenerationTypes = load("res://Data/Location Generation/{generatedLocation}.gd".format({ "generatedLocation": generatedLocation.replace(" ", "") })).new().chunkGenerationTypes
 	
-	#print("genning", generatedChunkPosition)
-	
 	$WFCChunkGenerator.generateChunk(generatedLocation, generatedChunkPosition)
 
 func processTiles(tiles: Dictionary):
