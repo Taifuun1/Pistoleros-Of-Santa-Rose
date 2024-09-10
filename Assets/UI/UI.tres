@@ -1,12 +1,21 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://c40khsw7ty1da"]
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://c40khsw7ty1da"]
 
-[ext_resource type="FontFile" uid="uid://cwt10dycv78e3" path="res://Assets/UI/FFFForward.fnt" id="1_87myq"]
+[ext_resource type="FontFile" uid="uid://cu3ytb4o32oi0" path="res://Assets/UI/Unnamed.fnt" id="1_0scx2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0soan"]
+bg_color = Color(0.458824, 0.956863, 1, 0.498039)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b58mt"]
+bg_color = Color(7.70092e-07, 0.915785, 0.973893, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lqpfp"]
-bg_color = Color(1, 0.690196, 0.6, 1)
+bg_color = Color(0.456915, 0.957641, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rjfyb"]
+bg_color = Color(2.11775e-06, 0.705992, 0.422728, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7bk0n"]
-bg_color = Color(0.848354, 0.495306, 0.323097, 1)
+bg_color = Color(1, 0.564524, 0.79426, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -14,9 +23,13 @@ border_width_bottom = 2
 border_color = Color(0.48242, 0.230011, 0.0747058, 1)
 
 [resource]
-default_font = ExtResource("1_87myq")
-default_font_size = 16
-Button/colors/font_color = Color(0, 0, 0, 1)
+default_font = ExtResource("1_0scx2")
+default_font_size = 10
+Button/styles/focus = SubResource("StyleBoxFlat_0soan")
+Button/styles/hover = SubResource("StyleBoxFlat_b58mt")
 Button/styles/normal = SubResource("StyleBoxFlat_lqpfp")
+Button/styles/pressed = SubResource("StyleBoxFlat_rjfyb")
+GridContainer/constants/v_separation = 12
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_7bk0n")
-RichTextLabel/font_sizes/normal_font_size = 16
+RichTextLabel/font_sizes/normal_font_size = 10
+VBoxContainer/constants/separation = 4
