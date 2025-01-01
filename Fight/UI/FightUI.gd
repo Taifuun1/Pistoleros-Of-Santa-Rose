@@ -18,14 +18,17 @@ func setPlayerCharacterStats(characterData, characterStats) -> void:
 
 func setPlayerCharacterItems(items) -> void:
 	var itemNode = load("res://Fight/UI/FightItem.tscn")
-	for item in $VBoxContainer/CenterContainer/PanelContainer/Items.get_children():
-		item.queue_free()
-	for item in items:
+	for itemName in $VBoxContainer/CenterContainer/PanelContainer/Items.get_children():
+		itemName.queue_free()
+	for itemName in items:
 		var newItem = itemNode.instantiate()
+		newItem.init(itemName)
 		$VBoxContainer/CenterContainer/PanelContainer/Items.add_child(newItem)
+		$VBoxContainer/CenterContainer/PanelContainer/Items.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Items.get_child_count() - 1].itemClicked.connect($"../..".actWithAbilityOrItem)
 
 
 func _on_fight_button_pressed() -> void:
+	$VBoxContainer/CenterContainer.visible = false
 	attack.emit()
 
 func _on_item_button_pressed() -> void:

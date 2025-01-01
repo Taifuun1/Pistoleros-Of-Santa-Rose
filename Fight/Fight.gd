@@ -1,11 +1,9 @@
-extends Node2D
+extends ActFight
 
 @onready var fightActor = preload("res://Actors/Fight/FightActor.tscn")
 @onready var damageNumber = preload("res://Nodes/Damage Number/DamageNumber.tscn")
 
 var outlineShader = load("res://Shaders/Outline.tres")
-
-signal actorDone
 
 var playerHasControl = false
 
@@ -20,7 +18,6 @@ var fightActors = {
 
 var turnOrder = []
 var playerAction = true
-var selectedActor = null
 
 
 func _ready():
@@ -196,6 +193,7 @@ func init(actors: Dictionary):
 					)
 					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind(actorNameIndexed))
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
+					#$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(playNextAnimation.bind())
 					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
 					index += 1
 	createTurnOrder()
@@ -277,10 +275,10 @@ func setActorCharacterStats():
 	})
 
 func setActorCharacterItems():
-	$CanvasLayer/FightUI.setPlayerCharacterItems([1, 2, 3, 4])
+	$CanvasLayer/FightUI.setPlayerCharacterItems(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items)
 
 func actorFrameHit():
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.pop_front() }))
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
 	var targetActorName
 	if playerAction:
 		targetActorName = selectedActor
@@ -295,10 +293,16 @@ func actorFrameHit():
 		damage = actor.stats.damage[actor.weapon.type][actor.weapon.weapon]
 	targetActor.hp -= damage
 	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
+	doEndOfTurnCheck(targetActor)
+
+func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "actorName": selectedActor }))):
 	if checkIfActorDead(targetActor):
 		selectActor()
+	turnOrder.pop_front()
 	actorDone.emit()
 
+#func playNextAnimation(nextAnimation):
+#	
 
 func _on_fight_ui_attack():
 	if selectedActor == null:

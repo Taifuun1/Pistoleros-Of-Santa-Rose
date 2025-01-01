@@ -4,17 +4,20 @@ var idleAnimation = ""
 var oneshotAnimation = false
 var animationFrameHit = -1
 var frameHit = false
+var nextAnimation = null
 
 signal onAnimationFrameHit
+signal onNextAnimation
 
 
 func init(initIdleAnimation, initAnimationFrameHit = -1):
 	idleAnimation = initIdleAnimation
 	animationFrameHit = initAnimationFrameHit
 
-func playAnimation(animation, isOneshotAnimation = false, lookForFrameHit = false):
+func playAnimation(animation, isOneshotAnimation = false, lookForFrameHit = false, assignNextAnimation = null):
 	oneshotAnimation = isOneshotAnimation
 	frameHit = lookForFrameHit
+	nextAnimation = assignNextAnimation
 	$AnimationSprite.animation = animation
 	$AnimationPlayer.play(animation)
 
@@ -28,10 +31,14 @@ func _on_animation_sprite_frame_changed() -> void:
 
 func _on_animation_player_animation_finished(animation) -> void:
 	if oneshotAnimation:
-		$AnimationSprite.animation = idleAnimation
-		$AnimationPlayer.play(idleAnimation)
-		oneshotAnimation = false
-		frameHit = false
+		if nextAnimation == null:
+			$AnimationSprite.animation = idleAnimation
+			$AnimationPlayer.play(idleAnimation)
+			oneshotAnimation = false
+			frameHit = false
+			return
+		onNextAnimation.emit(nextAnimation)
+		nextAnimation = null
 	else:
 		$AnimationSprite.animation = animation
 		$AnimationPlayer.play(animation)

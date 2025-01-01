@@ -1,11 +1,27 @@
 extends TextureRect
 
+signal itemClicked
+
+var itemName
 
 
+func init(newItemName: String) -> void:
+	itemName = newItemName
+	texture = load("res://Assets/Items/{itemName}.png".format({ "itemName": itemName }))
 
+
+func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if(
+		event is InputEventMouseButton and
+		event.button_index == MOUSE_BUTTON_LEFT and
+		not event.is_pressed()
+	):
+		var actor = get_node("/root/BaseFight/Actors/{actorName}".format({ "actorName": $"/root/BaseFight".turnOrder.front() }))
+		actor.items.erase(itemName)
+		actor.actorTurn.emit()
+		itemClicked.emit(itemName, "Items")
 
 func _on_area_2d_mouse_entered() -> void:
-	print("here")
 	$Highlight.show()
 
 func _on_area_2d_mouse_exited() -> void:
