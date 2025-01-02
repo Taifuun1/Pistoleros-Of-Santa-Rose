@@ -24,3 +24,4 @@ position = Vector2(313, 228)
 zoom = Vector2(2, 2)
 
 [connection signal="attack" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_attack"]
+[connection signal="item" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_item"]

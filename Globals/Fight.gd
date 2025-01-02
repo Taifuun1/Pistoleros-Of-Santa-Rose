@@ -119,7 +119,7 @@ var fightPositions = {
 
 var itemsData = {
 	"Paregoric": {
-		"baseAmount": 3,
+		"baseAmount": 5,
 		"statScaling": 0.5,
 		"side": "friendly",
 		"positions": {
@@ -142,3 +142,9 @@ var itemsData = {
 		}
 	}
 }
+
+func checkIfActorIsOnSide(actorName, actorSide, fightActors):
+	for checkedActorName in fightActors[actorSide]:
+		if actorName == checkedActorName:
+			return true
+	return false

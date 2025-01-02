@@ -17,7 +17,7 @@ var fightActors = {
 }
 
 var turnOrder = []
-var playerAction = true
+var playerAction = false
 
 
 func _ready():
@@ -197,11 +197,12 @@ func init(actors: Dictionary):
 					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
 					index += 1
 	createTurnOrder()
-	selectActor()
-	setActorCharacterStats()
-	setActorCharacterItems()
+	#selectActor()
+	#setActorCharacterStats()
+	#setActorCharacterItems()
 	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
-	playerHasControl = true
+	#playerHasControl = true
+	processEnemyTurn()
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
@@ -244,23 +245,37 @@ func checkIfSideIsDead():
 			
 
 func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
-	if playerHasControl:
+	if playerHasControl and playerAction:
+		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+		selectedActor = actorName
 		if selectedAct.type == "Items":
 			if (
 				(
-					Fight.itemsData[selectedAct.name] == "friendly" and
+					Fight.itemsData[selectedAct.name].side == "friendly" and
 					Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
 				) or
 				(
-					Fight.itemsData[selectedAct.name] == "hostile" and
+					Fight.itemsData[selectedAct.name].side == "hostile" and
 					Fight.checkIfActorIsOnSide(actorName, "friendly team", fightActors)
 				)
 			):
 				return
-	if selectedActor != null:
-		get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
+			actor.items.erase(selectedAct.name)
+		#if selectedActor != null:
+			#get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
+		#if selectedActor == null:
+			#selectActor()
+			actWithAbilityOrItem(selectedAct.name, selectedAct.type)
+		else:
+			actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+		playerHasControl = false
+		actor.actorTurn.emit()
+
+func hoverActor(actorName):
 	selectedActor = actorName
 	get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = outlineShader
+	if selectedActor != null:
+		get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
 
 func isPlayerActing(actor):
 	for actorName in fightActors["player team"]:
@@ -317,14 +332,18 @@ func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "acto
 #func playNextAnimation(nextAnimation):
 #	
 
-func _on_fight_ui_attack():
-	if selectedActor == null:
-		selectActor()
-	if playerHasControl and playerAction:
-		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-		actor.actorTurn.emit()
-		playerHasControl = false
-		actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+func _on_fight_ui_attack() -> void:
+	selectedAct = {
+		"type": "Attack",
+		"side": "hostile"
+	}
+
+func _on_fight_ui_item(itemName: String) -> void:
+	selectedAct = {
+		"name": itemName,
+		"type": "Items",
+		"side": "friendly"
+	}
 
 func _on_actor_done():
 	if turnOrder.is_empty():

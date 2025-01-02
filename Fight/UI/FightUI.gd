@@ -24,7 +24,10 @@ func setPlayerCharacterItems(items) -> void:
 		var newItem = itemNode.instantiate()
 		newItem.init(itemName)
 		$VBoxContainer/CenterContainer/PanelContainer/Items.add_child(newItem)
-		$VBoxContainer/CenterContainer/PanelContainer/Items.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Items.get_child_count() - 1].itemClicked.connect($"../..".actWithAbilityOrItem)
+		$VBoxContainer/CenterContainer/PanelContainer/Items.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Items.get_child_count() - 1].itemClicked.connect(itemPressed)
+
+func itemPressed(itemName):
+	item.emit(itemName)
 
 
 func _on_fight_button_pressed() -> void:
