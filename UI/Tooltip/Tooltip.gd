@@ -12,8 +12,11 @@ func _process(_delta):
 		set_position(adjustedPosition)
 
 func updateTooltip(title, description = null, _sprite = null):
+	$MarginContainer/VBoxContainer/Title.clear()
+	$MarginContainer/VBoxContainer/Text.clear()
 	$MarginContainer/VBoxContainer/Title.setRichTextLabel(title)
 	$MarginContainer/VBoxContainer/Text.setRichTextLabel(description)
+	#$MarginContainer/VBoxContainer/Text.text = description
 	#if _description == null:
 		#$TooltipContentContainer/TooltipTextContainer/TooltipTextContentContainer/Description.append_bbcode("?????")
 	#else:
