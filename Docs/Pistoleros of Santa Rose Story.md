@@ -116,7 +116,6 @@
 				*Native gang
 			*Freedom Riders
 				*Anti-government gang
-		
 
 
 ## Outline
@@ -131,13 +130,13 @@ After the weapons and equipment is acquired, the bank robbery commences. The rob
 
 Afterwards, the crew sets out to free Gwyneth. Aiyana is a key character for motivating the rescue. For the rescue, they need the special explosives for blowing up both the jail and the train. The explosives are expensive, so they need even more gold. There is a gold rush in a nearby region, which is the perfect opportunity for the crew.
 
-During the gold rush there are fights with the other prospectors. Aiyana jumps into every opportunity presented during the quest.
+During the gold rush the Bandidos of El Sacramento try to steal the crews gold. They succeed and escape into their hideout. Aiyana insists that they get the gold back, and so the crew attacks the Bandido camp. Aiyana rushes ahead of the crew and manages to get back the gold.
 
 Once the expensive explosives are bought, Gwyneths execution is on the next sunrise. The crew frees Gwyneth, but Walker shies away from a gunfight that Aiyana initiated, which causes Aiyana to be injured/killed. (If injured, Aiyana can't move well anymore.)
 
 Next, the party sets out to find animals strong enough to haul the valuables from the train to safety. They hear of a caravan route going over the mountains. In a nearby town, they manage to strike a deal to escort a caravan through a dangerous route in exchange for the oxen that drag the caravan.
 
-During the the trip, they are confronted with some natives. They will not let them pass through their holy land. Eventually, Manuel manages to befriend some of the Indians and gets the crew to throw a party with the natives. The Indians agree to let the caravan through. However, Walker gets too drunk and accidentally vandalizes the tribes totem pole. The caravan escapes just barely.
+During the trip, they are confronted with some natives. They will not let them pass through their holy land. Eventually, Manuel manages to befriend some of the Indians and gets the crew to throw a party with the natives. The Indians agree to let the caravan through. However, Walker gets too drunk and accidentally vandalizes the tribes totem pole. The caravan just barely escapes.
 
 After the caravan trip the party only needs an explosive expert to handle the explosives. Eventually, they hear of a ghost town prospector hermit, who's been trying to find gold in an abandoned town for years. They go meet the prospector, but the hermit is unwilling to help or even engage the crew. Morrison is empathetic to the lonely hermit and insists that they try to help him.
 
@@ -145,13 +144,13 @@ The crew finds some poker cheaters in a nearby towns saloon. After some poker ga
 
 Powell wants to see the ghost town lively again. Eventually, the poker cheaters return bringing news of Powell having stolen cattle. A mob sets out to lynch Powell, but Morrison manages to convince the crowd to settle down. Eventually, the villagers decide to spend a night in the ghost town.
 
-Once the villagers are spending the night in the ghost town, the poker cheaters try to spook the merriment in the saloon. The crew spoils the spooky attempt by making fun of the poker cheaters. Next morning the villagers consider repopulating the ghost town. Walker somehow manages to screw things up, discouraging the villagers from resettling. Morrison feels dejected because of this, and won't participate in the train robbery. Powell, however, feels gratitude for the night of merriment, and agrees to help with the train robbery.
+Once the villagers are spending the night in the ghost town, the poker cheaters try to spook the merriment in the saloon. The crew spoils the spooky attempt by making fun of the poker cheaters. Next morning the villagers consider repopulating the ghost town. Walker manages to spook people, discouraging the villagers from resettling. Morrison feels dejected because of this, and won't participate in the train robbery. Powell, however, feels gratitude for the night of merriment, and agrees to help with the train robbery.
 
-All is said and done, now it is time for the train robbery. The crew whitled down to fewer members, all has to be set up first. With setting up each part of the plan, there are more cracks in the relationship of Walker and the rest of the gang.
+All is said and done, now it is the time for the train robbery. The crew whitled down to fewer members, all has to be set up first. With setting up each part of the plan, there are more cracks in the relationship between Walker and the rest of the gang.
 
 Train robbery arc here.
 
-The final scene has Walker walk, mortally wounded, in the wreckage of the destroyed train. His crew, friends, lie dead on the ground. None of the valuables can be reclaimed now. Walker lies down for the last time, lights a cigaret, and reflects. "I didn't deserve this life... But at least I lived it." Walker lies dead on the ground as the sun sets. From the horizon, vultures appear. They circle around Walker, and finally lift him up to the air from his shoulders. The vultures carry Walker to the sunset, and beyond. Story ends with the sun setting and tumbleweeds rolling across the prairie.
+The final scene has Walker limp, mortally wounded, in the wreckage of the destroyed train. His crew, friends, lie dead on the ground. None of the valuables can be reclaimed now. Walker lies down for the last time, lights a cigaret, and reflects. "I didn't deserve this life... But at least I lived it." Walker lies dead on the ground as the sun sets. From the horizon, vultures appear. They circle around Walker, and finally lift him up to the air from his shoulders. The vultures carry Walker to the sunset, and beyond. Story ends with the sun setting and tumbleweeds rolling across the prairie.
 
 ## Ideas
 
