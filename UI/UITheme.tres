@@ -1,4 +1,6 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://cqvnxa7wpxk1i"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://cqvnxa7wpxk1i"]
+
+[ext_resource type="FontFile" uid="uid://dvrn7v47lju12" path="res://Assets/UI/docktrin.ttf" id="1_bbkms"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_34x3t"]
 bg_color = Color(1, 0.690196, 0.6, 1)
@@ -13,5 +15,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [resource]
+default_font = ExtResource("1_bbkms")
+default_font_size = 8
 Button/colors/font_color = Color(0, 0, 0, 1)
 Button/styles/normal = SubResource("StyleBoxFlat_34x3t")
