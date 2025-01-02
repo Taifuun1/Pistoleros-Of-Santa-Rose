@@ -3,6 +3,7 @@ class_name ActFight
 
 signal actorDone
 
+var selectedAct = null
 var selectedActor = null
 var targetType = "enemy"
 var targetActors = {}
@@ -17,10 +18,10 @@ func actAnimation(actName, actType):
 	animationInstance.tree_exited.connect(actWithAbilityOrItem.bind(actName, actType, false))
 	animationInstance.playAnimation("Effect")
 
-func actWithAbilityOrItem(actName, actType, actAnimation = true):
+func actWithAbilityOrItem(actName, actType, playActAnimation = true):
 	if actType == "Items":
 		$CanvasLayer/FightUI/VBoxContainer/CenterContainer.visible = false
-		if actAnimation:
+		if playActAnimation:
 			actAnimation(actName, actType)
 			return
 		actWithItem(actName)
@@ -28,7 +29,7 @@ func actWithAbilityOrItem(actName, actType, actAnimation = true):
 func actWithItem(actName):
 	match actName:
 		"Paregoric":
-			get_node("Actors/{actorName}".format({ "actorName": selectedActor })).hp += 4
+			get_node("Actors/{actorName}".format({ "actorName": selectedActor })).hp += Fight.itemsData[actName].baseAmount
 	get_node(".").doEndOfTurnCheck()
 
 func actOnCharacter():

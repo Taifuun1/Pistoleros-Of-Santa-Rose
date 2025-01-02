@@ -244,6 +244,19 @@ func checkIfSideIsDead():
 			
 
 func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
+	if playerHasControl:
+		if selectedAct.type == "Items":
+			if (
+				(
+					Fight.itemsData[selectedAct.name] == "friendly" and
+					Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+				) or
+				(
+					Fight.itemsData[selectedAct.name] == "hostile" and
+					Fight.checkIfActorIsOnSide(actorName, "friendly team", fightActors)
+				)
+			):
+				return
 	if selectedActor != null:
 		get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
 	selectedActor = actorName
