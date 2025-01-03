@@ -242,21 +242,24 @@ func checkIfSideIsDead():
 		if fightActors[fightSide].is_empty():
 			turnOrder.clear()
 			set_process(false)
-			
 
 func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
-	if playerHasControl and playerAction:
+	if playerHasControl and playerAction and selectedAct != null:
 		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
 		selectedActor = actorName
-		if selectedAct.type == "Items":
+		if selectedAct.type == "Attack":
+			if Fight.checkIfActorIsOnSide(actorName, "player team", fightActors):
+				return
+			actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+		elif selectedAct.type == "Items":
 			if (
 				(
-					Fight.itemsData[selectedAct.name].side == "friendly" and
+					Fight.itemsData[selectedAct.name].side == "player" and
 					Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
 				) or
 				(
 					Fight.itemsData[selectedAct.name].side == "hostile" and
-					Fight.checkIfActorIsOnSide(actorName, "friendly team", fightActors)
+					Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
 				)
 			):
 				return
@@ -266,16 +269,8 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 		#if selectedActor == null:
 			#selectActor()
 			actWithAbilityOrItem(selectedAct.name, selectedAct.type)
-		else:
-			actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 		playerHasControl = false
 		actor.actorTurn.emit()
-
-func hoverActor(actorName):
-	selectedActor = actorName
-	get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = outlineShader
-	if selectedActor != null:
-		get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
 
 func isPlayerActing(actor):
 	for actorName in fightActors["player team"]:
@@ -342,7 +337,7 @@ func _on_fight_ui_item(itemName: String) -> void:
 	selectedAct = {
 		"name": itemName,
 		"type": "Items",
-		"side": "friendly"
+		"side": "player"
 	}
 
 func _on_actor_done():
@@ -355,7 +350,6 @@ func _on_actor_done():
 		setActorCharacterItems()
 		playerHasControl = true
 		return
-	#if !playerAction:
 	playerAction = false
 	processEnemyTurn()
 	playerHasControl = false
