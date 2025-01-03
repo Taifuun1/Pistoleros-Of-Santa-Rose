@@ -1,12 +1,14 @@
 extends ActorBase
 
+var outlineShader = load("res://Shaders/Outline.tres")
+
 signal actorSelected
 signal actorTurn
 
 var items = ["Paregoric", "Paregoric"]
 
 
-func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
+func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
 	var frameHit = FrameData.frameData.animationHits[weapon.weapon]
 	animations.init("Idle", frameHit)
@@ -21,7 +23,7 @@ func initFightActor(actorType, actorNameInit, actorPosition, actorSide):
 	#position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
 	actorTurn.connect(toggleActorTurn)
 
-func toggleActorTurn():
+func toggleActorTurn() -> void:
 	if !$Highlight2.visible:
 		$Highlight2.show()
 		return
@@ -37,7 +39,7 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 		actorSelected.emit()
 
 func _on_area_2d_mouse_entered() -> void:
-	$Highlight.show()
+	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = outlineShader
 
 func _on_area_2d_mouse_exited() -> void:
-	$Highlight.hide()
+	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = null
