@@ -16,18 +16,15 @@ func setPlayerCharacterStats(characterData, characterStats) -> void:
 		#get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/{stat}Container/{stat}Title".format({ "stat": stat }))
 		get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(characterStats[stat])
 
-func setPlayerCharacterItems(items) -> void:
-	var itemNode = load("res://Fight/UI/FightItem.tscn")
-	for itemName in $VBoxContainer/CenterContainer/PanelContainer/Items.get_children():
-		itemName.queue_free()
-	for itemName in items:
-		var newItem = itemNode.instantiate()
-		newItem.init(itemName)
-		$VBoxContainer/CenterContainer/PanelContainer/Items.add_child(newItem)
-		$VBoxContainer/CenterContainer/PanelContainer/Items.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Items.get_child_count() - 1].itemClicked.connect(itemPressed)
-
-func itemPressed(itemName):
-	item.emit(itemName)
+func setPlayerCharacterActs(acts: Array, actType: String) -> void:
+	var actNode = load("res://Fight/UI/FightAct.tscn")
+	for actName in $VBoxContainer/CenterContainer/PanelContainer/Acts.get_children():
+		actName.queue_free()
+	for actName in acts:
+		var newAct = actNode.instantiate()
+		newAct.init(actName, actType)
+		$VBoxContainer/CenterContainer/PanelContainer/Acts.add_child(newAct)
+		$VBoxContainer/CenterContainer/PanelContainer/Acts.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Acts.get_child_count() - 1].actClicked.connect(func(): if actType == "Items": item.emit(actName) elif actType == "Abilities": ability.emit(actName))
 
 
 func _on_fight_button_pressed() -> void:
@@ -35,5 +32,11 @@ func _on_fight_button_pressed() -> void:
 	attack.emit()
 
 func _on_item_button_pressed() -> void:
-	$VBoxContainer/CenterContainer.visible = !$VBoxContainer/CenterContainer.visible
-	#item.emit()
+	setPlayerCharacterActs(get_node("../../Actors/{actorName}".format({ "actorName": $"../..".turnOrder.front() })).items, "Items")
+	if $VBoxContainer/CenterContainer/PanelContainer/Acts.get_child_count() > 0:
+		$VBoxContainer/CenterContainer.visible = !$VBoxContainer/CenterContainer.visible
+
+func _on_ability_button_pressed() -> void:
+	setPlayerCharacterActs(get_node("../../Actors/{actorName}".format({ "actorName": $"../..".turnOrder.front() })).abilities, "Abilities")
+	if $VBoxContainer/CenterContainer/PanelContainer/Acts.get_child_count() > 0:
+		$VBoxContainer/CenterContainer.visible = !$VBoxContainer/CenterContainer.visible

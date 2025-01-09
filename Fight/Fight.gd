@@ -193,7 +193,7 @@ func init(actors: Dictionary):
 					)
 					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind(actorNameIndexed))
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
-					#$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(playNextAnimation.bind())
+					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(manageAnimations)
 					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
 					index += 1
 	createTurnOrder()
@@ -241,7 +241,6 @@ func checkIfSideIsDead():
 	for fightSide in fightActors:
 		if fightActors[fightSide].is_empty():
 			turnOrder.clear()
-			set_process(false)
 
 func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 	if playerHasControl and playerAction and selectedAct != null:
@@ -251,26 +250,45 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 			if Fight.checkIfActorIsOnSide(actorName, "player team", fightActors):
 				return
 			actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
-		elif selectedAct.type == "Items":
+		elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
 			if (
 				(
-					Fight.itemsData[selectedAct.name].side == "player" and
-					Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+					selectedAct.type == "Items" and
+					(
+						(
+							Fight.itemsData[selectedAct.name].side == "player" and
+							Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+						) or
+						(
+							Fight.itemsData[selectedAct.name].side == "enemy" and
+							Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
+						)
+					)
 				) or
 				(
-					Fight.itemsData[selectedAct.name].side == "hostile" and
-					Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
+					selectedAct.type == "Abilities" and
+					(
+						(
+							Fight.abilitiesData[selectedAct.name].side == "player" and
+							Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+						) or
+						(
+							Fight.abilitiesData[selectedAct.name].side == "enemy" and
+							Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
+						)
+					)
 				)
 			):
 				return
-			actor.items.erase(selectedAct.name)
-		#if selectedActor != null:
-			#get_node("Actors/{actorName}/{actorName}/AnimationSprite".format({ "actorName": selectedActor })).material = null
-		#if selectedActor == null:
-			#selectActor()
-			actWithAbilityOrItem(selectedAct.name, selectedAct.type)
+			if selectedAct.type == "Items":
+				actor.items.erase(selectedAct.name)
+				animations = Fight.itemsData[selectedAct.name].animations.duplicate(true)
+			if selectedAct.type == "Abilities":
+				animations = Fight.abilitiesData[selectedAct.name].animations.duplicate(true)
+		$CanvasLayer/FightUI/VBoxContainer/CenterContainer.visible = false
 		playerHasControl = false
 		actor.actorTurn.emit()
+		manageAnimations()
 
 func isPlayerActing(actor):
 	for actorName in fightActors["player team"]:
@@ -297,10 +315,50 @@ func setActorCharacterStats():
 		"Shotgun": actor.stats.damage.lead.shotgun
 	})
 
-func setActorCharacterItems():
-	$CanvasLayer/FightUI.setPlayerCharacterItems(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items)
+func setActorCharacterActs(actType: String):
+	if actType == "Abilities":
+		$CanvasLayer/FightUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).abilities, actType)
+	elif actType == "Items":
+		$CanvasLayer/FightUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items, actType)
+
+func manageAnimations():
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+	if animations != null and animations.is_empty():
+		animations = null
+		actorFrameHit()
+		return
+	if selectedAct.type == "Attack":
+		actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+	elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
+		var animation = animations.pop_front()
+		if animation.target == "selectedActor":
+			actAnimation()
+			#actor.get_node(str(actor.name)).playAnimation(, true, true)
+		elif animation.target == "actingActor":
+			actor.get_node(str(actor.name)).playAnimation(animation.animation, true, true)
+
+func actAnimation():
+	var animation = load("res://Animations/Fight/{actType}/{actName}.tscn".format({ "actType": selectedAct.type, "actName": selectedAct.name.replace(" ", "") }))
+	var animationInstance = animation.instantiate()
+	#animationInstance.position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
+	#animationInstance.position.y -= 40
+	get_node("Actors/{actorName}".format({ "actorName": selectedActor })).add_child(animationInstance)
+	animationInstance.tree_exited.connect(manageAnimations)
+	animationInstance.playAnimation("Effect")
 
 func actorFrameHit():
+	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
+	if playerAction:
+		if selectedAct.type == "Attack":
+			damageTarget()
+		elif selectedAct.type == "Abilities":
+			actWithAbility(selectedAct.name)
+		elif selectedAct.type == "Items":
+			actWithItem(selectedAct.name)
+	else:
+		damageTarget()
+
+func damageTarget():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
 	var targetActorName
 	if playerAction:
@@ -329,15 +387,19 @@ func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "acto
 
 func _on_fight_ui_attack() -> void:
 	selectedAct = {
-		"type": "Attack",
-		"side": "hostile"
+		"type": "Attack"
+	}
+
+func _on_fight_ui_ability(abilityName: String) -> void:
+	selectedAct = {
+		"name": abilityName,
+		"type": "Abilities"
 	}
 
 func _on_fight_ui_item(itemName: String) -> void:
 	selectedAct = {
 		"name": itemName,
-		"type": "Items",
-		"side": "player"
+		"type": "Items"
 	}
 
 func _on_actor_done():
@@ -347,7 +409,6 @@ func _on_actor_done():
 	if isPlayerActing(turnOrder.front()):
 		playerAction = true
 		setActorCharacterStats()
-		setActorCharacterItems()
 		playerHasControl = true
 		return
 	playerAction = false

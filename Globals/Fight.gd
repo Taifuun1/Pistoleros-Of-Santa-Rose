@@ -111,28 +111,54 @@ var fightPositions = {
 	#}
 #}
 
-#var abilitiesData = {
-	#"columnHit": {
-		#"positions": ""
-	#}
-#}
-
-var itemsData = {
-	"Paregoric": {
+var abilitiesData = {
+	"Sharp Shot": {
 		"baseAmount": 5,
-		"statScaling": 0.5,
-		"side": "friendly",
+		"statScaling": 0.25,
+		"side": "enemy",
 		"positions": {
 			"type": "single",
 			"targets": {
 				"columns": [1, 2, 3, 4]
 			}
-		}
+		},
+		"animations": [
+			{
+				"target": "selectedActor",
+				"sprite": "icon",
+				"path": "res://Animations/Fight/Abilities/SharpShotAnimations.tscn"
+			},
+			{
+				"target": "actingActor",
+				"animation": "Shoot"
+			}
+		]
+	}
+}
+
+var itemsData = {
+	"Paregoric": {
+		"baseAmount": 5,
+		"statScaling": 0.5,
+		"side": "player",
+		"positions": {
+			"type": "single",
+			"targets": {
+				"columns": [1, 2, 3, 4]
+			}
+		},
+		"animations": [
+			{
+				"target": "selectedActor",
+				"sprite": "icon",
+				"path": "res://Animations/Fight/Items/ParegoricAnimations.tscn"
+			}
+		]
 	},
 	"multiHeal": {
 		"baseAmount": 1,
 		"statScaling": 0.5,
-		"side": "friendly",
+		"side": "player",
 		"positions": {
 			"type": "multi",
 			"shape": "column",

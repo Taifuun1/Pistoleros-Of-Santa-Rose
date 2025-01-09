@@ -48,7 +48,7 @@ layout_mode = 2
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Items" type="HBoxContainer" parent="VBoxContainer/CenterContainer/PanelContainer"]
+[node name="Acts" type="HBoxContainer" parent="VBoxContainer/CenterContainer/PanelContainer"]
 layout_mode = 2
 alignment = 1
 
@@ -374,4 +374,5 @@ size_flags_horizontal = 3
 [connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" method="_on_mouse_entered" binds= ["Shotgun", "Damage with shotguns"]]
 [connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" method="_on_mouse_exited"]
 [connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/AttackButton" to="." method="_on_fight_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/AbilityButton" to="." method="_on_ability_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/ItemButton" to="." method="_on_item_button_pressed"]

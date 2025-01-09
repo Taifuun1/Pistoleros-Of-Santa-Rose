@@ -1,16 +1,16 @@
 [gd_scene load_steps=5 format=3 uid="uid://bs1sty5b56jic"]
 
-[ext_resource type="Texture2D" uid="uid://du6gxqpjaiso4" path="res://Assets/Icons/MoneyIcon.png" id="1_8hesb"]
-[ext_resource type="Script" path="res://Fight/UI/FightItem.gd" id="2_mgoit"]
-[ext_resource type="Texture2D" uid="uid://bpeu6njviccp8" path="res://Assets/UI/Highlight2.png" id="3_u7mt7"]
+[ext_resource type="Texture2D" uid="uid://du6gxqpjaiso4" path="res://Assets/Icons/MoneyIcon.png" id="1_0cmnt"]
+[ext_resource type="Script" path="res://Fight/UI/FightAct.gd" id="2_eejde"]
+[ext_resource type="Texture2D" uid="uid://bpeu6njviccp8" path="res://Assets/UI/Highlight2.png" id="3_mvse3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_aj2j5"]
 size = Vector2(24, 24)
 
 [node name="FightItem" type="TextureRect"]
-texture = ExtResource("1_8hesb")
+texture = ExtResource("1_0cmnt")
 stretch_mode = 3
-script = ExtResource("2_mgoit")
+script = ExtResource("2_eejde")
 
 [node name="Area2D" type="Area2D" parent="."]
 
@@ -20,7 +20,7 @@ shape = SubResource("RectangleShape2D_aj2j5")
 
 [node name="Highlight" type="Sprite2D" parent="."]
 visible = false
-texture = ExtResource("3_u7mt7")
+texture = ExtResource("3_mvse3")
 centered = false
 
 [connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

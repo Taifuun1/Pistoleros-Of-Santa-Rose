@@ -23,5 +23,6 @@ tile_set = ExtResource("3_ba4lx")
 position = Vector2(313, 228)
 zoom = Vector2(2, 2)
 
+[connection signal="ability" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_ability"]
 [connection signal="attack" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_attack"]
 [connection signal="item" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_item"]
