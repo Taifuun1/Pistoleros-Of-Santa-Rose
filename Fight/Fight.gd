@@ -323,7 +323,7 @@ func setActorCharacterActs(actType: String):
 
 func manageAnimations():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	if animations != null and animations.is_empty():
+	if animations != null and animations.is_empty() and !selectedAct.type == "Attack":
 		animations = null
 		actorFrameHit()
 		return
@@ -347,7 +347,6 @@ func actAnimation():
 	animationInstance.playAnimation("Effect")
 
 func actorFrameHit():
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
 	if playerAction:
 		if selectedAct.type == "Attack":
 			damageTarget()
@@ -381,9 +380,6 @@ func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "acto
 		selectActor()
 	turnOrder.pop_front()
 	actorDone.emit()
-
-#func playNextAnimation(nextAnimation):
-#	
 
 func _on_fight_ui_attack() -> void:
 	selectedAct = {
