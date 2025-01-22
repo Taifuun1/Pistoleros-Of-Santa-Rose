@@ -29,8 +29,8 @@ var stats = {
 var rodeo = null
 
 var weapon = {
-	"range": null,
-	"type": null
+	"type": null,
+	"weapon": null
 }
 var equipment = {
 	"hat": null,

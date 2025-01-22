@@ -3,6 +3,8 @@ extends ActFight
 @onready var fightActor = preload("res://Actors/Fight/FightActor.tscn")
 @onready var damageNumber = preload("res://Nodes/Damage Number/DamageNumber.tscn")
 
+signal actorDone
+
 var outlineShader = load("res://Shaders/Outline.tres")
 
 var playerHasControl = false
@@ -180,11 +182,14 @@ func init(actors: Dictionary):
 					var newFightActor = fightActor.instantiate()
 					var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index})
 					$Actors.add_child(newFightActor)
-					$Actors.get_children()[$Actors.get_child_count() - 1].init(
-						load("res://Data/Actors/{actorType}/{actorName}.gd".format(
-							{ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") }
-						)
-					).new().data)
+					if Party.party.has(actorName):
+						$Actors.get_children()[$Actors.get_child_count() - 1].init(Party.party[actorName])
+					else:
+						$Actors.get_children()[$Actors.get_child_count() - 1].init(
+							load("res://Data/Actors/{actorType}/{actorName}.gd".format(
+								{ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") }
+							)
+						).new().data)
 					$Actors.get_children()[$Actors.get_child_count() - 1].initFightActor(
 						actorType,
 						actorNameIndexed,
@@ -249,7 +254,7 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 		if selectedAct.type == "Attack":
 			if Fight.checkIfActorIsOnSide(actorName, "player team", fightActors):
 				return
-			actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+			#actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 		elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
 			if (
 				(
@@ -328,14 +333,22 @@ func manageAnimations():
 		actorFrameHit()
 		return
 	if selectedAct.type == "Attack":
-		actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
+		if actor.weapon.weapon == "revolver":
+			actor.get_node(str(actor.name)).playAnimation("Shoot Revolver", true, true)
+		elif actor.weapon.weapon == "rifle":
+			actor.get_node(str(actor.name)).playAnimation("Shoot Rifle", true, true)
+		#actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 	elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
 		var animation = animations.pop_front()
 		if animation.target == "selectedActor":
 			actAnimation()
 			#actor.get_node(str(actor.name)).playAnimation(, true, true)
 		elif animation.target == "actingActor":
-			actor.get_node(str(actor.name)).playAnimation(animation.animation, true, true)
+			if actor.weapon.weapon == "revolver":
+				actor.get_node(str(actor.name)).playAnimation("Shoot Revolver", true, true)
+			elif actor.weapon.weapon == "rifle":
+				actor.get_node(str(actor.name)).playAnimation("Shoot Rifle", true, true)
+			#actor.get_node(str(actor.name)).playAnimation(animation.animation, true, true)
 
 func actAnimation():
 	var animation = load("res://Animations/Fight/{actType}/{actName}.tscn".format({ "actType": selectedAct.type, "actName": selectedAct.name.replace(" ", "") }))

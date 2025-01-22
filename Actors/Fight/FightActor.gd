@@ -6,17 +6,25 @@ signal actorSelected
 signal actorTurn
 
 var items = ["Paregoric", "Paregoric"]
+var abilities = ["Sharp Shot"]
 
 
 func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
 	var frameHit = FrameData.frameData.animationHits[weapon.weapon]
-	animations.init("Idle", frameHit)
+	var idleAnimation
+	if weapon.weapon == "revolver":
+		idleAnimation = "Idle Revolver"
+	elif weapon.weapon == "rifle":
+		idleAnimation = "Idle Rifle"
+	else:
+		idleAnimation = "Idle"
+	animations.init(idleAnimation, frameHit)
 	name = actorNameInit
 	animations.name = actorNameInit
 	if actorSide == "enemy team":
 		animations.flipAnimation()
-	animations.playAnimation("Idle")
+	animations.playAnimation(idleAnimation)
 	add_child(animations)
 	
 	position = Fight.fightPositions[actorSide][actorPosition.column][actorPosition.row]

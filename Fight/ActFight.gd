@@ -1,8 +1,6 @@
 extends Node2D
 class_name ActFight
 
-signal actorDone
-
 var selectedAct = null
 var selectedActor = null
 var targetType = "enemy"
