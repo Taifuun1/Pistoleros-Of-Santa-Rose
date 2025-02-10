@@ -16,6 +16,18 @@
 			*Friendly bouts for money, non-lethal
 			*Grievance settling, lethal
 
+:Map
+	*Attrition
+		*Party loses attrition as they travel
+		*Party move speed gets slower
+		*Recover attrition by camping and using items
+		*Lose condition if no camping for a long time?
+	*Camping
+		*Recipes
+			*Characters can have recipes they can make during camping
+			*One recipe made per camp
+			*Camping again resets previous recipe buff if still active
+
 :Quests
 	*Main quests
 		*Each quest is a story arc for a main cast character
@@ -209,6 +221,9 @@
 		*
 	*Shotguns
 		*
+
+:Logbook
+	*A log that holds fight strategy information, lore, a map and quests
 
 ?Major events
 	*Train robbery
@@ -451,6 +466,7 @@ el bandolero
 
 gunslinger
 pistolero
+Bronc Buster
 
 https://es.wikipedia.org/wiki/Salteador_de_caminos
 https://es.wikipedia.org/wiki/Viejo_Oeste#Bandidos
@@ -474,6 +490,9 @@ ranch/rancho
 
 barroom, ginmill, taproom
 
+A wild rag—also known in various regions as a cowboy scarf, necktie, bandana or kerchief—is a large square-shaped scarf made of silk, cotton, or other soft fabrics that is commonly worn by cowboys.
+Boots / Trotter Boxes, Trotter Cases Mud Pipes Mudpipes Mule-ears
+Mud Pipes – Any kind of boots or shoes, but mostly applied to riding-boots.
 
 
 

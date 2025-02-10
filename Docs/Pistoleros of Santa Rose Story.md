@@ -109,7 +109,7 @@
 		*Rival gangs
 			*Contribute as antagonists in different parts of the map and story
 			*All gangs are present at the train robbery, as they all want the loot or the train destroyed
-				*Rival gangs create chaos and a distraction at the train robbery  
+				*Rival gangs create chaos and a distraction at the train robbery
 			*Bandidos of El Sacramento
 				*Hispanic rival gang
 			*Running Deers
