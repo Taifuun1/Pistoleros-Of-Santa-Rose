@@ -99,9 +99,13 @@ Notes for combat.
 		*Damage piercing
 			*Increases characters damage piercing against a defensive damage types
 			*Lasts for an amount of turns
+		*Damage decrease
+			*Decreases characters damage against a defensive damage type
+			*Lasts for an amount of turns
 		*Taunt
 			*Taunt friendly row or column character is standing on
 			*All targeted characters on taunted tiles get directed to the taunt caster
+			*Defensive buffs to the caster on taunted attacks
 			*Lasts for an amount of turns
 		*Silence
 			*Disable abilities
@@ -115,7 +119,8 @@ Notes for combat.
 		*Can wear most equipment
 		*Abilities work in first and second column
 		*Abilities
-			*Attack and bleed application
+			*Attack and self-increase hit rate
+			*Attack and bleed affliction
 			*Self-increase damage type
 			*Self-cleanse bleed
 	*Bobtail Guard
@@ -125,7 +130,7 @@ Notes for combat.
 		*Abilities work in second and third column
 		*Targets backrows
 		*Abilities
-			*Attack and poison application
+			*Attack and poison affliction
 			*Hit-rate drop affliction
 			*Mark affliction
 	*Line Rider
@@ -137,16 +142,17 @@ Notes for combat.
 		*Abilities
 			*Poison cleanse
 			*Self-increase damage piercing
+			*Disrupt first and second column positioning
 	*Bottle Courage Bulldozer
 		*Tank class
 		*Can't hold rifles or shotguns
 		*Can wear any equipment
 		*Abilities work in first column
 		*Abilities
-			*Attack and self-increase hit rate
 			*Self-increase damage type defense
 			*Self-taunt current row or column
 			*Hit-rate increase application
+			*Disrupt second and third column positioning
 	*Support class
 		*Can't hold lead weapons
 		*Can wear less equipment than other classes
@@ -155,6 +161,7 @@ Notes for combat.
 			*Bleed cleanse and affliction
 			*Poison cleanse and affliction
 			*Damage type mark applications
+			*Damage decrease applications
 			*Damage piercing application
 
 ## Rodeo
