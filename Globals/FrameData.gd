@@ -3,8 +3,8 @@ extends Node
 
 var frameData = {
 	"animationHits": {
-		"revolver": 4,
-		"rifle": 4,
+		"revolver": 5,
+		"rifle": 8,
 		"scratch": 3
 	}
 }
