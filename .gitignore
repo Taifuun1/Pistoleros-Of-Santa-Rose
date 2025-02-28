@@ -6,6 +6,8 @@
 export.cfg
 export_presets.cfg
 *.tmp
+rcedit-x64.exe
+Pistoleros of Santa Rose*
 
 # Imported translations (automatically generated from CSV files)
 *.translation
