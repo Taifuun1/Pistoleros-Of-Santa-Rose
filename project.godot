@@ -13,6 +13,7 @@ config_version=5
 config/name="Pistoleros of Santa Rose"
 run/main_scene="res://Overworld/Overworld.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
+config/windows_native_icon="res://Assets/Icons/FileIcon.ico"
 
 [autoload]
 
