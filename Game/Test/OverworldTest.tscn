@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://bfunxmrggppio"]
 
-[ext_resource type="Script" path="res://Game/Test/OverworldTest.gd" id="1_6c1oy"]
+[ext_resource type="Script" uid="uid://1v65qt58hi0l" path="res://Game/Test/OverworldTest.gd" id="1_6c1oy"]
 [ext_resource type="TileSet" uid="uid://ct0gardf6g11h" path="res://Tilesets/Test/OverworldTilesetTest.tres" id="1_finbt"]
 [ext_resource type="PackedScene" uid="uid://b6aw0avuo4lco" path="res://Game/Test/LocationTest.tscn" id="2_bvgsc"]
-[ext_resource type="Script" path="res://Game/Test/PlayerTest.gd" id="4_wlbl5"]
+[ext_resource type="Script" uid="uid://b4364yi41yu4a" path="res://Game/Test/PlayerTest.gd" id="4_wlbl5"]
 [ext_resource type="Texture2D" uid="uid://dbspsh7t7o4uq" path="res://Assets/Map Entities/Wagon.png" id="5_17s3r"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1qswj"]

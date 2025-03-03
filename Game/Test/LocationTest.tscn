@@ -1,9 +1,9 @@
 [gd_scene load_steps=12 format=3 uid="uid://b6aw0avuo4lco"]
 
-[ext_resource type="Script" path="res://Game/Test/LocationTest.gd" id="1_qx83k"]
+[ext_resource type="Script" uid="uid://cwx36ettmvf7r" path="res://Game/Test/LocationTest.gd" id="1_qx83k"]
 [ext_resource type="TileSet" uid="uid://ccboijvx3jv1n" path="res://Tilesets/Test/LocationTilesetTest.tres" id="1_xagte"]
 [ext_resource type="PackedScene" uid="uid://lkirqht3aybu" path="res://Game/Test/TilemapTest.tscn" id="2_nrrjc"]
-[ext_resource type="Script" path="res://Game/Test/PlayerTest3.gd" id="4_sdm5i"]
+[ext_resource type="Script" uid="uid://c08bfustt814y" path="res://Game/Test/PlayerTest3.gd" id="4_sdm5i"]
 [ext_resource type="Texture2D" uid="uid://f832jy7jp7ti" path="res://Assets/Characters/Test/Test2Animation_40x40_run_smears_4.png" id="5_stgfj"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kom8s"]
@@ -64,9 +64,9 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_b3ev7"]
 _data = {
-"Idle": SubResource("Animation_fekpf"),
-"RESET": SubResource("Animation_5cm2m"),
-"Run": SubResource("Animation_xevcm")
+&"Idle": SubResource("Animation_fekpf"),
+&"RESET": SubResource("Animation_5cm2m"),
+&"Run": SubResource("Animation_xevcm")
 }
 
 [node name="LocationTest" type="Node2D"]

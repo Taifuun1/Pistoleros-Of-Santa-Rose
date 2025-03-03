@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmp2i45cwmphm"]
 
 [ext_resource type="PackedScene" uid="uid://c8y8ry3iy1a0o" path="res://Overworld/OverworldTileChunkTemplate.tscn" id="1_o6tl7"]
-[ext_resource type="Script" path="res://Overworld/Overworld Chunks/#3#14.gd" id="1_qhg4s"]
+[ext_resource type="Script" uid="uid://clften7lsm4os" path="res://Overworld/Overworld Chunks/#3#14.gd" id="1_qhg4s"]
 
 [node name="#3#14" type="Node2D"]
 script = ExtResource("1_qhg4s")

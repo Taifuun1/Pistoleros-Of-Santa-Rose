@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://cde3r7yun1dna"]
 
-[ext_resource type="Script" path="res://Animations/Overworld/OverworldAnimations.gd" id="1_6xh6n"]
+[ext_resource type="Script" uid="uid://dejsoqmprnc47" path="res://Animations/Overworld/OverworldAnimations.gd" id="1_6xh6n"]
 [ext_resource type="Texture2D" uid="uid://be7japy6ymjj3" path="res://Assets/Map Entities/Fluffy Rabbit/FluffyRabbit.png" id="2_12jhs"]
 [ext_resource type="Texture2D" uid="uid://3oy7woykk8tl" path="res://Assets/Map Entities/Fluffy Rabbit/FluffyRabbit_n.png" id="3_biahh"]
 
@@ -42,8 +42,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5fada"]
 _data = {
-"Idle": SubResource("Animation_pbcab"),
-"RESET": SubResource("Animation_77dnj")
+&"Idle": SubResource("Animation_pbcab"),
+&"RESET": SubResource("Animation_77dnj")
 }
 
 [node name="Animation" type="Node2D"]

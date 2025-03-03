@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://j4fd1kkium01"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_aa5jy"]
-[ext_resource type="Script" path="res://Location/Location Generation/Test/TestAStarPathfind.gd" id="2_0y7gv"]
+[ext_resource type="Script" uid="uid://b2q4c3hm7mrc2" path="res://Location/Location Generation/Test/TestAStarPathfind.gd" id="2_0y7gv"]
 
 [node name="TestAStarPathfind" type="TileMap"]
 y_sort_enabled = true

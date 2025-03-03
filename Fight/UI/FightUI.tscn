@@ -1,11 +1,11 @@
 [gd_scene load_steps=19 format=3 uid="uid://bc7rpjuhb524c"]
 
-[ext_resource type="Script" path="res://Fight/UI/FightUI.gd" id="1_2qgxu"]
+[ext_resource type="Script" uid="uid://dxuuu0o12w3q3" path="res://Fight/UI/FightUI.gd" id="1_2qgxu"]
 [ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Fight/UI/FightButton.tscn" id="1_drfjl"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_w5ldf"]
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
 [ext_resource type="Texture2D" uid="uid://cjocgotg0hgx5" path="res://Assets/Icons/SixShootinIcon.png" id="4_8ob0s"]
-[ext_resource type="Script" path="res://UI/Miscellaneous/AddTooltip.gd" id="4_8sf7b"]
+[ext_resource type="Script" uid="uid://b88mfmepglnl" path="res://UI/Miscellaneous/AddTooltip.gd" id="4_8sf7b"]
 [ext_resource type="Texture2D" uid="uid://6gju4eo6vq5g" path="res://Assets/Icons/HP.png" id="4_vga8u"]
 [ext_resource type="PackedScene" uid="uid://dm8v87vsh2qow" path="res://UI/Tooltip/Tooltip.tscn" id="5_5ysdm"]
 [ext_resource type="Texture2D" uid="uid://bss3bqrqmrnsd" path="res://Assets/Icons/HighTailinIcon.png" id="5_docnv"]

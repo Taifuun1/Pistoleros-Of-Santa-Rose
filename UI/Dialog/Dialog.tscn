@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cn7ew0rsr5gxi"]
 
 [ext_resource type="Texture2D" uid="uid://c5c41qixj4k3p" path="res://Assets/UI/DialogBackground.png" id="1_wo5xe"]
-[ext_resource type="Script" path="res://UI/Dialog/Dialog.gd" id="2_ifm4b"]
+[ext_resource type="Script" uid="uid://c1btrdoxtpl4p" path="res://UI/Dialog/Dialog.gd" id="2_ifm4b"]
 
 [node name="Dialog" type="CanvasLayer"]
 visible = false

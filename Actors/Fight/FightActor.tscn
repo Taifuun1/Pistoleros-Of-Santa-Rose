@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://tt6jng5rv6nq"]
 
-[ext_resource type="Script" path="res://Actors/Fight/FightActor.gd" id="1_3o4kd"]
+[ext_resource type="Script" uid="uid://c1w24r73mo06f" path="res://Actors/Fight/FightActor.gd" id="1_3o4kd"]
 [ext_resource type="Texture2D" uid="uid://b2nkhsi0t1tf4" path="res://Assets/UI/Highlight.png" id="2_u6u06"]
 [ext_resource type="Texture2D" uid="uid://bpeu6njviccp8" path="res://Assets/UI/Highlight2.png" id="3_8gi8m"]
 

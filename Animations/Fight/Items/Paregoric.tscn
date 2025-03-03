@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bytrthesl5w3b"]
 
-[ext_resource type="Script" path="res://Animations/Fight/FightAnimation.gd" id="1_i1xd2"]
+[ext_resource type="Script" uid="uid://dfjycrv8injq3" path="res://Animations/Fight/FightAnimation.gd" id="1_i1xd2"]
 [ext_resource type="Texture2D" uid="uid://b15sy1i2bi8co" path="res://Assets/SFX/ItemApplyHeal.png" id="1_r6r6m"]
 
 [sub_resource type="Animation" id="Animation_5s6or"]
@@ -37,8 +37,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ti4n6"]
 _data = {
-"Effect": SubResource("Animation_5s6or"),
-"RESET": SubResource("Animation_xayyp")
+&"Effect": SubResource("Animation_5s6or"),
+&"RESET": SubResource("Animation_xayyp")
 }
 
 [node name="Paregoric" type="Sprite2D"]

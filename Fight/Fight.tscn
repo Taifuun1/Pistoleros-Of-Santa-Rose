@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=4 uid="uid://buiva1siae1f0"]
 
-[ext_resource type="Script" path="res://Fight/Fight.gd" id="1_v7hky"]
+[ext_resource type="Script" uid="uid://bpx3yhv1tn53g" path="res://Fight/Fight.gd" id="1_v7hky"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="3_ba4lx"]
 [ext_resource type="PackedScene" uid="uid://bc7rpjuhb524c" path="res://Fight/UI/FightUI.tscn" id="3_d821d"]
 

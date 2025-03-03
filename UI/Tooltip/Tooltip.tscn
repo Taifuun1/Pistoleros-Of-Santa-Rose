@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="1_4sdvw"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_aw3v0"]
-[ext_resource type="Script" path="res://UI/Tooltip/Tooltip.gd" id="2_qv6mp"]
+[ext_resource type="Script" uid="uid://cgb0sgk44k1u8" path="res://UI/Tooltip/Tooltip.gd" id="2_qv6mp"]
 
 [node name="Tooltip" type="CanvasLayer"]
 layer = 2

@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://b0rctbmtj4v50"]
 
 [ext_resource type="Texture2D" uid="uid://bde6q4oncwpir" path="res://Assets/Abilities/SharpShotAnimation.png" id="1_jegrl"]
-[ext_resource type="Script" path="res://Animations/Fight/FightAnimation.gd" id="2_h01dh"]
+[ext_resource type="Script" uid="uid://dfjycrv8injq3" path="res://Animations/Fight/FightAnimation.gd" id="2_h01dh"]
 
 [sub_resource type="Animation" id="Animation_5s6or"]
 resource_name = "Effect"
@@ -36,8 +36,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ti4n6"]
 _data = {
-"Effect": SubResource("Animation_5s6or"),
-"RESET": SubResource("Animation_xayyp")
+&"Effect": SubResource("Animation_5s6or"),
+&"RESET": SubResource("Animation_xayyp")
 }
 
 [node name="Sharp Shot" type="Sprite2D"]

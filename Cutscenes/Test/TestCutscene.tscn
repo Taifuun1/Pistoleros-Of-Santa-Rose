@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dt5cfhc2fujdc"]
 
-[ext_resource type="Script" path="res://Cutscenes/Test/TestCutscene.gd" id="1_l6euq"]
+[ext_resource type="Script" uid="uid://c1bjfahb3gofn" path="res://Cutscenes/Test/TestCutscene.gd" id="1_l6euq"]
 [ext_resource type="PackedScene" uid="uid://cn7ew0rsr5gxi" path="res://UI/Dialog/Dialog.tscn" id="2_81c1w"]
 
 [node name="Cutscene" type="AnimationPlayer"]

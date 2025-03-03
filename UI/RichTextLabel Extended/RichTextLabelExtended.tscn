@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ce2thwvlne3vr"]
 
-[ext_resource type="Script" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.gd" id="1_lmsom"]
+[ext_resource type="Script" uid="uid://mjovl8hvs72g" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.gd" id="1_lmsom"]
 
 [node name="RichTextLabelExtended" type="RichTextLabel"]
 texture_filter = 1

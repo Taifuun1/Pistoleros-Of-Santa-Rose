@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bfjgww2c0wct8"]
 
-[ext_resource type="Script" path="res://Nodes/Damage Number/DamageNumber.gd" id="1_t4f4c"]
+[ext_resource type="Script" uid="uid://sgopdnm5cec4" path="res://Nodes/Damage Number/DamageNumber.gd" id="1_t4f4c"]
 
 [node name="DamageNumber" type="RichTextLabel"]
 size_flags_horizontal = 0

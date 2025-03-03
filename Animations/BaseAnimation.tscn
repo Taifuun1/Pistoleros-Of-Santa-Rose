@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://t164e3111dql"]
 
-[ext_resource type="Script" path="res://Animations/BaseAnimation.gd" id="1_dkduo"]
+[ext_resource type="Script" uid="uid://dstiaulbiv2kk" path="res://Animations/BaseAnimation.gd" id="1_dkduo"]
 
 [node name="BaseAnimation" type="Sprite2D"]
 script = ExtResource("1_dkduo")

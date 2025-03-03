@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bs2cvtlfeubvt"]
 
-[ext_resource type="Script" path="res://Overworld/Overworld Chunks/#1#22.gd" id="1_uk37u"]
+[ext_resource type="Script" uid="uid://c8ddt8qh2wnit" path="res://Overworld/Overworld Chunks/#1#22.gd" id="1_uk37u"]
 [ext_resource type="PackedScene" uid="uid://c8y8ry3iy1a0o" path="res://Overworld/OverworldTileChunkTemplate.tscn" id="2_tuyiu"]
 
 [node name="#2#23" type="Node2D"]

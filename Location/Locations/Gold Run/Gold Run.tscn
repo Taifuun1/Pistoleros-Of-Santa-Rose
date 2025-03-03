@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://blwuwmccpt1gr"]
 
-[ext_resource type="Script" path="res://Location/Locations/Lazysprings/Lazysprings.gd" id="1_osdk4"]
+[ext_resource type="Script" uid="uid://bbvwfas5cuy4s" path="res://Location/Locations/Lazysprings/Lazysprings.gd" id="1_osdk4"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_tddsq"]
 [ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/Location/PlayerLocationActor.tscn" id="3_wwyec"]
 [ext_resource type="Texture2D" uid="uid://be605mr72mv17" path="res://Assets/Buildings/Saloon2.png" id="4_tbr0w"]

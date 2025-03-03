@@ -1,15 +1,15 @@
 [gd_scene load_steps=95 format=3 uid="uid://lkirqht3aybu"]
 
-[ext_resource type="Shader" path="res://Shaders/Test/TilemapWaterTest.gdshader" id="2_bbt2a"]
+[ext_resource type="Shader" uid="uid://bralwfsmx5ac7" path="res://Shaders/Test/TilemapWaterTest.gdshader" id="2_bbt2a"]
 [ext_resource type="Texture2D" uid="uid://dj71emhaqahnd" path="res://Shaders/Test/TilemapWaterNoise1Test.tres" id="2_mp70a"]
 [ext_resource type="Texture2D" uid="uid://bulok7gwcxmyp" path="res://Shaders/Test/TilemapWaterNoise2Test.tres" id="3_5k0q6"]
 [ext_resource type="Texture2D" uid="uid://dy8rp0007s1ug" path="res://Assets/Miscellaneous/DefaultShaderSprite.png" id="3_mvl8f"]
 [ext_resource type="Texture2D" uid="uid://bca5p8hbh11qs" path="res://Assets/Tilesets/Test/TemplateLowerTile.png" id="4_5awqy"]
-[ext_resource type="Shader" path="res://Shaders/Test/TilemapGroundTest.gdshader" id="5_kxgjk"]
-[ext_resource type="Shader" path="res://Shaders/Test/TilemapTest.gdshader" id="6_5gfct"]
+[ext_resource type="Shader" uid="uid://cqb83rbgswd34" path="res://Shaders/Test/TilemapGroundTest.gdshader" id="5_kxgjk"]
+[ext_resource type="Shader" uid="uid://bow6l0tdc87d0" path="res://Shaders/Test/TilemapTest.gdshader" id="6_5gfct"]
 [ext_resource type="Texture2D" uid="uid://brfnygkic5ao6" path="res://Assets/Tilesets/Test/GrandCanyonTile.png" id="7_egxgf"]
 [ext_resource type="Texture2D" uid="uid://c8f0vc7eenjrs" path="res://Assets/Tilesets/TemplateTile_n.png" id="8_ccv2c"]
-[ext_resource type="Shader" path="res://Shaders/Test/ShadowTest.gdshader" id="8_ttgun"]
+[ext_resource type="Shader" uid="uid://duawmk4li76l6" path="res://Shaders/Test/ShadowTest.gdshader" id="8_ttgun"]
 [ext_resource type="Texture2D" uid="uid://xsjf8dopmpdx" path="res://Assets/Tilesets/Test/GrandCanyon.png" id="9_vls1s"]
 [ext_resource type="Texture2D" uid="uid://b0g645hfgpuh0" path="res://Assets/Tilesets/Test/GrandCanyon_n.png" id="10_kk2i1"]
 [ext_resource type="Texture2D" uid="uid://b8spy7q3eraof" path="res://Assets/Lights/Faint.png" id="12_klt0w"]
@@ -29,6 +29,8 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yqugh"]
 shader = ExtResource("2_bbt2a")
+shader_parameter/noise1 = ExtResource("2_mp70a")
+shader_parameter/noise2 = ExtResource("3_5k0q6")
 shader_parameter/scroll1 = Vector2(0.08, 0.05)
 shader_parameter/scroll2 = Vector2(-0.05, -0.08)
 shader_parameter/TIME_CONSTANT = 0.1
@@ -37,8 +39,6 @@ shader_parameter/tone_color = Color(0.282353, 0.494118, 1, 1)
 shader_parameter/top_color = Color(0.560784, 0.705882, 1, 1)
 shader_parameter/light_start = 0.262
 shader_parameter/light_end = 0.997
-shader_parameter/noise1 = ExtResource("2_mp70a")
-shader_parameter/noise2 = ExtResource("3_5k0q6")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wgrr2"]
 texture = ExtResource("4_5awqy")
@@ -52,6 +52,8 @@ sources/2 = SubResource("TileSetAtlasSource_wgrr2")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_44fs5"]
 shader = ExtResource("2_bbt2a")
+shader_parameter/noise1 = ExtResource("2_mp70a")
+shader_parameter/noise2 = ExtResource("3_5k0q6")
 shader_parameter/scroll1 = Vector2(0.08, 0.05)
 shader_parameter/scroll2 = Vector2(-0.05, -0.08)
 shader_parameter/TIME_CONSTANT = 0.05
@@ -60,8 +62,6 @@ shader_parameter/tone_color = Color(0.282353, 0.494118, 1, 1)
 shader_parameter/top_color = Color(0.560784, 0.705882, 1, 1)
 shader_parameter/light_start = 0.262
 shader_parameter/light_end = 0.997
-shader_parameter/noise1 = ExtResource("2_mp70a")
-shader_parameter/noise2 = ExtResource("3_5k0q6")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_4847w"]
 shader = ExtResource("6_5gfct")
@@ -78,9 +78,7 @@ texture = SubResource("CanvasTexture_ha0lq")
 texture_region_size = Vector2i(24, 24)
 use_texture_padding = false
 0:0/0 = 0
-0:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_vrcsu")
-0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-0:0/0/physics_layer_0/angular_velocity = 0.0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_vrcsu")
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_b6dk7"]
 polygon = PackedVector2Array(0, 1, -10, 7.5, 1, 12, 12, 8)
@@ -97,14 +95,10 @@ texture = SubResource("CanvasTexture_bvnu2")
 texture_region_size = Vector2i(24, 24)
 use_texture_padding = false
 2:0/0 = 0
-2:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_b6dk7")
-2:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-2:0/0/physics_layer_0/angular_velocity = 0.0
+2:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_b6dk7")
 3:0/size_in_atlas = Vector2i(1, 2)
 3:0/0 = 0
-3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_57q48")
-3:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-3:0/0/physics_layer_0/angular_velocity = 0.0
+3:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_57q48")
 
 [sub_resource type="TileSet" id="TileSet_u4rqm"]
 tile_shape = 1
@@ -175,29 +169,29 @@ texture = SubResource("CanvasTexture_3vcu0")
 texture_region_size = Vector2i(24, 48)
 use_texture_padding = false
 6:0/0 = 0
-6:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_os0b2")
+6:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_os0b2")
 7:0/0 = 0
-7:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_i4pqk")
+7:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_i4pqk")
 8:0/0 = 0
-8:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_oi0g1")
+8:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_oi0g1")
 9:0/0 = 0
-9:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_0q18a")
+9:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_0q18a")
 0:0/0 = 0
-0:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_bvmpd")
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_bvmpd")
 1:0/0 = 0
-1:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_81su7")
+1:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_81su7")
 2:0/0 = 0
-2:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_3l8dp")
+2:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_3l8dp")
 3:0/0 = 0
-3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_gm1fb")
+3:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_gm1fb")
 4:0/0 = 0
-4:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_lgacl")
+4:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_lgacl")
 5:0/0 = 0
-5:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_v43lv")
+5:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_v43lv")
 10:0/0 = 0
-10:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_8n0of")
+10:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_8n0of")
 11:0/0 = 0
-11:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_5xsac")
+11:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_5xsac")
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_pwp20"]
 
@@ -225,14 +219,14 @@ use_texture_padding = false
 1:0/0 = 0
 2:0/0 = 0
 3:0/0 = 0
-3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_pwp20")
-3:0/0/occlusion_layer_1/polygon = SubResource("OccluderPolygon2D_f7gse")
+3:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_pwp20")
+3:0/0/occlusion_layer_1/polygon_0/polygon = SubResource("OccluderPolygon2D_f7gse")
 4:0/0 = 0
-4:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_wfboi")
-4:0/0/occlusion_layer_1/polygon = SubResource("OccluderPolygon2D_svkt8")
+4:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_wfboi")
+4:0/0/occlusion_layer_1/polygon_0/polygon = SubResource("OccluderPolygon2D_svkt8")
 5:0/0 = 0
-5:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_v8v28")
-5:0/0/occlusion_layer_1/polygon = SubResource("OccluderPolygon2D_sxyjj")
+5:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_v8v28")
+5:0/0/occlusion_layer_1/polygon_0/polygon = SubResource("OccluderPolygon2D_sxyjj")
 6:0/0 = 0
 7:0/0 = 0
 8:0/0 = 0
@@ -290,63 +284,35 @@ texture_region_size = Vector2i(24, 48)
 use_texture_padding = false
 0:0/0 = 0
 0:0/0/texture_origin = Vector2i(0, 25)
-0:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_7byqy")
-0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-0:0/0/physics_layer_0/angular_velocity = 0.0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_7byqy")
 1:0/0 = 0
 1:0/0/texture_origin = Vector2i(0, 25)
-1:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_jo123")
-1:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-1:0/0/physics_layer_0/angular_velocity = 0.0
+1:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_jo123")
 2:0/0 = 0
 2:0/0/texture_origin = Vector2i(0, 25)
-2:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_y8opr")
-2:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-2:0/0/physics_layer_0/angular_velocity = 0.0
+2:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_y8opr")
 3:0/0 = 0
-3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_r8eqb")
-3:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-3:0/0/physics_layer_0/angular_velocity = 0.0
+3:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_r8eqb")
 4:0/0 = 0
-4:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_3o1yn")
-4:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-4:0/0/physics_layer_0/angular_velocity = 0.0
+4:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_3o1yn")
 5:0/0 = 0
-5:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_dgtwk")
-5:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-5:0/0/physics_layer_0/angular_velocity = 0.0
+5:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_dgtwk")
 6:0/0 = 0
-6:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_kalpk")
-6:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-6:0/0/physics_layer_0/angular_velocity = 0.0
+6:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_kalpk")
 7:0/0 = 0
 7:0/0/texture_origin = Vector2i(0, 1)
-7:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_b7ovx")
-7:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-7:0/0/physics_layer_0/angular_velocity = 0.0
+7:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_b7ovx")
 8:0/0 = 0
 8:0/0/texture_origin = Vector2i(0, 1)
-8:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_ojv0b")
-8:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-8:0/0/physics_layer_0/angular_velocity = 0.0
+8:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_ojv0b")
 9:0/0 = 0
 9:0/0/texture_origin = Vector2i(0, 1)
-9:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_vfbqe")
-9:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-9:0/0/physics_layer_0/angular_velocity = 0.0
+9:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_vfbqe")
 6:1/0 = 0
-6:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-6:1/0/physics_layer_0/angular_velocity = 0.0
 7:1/0 = 0
-7:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-7:1/0/physics_layer_0/angular_velocity = 0.0
 8:1/0 = 0
-8:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-8:1/0/physics_layer_0/angular_velocity = 0.0
 9:1/0 = 0
-9:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_1osab")
-9:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
-9:1/0/physics_layer_0/angular_velocity = 0.0
+9:1/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_1osab")
 
 [sub_resource type="TileSet" id="TileSet_uret2"]
 tile_shape = 1
@@ -364,12 +330,12 @@ noise = SubResource("FastNoiseLite_jtn63")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x62kl"]
 shader = ExtResource("5_kxgjk")
+shader_parameter/noise = SubResource("NoiseTexture2D_tetw7")
 shader_parameter/distortion_strength = 0.2
 shader_parameter/tone_color = Color(0.898039, 0.521569, 0.305882, 0.117647)
 shader_parameter/top_color = Color(0.666667, 0.34902, 0.152941, 0.207843)
 shader_parameter/light_start = 0.275
 shader_parameter/light_end = 0.4
-shader_parameter/noise = SubResource("NoiseTexture2D_tetw7")
 
 [sub_resource type="GDScript" id="GDScript_0kggw"]
 script/source = "extends Sprite2D
@@ -580,9 +546,9 @@ tracks/2/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_tlb7d"]
 _data = {
-"Idle": SubResource("Animation_xpotw"),
-"RESET": SubResource("Animation_vnx3y"),
-"Wagon Side Move": SubResource("Animation_j3yh0")
+&"Idle": SubResource("Animation_xpotw"),
+&"RESET": SubResource("Animation_vnx3y"),
+&"Wagon Side Move": SubResource("Animation_j3yh0")
 }
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_vy6wf"]

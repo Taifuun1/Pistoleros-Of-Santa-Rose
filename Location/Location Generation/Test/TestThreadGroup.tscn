@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bfuixbm8jk1t"]
 
-[ext_resource type="Script" path="res://Location/Location Generation/Clearwater Grove/ClearwaterGroveGeneration.gd" id="1_n5qs1"]
-[ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/WFCChunkGenerator.tscn" id="2_8axb3"]
+[ext_resource type="Script" uid="uid://dpxt2vduncm1a" path="res://Location/Location Generation/LocationGeneration.gd" id="1_n5qs1"]
+[ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/Chunk Generation/WFCChunkGenerator.tscn" id="2_8axb3"]
 
 [node name="TestThreadGroup" type="Node2D"]
 

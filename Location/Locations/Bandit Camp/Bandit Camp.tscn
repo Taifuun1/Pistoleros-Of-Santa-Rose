@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cee4qa2f4ysbp"]
 
-[ext_resource type="Script" path="res://Location/Locations/Bandit Camp/Bandit Camp.gd" id="1_e276l"]
+[ext_resource type="Script" uid="uid://bu3u41ab0nmmm" path="res://Location/Locations/Bandit Camp/Bandit Camp.gd" id="1_e276l"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_mavue"]
 [ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/Location/PlayerLocationActor.tscn" id="3_fte1c"]
 [ext_resource type="Texture2D" uid="uid://be605mr72mv17" path="res://Assets/Buildings/Saloon2.png" id="4_6dvig"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=32 format=3 uid="uid://dvlk3muixwpyx"]
 
-[ext_resource type="Script" path="res://Actors/Overworld/PlayerOverworldActor.gd" id="1_npyk4"]
+[ext_resource type="Script" uid="uid://u7jjiyxsjkm5" path="res://Actors/Overworld/PlayerOverworldActor.gd" id="1_npyk4"]
 [ext_resource type="Texture2D" uid="uid://dyg8kxe5bq1ia" path="res://Assets/Map Entities/Wagon/WagonUp.png" id="2_10jsh"]
 [ext_resource type="Texture2D" uid="uid://brqhktrw1fgpt" path="res://Assets/Map Entities/Wagon/WagonDown.png" id="2_vdlb4"]
 [ext_resource type="Texture2D" uid="uid://cijnovywmwynw" path="res://Assets/Map Entities/Wagon/WagonUpSide.png" id="3_7x7ga"]
@@ -152,7 +152,8 @@ animations = [{
 
 [sub_resource type="Animation" id="Animation_8p3vw"]
 resource_name = "Move Down"
-step = 0.5
+length = 2.0
+step = 1.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -160,7 +161,7 @@ tracks/0/path = NodePath("AnimatedSprite2D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.5),
+"times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [0, 1]
@@ -202,7 +203,8 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_6qvju"]
 resource_name = "Move Up"
-step = 0.5
+length = 2.0
+step = 1.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -210,7 +212,7 @@ tracks/0/path = NodePath("AnimatedSprite2D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.5),
+"times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [0, 1]
@@ -250,12 +252,12 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5kcx2"]
 _data = {
-"Move Down": SubResource("Animation_8p3vw"),
-"Move Down Side": SubResource("Animation_cjvc6"),
-"Move Side": SubResource("Animation_snt5j"),
-"Move Up": SubResource("Animation_6qvju"),
-"Move Up Side": SubResource("Animation_mw54g"),
-"RESET": SubResource("Animation_lax5o")
+&"Move Down": SubResource("Animation_8p3vw"),
+&"Move Down Side": SubResource("Animation_cjvc6"),
+&"Move Side": SubResource("Animation_snt5j"),
+&"Move Up": SubResource("Animation_6qvju"),
+&"Move Up Side": SubResource("Animation_mw54g"),
+&"RESET": SubResource("Animation_lax5o")
 }
 
 [node name="PlayerOverworldActor" type="CharacterBody2D"]

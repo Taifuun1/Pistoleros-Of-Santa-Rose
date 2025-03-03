@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://docllrl8hvf3k"]
 
-[ext_resource type="Script" path="res://Location/Location Generation/Chunk Generation/WFCChunkGenerator.gd" id="1_asj1o"]
+[ext_resource type="Script" uid="uid://3lcol2qlx11m" path="res://Location/Location Generation/Chunk Generation/WFCChunkGenerator.gd" id="1_asj1o"]
 
 [node name="WFCChunkGenerator" type="Node2D"]
 script = ExtResource("1_asj1o")
