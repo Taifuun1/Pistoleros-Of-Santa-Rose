@@ -71,7 +71,7 @@ A "His leg is hurt. We're not going anywhere before we do something about that."
 W "Gwyneth, make a splint from some sturdy branches off the ground. We're not leaving anyone behind."<br>
 G "On it."<br>
 A "What happened, Manuel?"<br>
-M "I rode with Morrison for long while. The Feds didn't give up the chase easily."<br>
+M "I rode with Morrison for a long while. The Feds didn't give up the chase easily."<br>
 M "The gunshots scared my horse, and it reared. I fell hard on my side."<br>
 M "Luckily, the Feds didn't see me. They went after Morrison."<br>
 A "Which direction did he ride to?"<br>
@@ -84,7 +84,7 @@ A "Let's move!"
 
 ## Littlehill Grove
 
-The gang wonders around for a while, and eventually runs into Morrison. Morrison managed to escape the feds, with his horse still with him. Morrison has his gear, supplies, and a bit of the money. The Pistoleros regroup, and head for the closest village.
+The gang wonders around for a while, and eventually runs into Morrison. Morrison managed to escape the feds, with his horse still with him. Morrison has his gear, supplies, and a bit of the money. The Pistoleros regroup, and head for the closest village, Lazysprings.
 
 MO "Who's there?"<br>
 G "It's just us, Morrison."<br>
@@ -100,14 +100,14 @@ Morrison pulls out one bag of cash<br>
 W "ONE bag? Damnit! Damnit all to hells!"<br>
 W "You couldn't grab more than one single bag!"<br>
 MO "I..."<br>
-A "Walker, that's enough. We've all had enough troubles for a whole year."<br>
+A "Walker, that's enough. We've had enough troubles for a whole year."<br>
 MA "Eyyyy, friends. Let's have a bit more friendliness, eh?"<br>
-G "It's alright. No we've something to work with. We have supplies, and some money."<br>
+G "It's alright. Now we've something to work with. We have supplies, and some money."<br>
 G "Lets take stock of what we have."<br>
 After counting the supplies and the money<br>
 G "...And that's it."<br>
 W "We don't got enough for anything, really. Enough for a trip to the nearest Fed prison, and that's it."<br>
-G "There's enough here to get to Lazysprings. We can think what we do after we get there."<br>
+G "There's enough here to get to Lazysprings. We can think of what we do after we get there."<br>
 MO "...I'm sorry. I couldn't grab more. The Feds were already blasting when I got to the safe."<br>
 G "All that matters it that were all safe."<br>
 MA "We got a little compañerismo, eh? We'll do it together!"<br>
@@ -117,5 +117,5 @@ G "...The Pistoleros of Santa Rose!"<br>
 A "Yeah!"<br>
 MA "Cheers!"<br>
 MO Almost starts crying "..."<br>
-W "Alright, let's move it to Lazysprings."<br>
-A "I can't wait to get to a saloon!"<br>
+W "Alright, let's move it. We're going to Lazysprings."<br>
+A "I can't wait to get to a saloon! Nothing beats whiskey after a bad day!"<br>
