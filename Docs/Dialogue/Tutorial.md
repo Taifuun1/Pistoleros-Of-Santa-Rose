@@ -16,14 +16,14 @@ After a wander, Walker comes up on Gwyneth, hiding behind a rock. Gwyneth recoun
 
 Walker "Who's that?"<br>
 Gwyneth, comes out of hiding "Walker, you're alive. Thank god."<br>
-"I wasn't sure if you would make it."<br>
-"Nevermind that, where's cash?"<br>
-"The Feds chased us up the mountain creek. I don't know where we got separated. The entire thing was a blur."<br>
-"I rode through the woods as fast as I could. At some point, the branches from the trees must have tangled on me."<br>
-"I don't know where the money is. It's gone."<br>
-"Darn it to hell! Where's the rest of the gang? They had the rest of it!"<br>
-"Calm down, Walker. That's not important. We have to find the others, before we worry about anything else."<br>
-"Hells, we didn't do all this for nothing, did we, Gwyneth? Let's search, the rest of them must around here somewhere."
+G "I wasn't sure if you would make it."<br>
+W "Nevermind that, where's cash?"<br>
+G "The Feds chased us up the mountain creek. I don't know where we got separated. The entire thing was a blur."<br>
+G "I rode through the woods as fast as I could. At some point, the branches from the trees must have tangled on me."<br>
+G "I don't know where the money is. It's gone."<br>
+W "Darn it to hell! Where's the rest of the gang? They had the rest of it!"<br>
+G "Calm down, Walker. That's not important. We have to find the others, before we worry about anything else."<br>
+W "Hells, we didn't do all this for nothing, did we, Gwyneth? Let's search, the rest of them must be around here somewhere."
 
 ## Great Fall Ridge
 
@@ -52,11 +52,70 @@ A "We'll, mostly Walker."<br>
 G "Oh, thank god you're alive Aiyana. My heart skipped a beat when I saw the jacket in the water."<br>
 W "Do you have the money? Did we get anything out of this miserable experience?"<br>
 A "Great to see you too, Walker. I'm fine, thank you for asking."<br>
-A "And no, I don't have the money. The Feds were on our tail. I rode as hard as I could the woods."<br>
+A "And no, I don't have the money. The Feds were on our tail. I rode as hard as I could in the woods."<br>
 A "I rode through a spruce thicklet. The branches tangled on me, and before I knew it, I was on the ground."<br>
-A "The horse rode with the money."<br>
+A "The horse rode off with the money."<br>
 W "What about Manuel? Or Morrison? Did they get any of the bags?"<br>
 A "I found Manuel deeper in the woods. He's hurt in the leg."<br>
 G "Do you have any of the gear on you? Or was it all on the horse?"<br>
 A "I'm afraid it was all on the horse. I only have the clothes on my back."<br>
 G "...It's okay. Let's just go see Manuel."<br>
+
+## Blackberry Retreat
+
+The half-found gang walks to Manuel, who is laying against a tree with his leg hurt. Manuel is fine after they make him a makeshift spint. Manuel says he saw Morrison run towards Littlehill Grove.
+
+G "There you are, Manuel. Looking worse for wear."<br>
+M "I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."<br>
+A "His leg is hurt. We're not going anywhere before we do something about that."<br>
+W "Gwyneth, make a splint from some sturdy branches off the ground. We're not leaving anyone behind."<br>
+G "On it."<br>
+A "What happened, Manuel?"<br>
+M "I rode with Morrison for long while. The Feds didn't give up the chase easily."<br>
+M "The gunshots scared my horse, and it reared. I fell hard on my side."<br>
+M "Luckily, the Feds didn't see me. They went after Morrison."<br>
+A "Which direction did he ride to?"<br>
+M "We we're headed for Littlehill Grove."<br>
+Gwyneth fixes up Manuels leg<br>
+G "There, good as new."<br>
+W "Good. Let's get moving. We have to find Morrison."<br>
+M "Oh, I hope he's okay. He's not the bravest soul."<br>
+A "Let's move!"
+
+## Littlehill Grove
+
+The gang wonders around for a while, and eventually runs into Morrison. Morrison managed to escape the feds, with his horse still with him. Morrison has his gear, supplies, and a bit of the money. The Pistoleros regroup, and head for the closest village.
+
+MO "Who's there?"<br>
+G "It's just us, Morrison."<br>
+MO "...Thank god. I thought the Feds finally caught up."<br>
+G "Do you have your horse?"<br>
+MO "She's here..."<br>
+Morrison walks the horse out of the brush<br>
+W "Finally, some good news. How many bags are there?"<br>
+MO "..."<br>
+W "Where's the bags, Morrison?"<br>
+MO "Here..."<br>
+Morrison pulls out one bag of cash<br>
+W "ONE bag? Damnit! Damnit all to hells!"<br>
+W "You couldn't grab more than one single bag!"<br>
+MO "I..."<br>
+A "Walker, that's enough. We've all had enough troubles for a whole year."<br>
+MA "Eyyyy, friends. Let's have a bit more friendliness, eh?"<br>
+G "It's alright. No we've something to work with. We have supplies, and some money."<br>
+G "Lets take stock of what we have."<br>
+After counting the supplies and the money<br>
+G "...And that's it."<br>
+W "We don't got enough for anything, really. Enough for a trip to the nearest Fed prison, and that's it."<br>
+G "There's enough here to get to Lazysprings. We can think what we do after we get there."<br>
+MO "...I'm sorry. I couldn't grab more. The Feds were already blasting when I got to the safe."<br>
+G "All that matters it that were all safe."<br>
+MA "We got a little compañerismo, eh? We'll do it together!"<br>
+G "We'll be fine. As long as we can figure out what to do next."<br>
+G "We've always pulled through. Because we are..."<br>
+G "...The Pistoleros of Santa Rose!"<br>
+A "Yeah!"<br>
+MA "Cheers!"<br>
+MO Almost starts crying "..."<br>
+W "Alright, let's move it to Lazysprings."<br>
+A "I can't wait to get to a saloon!"<br>
