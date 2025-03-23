@@ -8,7 +8,7 @@ Walker wakes up, slowly, at a pond in the woods. Shaking of the bruising and rag
 "There was piles of cash... and a chase..."<br>
 "I remember... flashes of light. Gunfire."<br>
 "What happened to the bags of cash? Ahhh..."<br>
-"I got to find Gwyneth. Where is she?"<br>
+"I got to find Gwyneth. Where is she?"
 
 ## Pine Meadows
 
@@ -42,7 +42,7 @@ G "Hey, do you see that? There, in the river."<br>
 W "What's that? A jacket?"<br>
 W "Damn it all! They fell down the waterfall with the cash!"<br>
 G "Could have been. I'm not gonna count anyone out until I see their body."<br>
-W "They're gone! All the money, <i>gone</i>! What am I gonna do now?"<br>
+W "They're gone! All the bags, <i>gone</i>! What am I gonna do now?"<br>
 G "Calm it down, Walker! The Pistoleros will not be done in by a little water."<br>
 G "They are all fine. We will just have to find them."<br>
 W "They're gone! All of it..."<br>
@@ -50,7 +50,7 @@ Aiyana burst through the brush<br>
 Aiyana "A-ha! Found you! I could hear the both of you from a mile away!"<br>
 A "We'll, mostly Walker."<br>
 G "Oh, thank god you're alive Aiyana. My heart skipped a beat when I saw the jacket in the water."<br>
-W "Do you have the money? Did we get anything out of this miserable experience?"<br>
+W "Do you have the money? Did we get anything out of this miserable fuckup?"<br>
 A "Great to see you too, Walker. I'm fine, thank you for asking."<br>
 A "And no, I don't have the money. The Feds were on our tail. I rode as hard as I could in the woods."<br>
 A "I rode through a spruce thicklet. The branches tangled on me, and before I knew it, I was on the ground."<br>
@@ -59,11 +59,11 @@ W "What about Manuel? Or Morrison? Did they get any of the bags?"<br>
 A "I found Manuel deeper in the woods. He's hurt in the leg."<br>
 G "Do you have any of the gear on you? Or was it all on the horse?"<br>
 A "I'm afraid it was all on the horse. I only have the clothes on my back."<br>
-G "...It's okay. Let's just go see Manuel."<br>
+G "...It's okay. Let's just go see Manuel."
 
 ## Blackberry Retreat
 
-The half-found gang walks to Manuel, who is laying against a tree with his leg hurt. Manuel is fine after they make him a makeshift spint. Manuel says he saw Morrison run towards Littlehill Grove.
+The half-found gang walks to Manuel, who is laying against a tree with his leg hurt. Manuel is fine after they make him a makeshift splint. Manuel says he saw Morrison run towards Littlehill Grove.
 
 G "There you are, Manuel. Looking worse for wear."<br>
 M "I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."<br>
@@ -79,7 +79,7 @@ M "We we're headed for Littlehill Grove."<br>
 Gwyneth fixes up Manuels leg<br>
 G "There, good as new."<br>
 W "Good. Let's get moving. We have to find Morrison."<br>
-M "Oh, I hope he's okay. He's not the bravest soul."<br>
+M "Oh, I hope he's okay. He's not the bravest <i>alma</i>."<br>
 A "Let's move!"
 
 ## Littlehill Grove
@@ -97,11 +97,11 @@ MO "..."<br>
 W "Where's the bags, Morrison?"<br>
 MO "Here..."<br>
 Morrison pulls out one bag of cash<br>
-W "ONE bag? Damnit! Damnit all to hells!"<br>
+W "ONE bag? Damnit! Damnit all to hell!"<br>
 W "You couldn't grab more than one single bag!"<br>
 MO "I..."<br>
 A "Walker, that's enough. We've had enough troubles for a whole year."<br>
-MA "Eyyyy, friends. Let's have a bit more friendliness, eh?"<br>
+MA "Eyyyy, <i>Amigos.</i> Let's have a bit more <i>camaradería</i>, eh?"<br>
 G "It's alright. Now we've something to work with. We have supplies, and some money."<br>
 G "Lets take stock of what we have."<br>
 After counting the supplies and the money<br>
@@ -109,13 +109,13 @@ G "...And that's it."<br>
 W "We don't got enough for anything, really. Enough for a trip to the nearest Fed prison, and that's it."<br>
 G "There's enough here to get to Lazysprings. We can think of what we do after we get there."<br>
 MO "...I'm sorry. I couldn't grab more. The Feds were already blasting when I got to the safe."<br>
-G "All that matters it that were all safe."<br>
-MA "We got a little compañerismo, eh? We'll do it together!"<br>
+G "It's okay. All that matters it that were all safe."<br>
+MA "We got a little <i>compañerismo</i>, eh? We'll do it together!"<br>
 G "We'll be fine. As long as we can figure out what to do next."<br>
 G "We've always pulled through. Because we are..."<br>
 G "...The Pistoleros of Santa Rose!"<br>
 A "Yeah!"<br>
-MA "Cheers!"<br>
-MO Almost starts crying "..."<br>
+MA "<i>Salud!</i>"<br>
+MO, almost starts crying "<i>sob</i>"<br>
 W "Alright, let's move it. We're going to Lazysprings."<br>
-A "I can't wait to get to a saloon! Nothing beats whiskey after a bad day!"<br>
+A "I can't wait to get to a saloon! Nothing beats whiskey after a bad day!"
