@@ -1,4 +1,8 @@
 
+# Pistoleros Regroup
+
+Pistoleros Regroup is the introduction to the gang and the story. In it the Pistoleros of Santa Rose are scattered in a forest after a failed robbery, and must find eachother and regroup.
+
 ## Finch Pond
 
 Walker wakes up, slowly, at a pond in the woods. Shaking of the bruising and raggedness, he finds his bearings. Nobody is around. Walker wonders first about loot that they've lost, and then his party. The Pistoleros of Santa Rose must be scattered nearby.
@@ -17,7 +21,7 @@ After a wander, Walker comes up on Gwyneth, hiding behind a rock. Gwyneth recoun
 Walker "Who's that?"<br>
 Gwyneth, comes out of hiding "Walker, you're alive. Thank god."<br>
 G "I wasn't sure if you would make it."<br>
-W "Nevermind that, where's cash?"<br>
+W "Nevermind that, where's the cash?"<br>
 G "The Feds chased us up the mountain creek. I don't know where we got separated. The entire thing was a blur."<br>
 G "I rode through the woods as fast as I could. At some point, the branches from the trees must have tangled on me."<br>
 G "I don't know where the money is. It's gone."<br>
