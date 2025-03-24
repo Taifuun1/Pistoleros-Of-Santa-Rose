@@ -72,7 +72,7 @@ W "Gwyneth, make a splint from some sturdy branches off the ground. We're not le
 G "On it."<br>
 A "What happened, Manuel?"<br>
 M "I rode with Morrison for a long while. The Feds didn't give up the chase easily."<br>
-M "The gunshots scared my horse, and it reared. I fell hard on my side."<br>
+M "The gunshots scared my <i>caballo</i>, and it reared. I fell hard on my side."<br>
 M "Luckily, the Feds didn't see me. They went after Morrison."<br>
 A "Which direction did he ride to?"<br>
 M "We we're headed for Littlehill Grove."<br>
@@ -118,4 +118,4 @@ A "Yeah!"<br>
 MA "<i>Salud!</i>"<br>
 MO, almost starts crying "<i>sob</i>"<br>
 W "Alright, let's move it. We're going to Lazysprings."<br>
-A "I can't wait to get to a saloon! Nothing beats whiskey after a bad day!"
+A "I can't wait to get to the saloon! Nothing beats whiskey after a bad day!"
