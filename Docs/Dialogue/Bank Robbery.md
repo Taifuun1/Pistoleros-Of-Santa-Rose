@@ -233,7 +233,7 @@ MO "...We'll have to travel west, to Copper Branch."<br>
 MO "It's a mining town in the hills. They mine all kinds of minerals there, coal, silver, gold."<br>
 MO "I've heard a rumor that they've found gold there recently."<br>
 W "Gold?"<br>
-MO "A goldrush is happening there. Many opportunistic prospectors have gone there to try their luck at hitting it big."<br>
+MO "There's a goldrush happening in the area. Many opportunistic prospectors are trying their luck at hitting it big."<br>
 W "A goldrush? We could make some money on the way..."<br>
 MO "West Field Mines are located near Copper branch. They sell the special explosives that we need."<br>
 W "Alright. We'll stock up on provisions, and head west. It'll be a long journey, so prepare properly. Let's take stock at the Copper Branch saloon."
