@@ -13,12 +13,12 @@ A "Let's get to the saloon and regroup."
 
 MA "Mmmm. <i>El whisky</i> tasting <i>bueno</i> after days on the trail!"<br>
 W "Well, we're at Copper Branch. Now what?"<br>
-A "We got to get to West Field Mines. There we'll find the special explosives."<br>
+A "We got to get to West Field Mines. There we will find the special explosives."<br>
 MO "...Well..."<br>
 W "Whats that, Morrison?"<br>
 MO "...I don't think we have enough money for the explosives."<br>
 W "Huh? We robbed a bank! We're rolling in the dough!"<br>
-MO "Those civil war-time explosives are rare, since they don't make them anymore. And they only get rarer each year."<br>
+MO "Those civil-war-time explosives are rare, since they don't make them anymore. And they only get rarer each year."<br>
 MO "I doubt we have enough money for both blowing up the jail AND the continental train."<br>
 W "Well fuck..."<br>
 A "We didn't come here for nothing, did we!?!"<br>
@@ -59,7 +59,7 @@ The Bandidos of El Sacramento pull up, with their leader, Carlos<br>
 Carlos "Eyyyy, <i>Pistoleros del Diablo</I>! High time for <i>venganza!</i>"<br>
 MA "The Bandidos of El Sacramento! <i>Feo!</i>"<br>
 C "Uuuuh, Manuel, <i>malo amigo</i>! We here to give our regards, for last time! Big money, gone with Pistoleros, not good for us."<br>
-C "We take back what is ours."<br>
+C "We take back what ours."<br>
 W "The hell you will! I ain't some yesterdays finch! We worked hard for this money!"<br>
 C "Ooooh, I'm sure you did, <i>amigo</i>. Like in the El Tecoo <i>plantación</i>, eh? Big guns, and big words. I give you what for."<br>
 A fight ensues
@@ -69,24 +69,24 @@ A fight ensues
 A "It's time to give up, Carlos! We got you outgunned!"<br>
 C "Ooooh, so you do, <i>indígena</i>. But we got your money!"<br>
 A "Huh?"<br>
-The crew look back, seeing some Bandidos run away with their money from the horses.<br>
+The crew looks back, seeing some Bandidos run away with their money from the horses.<br>
 W and A "Fuck!"<br>
 C "Our <i>deuda</i> is paid! <i>Adios, amigos!</i>"<br>
 Carlos rides off
 W "Ahhh... Some luck."<br>
 A "We, are going, <i><b>after them!</b></i>"<br>
 W "Aiyana, w..."<br>
-A "Shut it, Walker! I'm not gonna listen to you this time! It's about time you started caring about our gang!"<br>
+A "Shut it, Walker! I'm not going to listen to you this time! It's about time you started caring about our gang!"<br>
 A "Manuel! Morrison! Get on your horses! We're going after them!"<br>
 MO "...Aiyana, I..."<br>
 A "What?"<br>
-MO "We don't have any supplies for a chase. And we don't know where their headed."<br>
+MO "We don't have any supplies for a chase. And we don't know where they're headed."<br>
 MO "It's better if we prepare before we set out."<br>
 MO "And since they split up, we'd need to split up too. We already had that happen, and it landed us in big trouble."<br>
 A "So what? We didn't do all this work nothing, did we? Gwyneth is still out there!"<br>
 MA "Morrison has got his <i>cabeza</i> on right! We'll never find them in the rock hills."<br>
 MA "The Bandidos must have a hideout in the hills. Maybe the local sheriff will know where they are."<br>
-W "We're gonna ask help from the law? What kind of hell have we walked in..."<br>
+W "We're gonna ask help from the law? What kind of hell have we walked into..."<br>
 MO "...I think it's a good idea."<br>
 W "...Fine. Let's see if the Copper Branch sheriff's got an idea where they are."
 
@@ -111,7 +111,7 @@ W "Yeah, heard you loud and clear, shiny-star..."
 ## Outside the sheriffs office
 
 A "Damn, the law always have their heads up their asses. They take everything, and give nothing back."<br>
-W "Ain't that right. We got get to the Bandidos hideout now, so stock up. It should be a days travel down south, into the hills."
+W "Ain't that right. We got to get to the Bandidos hideout now, so stock up. It should be a days travel down south, into the hills."
 
 ## Arrival at the Bandidos hideout
 
@@ -156,21 +156,21 @@ MA "A plan as good as any!"<br>
 Texas Freedom steps into the saloon<br>
 MA "<i>gasp</i> <i>El soberano señorita!</i><br>
 TF "Mmmh, just the people I was lookin' for."<br>
-W "What the hell are you doin' here? Spit it out, or I'll make your hat into swiss cheese."<br>
+W "What the hell are you doin' here? Spit it out, or I'll make your jacket into swiss cheese."<br>
 TF "Now, feller, no need to get uppidy. I'm here to exchange a few words, and nothin' else, if you don't mind."<br>
 A "What do you want?"<br>
 TF "I was informed that them Feds were roughin' up some folk back at Snakeflats. And I went to investigate myself."<br>
 TF "Seems them Feds got one of your folk. And I heard they was gon' uppin' dem lawgiver patrols in der area."<br>
-TF "Those highridin', bootlickin', effeminin' coastal teasippers!"<br>
+TF "Those highridin', bootlickin', effeminin', coastal teasippers!"<br>
 TF "Their fancy au-to-mobiiiles, and their pretty colorful dresses, and their mellow cat-lickity ciders, ain't nothin' but some fairy dust on the trail."<br>
 TF "I ain't gon' let some of them Feds come up to my land here! Only thing they gettin' is the lead from my six-shooter!"<br>
 TF takes off his hat politely
 TF "I see that you people are some fine folk. I apologize for my transgressions earlier. It's the way of the land."<br>
 TF "Any person them Feds hate is good in my books."<br>
 TF "I do be proposin' that we team up, to teach those yellas some manners."<br>
-W "Well I'll be. Didn't take you for friendly type."<br>
+W "Well I'll be. Didn't take you for a friendly type."<br>
 TF "Don't get me wrong, it's not about helping you, not strictly speaking."<br>
-TF "I just don't like them Feds up in my business. Not out here anyways. They can stay in their fancy cities and caaa-feees in the coasts."<br>
+TF "I just don't like them Feds up in my business. Not out here anyways. They can stay in their fancy cities and - <i>caaa-feees</i> - in the coasts."<br>
 TF "And I do think thy should help thine neighbor, every once in a while."<br>
 MA "<i>Magnífico!</i> Our rider in white, coming to save us in our time of need!"<br>
 TF "I ain't no white ridah. I'm just a rancher, doin' what's right."<br>
@@ -200,7 +200,7 @@ MA "You're alive! <i>Milagro!</i><br>
 W "Alright, this is a heartfelt reunion, but we're still in the middle of a Fed prison. Let's move before the real Fed troops get here."<br>
 G "What is he doing here?"<br>
 TF takes off his hat politely
-TF "Pardon me, miss, but I've joined your gang momentarily. I'm here to teach these Feds a lesson or two about the West and its people."<br>
+TF "Pardon me, miss, but I've joined your Pistoleros momentarily. I'm here to teach these Feds a lesson or two about the West and its people."<br>
 G "Well, don't mind if I do. You're quite a welcome sight, sir."<br>
 TF "Y'all makin' me blush with your dang compliments."<br>
 W "We ought to be moving already!"<br>
@@ -218,20 +218,43 @@ W "...Fuck."<br>
 A "Okay, buddy! If it's a gunfight you want, it's a gunfight you'll get!"<br>
 MA "We will dance <i>la danza de la muerte</i> under the moon and the stars, <i>alguacil!</i>"
 
-### After the fight
+### During the fight
 
-LK and TF are fighting
+The crew is pinned down against the Feds
+G "We can't hold out here for long! The Feds got us pinned down!"<br>
+W "We need a distraction! Somethings gotta give!"<br>
+MO "...I..."<br>
+MO "I can blow up the office in the courtyard! Maybe that will create enough chaos."<br>
+W "Works for me! Go for it!"<br>
+MO "I... I need time to set up the explosives."<br>
+MA "We'll provide <i>fuego de supresión!</i>"<br>
+A "Cover me! I'm going in!"<br>
+W "Ahhh, fuck that."<br>
+Aiyana runs in, while the rest of the gang provides covering fire<br>
+Walker hides behind cover<br>
+Aiyana is hit in the leg<br>
+A "Aaaaaahhh!"<br>
+G "I'm gonna help her! Cover me!"<br>
+MA "Walker! We need your gunslinging skills!"<br>
+Gwyneth manages to drag Aiyana out of troubles way
+G "Are you hurt?"<br>
+A "My... leg..."<br>
+MO "I got the explosives in place."<br>
+W "Blow it up!"<br>
+Morrison blows up the jail office<br>
+Scene switches<br>
+LK and TF are fighting<br>
 LK "Give up now, bandit. There's only one way this is going to end for you."<br>
 TF "I ain't gon' give up nuth'in', pardner! Taste lead!"<br>
 LK "You criminals are all the same. All you know how to do is shoot and kill."<br>
 LK "You should learn some manners, dirtbag."<br>
 TF "You looking down on me all uppity, huh? A true man knows big talk ain't some virtue!"<br>
-TF "You got no morals to stand on, yuppie! We have morals, and pride in the West!"<br>
+TF "You got no morals to stand on, yuppie! We have rules, and pride in the West!"<br>
 LK "Morals? You hicks sleep with the horses more than you do with your wives."<br>
 LK "Don't lecture me about morals."<br>
 TF "We don' look down on folk round here, pardner! If you got the gutts and the wits to carve a life for yourself, West gives what it will."<br>
-TF "You get them fancy dresses and mansions for free! You didn't work for nuttin'!"<br>
-The Pistoleros manage to get a breather, by blasting down a wall that caused a large dust cloud
+TF "You get them fancy dresses and mansions for nuthin'! You didn't work a single day in your life!"<br>
+The Pistoleros manage to catch a breather, by blasting down a wall that caused a large dust cloud
 A "Texas, we managed to blast the courtyard office! It's time to get out of here!"<br>
 TF "I got to teach this flatfoot a lesson in manners! I ain't goin' nowhere!"<br>
 MA "This isn't what I had in mind for a fiery night, <i>señorita!</i><br>
