@@ -63,12 +63,12 @@ G "Now, where might the owner of this fine establishment be?"<br>
 A "Let's just wait for the land owner.<br>
 MO "...I don't like this."<br>
 A "Hmh?"<br>
-MO "The land owners in the West don't like when uninvited people wander onto their lands."<br>
+MO "The sovereign citizens in the West don't like when uninvited people wander onto their lands."<br>
 W "Pffft. We'll just talk it out with him, get our horses, and be on our way."<br>
 W "There's nothing to worry about."<br>
 Texas Freedom walks onto the scene<br>
 Texas Freedom "Who the hell are you people?"<br>
-G "Allow us to introduce ourselves. We are unemplyed cowboys, looking to purchase a few horses for our convenience. Are you the owner of this fine ranch?"<br>
+G "Allow us to introduce ourselves. We are unemployed cowboys, looking to purchase a few horses for our convenience. Are you the owner of this fine ranch?"<br>
 T "Mah name's Texas Freedom."<br>
 T "This right here is private property. Mine, in fact."<br>
 T "I'm gon' have to ask you to leave mah property - and I do mean right the hell now."<br>
@@ -127,13 +127,13 @@ G "Where's Walker?"<br>
 A "We were in such a hurry, but he decides to drag his boots..."<br>
 MA "Ey, we've got to go, <i>Amigo!</i> Hurry!"<br>
 The Law Keeper and the local Sheriff walks onto the scene
-Sheriff "Well, well, what do we have here? I thought the commotion was just another saloon brawl, but looks like we've got some real bank robbers on our hands."<br>
-S "You know, we don't appreciate any brigands 'round deeese parts, pardner."<br>
+Snakeflats Sheriff "Well, well, what do we have here? I thought the commotion was just another saloon brawl, but looks like we've got some real bank robbers on our hands."<br>
+SS "You know, we don't appreciate any brigands 'round deeese parts, pardner."<br>
 MA "We ain't no brigands! We're the big <i>Amigos</i>, friend!"<br>
 Law Keeper "...Hmmm..."<br>
 Gwyneth draws her gun<br>
 G "You better stay back, lawgiver. We got a fist full of lead, and you're outgunned!"<br>
-S "Outgunned? Hah! Come in, boys!"<br>
+SS "Outgunned? Hah! Come in, boys!"<br>
 Multiple sheriffs goons come to aid<br>
 G "Ahh... Shouldn't have said anything."<br>
 A "Too late for regrets! Start blasting!"<br>
@@ -142,14 +142,14 @@ A fight ensues
 ### After the fight
 Multiple lawgivers are dead<br>
 Gwyneth, from behind cover "Surrender! If you'll let us go, we'll spare your life!"<br>
-S "I'm not gonna give in to a bunch of criminals! You'll never take me alive!"<br>
+SS "I'm not gonna give in to a bunch of criminals! You'll never take me alive!"<br>
 Law Keeper "Hold on just a moment."<br>
-S "Huh? Don't tell me you're gonna negotiate!"<br>
+SS "Huh? Don't tell me you're gonna negotiate!"<br>
 LK "...Aren't you the Pistoleros of Santa Rose?"<br>
-S "<i>gasp</i><br>
+SS "<i>gasp</i><br>
 G "...I guess there's no point in hiding it. Yes, were the Pistoleros of Santa Rose!"<br>
 LK "Hmph. No wonder you managed to outgun these yokels."<br>
-S "Huh?!?"<br>
+SS "Huh?!?"<br>
 G "That doesn't sound like regular lawgiver talk to me..."<br>
 LK "I was here on my way to the East. I only stopped here for two reasons:"<br>
 LK "I needed a place to stay."<br>
@@ -226,7 +226,7 @@ W "You want to save her? That's suicide, if you ask me."<br>
 A "We're saving her!"<br>
 MA "I must agree with Aiyana. I won't let her go quietly into the sweet night."<br>
 W "Ugh, fuck me sideways. Fine, we'll try to save her. But we're gonna do it at night, with the explosives."<br>
-W "No thickheaded frontal charges. Is that clear, Aiyana?"<br>
+W "No bullheaded frontal charges. Is that clear, Aiyana?"<br>
 A "Fine, as long as we help her."<br>
 W "Where do we get the explosives from, Morrison?"<br>
 MO "...We'll have to travel west, to Copper Branch."<br>
@@ -234,6 +234,6 @@ MO "It's a mining town in the hills. They mine all kinds of minerals there, coal
 MO "I've heard a rumor that they've found gold there recently."<br>
 W "Gold?"<br>
 MO "A goldrush is happening there. Many opportunistic prospectors have gone there to try their luck at hitting it big."<br>
-W "A goldrush? We could make some money there on the way."<br>
-MO "West Field Mines are located nearby Copper branch. They sell the special explosives that we need."<br>
+W "A goldrush? We could make some money on the way..."<br>
+MO "West Field Mines are located near Copper branch. They sell the special explosives that we need."<br>
 W "Alright. We'll stock up on provisions, and head west. It'll be a long journey, so prepare properly. Let's take stock at the Copper Branch saloon."
