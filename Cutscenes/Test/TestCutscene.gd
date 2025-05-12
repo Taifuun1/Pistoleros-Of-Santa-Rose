@@ -1,6 +1,6 @@
 extends AnimationPlayer
 
-@onready var dialog = preload("res://Data/Dialog/Test/TestDialog.gd").new()
+@onready var dialog = preload("res://Data/Cutscenes/Test/TestDialog.gd").new()
 
 var playerAction = false
 var wait = false
