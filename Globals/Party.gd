@@ -25,13 +25,13 @@ var party = {
 			}
 		},
 		"rodeo": "leaders duck",
-		"weapon": {
-			"type": "lead",
-			"weapon": "revolver"
-		}
 		#"weapon": {
 			#"type": "lead",
-			#"weapon": "rifle"
+			#"weapon": "revolver"
 		#}
+		"weapon": {
+			"type": "lead",
+			"weapon": "rifle"
+		}
 	}
 }

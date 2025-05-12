@@ -13,6 +13,7 @@ config_version=5
 config/name="Pistoleros of Santa Rose"
 run/main_scene="res://Overworld/Overworld.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://Assets/Icons/FileIcon.png"
 config/windows_native_icon="res://Assets/Icons/FileIcon.ico"
 
 [autoload]
@@ -25,6 +26,8 @@ Overworld="*res://Globals/Overworld.gd"
 Locations="*res://Globals/Locations.gd"
 Fight="*res://Globals/Fight.gd"
 FrameData="*res://Globals/FrameData.gd"
+Party="*res://Globals/Party.gd"
+Cutscene="*res://Globals/Cutscene.gd"
 
 [display]
 

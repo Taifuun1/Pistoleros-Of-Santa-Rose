@@ -1,0 +1,70 @@
+[gd_scene load_steps=6 format=3 uid="uid://ddsoc6y66sblu"]
+
+[ext_resource type="Script" uid="uid://cw317x8kch11d" path="res://Cutscenes/BaseCutscene.gd" id="1_g8364"]
+[ext_resource type="PackedScene" uid="uid://cn7ew0rsr5gxi" path="res://UI/Dialog/Dialog.tscn" id="2_x62av"]
+
+[sub_resource type="Animation" id="Animation_g8364"]
+resource_name = "Fade In"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 1), Color(0, 0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_y1mie"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ty67o"]
+_data = {
+&"Fade In": SubResource("Animation_g8364"),
+&"RESET": SubResource("Animation_y1mie")
+}
+
+[node name="Cutscene" type="AnimationPlayer"]
+script = ExtResource("1_g8364")
+
+[node name="Setting" type="Node2D" parent="."]
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Dialog" parent="." instance=ExtResource("2_x62av")]
+
+[node name="Waiter" type="Timer" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_ty67o")
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[connection signal="timeout" from="Waiter" to="." method="_on_waiter_timeout"]
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
