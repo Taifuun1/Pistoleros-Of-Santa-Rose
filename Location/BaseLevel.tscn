@@ -1,7 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cn8q643uhqn1j"]
-
-[ext_resource type="Script" uid="uid://bd4cswglsa4ht" path="res://Location/BaseLevel.gd" id="1"]
-
-[node name="BaseLevel" type="TileMap"]
-format = 2
-script = ExtResource("1")

@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b6epbdqvbh83r"]
-
-[ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="1_s44w5"]
-
-[node name="LocationTileChunkTemplate" type="TileMap"]
-y_sort_enabled = true
-tile_set = ExtResource("1_s44w5")
-format = 2
-layer_0/y_sort_enabled = true
