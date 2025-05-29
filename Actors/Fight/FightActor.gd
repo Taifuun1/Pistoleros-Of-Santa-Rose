@@ -19,7 +19,7 @@ func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 		idleAnimation = "Idle Rifle"
 	else:
 		idleAnimation = "Idle"
-	animations.init(idleAnimation, frameHit)
+	animations.initAnimations(idleAnimation, frameHit)
 	name = actorNameInit
 	animations.name = actorNameInit
 	if actorSide == "enemy team":

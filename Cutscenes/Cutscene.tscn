@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://ddsoc6y66sblu"]
+
+[ext_resource type="Script" uid="uid://cw317x8kch11d" path="res://Cutscenes/Cutscene.gd" id="1_g8364"]
+[ext_resource type="PackedScene" uid="uid://cn7ew0rsr5gxi" path="res://UI/Dialog/Dialog.tscn" id="2_x62av"]
+[ext_resource type="PackedScene" uid="uid://muesuexxtn5o" path="res://Cutscenes/Generic Cutscenes/Fade.tscn" id="3_fc0am"]
+
+[node name="Cutscene" type="AnimationPlayer"]
+script = ExtResource("1_g8364")
+
+[node name="Setting" type="Node2D" parent="."]
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Dialog" parent="." instance=ExtResource("2_x62av")]
+
+[node name="Waiter" type="Timer" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+
+[node name="Fade" parent="." instance=ExtResource("3_fc0am")]
+
+[connection signal="timeout" from="Waiter" to="." method="_on_waiter_timeout"]
+[connection signal="animation_finished" from="Fade" to="." method="_on_fade_animation_finished"]

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://c58rrs11p42lk"]
+
+[ext_resource type="Script" uid="uid://cq2osboygwdyw" path="res://Actors/Cutscene/CutsceneActor.gd" id="1_bsbsx"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_bsbsx")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true

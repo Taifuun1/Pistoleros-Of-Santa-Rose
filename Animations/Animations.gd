@@ -10,7 +10,7 @@ signal onAnimationFrameHit
 signal onNextAnimation
 
 
-func init(initIdleAnimation, initAnimationFrameHit = -1):
+func initAnimations(initIdleAnimation, initAnimationFrameHit = -1):
 	idleAnimation = initIdleAnimation
 	animationFrameHit = initAnimationFrameHit
 

@@ -2,6 +2,6 @@ extends CanvasLayer
 
 
 func setDialog(text):
-	$DialogBackground/Text.clear()
-	$DialogBackground/Text.append_text(text)
+	$DialogBackground/MarginContainer/VBoxContainer/HBoxContainer/Text.clear()
+	$DialogBackground/MarginContainer/VBoxContainer/HBoxContainer/Text.append_text("%s" % text)
 	show()

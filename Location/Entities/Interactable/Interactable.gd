@@ -5,7 +5,7 @@ var playerClose = false
 
 func init(interactableType, interactableName, interactablePosition):
 	var animations = load("res://Animations/Locations/{interactableType}/{interactableName}Animations.tscn".format({ "interactableType": interactableType, "interactableName": interactableName.capitalize().replace(" ", "") })).instantiate()
-	animations.init("Sway")
+	animations.initAnimations("Sway")
 	name = interactableName + str(Locations.actorId)
 	animations.name = interactableName + str(Locations.actorId)
 	Locations.actorId += 1
