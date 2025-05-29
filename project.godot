@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Pistoleros of Santa Rose"
 run/main_scene="res://Overworld/Overworld.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://Assets/Icons/FileIcon.png"
 config/windows_native_icon="res://Assets/Icons/FileIcon.ico"
 
@@ -31,9 +31,11 @@ Cutscene="*res://Globals/Cutscene.gd"
 
 [display]
 
-window/size/viewport_width=638
-window/size/viewport_height=358
-window/size/mode=3
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/mode=4
+window/size/resizable=false
+window/size/borderless=true
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
 
@@ -101,5 +103,3 @@ INTERACT={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
-2d/snap/snap_2d_transforms_to_pixel=true
-2d/snap/snap_2d_vertices_to_pixel=true
