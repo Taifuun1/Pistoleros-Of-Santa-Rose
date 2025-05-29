@@ -17,26 +17,27 @@ Notes for combat.
 		*Item
 			*Use item on belt
 		*Duck
-			*Changes characters hit-rates to be one lower for the turn
-	*Hit-rates
-		*Hit-rate or a hit-rate pattern is a sequence of numbers
-		*Hit-rate decides the quality of an attack
-			*Hit-rate quality is between 0-3
-				*0 is Miss
-				*1 is Graze
-				*2 is Hit
-				*3 is Critical Hit
-		*Each character, class and weapon has a hit-rate pattern
-			*These individual hit-rate patterns are called Prototypes
-			*Each hit-rate pattern Prototype index can have a value between -3-3
-			*All of the hit-rate pattern Prototypes get added up to form the final hit-rate pattern
-				*Each index for all Prototypes is added for the final hit-rate pattern index
-		*Hit-rate patterns are always divisible by 4
-			*If a hit-rate pattern of a Prototype is shorter than another Prototypes, it gets repeated till it matches the longest hit-rate pattern
-		*At the start of combat, characters get placed randomly on their hit-rate pattern
-			*For each turn, they advance one in their hit-rate pattern
-			*When the hit-rate pattern ends, it jumps back to the beginning of the hit-rate pattern
-		*Hit-rates can have special hit-rate indexes, eg. Reload
+			*Changes characters cylinders to be one lower for the turn
+	*Cylinders
+		*Cylinder or a cylinder pattern is a sequence of numbers
+		*Each number in a Cylinder is called a Chamber
+			*Chamber decides the quality of an attack
+				*Chamber quality is between 0-3
+					*0 is Miss
+					*1 is Graze
+					*2 is Hit
+					*3 is Critical Hit
+		*Each character, class and weapon has a cylinder pattern
+			*These individual cylinder patterns are called Magazines
+			*Each cylinder pattern Chamber index can have a value between -3-3
+			*All of the cylinder pattern Magazines get added up to form the final cylinder pattern
+				*Each index for all Magazines is added for the final cylinder pattern index
+		*Cylinder patterns are always divisible by 4
+			*If a cylinder pattern of a Chamber is shorter than another Magazines, it gets repeated till it matches the longest cylinder pattern
+		*At the start of combat, characters get placed randomly on their cylinder pattern
+			*For each turn, they advance one in their cylinder pattern
+			*When the Cylinder ends, it jumps back to the beginning of the cylinder pattern
+		*Cylinders can have special cylinder indexes, eg. Reload
 	*Positions
 		*Characters have a position in fights
 		*DD style positioning, with a 3x3 grid (3 height, 3 width)
@@ -45,7 +46,6 @@ Notes for combat.
 
 ## Stats
 	*Stats are based on characters base stats, held weapon, worn equipment and item modifiers
-	*Total stats have some random variance in fights
 	*Types
 		*Initiative
 			*Initiative decides turn order on each turn
@@ -82,10 +82,10 @@ Notes for combat.
 			*Damage every turn start
 			*Slowly wears off
 			*Can stack
-		*Hit-rate
-			*Hit-rates for character increase or drop
-			*Can target specific hit-rate index or all hit-rates
-			*Won't change until modified with another hit-rate modifier
+		*Cylinder
+			*Cylinders for character increase or decrease
+			*Can target specific cylinder index or all cylinders
+			*Won't change until modified with another cylinder modifier
 		*Mark
 			*Mark a character
 			*After one turn, dealing damage to the character deals extra damage
@@ -131,7 +131,7 @@ Notes for combat.
 		*Targets backrows
 		*Abilities
 			*Attack and poison affliction
-			*Hit-rate drop affliction
+			*Cylinder drop affliction
 			*Mark affliction
 	*Line Rider
 		*Anti-sand class
@@ -151,11 +151,12 @@ Notes for combat.
 		*Abilities
 			*Self-increase damage type defense
 			*Self-taunt current row or column
-			*Hit-rate increase application
+			*Cylinder increase application
 			*Disrupt second and third column positioning
-	*Support class
+	*Camp Caretaker class
 		*Can't hold lead weapons
 		*Can wear less equipment than other classes
+		*High item modifiers
 		*Abilities work in third column
 		*Abilities
 			*Bleed cleanse and affliction

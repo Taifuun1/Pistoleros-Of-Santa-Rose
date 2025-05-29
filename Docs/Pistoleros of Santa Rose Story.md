@@ -21,7 +21,7 @@
 		*Average stature
 		*Personality
 			*Goal oriented
-			*Plans
+			*Makes plans for the gang
 			*Dutch?
 			*Practical
 		*Story arc
@@ -48,6 +48,7 @@
 		*Male
 		*Average stature
 		*Personality
+			*Silvertongue
 			*Warm towards others
 			*A bit too leisurely
 		*Story arc
@@ -99,7 +100,8 @@
 			*Looming final antagonist throughout the story
 			*Final confrontation in last main quest(train robbery)
 		*Sheriff
-			*Introduced in bank robbery quest
+			*Main antagonist for bank robbery quest
+		*Bandidos of el Sacramento leader
 			*Main antagonist for jail break quest
 		*Indian tribe leader
 			*Main antagonist for caravan quest
@@ -112,10 +114,21 @@
 				*Rival gangs create chaos and a distraction at the train robbery
 			*Bandidos of El Sacramento
 				*Hispanic rival gang
+			*Lead Diggers
+				*Prospector robber gang
 			*Running Deers
 				*Native gang
 			*Freedom Riders
 				*Anti-government gang
+		*Government forces
+			*The big antagonistic force throughout the story and the map
+			*Local Lawgivers
+				*Deputy Patrols
+				*County Officers
+			*State Yankees
+				*State Lawgivers
+				*Texas Rangers
+			*Feds
 
 
 ## Outline
@@ -125,6 +138,8 @@ Story begins as the main cast is separated. Walker wakes up next to a forest pon
 As the situation clears, the party decides to head to the closest village for rest and supplies. The party finds their wagon and starts the treck to the village. On the way there, there is an idea of a train robbery. Some character moments on the way too.
 
 At the village the crew decides to do the train robbery, but there needs to be a lot of preparation. They will need gold to pay for the safe cracking equipment, an explosive expert and special explosives to blow up the tracks and strong oxen to pull the haul. They agree to first get the gold through a bank robbery. For that, they need money for weapons, horses and other equipment. It's suggested that they gather plants and herbs for money, as well as doing quests for various folks.
+
+When buying horses from a ranch, the gang meets Texas Freedom, who doesn't like them being on his land. A firefight ensues, and the gang escapes. In the end, the gang manages to buy horses from another ranch.
 
 After the weapons and equipment is acquired, the bank robbery commences. The robbery goes well, until Walker gets greedy and tries to steal additional valuables. In the end, Gwyneth is captured, but the rest escape with the gold.
 
@@ -138,13 +153,17 @@ Next, the party sets out to find animals strong enough to haul the valuables fro
 
 During the trip, they are confronted with some natives. They will not let them pass through their holy land. Eventually, Manuel manages to befriend some of the Indians and gets the crew to throw a party with the natives. The Indians agree to let the caravan through. However, Walker gets too drunk and accidentally vandalizes the tribes totem pole. The caravan just barely escapes.
 
+On the other side of the mountain, the caravan is safely through. The gang get the oxen, but they are now stuck on the other side of the mountain. They have to take another route back through west. The Pistoleros need more money for winter gear. They hunt for bear in the snowy hills.
+
+The Pistoleros get out of the mountains, but the Law Keeper is there waiting for them. He had heard of the troubles with the natives, and deducted where the gang would emerge at. An extended gunfight ensues, and the Pistoleros escape.
+
 After the caravan trip the party only needs an explosive expert to handle the explosives. Eventually, they hear of a ghost town prospector hermit, who's been trying to find gold in an abandoned town for years. They go meet the prospector, but the hermit is unwilling to help or even engage the crew. Morrison is empathetic to the lonely hermit and insists that they try to help him.
 
 The crew finds some poker cheaters in a nearby towns saloon. After some poker games (that the crew loses), there is a fast draw against the cheaters. The poker cheaters also cheat in the fast draw. The prospector town hermit saves the crew however, as he was getting his mineral samples inspected. The cheaters flee town, and the crew starts a dialog with the prospector.
 
-Powell wants to see the ghost town lively again. Eventually, the poker cheaters return bringing news of Powell having stolen cattle. A mob sets out to lynch Powell, but Morrison manages to convince the crowd to settle down. Eventually, the villagers decide to spend a night in the ghost town.
+Wells wants to see the ghost town lively again. Eventually, the poker cheaters return bringing news of Wells having stolen the saloons cash. A mob sets out to lynch Wells, but Morrison manages to convince the crowd to settle down. Eventually, the villagers decide to spend a night in the ghost town.
 
-Once the villagers are spending the night in the ghost town, the poker cheaters try to spook the merriment in the saloon. The crew spoils the spooky attempt by making fun of the poker cheaters. Next morning the villagers consider repopulating the ghost town. Walker manages to spook people, discouraging the villagers from resettling. Morrison feels dejected because of this, and won't participate in the train robbery. Powell, however, feels gratitude for the night of merriment, and agrees to help with the train robbery.
+Once the villagers are spending the night in the ghost town, the poker cheaters try to spook the merriment in the saloon. The crew spoils the spooky attempt by making fun of the poker cheaters. Next morning the villagers consider repopulating the ghost town. Walker manages to spook people, discouraging the villagers from resettling. Morrison feels dejected because of this, and won't participate in the train robbery. Wells, however, feels gratitude for the night of merriment, and agrees to help with the train robbery.
 
 All is said and done, now it is the time for the train robbery. The crew whitled down to fewer members, all has to be set up first. With setting up each part of the plan, there are more cracks in the relationship between Walker and the rest of the gang.
 

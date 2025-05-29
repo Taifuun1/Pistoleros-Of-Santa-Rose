@@ -21,10 +21,19 @@
 		*Party loses attrition as they travel
 		*Party move speed gets slower
 		*Recover attrition by camping and using items
-		*Lose condition if no camping for a long time?
+		*Lose health if no camping for a long time
+		*Attrition resources
+			*Food
+			*Drink
+			*Sleep
+			*Leisure
+		*Non-sleep resources are bought from hub areas
+		*Running out of attrition resources gives debuffs to stats
 	*Camping
+		*Restores Sleep resource
 		*Recipes
 			*Characters can have recipes they can make during camping
+			*Recipes give buffs to stats
 			*One recipe made per camp
 			*Camping again resets previous recipe buff if still active
 
@@ -70,11 +79,8 @@
 			*Both common and rare ones
 			*Easy to acquire once found
 			*Lilypads
-				*
 			*Flowers
-				*
 			*Cacti
-				*
 		*Minerals
 			*Valuable and relatively common, but needs a lot of work to acquire
 			*Gold
@@ -213,14 +219,7 @@
 	*Weasel
 	*Badger
 	*Gold-mantled ground squirrel
-
-:Weapons
-	*Revolvers
-		*
-	*Rifles
-		*
-	*Shotguns
-		*
+	*Beaver
 
 :Logbook
 	*A log that holds fight strategy information, lore, a map and quests
@@ -245,6 +244,11 @@
 		*https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-20?id=74028#1
 
 _____
+
+waist 78
+underboob 80
+boobs 84
+hips 89
 
 600
 318
@@ -277,6 +281,11 @@ https://www.legendsofamerica.com/we-slang/10/
 Prairie Tenor – Coyote. Prairillon – A small prairie. Prat – Buttock, behind.
 prairie-dogging
 
+TF "Here in the West folk look out for one another! Like people should!"<br>
+TF "You cityfolk only look out for yourself! Like coyotes looking for scraps!<br>
+Another sad affair.
+worse than usual
+
 https://www.hhhistory.com/2015/01/saloon-girls-of-wild-west.html
 https://en.wikipedia.org/wiki/Fannie_Porter
 https://en.wikipedia.org/wiki/Kitty_Leroy
@@ -291,6 +300,13 @@ https://www.google.com/search?q=volcanic+pistol&tbm=isch&sa=X&ved=2ahUKEwjMifH_5
 https://www.legendsofamerica.com/we-slang/
 https://www.insp.com/blog/old-west-cowboy-speak/
 https://ridesouthdakota.com/rushmore-horseback-riding/cowboy-dictionary/
+
+https://crimefictionbook.com/2015/06/24/do-revolvers-use-clips/
+https://tncourts.gov/sites/default/files/docs/firearmshandout_1.pdf
+https://www.academy.com/expert-advice/parts-of-a-revolver
+https://www.targetbarn.com/broad-side/parts-of-a-revolver/
+https://en.wikipedia.org/wiki/Snap_cap
+https://www.targetbarn.com/broad-side/parts-of-a-revolver/
 
 Clearhill
 Snakeflats
@@ -414,8 +430,8 @@ barrenrun
 ?Caves
 *Buxmis Caves
 *Smithmont Shelter
-*Hasrich Hollows
-Overhang
+*Hollows
+*Overhang
 
 ?Hideouts
 *Bittervale Escape
@@ -477,6 +493,9 @@ gunmen
 gunfighters
 goons
 gunslingers
+vaqueros
+charro
+greaser
 
 lasso
 lariat
@@ -487,8 +506,17 @@ mustang/mustengo
 bandolier/bandolera
 stampede/stampeda
 ranch/rancho
+excavadora de whisky
 
 barroom, ginmill, taproom
+
+señoritas tetas
+tetas de señoritas
+pechos de señoritas
+coño de señoritas
+pezones de señoritas
+
+¡Muy bien!
 
 A wild rag—also known in various regions as a cowboy scarf, necktie, bandana or kerchief—is a large square-shaped scarf made of silk, cotton, or other soft fabrics that is commonly worn by cowboys.
 Boots / Trotter Boxes, Trotter Cases Mud Pipes Mudpipes Mule-ears
@@ -583,3 +611,22 @@ Huxley Kipp
 Mah name's Texas Freedom.
 This right here is private property. Mine, in fact.
 I'm gon' have to ask you to leave mah property - and I do mean right the hell now.
+
+Seems that we finally meet, Walker. It has been a long time coming.
+Coyotes like you should be hunted down like game.
+Don't shoot! Get away from me! I don't wanna die!
+...
+I call you folk coyotes more to inspire the hunt for myself.
+I expected more from the leader of the most notorious gang in all of Santa Rose.
+Why do you gotta hound us? We're trying to make a living here!
+Leave us be! We're not some New York mafia! We're small fry, sizzling in a big pan!
+Pfft. You criminals are all the same. Justifying your actions with lies.
+You told me your gang is infamous. You've avoided the long arm of law time and time again, was it?
+What was all that about? Just a bunch of balooney?
+I... I got to blast away with my six-shooter... And I... I just got carried away. That's all it was!
+I don't have some big plans for any of us! I just wing it as it comes and hope for the best! I tell them to do what I want, and that's all...
+...I almost feel sorry for you. But not quite. Your gang members seem to believe you got some big talent for leading a group.
+The Pistoleros of Santa Rose members are the victims of this grand ol' mess. They all seemed to believe in your gang.
+I... They just see me shooting... Better than anyone... And they just follow me because of that. I don't know... why...
+Hmph. That's just it.
+What a pathetic excuse of a Pistolero. Time to end this.
