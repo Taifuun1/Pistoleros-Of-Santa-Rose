@@ -11,7 +11,23 @@ G "We got to get Aiyana to the infirmary stat."
 
 ## Talk at the infirmary for next steps
 
-Nurse "She will be fine. The bullet hit her bone, but luckily there was no more damage."<br>
+TF "Well, we got your missy on out of there. Better here than with them Feds."<br>
+G "Thank you, Texas. We couldn't have done it without you."<br>
+A "You're a lifesaver, Texas!"<br>
+MA "<i>¡Caballero blanco de los cielos!</i>"<br>
+TF "Hey now, I'm just doin' my part. Folks in the West look out for one another."<br>
+TF "This big cahooney should send a signal to them Feds not to infringe upon good folks's property."<br>
+TF "I should be thanking you, for providin' me with the intelli-geence on Fed plans."<br>
+G "I'm in your debt, good sir."<br>
+TF "No, madam. It don't work that way. You just remember to keep your head on your shoulders."<br>
+TF "I ought to run back to my ranch before them cowboys get too bored of takin' potshots at flies. And before y'all make me blush again."<br>
+TF "My humblest thanks, Pistoleros. I hope we meet again."<br>
+G "Good fortune, Texas."<br>
+A "Thank you!"<br>
+MA "¡Gracias!"<br>
+W "Thanks, partner."<br>
+Nurse gives the gang a status report on Aiyanas health
+Nurse "Aiyana will be fine. The bullet hit her thigh bone, but luckily there was no more damage."<br>
 N "She won't be able to move as well anymore. I'm sorry."<br>
 Nurse walks out of the room
 G "This is pretty terrible. Aiyana is gonna have a bit of a limp."<br>
@@ -45,7 +61,7 @@ A "Walkers got bright ideas again. Leaving all the valuables behind, while we ge
 A "Looks like to me this is all were doing now. Cooking up bad plans, and falling behind for it."<br>
 W "Aiyana, maybe you shouldn't be runnin' in blindfolded every damn gunfight."<br>
 W "I say, we're gonna be hitting it big with this one. It's not like the Feds haven't been on our trail for years."<br>
-W "But, maybe those bars would be good to lasso in... They are, after all, their weight in gold."<br>
+W "But, maybe those bars would be good to lasso in... They are, after all, worth their weight in gold."<br>
 G "Then, we need oxen to drag our wagon. Regular horses aren't going to do the trick."<br>
 G "We need money again, it seems."<br>
 W "I'm too damn tired of pickin' herbs and chasin' prospectors. There's got to be a better way to get those bullhorns."<br>
@@ -56,30 +72,30 @@ G "Let's ask around at the Messenger Post for opportunities."
 
 ## Talk with a caravan party at the messenger post
 
-G "Hey there, feller? Mind if I ask where you're headed?"<br>
-Traveler "We're headed over the mountains to the north."<br>
+G "Hey there, feller? My name is Gwyneth Remington. Mind if I ask where you're headed?"<br>
+Evelyn Grace "My name's Evelyn Grace. We're headed over the mountains to the north."<br>
 G "North? Over Charokee Bluff?"<br>
-T "That's right. We're headed to Silverton, and then further north towards Wendowin."<br>
+EG "That's right. We're headed to Silverton, and then further north towards Wendowin."<br>
 G "I didn't know you could cross the mountains."<br>
-T "Yup, you can. Through Pilrose Pass. We've got to get through."<br>
+EG "Yup, you can. Through Pilrose Pass. We've got to get through."<br>
 G "The mountains are cold and treachorous. Surely you don't mean to cross?"<br>
-T "We do. We don't have any money left. Going around would take more than a month."<br>
-T "The governments giving land for free. There's still uninhabited land up north. We're going there for a chance at a new life."<br>
+EG "We do. We don't have any money left. Going around would take more than a month."<br>
+EG "The governments giving land for free. There's still uninhabited land up north. We're going there for a chance at a new life."<br>
 W "Brave going. Can't fault you for lackin' gutts."<br>
 G "You do know the Charokees inhabit the mountain? They're not gonna let you pass."<br>
-T "Yeah. But we don't got any choice now. Only thing we can do is push forward."<br>
-T "The real problem is how we're gonna get rid of these oxen we bought for the trip."<br>
-T "Not many buyers on the other side of the mountain. Silverton's just a hunting village, and we don't have feed for the oxen."<br>
+EG "Yeah. But we don't got any choice now. Only thing we can do is push forward."<br>
+EG "The real problem is how we're gonna get rid of these oxen we bought for the trip."<br>
+EG "Not many buyers on the other side of the mountain. Silverton's just a hunting village, and we don't have feed for the oxen."<br>
 W "Oxen? You don't need the oxen? We could take them oxen with us."<br>
-T "We need them for the trip. We're not giving them up for free."<br>
+EG "We need them for the trip. We're not giving them up for free."<br>
 G "Hmmm... Maybe we could come to an agreement. The trail to Silverton is treacherous, and you'll be needing caravan guards to keep you safe from the natives."<br>
 G "If you're willing to give the oxen to us in Silverton, we'll gladly escort you in exchange for protection."<br>
-T "Hmh... We'll, it doesn't sound like too bad of a deal. At least we'd have some protection against the natives."<br>
-T "If you're willing to do that, we have a deal."<br>
+EG "Hmh... Well, it doesn't sound like too bad of a deal. At least we'd have some protection against the natives."<br>
+EG "If you're willing to do that, we have a deal."<br>
 G "Excellent! We'll accompany you through Pilrose Pass."<br>
-T "We don't have the money to pay you, or supply you with anything. You got to take care of that yourself."<br>
+EG "We don't have the money to pay you, or supply you with anything. You got to take care of that yourself."<br>
 G "That's fine. The oxen are what we're after."<br>
-T "Come and talk to me once you're ready to leave."
+EG "Come and talk to me once you're ready to leave."
 
 ## Talk outside the messenger post
 
@@ -113,9 +129,9 @@ G "Good. Let's start packing up, and head up north."
 ## Talk with caravan party before leaving
 
 G "Hey! Everything ready for the trail?"<br>
-T "Sure is. It's going to be a grueling trip."<br>
+EG "Sure is. It's going to be a grueling trip."<br>
 G "No doubt. We're all stocked up, and ready to go. Let's get going."<br>
-T "Yup. Since you're our escort, we'll be following your lead.
+EG "Yup. Since you're our escort, we'll be following your lead.
 
 ## The mountain trek
 
@@ -124,14 +140,14 @@ T "Yup. Since you're our escort, we'll be following your lead.
 G "Alright, we're in it now! It's gonna get a lot more colder from here!"<br>
 W "My ass is gonna freeze off before we get to the other side of the mountain."<br>
 MA "Ooooh, this isn't like back home in Santa Luz! <i>¡Frío!</i><br>
-T "The mountain pass is straight ahead. Keep moving."
+EG "The mountain pass is straight ahead. Keep moving."
 
 ### Native tracks are found in the snow
 
 G "Halt!"<br>
-T "What is it?"<br>
+EG "What is it?"<br>
 G "There's tracks here. Natives."<br>
-T "Oh no..."<br>
+EG "Oh no..."<br>
 W "Of course the feather-hats are onto us. Better get them guns ready."<br>
 MA "<i>¡Oh!</i> Is it time to make <i>amigos?</i>"<br>
 W "No <i>amiii-gos</i> here, partner. The natives are on a warpath."<br>
@@ -151,13 +167,13 @@ G "Hello. We greet you, chieftain. We come in peace."<br>
 NC "<i>Tlateuijketl</i> never come peace. Always war."<br>
 G "We are trying to pass to the other side of the mountain. We mean no harm, we only want to pass peacefully."<br>
 NC "<i>Uelitini</i> do not believe white woman. <i>Uelitini</i> thinks you come to our land, take it away."<br>
-G "We're not here to take you lands. We just want to pass through the mountain, to Silverton."<br>
+G "We're not here to take your lands. We just want to pass through the mountain, to Silverton."<br>
 NC "White people all same. White people lie, and then shoot. No honor, no <i>iknoakayotl</i>."<br>
-G "We don't want any trouble. We simply ask for safe passage through the Pilrose Pass.<br>
+G "We don't want any trouble. We simply ask for safe passage through Pilrose Pass.<br>
 NC "<i>Tepetl</i> not called that. <i>Tepetl</i> called <i>tonati azul</i>.<br>
 G "Okay, I understand that. But we must pass through the mountain."<br>
 NC "<i>Tonati azul</i> hold sacred ground for Charokee. No white people enter."<br>
-G "We wont desecrate your sacred grounds. We'll pass through quickly, if you let us."<br>
+G "We won't desecrate your sacred grounds. We'll pass through quickly, if you let us."<br>
 NC "No passage."<br>
 MA "Gwyneth, let me handle this! I give them <i>la lengua de oro mexicana!</i><br>
 G "<i>sigh</i> Go for it."<br>
@@ -167,7 +183,7 @@ MA "You won't believe this! My <i>mejunje</i> cure all <i>enfermedades!</i> It t
 NC "You have cure for morning stiffness? And for limp leg during horse ride?"<br>
 MA "All of that, and much more! This <i>chupito de whisky</i> make all your worries go away!"<br>
 MA "It even give us passage through holy land!"<br>
-NC "I don't believe brown man. You drink <i>magia</i> before <i>Uelitini</i>.<br>
+NC "I do not believe brown man. You drink <i>magia</i> before <i>Uelitini</i>.<br>
 MA "Ooooh, wise <i>jefe</i> give me first taste! I drink to your health!"<br>
 Manuel takes a swig of the whiskey
 MA "Aaaah, <i>fluye como seda sobre las caderas de una dama.</i> What say you <i>jefe</i>, for my suggestion?"<br>
@@ -179,9 +195,9 @@ MA "That's the <i>magia tlen whisky!</i> Lot more where that came from!"<br>
 NC "<i>Uelitini</i> must have more <i>magia</i> for morning stiffness. No good for wife."<br>
 NC "<i>Uelitini</i> invite you to tribe village. We negotiate with brown man. But no word from white woman."<br>
 G "I wasn't going to say anything, honestly."<br>
-T "Are they going to let us through?"<br>
+EG "Are they going to let us through?"<br>
 G "We'll go to their village. Maybe we can negotiate safe passage."<br>
-T "I hope to god this works..."
+EG "I hope to god this works..."
 
 ### At the native village
 
@@ -217,7 +233,7 @@ NC "Secret? Tell <i>uelitini</i> secret!"<br>
 MA "<i>Señor sombrero</i> knows where big treasure hidden. Big-big treasure, worth more than gold or diamond!"<br>
 NC "Brown man hide treasure? Where?"<br>
 MA "Right here! In the Charokee village! To find, we must drink and dance!"<br>
-NC "<i>Uelitini</i> not know what brown man says, but we drink! And dance!<br>
+NC "<i>Uelitini</i> not know what brown man say, but we drink! And dance!<br>
 The partygoers proceed to drink and dance<br>
 MA "Aaaah, nothing beats drink and dance with <i>amigos!</i><br>
 NC "Brown man now tell where treasure hidden!"<br>
@@ -251,7 +267,7 @@ Walker walks off somewhere
 Tribe Villager "<i>Vandalismo!</i>
 G "Huh?"<br>
 The gang emerges out of the tent without Walker
-G "What the hell happened? Someones desecrated the totem pole!"<br>
+G "What the hell happened? Someone's desecrated the totem pole!"<br>
 TV "<i>Xikintemo nopa tlateuianij!</i>
 Multiple tribe warriors emerge to fight the Pistoleros<br>
 G "Uh oh..."<br>
@@ -261,7 +277,7 @@ A fight ensues
 
 ### After the fight
 
-NC "You pull big trick on <i>uelitini!</i> My morning stiffness worse than usual!"<br>
+NC "You pull big trick on <i>uelitini!</i> My morning stiffness as bad as always, maybe worse!"<br>
 G "That's probably the hangover..."<br>
 NC "<i>Uelitini</i> should not have invite gunpeople! Big mistake!"<br>
 NE "Meetings with the settlers never go well. I should have known."<br>
@@ -286,15 +302,15 @@ G "Head north, to Pilrose Pass.
 ### Talk in Pilrose Pass
 
 G "This is Pilrose Pass."<br>
-T "Look up ahead! The Charokee patrols are everywhere!"<br>
-G "They are truly on a warpath now. We have to fight our way trough."<br>
-T "Oh no..."<br>
+EG "Look up ahead! The Charokee patrols are everywhere!"<br>
+G "They are truly on a warpath now. We have to fight our way through."<br>
+EG "Oh no..."<br>
 G "Time to grit your teeth. Push forward, as fast as you can. The more time we waste, the more patrols we have to defeat. Move it!"
 
 ### Outside Pilrose Pass
 
 G "...I think we've made it."<br>
-T "We're out! We're saved!"<br>
+EG "We're out! We're saved!"<br>
 G "That couldn't have been much closer."<br>
 G "We still have to make it to Silverton. It should be somewhere up ahead. Follow any road north we find, and we should get there eventually."
 
@@ -307,30 +323,30 @@ G "Let's wind down in the saloon."
 ### Talk at Silverton saloon for next steps
 
 MO "Uhhh... Never been so happy to drink whiskey."<br>
-T "Well, we made it. Thanks to you, I guess."<br>
+EG "Well, we made it. Thanks to you, I guess."<br>
 G "It didn't go as well as I wanted it to, but we're through. In one piece, too."<br>
 G "Not my favourite trip."<br>
-T "I won't be coming back south anymore. This was the last straw. There's been nothing but hardships for us."<br>
-T "We're going to keep moving north. We don't have the provisions to take a breather."<br>
+EG "I won't be coming back south anymore. This was the last straw. There's been nothing but hardships for us."<br>
+EG "We're going to keep moving north. We don't have the provisions to take a breather."<br>
 G "Good luck on your trail. I hope you can find a better life up north."<br>
-T "Thanks, partner. You seem like a fine lady. We couldn't have done it without you. I tip my hat to you."<br>
+EG "Thanks, partner. You seem like a fine lady. We couldn't have done it without you. I tip my hat to you."<br>
 Traveler tips hat
-T "We'll be leaving the oxen for you, as promised. Good luck on your endeavors, friend."<br>
+EG "We'll be leaving the oxen for you, as promised. Good luck on your endeavors, friend."<br>
 G "Safe trails."<br>
 Traveler walks out of saloon<br>
 G "That's the end that trip. We've got the oxen, for free."<br>
 G "But now there's a bigger problem. We can't go through the mountain pass again."<br>
 G "The Charokees are hostile to us now. There's no chance we can pass back through Pillrose Pass."<br>
 MA "I sweettalked the <i>nativos</i> to pretty dreams! They we're in <i>paraíso!</i>"<br>
-MA "If Walker hadn't <i>orinado</i> on <i>el tótem</i>, we would be getting the grand <i>trato</i> out of mountain!"<br>
+MA "If Walker hadn't <i>orinado</i> on <i>el tótem</i>, we would be getting <i>el gran tratamiento</i> out of mountain!"<br>
 MA "This is a big <i>jodido! ¡Mierda!</i>"<br>
 W "Yeah, the feather-folk had got their feelings twisted. Good thing we got out of there quick."<br>
 MA "You got the big drunks! Way too much!"<br>
 W "I doubt anything would have made the difference. I drank like the rest of us. Probably shouldn't have gave the alcohol."<br>
 G "Look, let's stick to the point. We're stuck behind the mountain. That's just a fact."<br>
 G "We got to get out somehow."<br>
-MA "Maybe Walker can <i>orinado</i> a path trough mountain for us!"<br>
-MO "...There should be way out towards west. I know there's some mining sites that way."<br>
+MA "Maybe Walker can <i>orinado</i> a path through mountain for us!"<br>
+MO "...There should be a way out towards west. I know there's some mining sites that way."<br>
 MO "I don't know how well traveled the paths are."<br>
 G "And no doubt it gets just as cold that way as it did through the mountain pass. This isn't looking good."<br>
 G "It seems we need to prepare properly. We need winter gear for the trip. And that means we need more money."<br>
@@ -340,7 +356,7 @@ MO "Silverton has all types of wildlife around it, rabbit, beaver, deer... But w
 G "Bear! Really?"<br>
 MO "The hills around here hold countless caves for bears to make their home. The place is basically teeming with bear."<br>
 MO "Quickest way to make money would be to gather bear skins."<br>
-G "Mmmh... Seems risky. But I don't think we have another choice."<br>
+G "Mmmh... Seems risky. But I don't think we have much choice."<br>
 W "Fine. Bear hunting it is. Let's stock up, and head to the hills out west. It's time to track grizzlies.
 
 ## Talk at the Silverton hunting office after the money is gathered
@@ -365,45 +381,45 @@ G "Get to the saloon."
 G "We're out. We're finally out of the hills."<br>
 W "I don't know if I could have taken more cold. I left my ass frozen on the trail half way to here."<br>
 MA "I'm glad no more <i>frío!</i>"<br>
-G "I'm exhausted. That was way too much. First the natives, then the bears, and the hills were the nail in the coffin."<br>
+G "I'm exhausted. This was way too much. First the natives, then the bears, and the hills were the nail in the coffin."<br>
 W "We're safe now. Nothing to worry about now."<br>
 W "Once we're rested, we'll pick up Aiyana from Fairpeaks."<br>
 G "Good plan. Now, we need more whiskey."<br>
-LK, from outside the saloon "Come out, Pistoleros!"<br>
-W "Huh? Do I hear right? Is that the big-nosed lawgiver?"<br>
+WG, from outside the saloon "Come out, Pistoleros!"<br>
+W "Huh? Do I hear that right? Is that the big-nosed lawgiver?"<br>
 G "...I think it is. Looks like we got even more troubles for ourselves."<br>
-G "Get out the saloon. And get your guns ready."
+G "Get out of the saloon. And get your guns ready."
 
 ## Outside the saloon
 
-LK "Well, well, well, look what we have here. A den of coyotes, all ready to be smoked out."<br>
+WG "Well, well, well, look what we have here. A den of coyotes, all ready to be smoked out."<br>
 W "What the hell are you doing here?"<br>
-LK "There were attacks on farms near Fairpeaks from the natives of the mountain."<br>
-LK "Rumor has it that a caravan left for Pillrose Pass right before the attacks started."<br>
-LK "They were also shouting the warcry "<i>Walker mikistli!</i>" when they attacked. Not really hard to guess who was responsible."<br>
-LK "Only short route through the mountain leads through west into the hills."<br>
-LK "One might say I took a well deserved vacation in this lazy mining village."<br>
+WG "There were attacks on farms near Fairpeaks from the natives of the mountain."<br>
+WG "Rumor has it that a caravan left for Pillrose Pass right before the attacks started."<br>
+WG "They were also shouting the warcry "<i>Walker mikistli!</i>" when they attacked. Not really hard to guess who was responsible."<br>
+WG "Only other short route through the mountain leads through west into the hills."<br>
+WG "One might say I took a well deserved vacation in this lazy homey village."<br>
 W "The hell you did! Feds never rest on their laurels! You're always looking to hound honest folk in the West!"<br>
-LK "I think it's high time I get back to work. Might as well freshen up my gunslinging skills while I have the chance."<br>
-LK "Get 'em, boys."<br>
+WG "I think it's high time I get back to work. Might as well freshen up my gunslinging skills while I have the chance."<br>
+WG "Get 'em, boys."<br>
 A fight ensues
 
 ## During the fight
 
 MA "<i>¡Alguacil!</i> It's time for you to meet <i>dios!</i>"<br>
-LK "Me and god parted ways a long time ago. He wouldn't talk to me even if I tried."<br>
-LK "You scoundrels however are in need of the guiding hand of Creator. It's high time you embraced your spirituality."<br>
-MA "God forgives! But your sins are great! <i>Puertas del cielo</i> won't open for you, <i>¡legislador!</i>"<br>
-LK "Enough about god. I'm here to give out law. There won't be running this time."<br>
+WG "Me and god parted ways a long time ago. He wouldn't talk to me even if I tried."<br>
+WG "You scoundrels however are in need of the guiding hand of Creator. It's high time you embraced your spirituality."<br>
+MA "God forgives! But your sins are great! <i>Puertas del cielo</i> won't open for you, <i>legislador!</i>"<br>
+WG "Enough about god. I'm here to dish out law. There won't be running this time."<br>
 W "Yeah, we'll see about that. I'll give 'em what for."<br>
-Walker gives a quick volley of blasts, forcing the LK and the remaining lawgivers to duck behind cover
+Walker gives a quick volley of blasts, forcing Wyatt and the remaining lawgivers to duck behind cover
 W "Run!"<br>
 The Pistoleros book it, before the lawgivers can give chase<br>
 W "Taste lead, buckaroo!"<br>
-LK "Ain't you slick with that six-shooter. You coyotes have a tendency to always slip out the net."<br>
+WG "Ain't you slick with that six-shooter. You coyotes have a tendency to always slip out the net."<br>
 W "We ain't coyotes, shiny-star! We're the Pistoleros of Santa Rose!"<br>
 W "We're the infamous gunslingers that fooled the law, time and time again!"<br>
-LK "This is farewell. One more time. I'll see you later, Walker."<br>
+WG "This is farewell. One more time. I'll see you later, Walker."<br>
 Walker books it on out of there
 
 ## Outside Southstone Mining

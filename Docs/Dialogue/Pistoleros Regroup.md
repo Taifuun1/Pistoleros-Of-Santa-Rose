@@ -7,12 +7,12 @@ Pistoleros Regroup is the introduction to the gang and the story. In it the Pist
 
 Walker wakes up, slowly, at a pond in the woods. Shaking of the bruising and raggedness, he finds his bearings. Nobody is around. Walker wonders first about loot that they've lost, and then his party. The Pistoleros of Santa Rose must be scattered nearby.
 
-"Ugghhhh..."<br>
-"What happened... I can't remember..."<br>
-"There was piles of cash... and a chase..."<br>
-"I remember... flashes of light. Gunfire."<br>
-"What happened to the bags of cash? Ahhh..."<br>
-"I got to find Gwyneth. Where is she?"
+W "Ugghhhh..."<br>
+W "What happened... I can't remember..."<br>
+W "There was piles of cash... and a chase..."<br>
+W "I remember... flashes of light. Gunfire."<br>
+W "What happened to the bags of cash? Ahhh..."<br>
+W "I got to find Gwyneth. Where is she?"
 
 ## Pine Meadows
 
@@ -40,7 +40,7 @@ Gwyneth "We will never find them in the forest wandering aimlessly. Let's split 
 "Huh?"<br>
 Gunfight ensues<br>
 Gwyneth "...Holy smokes. That was close."<br>
-Walker "It's a real struggle. The Feds are hiring wildlife to find us. We'll never lose them."<br>
+Walker "It's a real struggle. Now the Feds are hiring wildlife to find us. We'll never lose them."<br>
 G "It was just a bear. We lost the feds in the chase."<br>
 G "Hey, do you see that? There, in the river."<br>
 W "What's that? A jacket?"<br>
@@ -50,10 +50,10 @@ W "They're gone! All the bags, <i>gone</i>! What am I gonna do now?"<br>
 G "Calm it down, Walker! The Pistoleros will not be done in by a little water."<br>
 G "They are all fine. We will just have to find them."<br>
 W "They're gone! All of it..."<br>
-Aiyana burst through the brush<br>
+Aiyana bursts through the brush<br>
 Aiyana "A-ha! Found you! I could hear the both of you from a mile away!"<br>
 A "We'll, mostly Walker."<br>
-G "Oh, thank god you're alive Aiyana. My heart skipped a beat when I saw the jacket in the water."<br>
+G "Oh, thank god you're alive, Aiyana. My heart skipped a beat when I saw the jacket in the water."<br>
 W "Do you have the money? Did we get anything out of this miserable fuckup?"<br>
 A "Great to see you too, Walker. I'm fine, thank you for asking."<br>
 A "And no, I don't have the money. The Feds were on our tail. I rode as hard as I could in the woods."<br>
@@ -75,7 +75,7 @@ A "His leg is hurt. We're not going anywhere before we do something about that."
 W "Gwyneth, make a splint from some sturdy branches off the ground. We're not leaving anyone behind."<br>
 G "On it."<br>
 A "What happened, Manuel?"<br>
-M "I rode with Morrison for a long while. The Feds didn't give up the chase easily."<br>
+M "I rode with Morrison for a long while. The Feds didn't give up <i>la caza</i> easily."<br>
 M "The gunshots scared my <i>caballo</i>, and it reared. I fell hard on my side."<br>
 M "Luckily, the Feds didn't see me. They went after Morrison."<br>
 A "Which direction did he ride to?"<br>

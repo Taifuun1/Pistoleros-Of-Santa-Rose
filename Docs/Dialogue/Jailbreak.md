@@ -19,13 +19,13 @@ W "Whats that, Morrison?"<br>
 MO "...I don't think we have enough money for the explosives."<br>
 W "Huh? We robbed a bank! We're rolling in the dough!"<br>
 MO "Those civil-war-time explosives are rare, since they don't make them anymore. And they only get rarer each year."<br>
-MO "I doubt we have enough money for both blowing up the jail AND the continental train."<br>
+MO "I doubt we have enough money for both blowing up the jail AND the continental train, AND the safe in the train."<br>
 W "Well fuck..."<br>
 A "We didn't come here for nothing, did we!?!"<br>
 W "Naaah, it's all good. This is an opportunity. Opportunity to make some money."<br>
 W "The prospectors here are bound to be carrying the motherload. Ain't no way we're leaving free money on the table."<br>
 W "It's time to do some good ol' fashioned gunslingin'. Let's get to the mines and blast their asses out."<br>
-MA "Oooooh, hold on now, <i>amigo</i>! The Bandidos of El Sacramento are on the lookout, we shouldn't go in guns blasting."<br>
+MA "Oooooh, hold on now, <i>amigo</i>! The Bandidos of El Sacramento are on the lookout, we shouldn't go in guns blazing."<br>
 W "The Bandidos? Those lazy siesta-enjoyers, they're here?"<br>
 W "We rode their asses out of Guajohuila. Here we're on homeground. They'll be gettin' their asses handed to them."<br>
 A "I remember us barely escaping the town after a shootout with the Bandidos..."<br>
@@ -57,11 +57,11 @@ W "Move it."
 W "The fuck is that noise?"<br>
 The Bandidos of El Sacramento pull up, with their leader, Carlos<br>
 Carlos "Eyyyy, <i>Pistoleros del Diablo</I>! High time for <i>venganza!</i>"<br>
-MA "The Bandidos of El Sacramento! <i>Feo!</i>"<br>
+MA "The Bandidos of El Sacramento! <i>¡Feo!</i>"<br>
 C "Uuuuh, Manuel, <i>malo amigo</i>! We here to give our regards, for last time! Big money, gone with Pistoleros, not good for us."<br>
 C "We take back what ours."<br>
 W "The hell you will! I ain't some yesterdays finch! We worked hard for this money!"<br>
-C "Ooooh, I'm sure you did, <i>amigo</i>. Like in the El Tecoo <i>plantación</i>, eh? Big guns, and big words. I give you what for."<br>
+C "Ooooh, I'm sure you did, <i>amigo</i>. Like in El Tecoo <i>plantación</i>, eh? Big guns, and big words. I give you what for."<br>
 A fight ensues
 
 ## After the fight
@@ -83,7 +83,7 @@ A "What?"<br>
 MO "We don't have any supplies for a chase. And we don't know where they're headed."<br>
 MO "It's better if we prepare before we set out."<br>
 MO "And since they split up, we'd need to split up too. We already had that happen, and it landed us in big trouble."<br>
-A "So what? We didn't do all this work nothing, did we? Gwyneth is still out there!"<br>
+A "So what? We did all this work for a reason! Gwyneth is still out there!"<br>
 MA "Morrison has got his <i>cabeza</i> on right! We'll never find them in the rock hills."<br>
 MA "The Bandidos must have a hideout in the hills. Maybe the local sheriff will know where they are."<br>
 W "We're gonna ask help from the law? What kind of hell have we walked into..."<br>
@@ -103,8 +103,8 @@ CBS "Second, I'm not responsible for what happens to you."<br>
 CBS "You'll be out there on your own. I don't have the lawgivers to help you out."<br>
 W "Yeah, as expected. We'll be heading to the hills then."<br>
 CBS "Now, listen, we might not got the most people to keep the peace round here, but we still got our pride! We work h..."<br>
-A "Yeah, I'm sure you do. The amount of prospectors I've seen robbed in the last few days makes me think we got wilderness law here."<br>
-MA "Ooooh, I thinks we should skidadle out of the sheriffs office..."<br>
+A "Yeah, I'm sure you do. The amount of prospectors I've seen robbed in the last few days makes me think we only got wilderness law here."<br>
+MA "Ooooh, I thinks we should skidadle out of <i>la oficina del sheriff</i>..."<br>
 CBS "You damn brigands! Strutting in to my office like you own the damn place! Get out of here before I throw you into a cell!"<br>
 W "Yeah, heard you loud and clear, shiny-star..."
 
@@ -137,7 +137,7 @@ Carlos is on the ground, bleeding to death<br>
 C "Ooooh... <i>Del diablos</i> got me..."<br>
 W "That's what you get for messing with the Pistoleros of Santa Rose."<br>
 A "I got the money. It's all right here."<br>
-W "Thank fuck somethings going our way. We don't got too much time now."<br>
+W "Thank fuck something's going our way. We don't got too much time now."<br>
 W "We got to get the explosives, and then run straight to Sandy Cross. There we'll find Gwyneth, in jail."<br>
 
 ## Arrival at Sandy Cross
@@ -156,7 +156,7 @@ MA "A plan as good as any!"<br>
 Texas Freedom steps into the saloon<br>
 MA "<i>gasp</i> <i>El soberano señorita!</i><br>
 TF "Mmmh, just the people I was lookin' for."<br>
-W "What the hell are you doin' here? Spit it out, or I'll make your jacket into swiss cheese."<br>
+W "What the hell are you doin' here? Spit it out, or I'll make your hat into swiss cheese."<br>
 TF "Now, feller, no need to get uppidy. I'm here to exchange a few words, and nothin' else, if you don't mind."<br>
 A "What do you want?"<br>
 TF "I was informed that them Feds were roughin' up some folk back at Snakeflats. And I went to investigate myself."<br>
@@ -182,7 +182,6 @@ W "Gwyneth goes free tonight."
 ## Prison break
 
 ### At jail
-
 G "OK, here we are. Morrison, set it up."<br>
 MO "On it..."<br>
 Morrison setts up the explosives and takes cover
@@ -192,7 +191,6 @@ W "Alright, boys and girls! Let's get to it! Find Gwyneth!"<br>
 A "YEEEHAAWWW!<br>
 
 ### Finding Gwyneths cell
-
 A "Gwyneth! You're okay!"<br>
 G "<i>sniff</i> ...I've never been so happy to see you all."<br>
 MO "<i>sobbs</i><br>
@@ -207,19 +205,17 @@ W "We ought to be moving already!"<br>
 G "Alright, gang! Let's hit it!"<br>
 
 ### In the jail courtyard
-
-LK "Hmmh, what do we have here? Have the coyotes crawled out of the den?"<br>
+WG "Hmmh, what do we have here? Have the coyotes crawled out of the den?"<br>
 W "Who the fuck is that? Is that the hippopotamus Fed?"<br>
 G "It sure is! And he doesn't look too happy!"<br>
-LK "Oh, I'm quite happy, actually. This could not be a better opportunity. I won't be needing to run after you all in some devilish goose chase."<br>
-LK "<i>whistles</i> It's time to meet your maker.<br>
+WG "Oh, I'm quite happy, actually. This could not be a better opportunity. I won't be needing to run after you all in some devilish goose chase."<br>
+WG "<i>whistles</i> It's time to meet your maker.<br>
 Multiple Feds pull up on the scene<br>
 W "...Fuck."<br>
 A "Okay, buddy! If it's a gunfight you want, it's a gunfight you'll get!"<br>
 MA "We will dance <i>la danza de la muerte</i> under the moon and the stars, <i>alguacil!</i>"
 
 ### During the fight
-
 The crew is pinned down against the Feds
 G "We can't hold out here for long! The Feds got us pinned down!"<br>
 W "We need a distraction! Somethings gotta give!"<br>
@@ -227,7 +223,7 @@ MO "...I..."<br>
 MO "I can blow up the office in the courtyard! Maybe that will create enough chaos."<br>
 W "Works for me! Go for it!"<br>
 MO "I... I need time to set up the explosives."<br>
-MA "We'll provide <i>fuego de supresión!</i>"<br>
+MA "We will provide <i>fuego de supresión!</i>"<br>
 A "Cover me! I'm going in!"<br>
 W "Ahhh, fuck that."<br>
 Aiyana runs in, while the rest of the gang provides covering fire<br>
@@ -235,7 +231,7 @@ Walker hides behind cover<br>
 Aiyana is hit in the leg<br>
 A "Aaaaaahhh!"<br>
 G "I'm gonna help her! Cover me!"<br>
-MA "Walker! We need your gunslinging skills!"<br>
+MA "Walker! We need your <i>habilidades de pistolero</i>!"<br>
 Gwyneth manages to drag Aiyana out of troubles way
 G "Are you hurt?"<br>
 A "My... leg..."<br>
@@ -243,31 +239,30 @@ MO "I got the explosives in place."<br>
 W "Blow it up!"<br>
 Morrison blows up the jail office<br>
 Scene switches<br>
-LK and TF are fighting<br>
-LK "Give up now, bandit. There's only one way this is going to end for you."<br>
-TF "I ain't gon' give up nuth'in', pardner! Taste lead!"<br>
-LK "You criminals are all the same. All you know how to do is shoot and kill."<br>
-LK "You should learn some manners, dirtbag."<br>
+WG and TF are fighting<br>
+WG "Give up now, bandit. There's only one way this is going to end for you."<br>
+TF "I ain't gon' give up nut'in', pardner! Taste lead!"<br>
+WG "You criminals are all the same. All you know how to do is shoot and kill."<br>
+WG "You should learn some manners, dirtbag."<br>
 TF "You looking down on me all uppity, huh? A true man knows big talk ain't some virtue!"<br>
-TF "You got no morals to stand on, yuppie! We have rules, and pride in the West!"<br>
-LK "Morals? You hicks sleep with the horses more than you do with your wives."<br>
-LK "Don't lecture me about morals."<br>
-TF "We don' look down on folk round here, pardner! If you got the gutts and the wits to carve a life for yourself, West gives what it will."<br>
-TF "You get them fancy dresses and mansions for nuthin'! You didn't work a single day in your life!"<br>
-The Pistoleros manage to catch a breather, by blasting down a wall that caused a large dust cloud
+TF "You got no morals to stand on, yuppie! We have grit, and pride in the West!"<br>
+WG "Morals? You hicks sleep with the horses more than you do with your wives."<br>
+WG "Don't lecture me about morals."<br>
+TF "We don' look down on folk 'round here, pardner! If you got the gutts and the wits to carve a life for yourself, West gives what it will."<br>
+TF "You get them fancy dresses and - au-to-mobiiiles - for nut'in'! You didn't work a single day in your life!"<br>
+The Pistoleros manage to catch a breather, by blasting down a wall that caused a large dust cloud<br>
 A "Texas, we managed to blast the courtyard office! It's time to get out of here!"<br>
 TF "I got to teach this flatfoot a lesson in manners! I ain't goin' nowhere!"<br>
 MA "This isn't what I had in mind for a fiery night, <i>señorita!</i><br>
-LK "Hmph. Dirty trick blasting the office. Even if effective."<br>
-LK "You're a good gunslinger, I'll give you that much. That saved your life today."<br>
-LK "Once again, we must depart, Pistoleros of Santa Rose."<br>
-LK "But mark my words:"<br>
-LK "We will meet again."
-LK runs away
-W "Move your asses! This is our chance!"<br>
+WG "Hmph. Dirty trick blasting the office. Even if effective."<br>
+WG "You're a good gunslinger, I'll give you that much. That saved your life today."<br>
+WG "Once again, we must depart, Pistoleros of Santa Rose."<br>
+WG "But mark my words:"<br>
+WG "We will meet again."<br>
+WG runs away<br>
+W "Move your asses! This is our chance!"
 
 ### Outside the jail
-
 G "We're out. Where to now?"<br>
 W "Anywhere is better than here."<br>
 MO "Head north, to Fairpeaks."<br>

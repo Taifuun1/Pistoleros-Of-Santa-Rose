@@ -12,7 +12,7 @@ G "Aiyana is probably at the saloon.
 A "Finally! You're here! And you're all okay!"<br>
 MA "Aiyana! Ángel de los cielo!"<br>
 G "Good to see you, Aiyana. It was a long journey."<br>
-A "You look exhausted. What happened? Was the mountain trek that difficult?"<br>
+A "You look exhausted. What happened? Was the mountain trek difficult?"<br>
 G "That mountain was like hell itself. The whole way was filled with trouble."<br>
 G "The natives of the mountain were friendly at first, but there were some complications that made them hostile."<br>
 G "We had to rush through Pillrose Pass fighting both natives and cold all the way."<br>
@@ -93,6 +93,16 @@ Poker Player "We're playing poker. Want to bet a round?"<br>
 Dallas Spades "Poker? I've heard of that game, and I've always wanted to play!"<br>
 PP "Well, why don't you take a seat and learn? At your own risk of course..."<br>
 TH "This will be a lot of fun!"<br>
+PP2 "What's your names?"<br>
+TH "I'm Tennessee Hearts, and this is Dallas Spades. Good to meet you."<br>
+TCSK "I should mention one thing if you're serious about going. The town is haunted."<br>
+G "What do you mean?"<br>
+TCSK "That's what they say. That the spirit of the old miner, Huxley Dale, still wanders the streets."<br>
+TCSK "He was a prolific miner in those days. Fell off a horse, and then shot himself four times."<br>
+TCSK "When people found him, they didn't find any of his money on him. Taken by The Cursed Mary, no doubt."<br>
+G "You sure he wasn't just robbed?"<br>
+TCSK "Well, that's how the story goes. I'm just tellin' you how I've heard it."<br>
+G "I think we'll still go and pay Gold Springs a visit."<br>
 G "Aiyana, we've got to go."<br>
 A "Yeah, I'll finish this game."<br>
 G "She's gonna play for at least an hour..."
@@ -130,7 +140,7 @@ TH and DS run away
 A "Damn, that guy is a scumbag..."<br>
 MA "No honour, for some folk!"<br>
 A "Hey there, feller. You saved my life. I owe you one."<br>
-WE "You don't own me anything, sonny. I just don't like when people shoot others in the back."<br>
+WE "You don't own me anything, missy. I just don't like when people shoot others in the back."<br>
 A "Are you Wells, by any chance?"<br>
 WE "What's it to you? Are you after my mine?"<br>
 A "No, I..."<br>
@@ -146,7 +156,7 @@ G "Hmmm, he doesn't seem very interested."<br>
 W "Well, no point in pushing it. We'll find another explosives expert."<br>
 MO "...I think we should help that old fellow."<br>
 W "Huh?"<br>
-MO "He's a hermit living all alone in a ghost town. He must be lonely."<br>
+MO "He's must not have had any visitors for a while in the ghost town. He must be lonely."<br>
 MO "We should try one more time. I'm sure he'd like to be around other folk too."<br>
 G "True. Maybe we can talk to him at Gold Springs."<br>
 G "Let's head there next."
@@ -208,10 +218,10 @@ PP "Whoa now, partner. You got robbed? When's that happened?"<br>
 TCSK "They broke into my saloon during the night and took the months earnings. What am I gonna do?"<br>
 PP "Better let the sheriff know. They'll catch them soon. No need to go after anyone."<br>
 PP2 "It's alright, Dusty. You'll be on your feet in no time. You got a lot of customers every day of the week."<br>
-TCSK "That's not fine! I earned my keep fair and square!"<br>
+TCSK "That's not enough! I earned my keep fair and square!"<br>
 TCSK "The saloon is closed until I get my money back!"<br>
 PP "What?!? We have to get the ones responsible for this!"<br>
-PP2 "Let's make a mob and lynch who's responsible for this!"<br>
+PP2 "Let's make a mob and lynch the brigands!"<br>
 A "Oh lord..."<br>
 TH "It's terrible! It's terrible!"<br>
 A "What's it now?"<br>
@@ -237,7 +247,48 @@ A "A couple of agitators riled up the mob. They were the same poker cheaters who
 WE "Well... That would explain it."<br>
 A "Explain what?"<br>
 WE "I found this box in the mine this morning. It's full of cash."<br>
-WE "I was surprised finding anything of worth in my mine..."<br>
+WE "I was surprised to find anything of worth in my mine..."<br>
 G "That means the poker cheaters planted the money here. Likely they want revenge for the shootout."<br>
 WE "What am I gonna do now? I can't run. This mine is all I have."<br>
-A "We'll talk to the mob. Let's see what happens then."
+A "We'll talk to the mob. Let's see what happens then."<br>
+After the lynching mob arrives<br>
+TF1 "Let us pass! We're dragging that thief out of his mine!"<br>
+A "Hold on. We shouldn't go around hanging people for no reason."<br>
+TF1 "Well hang Wells, and the ghost of Huxley Dale along with him!"<br>
+MA "What are you <i>locos</i> on about?"<br>
+TF1 "The ghost of Huxley Dale took over Wells, which made him go crazy!"<br>
+TF1 "All those years in the mine disturbed the spector!"<br>
+WE "What on earth is that talk? I'm not some ghost puppet, sonny! I've got my head on straight!"<br>
+TF2 "Lies! You finally had enough mole mining and took Dustys earnings!"<br>
+G "Wells hasn't taken anyones earnings. He was framed."<br>
+TF1 "We don't believe you! The ghost took over all of you too!"<br>
+A "I'm not some ghost!"<br>
+TF2 "Hang them too!"<br>
+MA "Ooooh, <i>amigos</i>, let's think about this!"<br>
+W "Eh, I think it's high time to draw..."<br>
+Morrison walks infront of the crowd<br>
+MO "Wait! Hold on!"<br>
+TF1 "Get out the way!"<br>
+MO "..."<br>
+MO "No! Wells is innocent! He hasn't done anything wrong."<br>
+MO "Wells digs his mine here, all alone. There's nothing else he wants here."<br>
+MO "He wont even go Twin Creeks for anything else except mineral surveys!"<br>
+TF1 "Wells is taken over by the spector. Only way to get rid of it is to hang him!"<br>
+MO "The town ain't haunted! There's only dust and spiders here."<br>
+TF1 "It for sure is! I saw someone staring at me from the apothecary when we passed through."<br>
+TF2 "I think that was a weasel..."<br>
+MO "This town isn't haunted. I'd bet my conscience on it."<br>
+MO "If you really think the town is haunted, I challenge you to stay a night here!"<br>
+TF1 "Stay a night? Are you crazy?"<br>
+MO "What are you, yella?"<br>
+TF1 "I ain't some yella! ...Fine, I'll spend a night. But only if others do too!"<br>
+TF2 "Yeah, sure, I'm no yella, I'll sleep a night."<br>
+MO "That's better! But a cold night on a broken floor isn't a night well slept. It should be a party."<br>
+TF3 "Hey, that sounds like a good idea. We could do a night here, with drinks and dance."<br>
+TF4 "Who's gonna be paying? I don't got a penny to spare."<br>
+MO "We'll pay for it! Drinks, and the food, and everything else."<br>
+TF3 "Let's do it! A night out in the ghost town!"<br>
+G "Well, that's fine. We ought to have some time to get the money together, since it's a large crowd."<br>
+G "How about we tell you guys once we have everything ready, and then we'll come here together."<br>
+TF3 "Sounds like a plan!"<br>
+The townsfolk leave

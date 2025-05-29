@@ -61,7 +61,7 @@ W "Well, it's the best we've got. Let's gather provisions, head south, and start
 ### Talk at Texas Freedoms ranch
 G "Now, where might the owner of this fine establishment be?"<br>
 A "Let's just wait for the land owner.<br>
-MO "...I don't like this."<br>
+MO "...I don't really like this."<br>
 A "Hmh?"<br>
 MO "The sovereign citizens in the West don't like when uninvited people wander onto their lands."<br>
 W "Pffft. We'll just talk it out with him, get our horses, and be on our way."<br>
@@ -145,42 +145,41 @@ Gwyneth, from behind cover "Surrender! If you'll let us go, we'll spare your lif
 SS "I'm not gonna give in to a bunch of criminals! You'll never take me alive!"<br>
 Law Keeper "Hold on just a moment."<br>
 SS "Huh? Don't tell me you're gonna negotiate!"<br>
-LK "...Aren't you the Pistoleros of Santa Rose?"<br>
+WG "...Aren't you the Pistoleros of Santa Rose?"<br>
 SS "<i>gasp</i><br>
 G "...I guess there's no point in hiding it. Yes, were the Pistoleros of Santa Rose!"<br>
-LK "Hmph. No wonder you managed to outgun these yokels."<br>
+WG "Hmph. No wonder you managed to outgun these yokels."<br>
 SS "Huh?!?"<br>
 G "That doesn't sound like regular lawgiver talk to me..."<br>
-LK "I was here on my way to the East. I only stopped here for two reasons:"<br>
-LK "I needed a place to stay."<br>
-LK "And I wanted to check on the smaller village and town law departments."<br>
+WG "I was here on my way to the East. I only stopped here for two reasons:"<br>
+WG "I needed a place to stay."<br>
+WG "And I wanted to check on the smaller village and town law departments."<br>
 G "Law departments? That sounds like Fed talk to me."<br>
-LK "And you wouldn't be far from the truth. I'm {name here}, the Deputy Commander of the Midwest Law."<br>
+WG "And you wouldn't be far from the truth. I'm Wyatt Garrett, the Deputy Marshal of the Midwest Law."<br>
 A "You're a highridin' fancy bootlickin' city vacator! Ain't no way the highest ranking Midwest lawgiver is in a tiny town like this one!"<br>
-LK "Seems that fate works in mysterious ways."<br>
-LK "The Pistoleros of Santa Rose, in the flesh and alive."<br>
-LK "My journey has brought me to a gold mine. All I had to do was prospect, and I struck gold."<br>
+WG "Seems that fate works in mysterious ways."<br>
+WG "The Pistoleros of Santa Rose, in the flesh and alive."<br>
+WG "My journey has brought me to a gold mine. All I had to do was prospect, and I struck gold."<br>
 G "Enough of your cryptic yammerin'! Time to decide, let us go, or else!"<br>
-LK "I am not letting the most wanted gang in all of the West of the hook."<br>
+WG "I am not letting the most wanted gang in all of the West of the hook."<br>
 A "Bad move, partner! You're outgunned 4 to 1! Better say your prayers!"<br>
-MA "You're just a soft cityperson!"<br>
-LK "I am the The Law in the Midwest."<br>
-LK "And if it's my draw you're doubting..."<br>
-LK draws his revolver lightning fast, and shoots all of the Pistoleros's hats off<br>
-LK "...There."<br>
+MA "You're just <i>gente de la ciudad!</i>"<br>
+WG "I am the The Law in the Midwest."<br>
+WG "And if it's my draw you're doubting..."<br>
+WG draws his revolver lightning fast, and shoots all of the Pistoleros's hats off<br>
+WG "...There."<br>
 G "Holy smokes!"<br>
 MA "This one doesn't feel so good..."<br>
 A "Fuck!"<br>
-LK manages to grab Gwyneth and uses her for protection<br>
-LK "Sadly, since I am quite alone, I don't have the means to take all of you in. Just one of you will have to do."<br>
-LK "No sudden moves now, or your friend bites the dust."<br>
+WG manages to grab Gwyneth and uses her for protection<br>
+WG "Sadly, since I am quite alone, I don't have the means to take all of you in. Just one of you will have to do."<br>
+WG "No sudden moves now, or your friend bites the dust."<br>
 A "Let her go!"<br>
-LK "If I'd have some Fed lawgivers here, I'd shoot you all dead. But alas, that will have to wait for another day."<br>
-LK "I will have to bid you farewell, as much as it pains me to do so."<br>
-LK "But we will meet again. Mark my words."
+WG "If I'd have some Fed lawgivers here, I'd shoot you all dead. But alas, that will have to wait for another day."<br>
+WG "I will have to bid you farewell, as much as it pains me to do so."<br>
+WG "But we will meet again. Mark my words."
 
-### LK leaves with Gwyneth
-
+### WG leaves with Gwyneth
 A "He got Gwyneth."<br>
 MA "Oooh, this isn't looking good..."<br>
 A "Where the fuck is Walker? We we're out here getting blasted, and he's nowhere to be seen."<br>
@@ -191,7 +190,7 @@ A "Well, I'm glad you did that! We could really have used our best Gunslinger ou
 W "Nahhh, it seems you handled it just fine. Where's Gwyneth?"<br>
 A "He, <i>took</i>, Gwyneth!"<br>
 W "What?"<br>
-A "The Debuty Commander of the Midwest Law just rolled up on us, and took Gwyneth!"<br>
+A "The Debuty Marshal of the Midwest Law just rolled up on us, and took Gwyneth!"<br>
 W "Ain't no way some stuckup queezy flatboot wagon-driver came here just to look us down his nose."<br>
 A "That's who he said he was, and he certainly wasn't some citydweller."<br>
 A "He outgunned us all 4 to 1!"<br>
@@ -226,14 +225,14 @@ W "You want to save her? That's suicide, if you ask me."<br>
 A "We're saving her!"<br>
 MA "I must agree with Aiyana. I won't let her go quietly into the sweet night."<br>
 W "Ugh, fuck me sideways. Fine, we'll try to save her. But we're gonna do it at night, with the explosives."<br>
-W "No bullheaded frontal charges. Is that clear, Aiyana?"<br>
+W "No bullheaded frontal charges. Got it, Aiyana?"<br>
 A "Fine, as long as we help her."<br>
 W "Where do we get the explosives from, Morrison?"<br>
 MO "...We'll have to travel west, to Copper Branch."<br>
-MO "It's a mining town in the hills. They mine all kinds of minerals there, coal, silver, gold."<br>
+MO "It's a mining town in the hills. They mine all kinds of minerals there, coal, lead, brass."<br>
 MO "I've heard a rumor that they've found gold there recently."<br>
 W "Gold?"<br>
 MO "There's a goldrush happening in the area. Many opportunistic prospectors are trying their luck at hitting it big."<br>
 W "A goldrush? We could make some money on the way..."<br>
 MO "West Field Mines are located near Copper branch. They sell the special explosives that we need."<br>
-W "Alright. We'll stock up on provisions, and head west. It'll be a long journey, so prepare properly. Let's take stock at the Copper Branch saloon."
+W "Alright. We'll stock up on provisions, and head west. Let's take stock at the Copper Branch saloon."

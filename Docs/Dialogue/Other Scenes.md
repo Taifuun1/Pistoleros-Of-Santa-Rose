@@ -28,7 +28,7 @@ A "Yeah, whatever."<br>
 G "Manuel."<br>
 MA "<i>Dios me guie!</i><br>
 Manuel blasts 3 bottles, while grazing 2<br>
-MA "Ooooh! <i>¡cerca!</i>"<br>
+MA "Ooooh! <i>¡Cerca!</i>"<br>
 A "Damn. Almost had all of them."<br>
 W "Needs more practise. You could be hitting all of those consistently. Maybe lay off on the siestas."<br>
 G "Very nice, Manuel."<br>
@@ -82,7 +82,7 @@ A "What the hell is that to you? Get the hell out of here!"<br>
 W "I don't want some amateurs rolling up on our turf, flatboot. Better think twice pullin' that shit in Santa Rose."<br>
 A "Huh? Who do you think are? Some bigshot too big for his own boots?"<br>
 W "We're the Pistoleros of Santa Rose, cityboy. This is our land. You ain't going to rob any trains 'round here, partner."<br>
-D "Now, listen up. We're going to rob a train. And we'll take what's ours."<br>
+D "Now, listen up. We are going to rob a train. And we'll take what's ours."<br>
 A "Ahhh... Look, it's fine. We'll be leaving your trains alone. We'll look for employment elsewhere."<br>
 D "Listen here..."<br>
 A "Come on, Dutch. We don't need to get into trouble right away."<br>
