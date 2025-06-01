@@ -14,6 +14,7 @@ script = ExtResource("1_g8364")
 [node name="Dialog" parent="." instance=ExtResource("2_x62av")]
 
 [node name="Waiter" type="Timer" parent="."]
+one_shot = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)

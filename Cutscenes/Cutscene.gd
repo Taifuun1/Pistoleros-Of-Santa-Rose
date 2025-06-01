@@ -36,7 +36,6 @@ func advanceScene() -> void:
 	var scene = cutscene.shots.pop_front()
 	
 	if scene == null:
-		print("fade out")
 		wait = true
 		$Fade.playAnimation("Fade Out")
 	else:
