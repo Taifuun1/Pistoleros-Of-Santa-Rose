@@ -8,4 +8,4 @@ shader_parameter/color = Color(0.985993, 0, 0.557271, 1)
 shader_parameter/width = 1.0
 shader_parameter/pattern = 0
 shader_parameter/inside = false
-shader_parameter/add_margins = true
+shader_parameter/add_margins = false

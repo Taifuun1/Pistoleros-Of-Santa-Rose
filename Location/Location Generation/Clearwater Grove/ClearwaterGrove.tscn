@@ -1,10 +1,10 @@
 [gd_scene load_steps=15 format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
-[ext_resource type="Script" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
+[ext_resource type="Script" uid="uid://beegavp5ohucg" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_3cuy1"]
-[ext_resource type="Script" path="res://Location/Location Generation/LocationGeneration.gd" id="3_3gfy0"]
-[ext_resource type="Script" path="res://Location/Location Generation/LocationChunk.gd" id="3_esotd"]
+[ext_resource type="Script" uid="uid://dpxt2vduncm1a" path="res://Location/Location Generation/LocationGeneration.gd" id="3_3gfy0"]
+[ext_resource type="Script" uid="uid://6aoesv5hce05" path="res://Location/Location Generation/LocationChunk.gd" id="3_esotd"]
 [ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/Location/PlayerLocationActor.tscn" id="3_ptpse"]
 [ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/Chunk Generation/WFCChunkGenerator.tscn" id="3_y2lwj"]
 [ext_resource type="PackedScene" uid="uid://c60dx2f3r0a8n" path="res://Location/Location Generation/Chunk Generation/ChunkProcessor.tscn" id="5_w0ig6"]
@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.tscn" id="8_rqtc4"]
 [ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="10_t2ahg"]
 [ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/Location/LocationActor.tscn" id="11_ipqrn"]
-[ext_resource type="Script" path="res://Actors/AI.gd" id="12_pq735"]
+[ext_resource type="Script" uid="uid://ct0e026q7u5rr" path="res://Actors/AI.gd" id="12_pq735"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_5ks3n"]
 vertices = PackedVector2Array(578, 398, 10, 398, 10, 4, 578, 4)

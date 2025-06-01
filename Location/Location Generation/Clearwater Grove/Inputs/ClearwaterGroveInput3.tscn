@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://crmknk82thghx"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_522qb"]
-[ext_resource type="Script" path="res://Location/Location Generation/Wave Function Collapse/InputTemplate.gd" id="2_mu4wa"]
+[ext_resource type="Script" uid="uid://b2auf7seb4ivl" path="res://Location/Location Generation/Wave Function Collapse/InputTemplate.gd" id="2_mu4wa"]
 
 [node name="TileMap" type="TileMap"]
 y_sort_enabled = true
