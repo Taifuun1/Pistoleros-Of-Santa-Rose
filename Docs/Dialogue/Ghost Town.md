@@ -1,7 +1,7 @@
 
 # Ghost Town
 
-Ghost town is the fourth main quest. It sees the Pistoleros help an old ghost town hermit make the town lively again. The Pistoleros find a pair of scummy poker cheaters as their antagonists. They attempt to cheat the Pistoleros multiple times, as well as frame Powell for stealing cattle.
+Ghost town is the fourth main quest. It sees the Pistoleros help an old ghost town hermit make the town lively again. The Pistoleros find a pair of scummy poker cheaters as their antagonists. They attempt to cheat the Pistoleros multiple times, as well as frame Wells for stealing cattle.
 
 ## Arrival at Fairpeaks
 
@@ -10,7 +10,7 @@ G "Aiyana is probably at the saloon.
 ## Talk at Fairpeaks saloon for next steps
 
 A "Finally! You're here! And you're all okay!"<br>
-MA "Aiyana! Ángel de los cielo!"<br>
+MA "Aiyana! <i>Ángel de los cielo!</i>"<br>
 G "Good to see you, Aiyana. It was a long journey."<br>
 A "You look exhausted. What happened? Was the mountain trek difficult?"<br>
 G "That mountain was like hell itself. The whole way was filled with trouble."<br>
@@ -18,14 +18,14 @@ G "The natives of the mountain were friendly at first, but there were some compl
 G "We had to rush through Pillrose Pass fighting both natives and cold all the way."<br>
 G "There was no way back through Pillrose Pass, so we had to take the western route through the hills into Lonmont Rise."<br>
 G "The way was winding and long, so we needed winter equipment. We had to hunt bear for their bear skins."<br>
-G "To top it all of, The Deputy Marshal himself was waiting for us is in Southstone Mining. We barely escaped."<br>
+G "To top it all of, The Deputy Marshal himself was waiting for us is in Pinewood Fields. We barely escaped."<br>
 G "I think this trip was a huge mistake."<br>
 MA "The <i>frío!</i> still touches my soul!"<br>
 A "That sounds terrible. That lawgiver gave Texas Freedom the run for his money, so how on earth did you beat him and his Feds?"<br>
 G "We managed to match him and his goons just barely. Then Walker gave him the 'ol Gunslingers Draw. We managed to run away before they gave chase."<br>
 G "You really gave them the what for back there, Walker."<br>
 W "When I just get to shoot at things, everything makes sense in the world."<br>
-G "I guess we just need to get you to blast away at Marshal WG and all our problems will be solved."<br>
+G "I guess we just need to get you to blast away at Marshal Wyatt and all our problems will be solved."<br>
 W "I don't know if I could beat that lawgiver fellow. He had a real rhythm to his hands."<br>
 W "Them Feds get scarier every year that passes."<br>
 G "Now that we're all back together, we got the last part of our plan to figure out."<br>
@@ -116,7 +116,7 @@ A "Learning a little too quickly! I've seen a cheat a thousand times! You're not
 PP "It's just a bit of misfortune. Let's play more cards. No need to get worked up."<br>
 A "The ol' slip of the hand got you that jack! Those hands are too slick for a greenhorn!"<br>
 DS "It wasn't a slip of the hand, it's called a turn of the card..."<br>
-TH "Dallas here has a great sense of humor. But you, madam, are quite antogonistic! You wouldn't be so mouthful if I had a gun to defend my honour!"<br>
+TH "Dallas here has a great sense of humor. But you, madam, are quite antagonistic! You wouldn't be so mouthful if I had a gun to defend my honour!"<br>
 PP "Hey, I can lend you a gun right here. Defend your honour, man to woman."<br>
 TH "Oh..."<br>
 A "You'll be counting cards in heaven, slickjacks!"<br>
@@ -183,7 +183,7 @@ WE "Mmmhh... I'd say with those explosives your target would be the Continental 
 G "Very good deduction, sir."<br>
 WE "I don't really care one way or another for that type of meddling. Those folk in the train look down on anyone who lives in the West."<br>
 G "So would you agree to help us?"<br>
-WE "I've had a lot on my mind lately. It's been years since arrived here. I was the first of many... And now I'm the last."<br>
+WE "I've had a lot on my mind lately. It's been years since I've arrived here. I was the first of many... And now I'm the last."<br>
 WE "I will find gold in these hills. I'm sure of it."<br>
 G "I wouldn't stop you from trying. We'll share a portion of our valuables from the Continental Train robbery."<br>
 G "You'd come back here, where you'd have the money to keep trying for as long as you'd like."<br>
@@ -196,7 +196,7 @@ MA "<i>¡Felices tiempos!</i><br>
 WE "I don't know if those times will ever come back."<br>
 WE "Maybe you fellers could try convincing a few people from Twin Creek to come over to Gold Springs for a night? For olds times sake."<br>
 G "If thats what would convince you to help us, we can try."<br>
-WE "I would appreciate that very much. And I'll consider helping you folk out on your mischievious adventure."
+WE "I would appreciate that very much. And I'll consider helping you folk out on your <i>mischievious</i> adventure."
 WE "I better get back to mining."<br>
 After Wells leaves<br>
 W "So we're trying to get some yellas from Twin Creek to have a picnic here? That ain't how the Pistoleros do things."<br>
@@ -272,7 +272,7 @@ TF1 "Get out the way!"<br>
 MO "..."<br>
 MO "No! Wells is innocent! He hasn't done anything wrong."<br>
 MO "Wells digs his mine here, all alone. There's nothing else he wants here."<br>
-MO "He wont even go Twin Creeks for anything else except mineral surveys!"<br>
+MO "He wont even go to Twin Creeks for anything else except mineral surveys!"<br>
 TF1 "Wells is taken over by the spector. Only way to get rid of it is to hang him!"<br>
 MO "The town ain't haunted! There's only dust and spiders here."<br>
 TF1 "It for sure is! I saw someone staring at me from the apothecary when we passed through."<br>
@@ -291,4 +291,75 @@ TF3 "Let's do it! A night out in the ghost town!"<br>
 G "Well, that's fine. We ought to have some time to get the money together, since it's a large crowd."<br>
 G "How about we tell you guys once we have everything ready, and then we'll come here together."<br>
 TF3 "Sounds like a plan!"<br>
-The townsfolk leave
+The townsfolk leave<br>
+G "That was close..."<br>
+W "Fantastic. Now we've got even more money to raise."<br>
+W "You just couldn't keep your mouth shut, Morrison."<br>
+MO, frowning "..."<br>
+A "Would you rather have them hang us?"<br>
+W "Nah, we could have handled a few greenhorns."<br>
+W "Nobody ever got hurt from a bit of gunplay."<br>
+A "Except I did! You're way too in your head, Walker!"<br>
+G "This isn't important right now. Let's focus on what matters. Which is the funds for the party."<br>
+G "This will cost us a fortune. How are we going to scramble this together?"<br>
+W "If only we could rob the Continental train..."<br>
+G "No reason to daydream, Walker."<br>
+A "There's a swamp far down south called Tillhill Marsh. Our tribe would go there in spring to hunt and forage."<br>
+A "There's expensive herbs there for beverages. I remember seeing mineral deposits in the waters. Giant beavers roam the swamplands."<br>
+A "I was thinking, since we've done everything under the sun since arriving in Lazysprings, we might as well put those skills into use."<br>
+G "Good thinking, Gwyneth. We've got experience on every odd job you can imagine now. Putting all of it together will maximise our profits."<br>
+G "But how far down south is Tillhill Marsh?"<br>
+A "It's past Scorpions Stead. Way further south."<br>
+G "I don't think we're welcome in Scorpions Stead. Especially after our encounters with Wyatt Garrett."<br>
+G "I say we go back to Lazysprings to avoid all of the Fed patrols, and to get closer to Tillhill Marsh."<br>
+G "With luck, we'll have the funds together by the end of the week."
+
+## Talk at the Lazysprings saloon once the money is gathered
+G "...We have enough money."<br>
+W "This dampness will follow me to my grave. What a miserable swamp."<br>
+A "It's was spring home for our tribe! You shut your mouth!"<br>
+G "Alright, enough. Let's go to Goldsprings, and get this party started."
+
+## Ghost town
+
+### Arrival at Goldsprings
+TF1 "Hey there, fellers. How you doin' on this fine night?"<br>
+A "We're not getting lynched, so better than usual..."<br>
+TF1 "What's that?"<br>
+G "We're doing fantastic! Everythings ready for the festivities. Let's get into the saloon and begin!"<br>
+Townsfolk move into the saloon
+
+### Outside the Goldsprings saloon
+Outside, the poker cheaters prepare
+TH "The plan is, you go in at midnight, and spook the townsfolk. They'll run into the night with their tail between their legs."<br>
+TH "The townsfolk will blame Wells, and well be able to get back at him!"<br>
+DS "Right. But wouldn't you be a scarier ghost since you're taller?"<br>
+TH "Nonsense, Dallas! With your naturally weasely movements, the townsfolk will wet their pants before you can say "Phantom Pull"!"<br>
+DS "We could have just went back to swindling people at the poker table..."
+
+### Dancing in the saloon
+The townsfolk are dancing in the saloon
+Suddenly, a ghost appears from the door
+DS "Boooo! I'm a ghost!"<br>
+TF1 "<i>gasp</i> The ghost of Huxley Dale!"<br>
+MA "Eyyy, it's our special quest! ¡Fantasma bailando!"<br>
+MA "Sing and dance, <i>amigos!</i>
+Manuel shoots the floor under the spector, making it dance to the music
+TF2 "Hah! You have the wildest ideas, Manuel!"<br>
+MA "My <i>imaginación</i> is only matched by my good manners!"<br>
+MA "Our ghost friend wanted to learn new dance moves after <i>un incidente</i> with <i>una Escalera Real!</i>"<br>
+Townsfolk laugh and dance
+
+### After the party
+
+
+### On the morrow after the party
+
+
+## At Twin Creep saloon
+
+
+## Outside the town
+A "Where is Wyatt Garrett? I thought he'd be right on our trail."<br>
+G "Wyatt is no yesterdays finch. He must be preparing to defend the Continental Train."<br>
+G "The Continental Train will be swarming with Feds, I'm sure."
