@@ -32,7 +32,7 @@ G "Now that we're all back together, we got the last part of our plan to figure 
 G "We need that explosives expert for the train robbery."<br>
 A "No honest fellow is going to help us. Most wouldn't approach us with a long stick."<br>
 A "It's gotta be someone a little hazy. Someone with a bad background."<br>
-G "Could we find a civil war-era guy?"<br>
+G "Could we find a civil war–era guy?"<br>
 W "Nah, those ain't around anymore. They're not really looked well upon in the West."<br>
 G "Morrison, do you know of anyone who might be of help?"<br>
 MO "All the miners I knew in {state} must be gone or retired. I've got no people I know that could help."<br>
@@ -307,7 +307,7 @@ G "No reason to daydream, Walker."<br>
 A "There's a swamp far down south called Tillhill Marsh. Our tribe would go there in spring to hunt and forage."<br>
 A "There's expensive herbs there for beverages. I remember seeing mineral deposits in the waters. Giant beavers roam the swamplands."<br>
 A "I was thinking, since we've done everything under the sun since arriving in Lazysprings, we might as well put those skills into use."<br>
-G "Good thinking, Gwyneth. We've got experience on every odd job you can imagine now. Putting all of it together will maximise our profits."<br>
+G "Good thinking, Aiyana. We've got experience on every odd job you can imagine now. Putting all of it together will maximise our profits."<br>
 G "But how far down south is Tillhill Marsh?"<br>
 A "It's past Scorpions Stead. Way further south."<br>
 G "I don't think we're welcome in Scorpions Stead. Especially after our encounters with Wyatt Garrett."<br>
@@ -351,15 +351,105 @@ MA "Our ghost friend wanted to learn new dance moves after <i>un incidente</i> w
 Townsfolk laugh and dance
 
 ### After the party
-
+A "That went exceptionally well. The village folk had a great impression."<br>
+MA "<i>¡Grandes festividades!</i><br>
+G "And there were no complications after."<br>
+W "I didn't drink tonight, pardner."<br>
+A "Can't piss on the totem pole here..."<br>
+G "Let's get sleeping, and talk out the rest on the morrow."
 
 ### On the morrow after the party
+TF2 "Wheeell, that was a merry ol' time."<br>
+G "That it was, partner! And there weren't any ghosts to be seen either!"<br>
+MA "Except our <i>amigo festivo!</i>"<br>
+WE "I guess that means there won't be any lynching happening here?"<br>
+TF1 "No, sir! Seems like that ghost baloonie was nothing but fairy dust on the trail."<br>
+TF1 "You seem like a fine feller, Wells. I'm sorry for judging you too hastily."<br>
+WE "Well, that's a relieving sentiment to hear. I'm glad the witch hunt is over."<br>
+WE "I hope my mining here won't be looked down on as some wierd hermitcraft."<br>
+TF3 "This town has a wonderful energy to it. I say we move here to rebirth the towns vitality!"<br>
+TF2 "That don't sound like a bad idea. The buildings are in surprisingly good condition, and there's water and farmland all around."<br>
+A "If you go to the forest up north, you can haul timber for the reconstruction."<br>
+TF3 "And cleaning the cobwebs will make the village seem homey."<br>
+Walker arrives on the scene
+W "What's y'all doin'?"<br>
+TF1 "We're going to resettle the town! Turns out all the ghost talk was all baloonie!"<br>
+W "Really?"<br>
+TF1 "Yup!"<br>
+W "Well, I just came back from the horse stables and I saw the meanest, creepiest stare you could imagine."<br>
+TF1 "Huh?"<br>
+W "Speak of the devil, it's right there."<br>
+Townsfolk turn to look at the dark building interior, where a pair of eyes stares back<br>
+TF1 "Ghost!"<br>
+TF2 "That's the ghost of Huxley Fin! Run!"<br>
+The townsfolk run<br>
+The ghost emerges from the shadows, turns out it was a dog<br>
+W "Welp, it was just a scoundrel."<br>
+A "Fuck..."<br>
+MA "Where did the townsfolk go?"<br>
+G "They ran off. I don't think they're coming back."<br>
+WE "What's gonna happen to rebuilding Goldsprings?"<br>
+G "Those townsfolk were pretty superstitious, and quick to change their mind. I don't expect them to come back."<br>
+WE "Ehhh... They're simple folk, I guess. Maybe I'll keep on mining out here alone."<br>
+WE "Anyways... This was a fun night. Felt like the good old times."<br>
+WE "I'll be helping you on your train robbery."<br>
+G "Great to hear. Perhaps we could meet at Lazysprings?"<br>
+WE "Sounds good. I'll travel there on my own once I've got my things set up here."<br>
+G "The Continental Train will be making it's way through the area soon. Let's make sure we're all there before it arrives."
 
+## Outside Goldsprings
+G "Let's head to Twin Creek saloon and plan out this heist before anything else."
 
-## At Twin Creep saloon
-
+## At Twin Creek saloon
+G "OK, gang. Here's the facts."<br>
+G "We have our equipment for robbing the train. There's a saddleload of civil war–grade explosives on the haul."<br>
+G "The oxen are well fed and ready to pull the stagecoach. And Wells will be handling the explosives."<br>
+G "We got all of our goals done. It's time to rob the Continental Train."<br>
+A "Do we intercept the train deep in the prairie? Or earlier, closer to Gránde Canyon?"<br>
+G "I say the further from civilization we are, the better."<br>
+MA "Where do we go after <i>el robo?</i> No safe hiding spot here, so we must run for the hills."<br>
+W "We'll just ride for Santa Catherine. The farther west we go, the less Feds there are."<br>
+G "That seems all fine. I guess other than that we'll be relying on our experience as Pistoleros to wade us through."<br>
+W "Finally, some big–time robbing. I'm ready to grab some shiny–stuff for myself."<br>
+A "I bet you are, Walker. You're always ready to snatch every valuable you can get your hands on."<br>
+A "I wish you'd care more about your gangmembers. My limp isn't getting better any time soon."<br>
+A "I have to drag myself through this whole thing just for you to see the gleam of gold in some hare–brained scheme of yours."<br>
+W "I got my head on straight. This robbery's gonna make us rich. That's all that matters."<br>
+MA "I don't know, <i>amigo</i>. All this <i>desgracia</i> has got my mood down in the dumps."<br>
+MA "How are the Pistoleros going to get through this? <i>El gran robo</i>, with <i>Federales arenosos</i>, and <i>ira de dioses</i> on our backs?"<br>
+MA "This <i>robo</i> has got the ingredients for the biggest <i>quemadura de especias!</i>"<br>
+W "It's gonna be fine. Them Feds don't got a clue we're coming."<br>
+W "And it's not like we've had some grand misfortune fall upon us. It's just a chuckhole or two before smooth riding."<br>
+G "I have to agree with Aiyana and Manuel. We've had one mistep after another lately, and it doesn't seem like it's getting any better."<br>
+W "You still got gunfright from that wide–walkin' highridin' Fed lawgiver. This is the big one we've been aiming for."<br>
+MO "..."<br>
+MO "I..."<br>
+The gang looks at Morrison<br>
+MO "I don't agree how we treated Wells."<br>
+W "Huh? How's that relevant? We got Wells on our team."<br>
+MO "..."<br>
+MO "Wells had his lonely hermit life in that little mine of his. And I wanted to give him more."<br>
+MO "You scared them away. With one meaningless comment, they all ran off."<br>
+W "Those scaredy–cats would have ran the moment one horse was hitched wrong. That wasn't a big loss."<br>
+MO "It was a big loss to <i>me</i>! I've wanted to do one good thing in this goddamned mess. And you screwed it all up!"<br>
+MO "I'm trying to make the lives of the people we meet better. Nothing else matters to me!"<br>
+MO "Not like you've cared about how I've thought <i>ever</i>. None of you."<br>
+G "Well now, Morrison. I care about how you feel. I've always tried to include you in our talks."<br>
+A "Don't listen to him, Morrison. You've got a lot more to give to this gang than Walker could ever hope for."<br>
+MA "Morrison! My <i>amigo!</i> We have big talks, with you! Every night!"<br>
+MO "Well..."<br>
+W "That ain't something I'm concerned with. The townsfolk and the hermit can go kick it, for all I care."<br>
+W "We ought to be looking out for ourselves."<br>
+MO "...If that's how you feel, then I'm not going to participate in this heist."<br>
+G "Hey, now..."<br>
+A "We're in this together, Morrison! Don't listen to him!"<br>
+MA "Ooooh, my <i>amigo!</i> Let's figure it out!"<br>
+MO "There's nothing for me to figure out here. I'm not going to take part in an empty, vapid scheme of a fool."<br>
+Morrison leaves the saloon, and the gang<br>
+There's a short pause<br>
+A "...Great going, Walker."
 
 ## Outside the town
 A "Where is Wyatt Garrett? I thought he'd be right on our trail."<br>
 G "Wyatt is no yesterdays finch. He must be preparing to defend the Continental Train."<br>
-G "The Continental Train will be swarming with Feds, I'm sure."
+G "The train will be swarming with Feds, I'm sure."
