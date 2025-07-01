@@ -342,7 +342,7 @@ MA "If Walker hadn't <i>orinado</i> on <i>el tótem</i>, we would be getting <i>
 MA "This is a big <i>jodido! ¡Mierda!</i>"<br>
 W "Yeah, the feather-folk had got their feelings twisted. Good thing we got out of there quick."<br>
 MA "You got the big drunks! Way too much!"<br>
-W "I doubt anything would have made the difference. I drank like the rest of us. Probably shouldn't have gave the alcohol."<br>
+W "I doubt anything would have made the difference. I drank like the rest of us. Probably shouldn't have gave them alcohol."<br>
 G "Look, let's stick to the point. We're stuck behind the mountain. That's just a fact."<br>
 G "We got to get out somehow."<br>
 MA "Maybe Walker can <i>orinado</i> a path through mountain for us!"<br>
@@ -369,14 +369,14 @@ W "I'm not really looking to get eaten by a bear. Way too many close calls alrea
 ## Out of the hills
 
 MO "I think I know this place. It's one of the old mining operations done in Lonmont Rise."<br>
-MO "Southstone Mining should be down south. Find a creek and follow it."
+MO "Pinewood Fields should be down south. Find a creek and follow it."
 
-## Arrival at Southstone Mining
+## Arrival at Pinewood Fields
 
-MO "That's Southstone Mining."<br>
+MO "That's Pinewood Fields."<br>
 G "Get to the saloon."
 
-## Talk at Southstone Mining saloon for next steps
+## Talk at Pinewood Fields saloon for next steps
 
 G "We're out. We're finally out of the hills."<br>
 W "I don't know if I could have taken more cold. I left my ass frozen on the trail half way to here."<br>
@@ -386,7 +386,7 @@ W "We're safe now. Nothing to worry about now."<br>
 W "Once we're rested, we'll pick up Aiyana from Fairpeaks."<br>
 G "Good plan. Now, we need more whiskey."<br>
 WG, from outside the saloon "Come out, Pistoleros!"<br>
-W "Huh? Do I hear that right? Is that the big-nosed lawgiver?"<br>
+W "Huh? Do I hear that right? Is that the big-nosed humpty-dumpty lawgiver?"<br>
 G "...I think it is. Looks like we got even more troubles for ourselves."<br>
 G "Get out of the saloon. And get your guns ready."
 
@@ -408,7 +408,7 @@ A fight ensues
 
 MA "<i>¡Alguacil!</i> It's time for you to meet <i>dios!</i>"<br>
 WG "Me and god parted ways a long time ago. He wouldn't talk to me even if I tried."<br>
-WG "You scoundrels however are in need of the guiding hand of Creator. It's high time you embraced your spirituality."<br>
+WG "You scoundrels however are in need of the guiding hand of the Creator. It's high time you embraced your spirituality."<br>
 MA "God forgives! But your sins are great! <i>Puertas del cielo</i> won't open for you, <i>legislador!</i>"<br>
 WG "Enough about god. I'm here to dish out law. There won't be running this time."<br>
 W "Yeah, we'll see about that. I'll give 'em what for."<br>
@@ -422,6 +422,6 @@ W "We're the infamous gunslingers that fooled the law, time and time again!"<br>
 WG "This is farewell. One more time. I'll see you later, Walker."<br>
 Walker books it on out of there
 
-## Outside Southstone Mining
+## Outside Pinewood Fields
 
 W "We got to get to Fairpeaks quick, before they get their shit together."

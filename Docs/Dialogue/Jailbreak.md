@@ -159,7 +159,7 @@ TF "Mmmh, just the people I was lookin' for."<br>
 W "What the hell are you doin' here? Spit it out, or I'll make your hat into swiss cheese."<br>
 TF "Now, feller, no need to get uppidy. I'm here to exchange a few words, and nothin' else, if you don't mind."<br>
 A "What do you want?"<br>
-TF "I was informed that them Feds were roughin' up some folk back at Snakeflats. And I went to investigate myself."<br>
+TF "I was informed that them Feds were roughin' up some folk back at Snakeflats. So I went to investigate myself."<br>
 TF "Seems them Feds got one of your folk. And I heard they was gon' uppin' dem lawgiver patrols in der area."<br>
 TF "Those highridin', bootlickin', effeminin', coastal teasippers!"<br>
 TF "Their fancy au-to-mobiiiles, and their pretty colorful dresses, and their mellow cat-lickity ciders, ain't nothin' but some fairy dust on the trail."<br>
@@ -188,7 +188,7 @@ Morrison setts up the explosives and takes cover
 MO "It's gonna blow!"
 Jail wall exlodes
 W "Alright, boys and girls! Let's get to it! Find Gwyneth!"<br>
-A "YEEEHAAWWW!<br>
+A "YEEEHAAWWW!
 
 ### Finding Gwyneths cell
 A "Gwyneth! You're okay!"<br>
@@ -202,7 +202,7 @@ TF "Pardon me, miss, but I've joined your Pistoleros momentarily. I'm here to te
 G "Well, don't mind if I do. You're quite a welcome sight, sir."<br>
 TF "Y'all makin' me blush with your dang compliments."<br>
 W "We ought to be moving already!"<br>
-G "Alright, gang! Let's hit it!"<br>
+G "Alright, gang! Let's hit it!"
 
 ### In the jail courtyard
 WG "Hmmh, what do we have here? Have the coyotes crawled out of the den?"<br>
@@ -252,7 +252,7 @@ TF "We don' look down on folk 'round here, pardner! If you got the gutts and the
 TF "You get them fancy dresses and - au-to-mobiiiles - for nut'in'! You didn't work a single day in your life!"<br>
 The Pistoleros manage to catch a breather, by blasting down a wall that caused a large dust cloud<br>
 A "Texas, we managed to blast the courtyard office! It's time to get out of here!"<br>
-TF "I got to teach this flatfoot a lesson in manners! I ain't goin' nowhere!"<br>
+TF "I got to teach this flatboot a lesson in manners! I ain't goin' nowhere!"<br>
 MA "This isn't what I had in mind for a fiery night, <i>señorita!</i><br>
 WG "Hmph. Dirty trick blasting the office. Even if effective."<br>
 WG "You're a good gunslinger, I'll give you that much. That saved your life today."<br>

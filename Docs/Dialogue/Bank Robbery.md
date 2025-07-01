@@ -25,7 +25,7 @@ G "The Continental Crossing Train? You can't be serious. That train is the most 
 W "I've got a plan. Trust me. I've thought of this for a while."<br>
 A "Did you start thinking of this before or <i>after</i> our last failed robbery?"<br>
 W "I've got this all figured out. First, we're gonna need some special explosives. Like, the Real Stuff."<br>
-W "Not the stuff you get from the general store. No. I'm talking real, civil war-grade explosives."<br>
+W "Not the stuff you get from the general store. No. I'm talking real, civil war–grade explosives."<br>
 W "Then, we're gonna need an explosives expert. Someone who really knows what they're doin'. Not some amateur."<br>
 W "Last, they've got the biggest, meanest, sturdiest safe in the West on that train. So that all the fancy city-folk can feel safe with their jewellery."<br>
 W "We need some safe cracking equipment for that thing."<br>
@@ -163,7 +163,7 @@ WG "My journey has brought me to a gold mine. All I had to do was prospect, and 
 G "Enough of your cryptic yammerin'! Time to decide, let us go, or else!"<br>
 WG "I am not letting the most wanted gang in all of the West of the hook."<br>
 A "Bad move, partner! You're outgunned 4 to 1! Better say your prayers!"<br>
-MA "You're just <i>gente de la ciudad!</i>"<br>
+MA "You're just <i>una gente de la ciudad!</i>"<br>
 WG "I am the The Law in the Midwest."<br>
 WG "And if it's my draw you're doubting..."<br>
 WG draws his revolver lightning fast, and shoots all of the Pistoleros's hats off<br>
