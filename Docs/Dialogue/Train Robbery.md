@@ -23,7 +23,7 @@ A "Even if he can't hit a barn wall from a spitting distance, we could always co
 A "Walker, your fucking loud mouth always puts us into the ditch. That was no way to treat a Pistolero back at Twin Creeks!"<br>
 W "What? I just put down the plan. We ride for the Pistoleros, no-one else."<br>
 A "Morrison is <i>gone!</i> Doesn't sound like riding with the Pistoleros!"<br>
-Wells enters the saloon
+Wells enters the saloon<br>
 WE "Hey there, partners. I'm here, and ready for action."<br>
 G "Hey there, Wells. I think we got our plans figured out."<br>
 G "There's just one thing. How good is your horse riding?"<br>
@@ -48,7 +48,7 @@ G "But we ought to move now! The more time we waste, the more Feds will catch up
 G "Wells, can you follow us?"<br>
 WE "Missy, I don't really have the best back no more. I won't be able to get into the train."<br>
 G "Can you follow us up the tracks while we get the train there?"<br>
-WE "I sure can, missy"<br>
+WE "I sure can, missy."<br>
 G "Alright, gang. Let's move out! Quick!"
 
 ### At the Continental Train
@@ -61,25 +61,67 @@ A "YEEEHAAWWW!"
 
 ### Gwyneth and Walker talk inside the train
 
-Gwyneth has a problem with Walkers decisions
-She has to clean up after him every time and keep the gang focused
-Walker says it was all fine
+A "What's going on?"<br>
+G "Looks like the train is moving. The Feds must have been able to push back the bandit groups."<br>
+MA "The train moving is good! But we are not in control! We need to get to <i>la locomotora!</i>"<br>
+W "Ehh, there ain't no hurry to stop this tankhorse. It's all just fine and dandy."<br>
+G "Pardon me, Walker, but it certainly isn't. We're on a clock here. The more we dawdle, the worse it's going to get for us."<br>
+G "This has been a pattern for a while now. You misassess the situation, give out the wrong opinion, and we get into trouble."<br>
+G "We have to rethink how we approach dangerous situations."<br>
+W "It's them Feds who make it all so difficult. My straight-shot plans keep us on the trail."<br>
+G "..."<br>
+G "I've been keeping this gang focused ever since we got separated in Redbadger Forest. There's always a fight brewing with you and the rest of the gang."<br>
+G "I'm not happy with the state of affairs as they currently stand."<br>
+W "Nah, it's fine. We're doing alright."<br>
+Feds emerge from front-portions of the train
+Fed "There they are! The Pistoleros of Santa Rose! Get 'em!"<br>
+A "Fuck! That's too many of them!"<br>
+G "Shoot and retreat to the back of the train!"
 A firefight with Feds starts
 
 ### Manuel and Walker talk inside the train
 
-Manuel tells Walker he doesn't like making enemies out of friends
-Walker says they haven't made any friends on the way
-Manuel didn't like the way Walker treated Morrison
+G "They're of our backs, for now."<br>
+A "We still gotta stop the train!"<br>
+MA "Our <i>cálido amigo</i>, Morrison, could have blown up <i>las ruedas del tren</i> easy!"<br>
+MA "But no <i>amigos</i>, no <i>grandes explosivos!</i>"<br>
+MA "We make only enemies, no friends!"<br>
+W "We ain't made any friends after the fuckup with the Feds. People ain't too friendly round these parts."<br>
+MA "Big lies! As usual!"<br>
+MA "My <i>amigo</i>, <i>Compañero alegre</i>, sweet frowny-face! Lost to Pistoleros, for all time!"<br>
+MA "<i>Mi villano</i>, Walker, you treat Morrison worse than dirt!"<br>
+MA "I see you have no respect for any Pistolero. Not good for morale!"<br>
+W "Morrisons got his own problems to figure out. We ought to look out for ourselves."<br>
 More Feds emerge on to the train coach
+F "There's nowhere to run, Pistoleros! Give up!"<br>
+A "Get on the roof!<br>
 The gang is overwhelmed and has to escape to the train roof
 
 ### Aiyana and Walker talk on top of the train
 
-Aiyana confronts Walker about his loyalty to the gang
-Walker says they've got to get the valuables instead of relying on the gang
-Aiyana blames Walker and starts crying
-Aiyana verbally pushes Walker to stop the train
+G "It's hard to keep a footing here. The train's moving fast, and the wind pushes us off easily!"<br>
+MA "No choice! Move like <i>el diablo del viento!</i><br>
+W "We're not leaving this train without the valuables! Get moving!"<br>
+A "And the fuck we are! I've had enough!"<br>
+A "Walker! Do you care more about the gold or our gang?"<br>
+A "Give me an answer!"<br>
+W "Ain't no time to think about that! Move it towards the front!"<br>
+W "The shiny-stuff is right there, if we can get the train a halt!"<br>
+A "Well ain't that something. Honesty, just for once. Didn't know you were capable of that."<br>
+A "I always knew you weren't in it for the gang. I always knew... I... I knew... I..."<br>
+Aiyana starts crying
+A "..."
+A "You fucking common thug! Put your actions where your mouth is! You're gonna lead us all the way to the front!"<br>
+A "No more bullshit from you! If you want it, then go get the valuables!"<br>
+W "That..."<br>
+A "Move it or I'll shoot you!"<br>
+Aiyana pulls out her gun<br>
+W, scared "..."<br>
+W "We ought to..."<br>
+MA "Fly like the wind, <i>villano!</i>"<br>
+G "I hope you'll lead us, Walker. This time at least."<br>
+W "..."<br>
+W "Fine, I'll move."
 
 ### Walker meets Wyatt Garrett on top of the train
 
