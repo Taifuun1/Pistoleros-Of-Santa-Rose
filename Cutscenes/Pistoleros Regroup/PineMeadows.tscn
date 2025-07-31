@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3oe6dv8bb60g"]
+
+[ext_resource type="PackedScene" uid="uid://ddsoc6y66sblu" path="res://Cutscenes/Cutscene.tscn" id="1_mp6eo"]
+
+[node name="PineMeadows" type="Node2D"]
+
+[node name="Cutscene" parent="." instance=ExtResource("1_mp6eo")]
