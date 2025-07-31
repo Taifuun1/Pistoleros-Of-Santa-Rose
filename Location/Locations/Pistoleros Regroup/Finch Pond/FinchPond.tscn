@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=4 uid="uid://dtugxex2k55px"]
+[gd_scene load_steps=6 format=4 uid="uid://dtugxex2k55px"]
 
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="1_06wys"]
 [ext_resource type="Script" uid="uid://ii52u1yme8jk" path="res://Location/Locations/BaseLocation.gd" id="1_bqboe"]
 [ext_resource type="TileSet" uid="uid://3cjwhqd8trvl" path="res://Tilesets/LocationObjects.tres" id="3_p6f00"]
+[ext_resource type="PackedScene" uid="uid://plqhvmf2uttb" path="res://Nodes/Exit/Exit.tscn" id="4_xgubb"]
+[ext_resource type="PackedScene" uid="uid://muesuexxtn5o" path="res://Cutscenes/Generic Cutscenes/Fade.tscn" id="5_2g0cf"]
 
 [node name="FinchPond" type="Node2D"]
 script = ExtResource("1_bqboe")
@@ -15,3 +17,25 @@ tile_set = ExtResource("1_06wys")
 [node name="TileMapLayer2" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAAPAEwACAAAAAAAAAAPAEoAAAAAAAAAAAAPAEkABwAAAAAAAAAQAEoAAgAAAAAAAAAPAEsABQAAAAAAAAAQAEwABQAAAAAAAAAUAEoAAwAAAAAAAAAVAEwAAwAAAAAAAAAVAE4AAwAAAAAAAAAVAE0AAQAAAAAAAAAVAFAAAQAAAAAAAAAQAEkABAAAAAAAAAAQAEsABAAAAAAAAAA=")
 tile_set = ExtResource("3_p6f00")
+
+[node name="Exits" type="Node2D" parent="."]
+
+[node name="Pine Meadows" type="Node2D" parent="Exits"]
+
+[node name="Exit" parent="Exits/Pine Meadows" instance=ExtResource("4_xgubb")]
+position = Vector2(564, -12)
+exitTo = {
+&"location": &"Pine Meadows",
+&"playerPosition": Vector2i(855, 700)
+}
+
+[node name="Exit2" parent="Exits/Pine Meadows" instance=ExtResource("4_xgubb")]
+position = Vector2(588, -12)
+exitTo = {
+&"location": &"Pine Meadows",
+&"playerPosition": Vector2i(855, 700)
+}
+
+[node name="Fade" parent="." instance=ExtResource("5_2g0cf")]
+
+[connection signal="animation_finished" from="Fade" to="." method="_on_fade_animation_finished"]

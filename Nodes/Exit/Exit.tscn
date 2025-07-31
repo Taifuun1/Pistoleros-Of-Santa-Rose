@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://plqhvmf2uttb"]
+
+[ext_resource type="Script" uid="uid://cyrt6or8uljbh" path="res://Nodes/Exit/Exit.gd" id="1_getpx"]
+
+[node name="Exit" type="Area2D"]
+collision_layer = 8
+script = ExtResource("1_getpx")
+exitTo = {
+&"location": &"",
+&"playerPosition": Vector2i(0, 0)
+}
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-12, 0, 0, -6, 12, 0, 0, 6)

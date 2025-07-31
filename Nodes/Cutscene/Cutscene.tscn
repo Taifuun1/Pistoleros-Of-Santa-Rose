@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cu6ur8rfrmofo"]
+
+[ext_resource type="Script" uid="uid://cek1jg4ty4iwd" path="res://Nodes/Cutscene/Cutscene.gd" id="1_ed8ky"]
+
+[node name="Cutscene" type="Area2D"]
+collision_layer = 8
+script = ExtResource("1_ed8ky")
