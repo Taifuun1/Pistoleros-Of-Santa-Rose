@@ -15,6 +15,7 @@ func _ready():
 func initCutscene(cutsceneArc: String = "Pistoleros Regroup", cutsceneName: String = "Finch Pond") -> void:
 	cutscene = load("res://Data/Cutscenes/{cutsceneArc}/{cutsceneName}.gd".format({ "cutsceneArc": cutsceneArc, "cutsceneName": cutsceneName.capitalize().replace(" ", "") })).new().data
 	$Setting.add_child(load("res://Location/Locations/{cutsceneArc}/{cutsceneName}/{cutsceneNameNoWhitespace}.tscn".format({ "cutsceneArc": cutsceneArc, "cutsceneName": cutsceneName, "cutsceneNameNoWhitespace": cutsceneName.capitalize().replace(" ", "") })).instantiate())
+	$Setting.get_children()[$Setting.get_child_count() - 1].get_node("Fade/CanvasLayer/ColorRect").visible = false
 	for actorData in cutscene.actors:
 		var actor = load("res://Actors/Cutscene/CutsceneActor.tscn").instantiate()
 		actor.initCutsceneActor(actorData.type, actorData.name, actorData.position, false, "Idle")
