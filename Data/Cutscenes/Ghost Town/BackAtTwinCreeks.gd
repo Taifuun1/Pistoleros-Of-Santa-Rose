@@ -1,0 +1,35 @@
+# GDScript cutscene data for 'Back at Twin Creeks'
+var data = {
+	"type": "cutscene",
+	"setting": "Back at Twin Creeks",
+	"nextLocation": "Vector2i(0, 0)",
+	"initialCameraPosition": "Vector2i(0, 0)",
+	"actors": ["Gang", "TCSK", "PP", "PP2", "A", "TH", "DS", "Townsfolk", "TF1", "TF2", "TF3", "TF4", "MO", "G", "W", "MA"],
+	"shots": [
+		{"Gang": "walks into town"},
+		{"TCSK": "NOOOOOOOO!!!"},
+		{"G": "Who's hurting?"},
+		{"TCSK": "It can't be! They took it all!"},
+		{"PP": "Took what, Dusty?"},
+		{"TCSK": "Somebody robbed me! My earnings are gone!"},
+		{"PP": "Whoa now, partner. You got robbed? When's that happened?"},
+		{"TCSK": "They broke into my saloon during the night and took the months earnings. What am I gonna do?"},
+		{"PP2": "It's alright, Dusty. You'll be on your feet in no time. You got a lot of customers every day of the week."},
+		{"TCSK": "That's not enough! I earned my keep fair and square!"},
+		{"TCSK": "The saloon is closed until I get my money back!"},
+		{"PP": "What?!? We have to get the ones responsible for this!"},
+		{"PP2": "Let's make a mob and lynch the brigands!"},
+		{"A": "Oh lord..."},
+		{"TH": "It's terrible! It's terrible!"},
+		{"A": "What's it now?"},
+		{"DS": "He took it! Wells has taken the money!"},
+		{"TCSK": "What are you saying?"},
+		{"TH": "We went to Gold Springs to refill our water, and we saw Wells taking a suspicious box into his mine!"},
+		{"TH": "The box was about two hands wide, and yellow on the top."},
+		{"TCSK": "That's where I store my money! Wells took it!"},
+		{"PP": "He must have finally come down from his dang gold fever, and gone off the deep end!"},
+		{"Townsfolk": "Let's go and lynch him!"},
+		{"A": "I don't like where this is going. We we're supposed to bring a few fun partygoers, but it looks like were sending a lynching mob."},
+		{"G": "We ought to run back to Gold Springs before the mob reaches Wells's mine."}
+	]
+}
