@@ -1,0 +1,34 @@
+# GDScript cutscene data for 'Talk with a caravan party at the messenger post'
+{
+	"type": "cutscene",
+	"setting": "Messenger Post",
+	"nextLocation": "Vector2i(0, 0)",
+	"initialCameraPosition": "Vector2i(0, 0)",
+	"actors": ["G", "Evelyn Grace", "EG", "W"],
+	"shots": [
+		{"G": "Hey there, feller? My name is Gwyneth Remington. Mind if I ask where you're headed?"},
+		{"Evelyn Grace": "My name's Evelyn Grace. We're headed over the mountains to the north."},
+		{"G": "North? Over Charokee Bluff?"},
+		{"EG": "That's right. We're headed to Silverton, and then further north towards Wendowin."},
+		{"G": "I didn't know you could cross the mountains."},
+		{"EG": "Yup, you can. Through Pilrose Pass. We've got to get through."},
+		{"G": "The mountains are cold and treachorous. Surely you don't mean to cross?"},
+		{"EG": "We do. We don't have any money left. Going around would take more than a month."},
+		{"EG": "The governments giving land for free. There's still uninhabited land up north. We're going there for a chance at a new life."},
+		{"W": "Brave going. Can't fault you for lackin' gutts."},
+		{"G": "You do know the Charokees inhabit the mountain? They're not gonna let you pass."},
+		{"EG": "Yeah. But we don't got any choice now. Only thing we can do is push forward."},
+		{"EG": "The real problem is how we're gonna get rid of these oxen we bought for the trip."},
+		{"EG": "Not many buyers on the other side of the mountain. Silverton's just a hunting village, and we don't have feed for the oxen."},
+		{"W": "Oxen? You don't need the oxen? We could take them oxen with us."},
+		{"EG": "We need them for the trip. We're not giving them up for free."},
+		{"G": "Hmmm... Maybe we could come to an agreement. The trail to Silverton is treacherous, and you'll be needing caravan guards to keep you safe from the natives."},
+		{"G": "If you're willing to give the oxen to us in Silverton, we'll gladly escort you in exchange for protection."},
+		{"EG": "Hmh... Well, it doesn't sound like too bad of a deal. At least we'd have some protection against the natives."},
+		{"EG": "If you're willing to do that, we have a deal."},
+		{"G": "Excellent! We'll accompany you through Pilrose Pass."},
+		{"EG": "We don't have the money to pay you, or supply you with anything. You got to take care of that yourself."},
+		{"G": "That's fine. The oxen are what we're after."},
+		{"EG": "Come and talk to me once you're ready to leave."}
+	]
+}

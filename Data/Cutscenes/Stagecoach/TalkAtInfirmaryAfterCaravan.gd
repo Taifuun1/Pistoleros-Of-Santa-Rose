@@ -1,0 +1,32 @@
+# GDScript cutscene data for 'Talk at the infirmary after the talk with the caravan'
+{
+	"type": "cutscene",
+	"setting": "Infirmary After Caravan Talk",
+	"nextLocation": "Vector2i(0, 0)",
+	"initialCameraPosition": "Vector2i(0, 0)",
+	"actors": ["G", "A", "MA"],
+	"shots": [
+		{"G": "Alright, we've found something."},
+		{"A": "What's that? What are we doing?"},
+		{"G": "We agreed to escort a caravan over the mountains in exchange for their oxen."},
+		{"A": "The mountains? Are you crazy? That's Charokee territory!"},
+		{"G": "I know it's dangerous. This was the best opportunity we found."},
+		{"A": "Gwyneth, this is a bad idea. The Charokee don't like anyone stepping into their territory."},
+		{"A": "They were driven of their lands. There's not much good will going with them and the settlers."},
+		{"G": "We'll find a way. We always have."},
+		{"MA": "Eyyyy, Aiyana, my <i>amigo!</i> You got to have a little more faith in the Pistoleros!"},
+		{"MA": "We will make friends with the <i>nativos</i>, and get safe passage through <i>el paso de montaña!</i>"},
+		{"A": "Ahhh... I don't think that's gonna work, Manuel. The hatred goes deep for the Charokees."},
+		{"A": "Even with your silvertongue and warm expressions you won't be able to persuade the Charokees."},
+		{"MA": "You have big doubts, Aiyana! And I'll show you, you are wrong! The Charokees will give us <i>una bienvenida dorada!</i>"},
+		{"A": "You're too good for this world, Manuel."},
+		{"G": "There's another matter we have to go through. You can't move, Aiyana. That means you'll have to stay here while we escort the stagecoach."},
+		{"A": "Yeah, that's how it's gonna have to go. And I don't know how the Charokees would react to another native tribemember."},
+		{"G": "That is true. We're gonna have to do this with just the four of us."},
+		{"G": "But we will be back, Aiyana. Don't you go running after us."},
+		{"G": "We're the Pistoleros of Santa Rose. We'll stick together, to the end."},
+		{"G": "You'll be here, just like I was at the prison. I'm not gonna lose you just as you saved me."},
+		{"A": "...I'll be waiting for you, right here then."},
+		{"G": "Good. Let's start packing up, and head up north."}
+	]
+}
