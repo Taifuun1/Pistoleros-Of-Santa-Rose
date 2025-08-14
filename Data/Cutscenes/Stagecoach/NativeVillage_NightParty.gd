@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'At native night party'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Native Village - Night Party",
 	"nextLocation": "Vector2i(0, 0)",

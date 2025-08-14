@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk at the Silverton hunting office after the money is gathered'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Silverton Hunting Office",
 	"nextLocation": "Vector2i(0, 0)",

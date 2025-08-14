@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Arrival at Fairpeaks'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Arrival at Fairpeaks",
 	"nextLocation": "Vector2i(0, 0)",

@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Arrival in Silverton'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Arrival in Silverton",
 	"nextLocation": "Vector2i(0, 0)",

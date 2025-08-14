@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Escape from native village'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Escape from Native Village",
 	"nextLocation": "Vector2i(0, 0)",

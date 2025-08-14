@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'After the fight'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Native Village - After Fight",
 	"nextLocation": "Vector2i(0, 0)",

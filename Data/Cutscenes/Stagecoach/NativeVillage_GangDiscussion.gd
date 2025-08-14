@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk at the native village with the gang'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Native Village - Gang Discussion",
 	"nextLocation": "Vector2i(0, 0)",

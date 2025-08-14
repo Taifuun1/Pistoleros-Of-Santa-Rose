@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Native tracks are found in the snow'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Mountain Trek - Native Tracks",
 	"nextLocation": "Vector2i(0, 0)",

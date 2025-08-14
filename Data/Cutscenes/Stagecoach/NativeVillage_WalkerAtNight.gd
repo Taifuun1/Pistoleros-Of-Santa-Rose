@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Walker during night'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Native Village - Walker at Night",
 	"nextLocation": "Vector2i(0, 0)",

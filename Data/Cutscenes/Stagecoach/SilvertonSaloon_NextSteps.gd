@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk at Silverton saloon for next steps'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Silverton Saloon",
 	"nextLocation": "Vector2i(0, 0)",

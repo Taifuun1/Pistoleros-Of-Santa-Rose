@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk at Pinewood Fields saloon for next steps'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Pinewood Fields Saloon",
 	"nextLocation": "Vector2i(0, 0)",

@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Confrontation with natives'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Mountain Trek - Confrontation with Natives",
 	"nextLocation": "Vector2i(0, 0)",

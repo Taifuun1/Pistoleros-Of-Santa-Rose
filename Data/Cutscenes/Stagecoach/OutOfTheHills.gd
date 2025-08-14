@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Out of the hills'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Out of the Hills",
 	"nextLocation": "Vector2i(0, 0)",

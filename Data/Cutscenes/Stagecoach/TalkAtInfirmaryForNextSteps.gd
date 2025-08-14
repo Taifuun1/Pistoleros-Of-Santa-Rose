@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk at the infirmary for next steps'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Infirmary",
 	"nextLocation": "Vector2i(0, 0)",

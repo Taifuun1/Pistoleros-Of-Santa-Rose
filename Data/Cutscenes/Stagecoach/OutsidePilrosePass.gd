@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Outside Pilrose Pass'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Outside Pilrose Pass",
 	"nextLocation": "Vector2i(0, 0)",

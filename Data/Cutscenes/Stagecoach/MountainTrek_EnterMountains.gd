@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'The mountain trek - Caravan enters the mountains'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Mountain Trek - Entering Mountains",
 	"nextLocation": "Vector2i(0, 0)",
