@@ -4,6 +4,11 @@ extends Node2D
 var playCutsceneNext = false
 
 func initLocation() -> void:
+	if get_node_or_null("Cutscenes"):
+		for cutsceneNode in $Cutscenes.get_children():
+			if Cutscene.playedCutscenes[cutsceneNode.name]:
+				for cutsceneArea in cutsceneNode.get_children():
+					cutsceneArea.monitoring = false
 	var player = load("res://Actors/Location/PlayerLocationActor.tscn").instantiate()
 	player.position = Locations.currentLocation.playerPosition
 	add_child(player)
@@ -12,6 +17,7 @@ func initLocation() -> void:
 func playCutscene(_body: Node2D, cutsceneName: StringName):
 	Cutscene.cutsceneName = cutsceneName
 	playCutsceneNext = true
+	Cutscene.playedCutscenes[cutsceneName] = true
 	$Fade.play("Fade Out")
 
 func exitLocation(_body: Node2D, exitTo: Dictionary) -> void:
