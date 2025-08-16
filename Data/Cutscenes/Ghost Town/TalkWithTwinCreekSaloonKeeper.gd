@@ -1,10 +1,25 @@
-# GDScript cutscene data for 'Talk with Twin Creek saloon keeper'
 var data = {
 	"type": "cutscene",
-	"setting": "Twin Creek Saloon - Keeper",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["G", "Twin Creek Saloon Keeper", "TCSK", "Tennessee Diamonds", "Poker Player", "Dallas Spades", "PP", "TH", "PP2"],
+	"setting": {
+		"quest": "Ghost Town",
+		"location": "Twin Creek Saloon - Keeper"
+	},
+	"nextLocation": {
+		"location": "Twin Creek Saloon - Keeper",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "G", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "Twin Creek Saloon Keeper", "type": "Unknown", "position": Vector2i(20, 0)},
+		{"name": "TCSK", "type": "Unknown", "position": Vector2i(40, 0)},
+		{"name": "Tennessee Diamonds", "type": "Unknown", "position": Vector2i(60, 0)},
+		{"name": "Poker Player", "type": "Unknown", "position": Vector2i(80, 0)},
+		{"name": "Dallas Spades", "type": "Unknown", "position": Vector2i(100, 0)},
+		{"name": "PP", "type": "Unknown", "position": Vector2i(120, 0)},
+		{"name": "TH", "type": "Unknown", "position": Vector2i(140, 0)},
+		{"name": "PP2", "type": "Unknown", "position": Vector2i(160, 0)}
+	],
 	"shots": [
 		{"G": "Hey there, feller. Mind if I ask some questions?"},
 		{"Twin Creek Saloon Keeper": "Sure thing, partner. Not much going on 'round dese parts, anyways."},

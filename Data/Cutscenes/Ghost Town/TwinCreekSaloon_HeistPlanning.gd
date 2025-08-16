@@ -1,10 +1,21 @@
-# GDScript cutscene data for 'At Twin Creek saloon'
 var data = {
 	"type": "cutscene",
-	"setting": "Twin Creek Saloon - Heist Planning",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["G", "A", "MA", "W", "MO"],
+	"setting": {
+		"quest": "Ghost Town",
+		"location": "Twin Creek Saloon - Heist Planning"
+	},
+	"nextLocation": {
+		"location": "Twin Creek Saloon - Heist Planning",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "G", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "A", "type": "Unknown", "position": Vector2i(20, 0)},
+		{"name": "MA", "type": "Unknown", "position": Vector2i(40, 0)},
+		{"name": "W", "type": "Unknown", "position": Vector2i(60, 0)},
+		{"name": "MO", "type": "Unknown", "position": Vector2i(80, 0)}
+	],
 	"shots": [
 		{"G": "OK, gang. Here's the facts."},
 		{"G": "We have our equipment for robbing the train. There's a saddleload of civil war–grade explosives on the haul."},

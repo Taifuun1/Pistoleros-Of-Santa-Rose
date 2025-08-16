@@ -1,10 +1,22 @@
 # GDScript cutscene data for 'Talk at Fairpeaks saloon for next steps'
 var data = {
 	"type": "cutscene",
-	"setting": "Fairpeaks Saloon",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["A", "MA", "G", "W", "MO"],
+	"setting": {
+		"quest": "Ghost Town",
+		"location": "Fairpeaks Saloon"
+	},
+	"nextLocation": {
+		"location": "Fairpeaks Saloon",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "A", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "MA", "type": "Unknown", "position": Vector2i(20, 0)},
+		{"name": "G", "type": "Unknown", "position": Vector2i(40, 0)},
+		{"name": "W", "type": "Unknown", "position": Vector2i(60, 0)},
+		{"name": "MO", "type": "Unknown", "position": Vector2i(80, 0)}
+	],
 	"shots": [
 		{"A": "Finally! You're here! And you're all okay!"},
 		{"MA": "Aiyana! <i>Ángel de los cielo!</i>"},

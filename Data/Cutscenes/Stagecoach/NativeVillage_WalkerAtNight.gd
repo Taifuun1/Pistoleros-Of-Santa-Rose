@@ -1,14 +1,22 @@
 var data = {
 	"type": "cutscene",
-	"setting": "Native Village - Walker at Night",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["W"],
+	"setting": {
+		"quest": "Stagecoach",
+		"location": "Native Village - Walker at Night"
+	},
+	"nextLocation": {
+		"location": "Native Village - Walker at Night",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "W", "type": "Unknown", "position": Vector2i(0, 0)}
+	],
 	"shots": [
-		{"W": "Uuuuhhhh... Uuuuuuggghhhhhh..."},
-		{"W": "Fffffffffuuuuuuuuccckkk..."},
-		{"W": "Uuuurrrggghhh..."},
-		{"W": "Uuuurrrrggghhh..."},
-		{"W": "Uuuurrrrggghhh..."}
+		{"object": "dialog", "data": {"actor": "W", "text": "Uuuuhhhh... Uuuuuuggghhhhhh..."}},
+		{"object": "dialog", "data": {"actor": "W", "text": "Fffffffffuuuuuuuuccckkk..."}},
+		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrggghhh..."}},
+		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrrggghhh..."}},
+		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrrggghhh..."}}
 	]
 }

@@ -1,11 +1,19 @@
 # GDScript cutscene data for 'Arrival at Fairpeaks'
 var data = {
 	"type": "cutscene",
-	"setting": "Arrival at Fairpeaks",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["G"],
+	"setting": {
+		"quest": "Ghost Town",
+		"location": "Arrival at Fairpeaks"
+	},
+	"nextLocation": {
+		"location": "Arrival at Fairpeaks",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "G", "type": "Unknown", "position": Vector2i(0, 0)}
+	],
 	"shots": [
-		{"G": "Aiyana is probably at the saloon."}
+		{"object": "dialog", "data": {"actor": "G", "text": "Aiyana is probably at the saloon."}}
 	]
 }

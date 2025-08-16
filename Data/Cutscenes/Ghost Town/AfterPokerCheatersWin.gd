@@ -1,10 +1,25 @@
-# GDScript cutscene data for 'After the poker cheaters win three poker hands'
 var data = {
 	"type": "cutscene",
-	"setting": "Twin Creek Saloon - Poker Cheaters",
-	"nextLocation": "Vector2i(0, 0)",
-	"initialCameraPosition": "Vector2i(0, 0)",
-	"actors": ["PP", "A", "TH", "DS", "PP2", "Wells", "MA", "WE", "G"],
+	"setting": {
+		"quest": "Ghost Town",
+		"location": "Twin Creek Saloon - Poker Cheaters"
+	},
+	"nextLocation": {
+		"location": "Twin Creek Saloon - Poker Cheaters",
+		"playerPosition": Vector2i(0, 0)
+	},
+	"initialCameraPosition": Vector2i(0, 0),
+	"actors": [
+		{"name": "PP", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "A", "type": "Unknown", "position": Vector2i(20, 0)},
+		{"name": "TH", "type": "Unknown", "position": Vector2i(40, 0)},
+		{"name": "DS", "type": "Unknown", "position": Vector2i(60, 0)},
+		{"name": "PP2", "type": "Unknown", "position": Vector2i(80, 0)},
+		{"name": "Wells", "type": "Unknown", "position": Vector2i(100, 0)},
+		{"name": "MA", "type": "Unknown", "position": Vector2i(120, 0)},
+		{"name": "WE", "type": "Unknown", "position": Vector2i(140, 0)},
+		{"name": "G", "type": "Unknown", "position": Vector2i(160, 0)}
+	],
 	"shots": [
 		{"PP": "Insane luck..."},
 		{"A": "That ain't right! You're a cheater!"},
