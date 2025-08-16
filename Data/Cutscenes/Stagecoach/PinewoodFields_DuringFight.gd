@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'During the fight'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Pinewood Fields - During Fight",
 	"nextLocation": "Vector2i(0, 0)",

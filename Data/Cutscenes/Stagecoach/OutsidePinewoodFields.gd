@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Outside Pinewood Fields'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Outside Pinewood Fields",
 	"nextLocation": "Vector2i(0, 0)",

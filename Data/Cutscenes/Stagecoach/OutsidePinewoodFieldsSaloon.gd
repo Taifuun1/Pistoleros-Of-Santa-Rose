@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Outside the saloon'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Outside Pinewood Fields Saloon",
 	"nextLocation": "Vector2i(0, 0)",

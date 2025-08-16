@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk in Pilrose Pass'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Pilrose Pass",
 	"nextLocation": "Vector2i(0, 0)",

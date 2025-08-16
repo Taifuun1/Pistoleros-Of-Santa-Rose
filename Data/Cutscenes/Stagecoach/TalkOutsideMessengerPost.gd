@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk outside the messenger post'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Outside Messenger Post",
 	"nextLocation": "Vector2i(0, 0)",

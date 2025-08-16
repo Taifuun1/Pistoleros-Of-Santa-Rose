@@ -1,5 +1,4 @@
-# GDScript cutscene data for 'Talk with caravan party before leaving'
-{
+var data = {
 	"type": "cutscene",
 	"setting": "Messenger Post - Before Leaving",
 	"nextLocation": "Vector2i(0, 0)",
