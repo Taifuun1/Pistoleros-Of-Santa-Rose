@@ -10,9 +10,9 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "A", "type": "Unknown", "position": Vector2i(0, 0)}
+		{"name": "Aiyana", "type": "Unknown", "position": Vector2i(0, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "A", "text": "Let's go see Aiyana again."}}
+		{"object": "dialog", "data": {"actor": "Aiyana", "text": "Let's go see Aiyana again."}}
 	]
 }

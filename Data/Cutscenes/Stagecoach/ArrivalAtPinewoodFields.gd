@@ -10,11 +10,11 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "MO", "type": "Unknown", "position": Vector2i(0, 0)},
-		{"name": "G", "type": "Unknown", "position": Vector2i(20, 0)}
+		{"name": "Morrison Branson", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "Gwyneth Remington", "type": "Unknown", "position": Vector2i(20, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "MO", "text": "That's Pinewood Fields."}},
-		{"object": "dialog", "data": {"actor": "G", "text": "Get to the saloon."}}
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "That's Pinewood Fields."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Get to the saloon."}}
 	]
 }

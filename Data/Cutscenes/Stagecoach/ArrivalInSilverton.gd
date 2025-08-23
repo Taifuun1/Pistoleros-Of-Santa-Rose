@@ -10,13 +10,13 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "MA", "type": "Unknown", "position": Vector2i(0, 0)},
-		{"name": "W", "type": "Unknown", "position": Vector2i(20, 0)},
-		{"name": "G", "type": "Unknown", "position": Vector2i(40, 0)}
+		{"name": "Manuel Cárdenas", "type": "Unknown", "position": Vector2i(0, 0)},
+		{"name": "Walker Langley", "type": "Unknown", "position": Vector2i(20, 0)},
+		{"name": "Gwyneth Remington", "type": "Unknown", "position": Vector2i(40, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "MA", "text": "Silverton!"}},
-		{"object": "dialog", "data": {"actor": "W", "text": "Shit... Heaven..."}},
-		{"object": "dialog", "data": {"actor": "G", "text": "Let's wind down in the saloon."}}
+		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "Silverton!"}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Shit... Heaven..."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Let's wind down in the saloon."}}
 	]
 }

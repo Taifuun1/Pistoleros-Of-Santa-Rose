@@ -10,9 +10,9 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "MO", "type": "Unknown", "position": Vector2i(0, 0)}
+		{"name": "Morrison Branson", "type": "Unknown", "position": Vector2i(0, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "MO", "text": "We're at Lonmont Rise. Pinewood Fields should be down south. Find a creek and follow it."}}
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "We're at Lonmont Rise. Pinewood Fields should be down south. Find a creek and follow it."}}
 	]
 }

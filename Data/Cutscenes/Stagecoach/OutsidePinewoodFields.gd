@@ -10,9 +10,9 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "W", "type": "Unknown", "position": Vector2i(0, 0)}
+		{"name": "Walker Langley", "type": "Unknown", "position": Vector2i(0, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "W", "text": "We got to get to Fairpeaks quick, before they get their shit together."}}
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "We got to get to Fairpeaks quick, before they get their shit together."}}
 	]
 }

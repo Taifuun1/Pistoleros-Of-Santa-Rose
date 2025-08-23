@@ -10,9 +10,9 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "G", "type": "Unknown", "position": Vector2i(0, 0)}
+		{"name": "Gwyneth Remington", "type": "Unknown", "position": Vector2i(0, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "G", "text": "Let's head to Twin Creek saloon and plan out this heist before anything else."}}
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Let's head to Twin Creek saloon and plan out this heist before anything else."}}
 	]
 }

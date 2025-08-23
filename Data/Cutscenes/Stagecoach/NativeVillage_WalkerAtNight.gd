@@ -10,13 +10,13 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "W", "type": "Unknown", "position": Vector2i(0, 0)}
+		{"name": "Walker Langley", "type": "Unknown", "position": Vector2i(0, 0)}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "W", "text": "Uuuuhhhh... Uuuuuuggghhhhhh..."}},
-		{"object": "dialog", "data": {"actor": "W", "text": "Fffffffffuuuuuuuuccckkk..."}},
-		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrggghhh..."}},
-		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrrggghhh..."}},
-		{"object": "dialog", "data": {"actor": "W", "text": "Uuuurrrrggghhh..."}}
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Uuuuhhhh... Uuuuuuggghhhhhh..."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Fffffffffuuuuuuuuccckkk..."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Uuuurrrggghhh..."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Uuuurrrrggghhh..."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Uuuurrrrggghhh..."}}
 	]
 }
