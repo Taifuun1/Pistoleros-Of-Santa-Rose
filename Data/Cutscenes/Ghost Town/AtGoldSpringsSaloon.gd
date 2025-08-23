@@ -48,11 +48,11 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "If thats what would convince you to help us, we can try."}},
 		{"object": "dialog", "data": {"actor": "Wells", "text": "I would appreciate that very much. And I'll consider helping you folk out on your <i>mischievious</i> adventure."}},
 		{"object": "dialog", "data": {"actor": "Wells", "text": "I better get back to mining."}},
-		{"object": "dialog", "data": {"actor": "W", "text": "So we're trying to get some yellas from Twin Creek to have a picnic here? That ain't how the Pistoleros do things."}},
-		{"object": "dialog", "data": {"actor": "G", "text": "We should try to help him out. That way we'll get an explosives expert for the train robbery."}},
-		{"object": "dialog", "data": {"actor": "A", "text": "I'd say it's the least we can do after he saved my life."}},
-		{"MO": "He deserves more than a run down mine!"},
-		{"W": "Eh, fine. The old-timer is gonna have one more party in the ghost town."},
-		{"G": "In that case, we should head back to Twin Creek to see if any townfolk are willing to spend a night in the ghost town."}
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "So we're trying to get some yellas from Twin Creek to have a picnic here? That ain't how the Pistoleros do things."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "We should try to help him out. That way we'll get an explosives expert for the train robbery."}},
+		{"object": "dialog", "data": {"actor": "Aiyana", "text": "I'd say it's the least we can do after he saved my life."}},
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "He deserves more than a run down mine!"}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Eh, fine. The old-timer is gonna have one more party in the ghost town."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "In that case, we should head back to Twin Creek to see if any townfolk are willing to spend a night in the ghost town."}}
 	]
 }
