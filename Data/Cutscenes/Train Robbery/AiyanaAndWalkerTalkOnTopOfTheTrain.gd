@@ -10,15 +10,15 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "Gwyneth", "type": "Named People", "position": Vector2i(0, 0)},
-		{"name": "Manuel", "type": "Named People", "position": Vector2i(20, 0)},
+		{"name": "Gwyneth Remington", "type": "Named People", "position": Vector2i(0, 0)},
+		{"name": "Manuel Cárdenas", "type": "Named People", "position": Vector2i(20, 0)},
 		{"name": "Walker Langley", "type": "Named People", "position": Vector2i(40, 0)},
 		{"name": "Aiyana", "type": "Named People", "position": Vector2i(60, 0)}
 	],
 	"shots": [
 		{"object": "camera", "data": {"position": Vector2i(0, 0)}},
-		{"object": "dialog", "data": {"actor": "Gwyneth", "text": "It's hard to keep a footing here. The train's moving fast, and the wind pushes us off easily!"}},
-		{"object": "dialog", "data": {"actor": "Manuel", "text": "No choice! Move like <i>el diablo del viento!</i>"}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "It's hard to keep a footing here. The train's moving fast, and the wind pushes us off easily!"}},
+		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "No choice! Move like <i>el diablo del viento!</i>"}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "We're not leaving this train without the valuables! Get moving!"}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "And the fuck we are! I've had enough!"}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "Walker! Do you care more about the gold or our gang?"}},
@@ -36,8 +36,8 @@ var data = {
 		{"object": "action", "data": {"description": "Aiyana pulls out her gun"}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "..."}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "We ought to..."}},
-		{"object": "dialog", "data": {"actor": "Manuel", "text": "Fly like the wind, <i>villano!</i>"}},
-		{"object": "dialog", "data": {"actor": "Gwyneth", "text": "I hope you'll lead us, Walker. This time at least."}},
+		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "Fly like the wind, <i>villano!</i>"}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "I hope you'll lead us, Walker. This time at least."}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "..."}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Fine, I'll move."}}
 	]

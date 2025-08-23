@@ -10,10 +10,10 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "Gwyneth", "type": "Named People", "position": Vector2i(0, 0)}
+		{"name": "Gwyneth Remington", "type": "Named People", "position": Vector2i(0, 0)}
 	],
 	"shots": [
 		{"object": "camera", "data": {"position": Vector2i(0, 0)}},
-		{"object": "dialog", "data": {"actor": "Gwyneth", "text": "We're at Lazysprings again. Let's get to the saloon and wait for Wells."}}
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "We're at Lazysprings again. Let's get to the saloon and wait for Wells."}}
 	]
 }
