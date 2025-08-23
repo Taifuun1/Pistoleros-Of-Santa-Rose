@@ -10,14 +10,14 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "Morrison", "type": "Named People"},
-		{"name": "Walker", "type": "Named People"}
+		{"name": "Morrison Branson", "type": "Named People"},
+		{"name": "Walker Langley", "type": "Named People"}
 	],
 	"shots": [
-		{"object": "action", "data": {"description": "Morrison counts the money"}},
-		{"object": "dialog", "data": {"actor": "Morrison", "text": "...That's enough."}},
-		{"object": "dialog", "data": {"actor": "Walker", "text": "Not a moment too soon. These damn prospectors are a stubborn bunch."}},
-		{"object": "dialog", "data": {"actor": "Morrison", "text": "We can buy the explosives at the mine warehouse."}},
-		{"object": "dialog", "data": {"actor": "Walker", "text": "Move it."}}
+		{"object": "action", "data": {"description": "Morrison Branson counts the money"}},
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "...That's enough."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Not a moment too soon. These damn prospectors are a stubborn bunch."}},
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "We can buy the explosives at the mine warehouse."}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Move it."}}
 	]
 }

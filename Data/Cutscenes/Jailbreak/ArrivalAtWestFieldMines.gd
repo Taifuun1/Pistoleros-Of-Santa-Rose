@@ -10,9 +10,9 @@ var data = {
 	},
 	"initialCameraPosition": Vector2i(0, 0),
 	"actors": [
-		{"name": "Walker", "type": "Named People"}
+		{"name": "Walker Langley", "type": "Named People"}
 	],
 	"shots": [
-		{"object": "dialog", "data": {"actor": "Walker", "text": "Here we are. Let's find where the best mining spots are and start diggin'."}}
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Here we are. Let's find where the best mining spots are and start diggin'."}}
 	]
 }
