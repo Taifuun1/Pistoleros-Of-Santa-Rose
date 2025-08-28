@@ -155,7 +155,7 @@ During the trip, they are confronted with some natives. They will not let them p
 
 On the other side of the mountain, the caravan is safely through. The gang get the oxen, but they are now stuck on the other side of the mountain. They have to take another route back through west. The Pistoleros need more money for winter gear. They hunt for bear in the snowy hills.
 
-The Pistoleros get out of the mountains, but the Law Keeper is there waiting for them. He had heard of the troubles with the natives, and deducted where the gang would emerge at. An extended gunfight ensues, and the Pistoleros escape.
+The Pistoleros get out of the mountains, but Wyatt Garrett is there waiting for them. He had heard of the troubles with the natives, and deducted where the gang would emerge at. An extended gunfight ensues, and the Pistoleros escape.
 
 After the caravan trip the party only needs an explosive expert to handle the explosives. Eventually, they hear of a ghost town prospector hermit, who's been trying to find gold in an abandoned town for years. They go meet the prospector, but the hermit is unwilling to help or even engage the crew. Morrison is empathetic to the lonely hermit and insists that they try to help him.
 
@@ -165,9 +165,13 @@ Wells wants to see the ghost town lively again. Eventually, the poker cheaters r
 
 Once the villagers are spending the night in the ghost town, the poker cheaters try to spook the merriment in the saloon. The crew spoils the spooky attempt by making fun of the poker cheaters. Next morning the villagers consider repopulating the ghost town. Walker manages to spook people, discouraging the villagers from resettling. Morrison feels dejected because of this, and won't participate in the train robbery. Wells, however, feels gratitude for the night of merriment, and agrees to help with the train robbery.
 
-All is said and done, now it is the time for the train robbery. The crew whitled down to fewer members, all has to be set up first. With setting up each part of the plan, there are more cracks in the relationship between Walker and the rest of the gang.
+All is said and done, now it is the time for the train robbery. The crew whitled down to fewer members, the Pistoleros travel to Lazysprings for the last time. The crew put their plan into action. However, there are more cracks in the relationship between Walker and the rest of the gang. Wells eventually arrives, pushing the Pistoleros to move.
 
-Train robbery arc here.
+The Pistoleros travel to the meeting point near the Continental Train. The other gangs from earlier in the story are all here, for spoils and revenge. They have managed to stop the train, which changes Pistoleros's plan. The gang boards the train, while Wells follows from a distance until the Pistoleros have secured the train.
+
+As the Pistoleros board the train, it starts to move. They now have to get to the front of the train and stop it. On the way, all the gang members voice their grievances to Walker.
+
+Walker ends up on top of the train, where he meets Wyatt Garrett. They have a conversation, and then a shootout. Walker manages to corner Wyatt, but he jumps off the train onto a Fed-driven stagecoach. Walker looks on in horror as he notices explosives on the train tracks. There is nothing he can do.
 
 The final scene has Walker limp, mortally wounded, in the wreckage of the destroyed train. His crew, friends, lie dead on the ground. None of the valuables can be reclaimed now. Walker lies down for the last time, lights a cigaret, and reflects. "I didn't deserve this life... But at least I lived it." Walker lies dead on the ground as the sun sets. From the horizon, vultures appear. They circle around Walker, and finally lift him up to the air from his shoulders. The vultures carry Walker to the sunset, and beyond. Story ends with the sun setting and tumbleweeds rolling across the prairie.
 
