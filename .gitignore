@@ -16,3 +16,6 @@ Pistoleros of Santa Rose*
 .mono/
 data_*/
 mono_crash.*.json
+
+# VSCode specific ignores
+.vscode/
