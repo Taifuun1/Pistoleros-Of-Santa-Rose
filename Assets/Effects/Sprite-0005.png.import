@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c7b18m862hapu"
-path="res://.godot/imported/HitrateIncrease.png-e663d60fa20e966952ef5b1c0e1637f0.ctex"
+uid="uid://bixsh04qu8epk"
+path="res://.godot/imported/Sprite-0005.png-e3307d04e319a633f61e099bf040543b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Stats/HitrateIncrease.png"
-dest_files=["res://.godot/imported/HitrateIncrease.png-e663d60fa20e966952ef5b1c0e1637f0.ctex"]
+source_file="res://Assets/Effects/Sprite-0005.png"
+dest_files=["res://.godot/imported/Sprite-0005.png-e3307d04e319a633f61e099bf040543b.ctex"]
 
 [params]
 

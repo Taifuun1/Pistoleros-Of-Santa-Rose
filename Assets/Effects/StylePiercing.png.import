@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dy6eoykafw2w2"
-path="res://.godot/imported/HitrateDecrease.png-bc9d2e4926aae327ace32955209b2775.ctex"
+uid="uid://x3q1a0muy3mk"
+path="res://.godot/imported/StylePiercing.png-6dd87fd56f56ca3f0a99c62d424d3870.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Stats/HitrateDecrease.png"
-dest_files=["res://.godot/imported/HitrateDecrease.png-bc9d2e4926aae327ace32955209b2775.ctex"]
+source_file="res://Assets/Effects/StylePiercing.png"
+dest_files=["res://.godot/imported/StylePiercing.png-6dd87fd56f56ca3f0a99c62d424d3870.ctex"]
 
 [params]
 
