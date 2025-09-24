@@ -5,7 +5,7 @@ func _ready():
 	randomize()
 	setChunkPriority(Vector2i(0, 0))
 	$Entities/Actors/PlayerActor.position = $Map.map_to_local(Vector2i(11, 1))
-	$ChunkGenerators/WFCInputCreation.initWFCGeneration(["Clearwater Grove"])
+	$ChunkGenerators/WFCInputCreation.initWFCGeneration([Locations.currentLocation])
 
 func initWFCGenerationFinished():
 	emptyChunks.append_array($ChunkGenerators/LocationMapLayoutGeneration.generateMapLayout())
@@ -23,7 +23,7 @@ func generateNewChunk():
 		return
 	var generatorName = idleGenerators.pop_front()
 	if chunkPriority != null and !generatedChunks.has(chunkPriority):
-		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority, currentGeneration)
+		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority, Locations.currentLocation)
 		chunkPriority = null
 		return
-	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front(), currentGeneration)
+	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front(), Locations.currentLocation)

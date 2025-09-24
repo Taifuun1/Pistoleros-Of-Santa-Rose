@@ -3,8 +3,6 @@ class_name LocationMapBase
 
 var dynamicSprite = load("res://Nodes/Dynamic Sprite/DynamicSprite.tscn")
 
-var currentGeneration = "Clearwater Grove"
-
 var emptyChunks = []
 var currentlyGeneratingChunks = []
 var idleGenerators = ["Gen1", "Gen2", "Gen3"]
@@ -35,16 +33,19 @@ func changeChunk(direction = movedDirection, directionRelative = Vector2i(0, 0))
 		chunkPriority = currentChunk
 		set_process(true)
 		return
+	var generationVariables = load("res://Data/Location Generation/{generatedLocation}.gd".format({ "generatedLocation": Locations.currentLocation.replace(" ", "") })).new().generationVariables
 	var tileTypes = transformWFCTilesToMapTiles(generatedChunks[currentChunk].tiles)
 	for tileType in tileTypes:
 		match tileType:
-			"water":
-				$Map.setTerrainTiles(tileTypes[tileType], 0, 1)
 			"ground":
-				$Map.setTerrainTiles(tileTypes[tileType], 0, 0)
+				$Map.setTerrainTiles(tileTypes[tileType], generationVariables.tileset, 0)
+			"water":
+				$Map.setTerrainTiles(tileTypes[tileType], generationVariables.tileset, 1)
 			"trees":
-				$Map.setTerrainTiles(tileTypes[tileType], 0, 2)
-	addTrees(tileTypes.trees, "Birch", 4)
+				$Map.setTerrainTiles(tileTypes[tileType], generationVariables.tileset, 2)
+			"walls":
+				$Map.setTerrainTiles(tileTypes[tileType], generationVariables.tileset, 3)
+	addTrees(tileTypes.trees, generationVariables.trees, 4)
 	addExits()
 	if typeof(generatedChunks[currentChunk].interactables) == TYPE_ARRAY:
 		generatedChunks[currentChunk].interactables = getInteractablePositions(generatedChunks[currentChunk].interactables, tileTypes.ground)
@@ -67,17 +68,20 @@ func transformWFCTilesToMapTiles(tiles: Dictionary):
 	var mapTiles = {
 		"water": [],
 		"ground": [],
-		"trees": []
+		"trees": [],
+		"walls": []
 	}
 	for tile in tiles:
-		match currentGeneration:
-			"Clearwater Grove":
+		match Locations.currentLocation:
+			"Clearwater Grove", "Donnafolk Cave":
 				if tiles[tile] == 0:
 					mapTiles.water.append(tile)
 				elif tiles[tile] == 1:
 					mapTiles.ground.append(tile)
 				elif tiles[tile] == 2:
 					mapTiles.trees.append(tile)
+				elif tiles[tile] == 3:
+					mapTiles.walls.append(tile)
 	return mapTiles
 
 func addExits():
@@ -140,7 +144,7 @@ func addInteractables(interactables, tiles):
 	for interactablePosition in newInteractables:
 		var newInteractable = interactableNode.instantiate()
 		newInteractable.init(newInteractables[interactablePosition].type, newInteractables[interactablePosition].name, Vector2i($Map.map_to_local(interactablePosition)))
-		$Entities/Interactables.add_child(newInteractable)
+		$Entities/Interactables.call_deferred("add_child", newInteractable)
 
 func getInteractablePositions(interactables, tiles):
 	var newInteractables = {}

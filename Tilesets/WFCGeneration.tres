@@ -1,24 +1,31 @@
-[gd_resource type="TileSet" load_steps=7 format=3 uid="uid://kc6nv2luoiie"]
+[gd_resource type="TileSet" load_steps=9 format=3 uid="uid://kc6nv2luoiie"]
 
-[ext_resource type="Texture2D" uid="uid://c6880r8f6me7y" path="res://Assets/Tilesets/WFCGeneration.png" id="1_kowpl"]
-[ext_resource type="Texture2D" uid="uid://d08l2m3sxb16b" path="res://Assets/Tilesets/WFCGeneration2.png" id="2_vak4d"]
-[ext_resource type="Texture2D" uid="uid://bknt103pq2s2k" path="res://Assets/Tilesets/WFCGeneration3.png" id="3_sk5b5"]
+[ext_resource type="Texture2D" uid="uid://c6880r8f6me7y" path="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration.png" id="1_osvds"]
+[ext_resource type="Texture2D" uid="uid://d08l2m3sxb16b" path="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration2.png" id="2_ey5x3"]
+[ext_resource type="Texture2D" uid="uid://bknt103pq2s2k" path="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration3.png" id="3_daupg"]
+[ext_resource type="Texture2D" uid="uid://det4fwdapvbdg" path="res://Assets/Tilesets/Wave Function Collapse/WFCGenerationWall.png" id="4_hxrlq"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vojls"]
 resource_name = "Water"
-texture = ExtResource("1_kowpl")
+texture = ExtResource("1_osvds")
 texture_region_size = Vector2i(24, 48)
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2l4ha"]
 resource_name = "Grass"
-texture = ExtResource("2_vak4d")
+texture = ExtResource("2_ey5x3")
 texture_region_size = Vector2i(24, 48)
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xcmh2"]
 resource_name = "Forest"
-texture = ExtResource("3_sk5b5")
+texture = ExtResource("3_daupg")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_py3y7"]
+resource_name = "Wall"
+texture = ExtResource("4_hxrlq")
 texture_region_size = Vector2i(24, 48)
 0:0/0 = 0
 
@@ -28,3 +35,4 @@ tile_size = Vector2i(24, 12)
 sources/0 = SubResource("TileSetAtlasSource_vojls")
 sources/1 = SubResource("TileSetAtlasSource_2l4ha")
 sources/2 = SubResource("TileSetAtlasSource_xcmh2")
+sources/3 = SubResource("TileSetAtlasSource_py3y7")

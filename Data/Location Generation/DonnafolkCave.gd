@@ -2,20 +2,21 @@ extends Node
 
 
 var generationVariables = {
-	"tileset": 0,
-	"trees": "Birch"
+	"tileset": 1,
+	"trees": "Mushroom"
 }
 
 var chunkGenerationTypes = {
 	"chance": {
-		"forest": 50,
-		"sparse forest": 40,
+		"dry stalagmites": 30,
+		"stalagmites": 20,
+		"mushrooms": 40,
 		"lakes": 10
 	},
 	"types": {
-		"forest": {
+		"stalagmites": {
 			"generateFromNoiseMap": {
-				"noiseMap": load("res://Location/Location Generation/Noise Maps/ClearwaterGroveLakes.tres"),
+				"noiseMap": load("res://Location/Location Generation/Noise Maps/DonnafolkCaveLakes.tres"),
 				"noiseCutoff": 0.35
 			},
 			"getOpenBorderTiles": null,
@@ -28,18 +29,37 @@ var chunkGenerationTypes = {
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
 			"addInteractables": [
-				{
-					"name": "Golden Alexander",
-					"type": "Flowers",
-					"count": [3, 13],
-					"tileType": "ground"
-				}
+				#{
+					#"name": "Golden Alexander",
+					#"type": "Flowers",
+					#"count": [3, 13],
+					#"tileType": "ground"
+				#}
 			]
 		},
-		"sparse forest": {
+		"dry stalagmites": {
+			"getOpenBorderTiles": null,
+			"connectBorderEntrances": null,
+			"randomizeTileToTile": {
+				"fromTileType": 2,
+				"toTileType": 1,
+				"tileChance": 15
+			},
+			"transformOpenBordersToTiles": null,
+			"fillVisibleEmptyTiles": null,
+			"addInteractables": [
+				#{
+					#"name": "Golden Alexander",
+					#"type": "Flowers",
+					#"count": [3, 13],
+					#"tileType": "ground"
+				#}
+			]
+		},
+		"mushrooms": {
 			"generateFromNoiseMap": {
-				"noiseMap": load("res://Location/Location Generation/Noise Maps/ClearwaterGroveLakes.tres"),
-				"noiseCutoff": 0.35
+				"noiseMap": load("res://Location/Location Generation/Noise Maps/DonnafolkCaveLakes.tres"),
+				"noiseCutoff": 0.25
 			},
 			"cleanUpTile": {
 				"fromTile": 2,
@@ -56,17 +76,17 @@ var chunkGenerationTypes = {
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
 			"addInteractables": [
-				{
-					"name": "Golden Alexander",
-					"type": "Flowers",
-					"count": [3, 13],
-					"tileType": "ground"
-				}
+				#{
+					#"name": "Golden Alexander",
+					#"type": "Flowers",
+					#"count": [3, 13],
+					#"tileType": "ground"
+				#}
 			]
 		},
 		"lakes": {
 			"generateFromNoiseMap": {
-				"noiseMap": load("res://Location/Location Generation/Noise Maps/ClearwaterGroveLakes.tres"),
+				"noiseMap": load("res://Location/Location Generation/Noise Maps/DonnafolkCaveLakes.tres"),
 				"noiseCutoff": 0.1
 			},
 			"cleanUpTile": {
@@ -84,12 +104,12 @@ var chunkGenerationTypes = {
 			"transformOpenBordersToTiles": null,
 			"fillVisibleEmptyTiles": null,
 			"addInteractables": [
-				{
-					"name": "Golden Alexander",
-					"type": "Flowers",
-					"count": [3, 13],
-					"tileType": "ground"
-				}
+				#{
+					#"name": "Golden Alexander",
+					#"type": "Flowers",
+					#"count": [3, 13],
+					#"tileType": "ground"
+				#}
 			]
 		}
 	}

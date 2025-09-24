@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://jnr6007qdsy5"]
+
+[ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_jgw4y"]
+[ext_resource type="Script" uid="uid://b2auf7seb4ivl" path="res://Location/Location Generation/Wave Function Collapse/InputTemplate.gd" id="2_7uuld"]
+
+[node name="TileMap" type="TileMap"]
+y_sort_enabled = true
+tile_set = ExtResource("1_jgw4y")
+format = 2
+layer_0/y_sort_enabled = true
+layer_0/tile_data = PackedInt32Array(0, 2, 0, 65536, 1, 0, 131072, 1, 0, 196608, 1, 0, 1, 2, 0, 65537, 1, 0, 196609, 1, 0, 2, 2, 0, 65538, 2, 0, 131074, 1, 0, 196610, 1, 0, 131073, 1, 0, 327680, 1, 0, 327681, 1, 0, 327682, 1, 0, 262144, 2, 0, 262145, 2, 0, 262146, 2, 0, 4, 2, 0, 65540, 2, 0, 131076, 2, 0, 196612, 2, 0, 262148, 1, 0, 327684, 1, 0, 5, 2, 0, 65541, 2, 0, 131077, 2, 0, 196613, 2, 0, 262149, 1, 0, 3, 2, 0, 65539, 2, 0, 131075, 1, 0, 196611, 1, 0, 262147, 1, 0, 327683, 1, 0, 327685, 1, 0)
+script = ExtResource("2_7uuld")
