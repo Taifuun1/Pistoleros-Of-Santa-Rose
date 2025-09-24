@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var speed = 100
+@export var speed = 125
 
 var transparentShader = load("res://Shaders/Transparent.tres")
 
@@ -10,8 +10,8 @@ func get_input():
 	velocity = Vector2(input_direction.x * speed, input_direction.y * speed / 2)
 	
 	if velocity == Vector2(0, 0):
-		$AnimationPlayer.play("Idle Outline")
-		$AnimatedSprite2D.animation = "IdleOutline"
+		$AnimationPlayer.play("Idle")
+		$AnimatedSprite2D.animation = "Idle"
 	else:
 		$AnimationPlayer.play("Run")
 		$AnimatedSprite2D.animation = "Run"

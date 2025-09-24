@@ -363,15 +363,11 @@ offset = Vector2(0, -15)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_5fada")
+&"": SubResource("AnimationLibrary_5fada")
 }
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
-limit_left = -24
-limit_top = -12
-limit_right = 600
-limit_bottom = 318
 
 [node name="Area2D" type="Area2D" parent="."]
 collision_layer = 4
