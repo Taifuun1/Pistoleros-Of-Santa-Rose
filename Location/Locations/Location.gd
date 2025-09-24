@@ -8,4 +8,4 @@ func _ready() -> void:
 	else:
 		location = load("res://Location/Locations/{currentQuest}/{currentLocation}/{currentLocationNoWhitespace}.tscn".format({ "currentQuest": Locations.currentQuest, "currentLocation": Locations.currentLocation.location, "currentLocationNoWhitespace": Locations.currentLocation.location.capitalize().replace(" ", "") })).instantiate()
 	add_child(location)
-	location.initLocation()
+	location.call_deferred("initLocation")
