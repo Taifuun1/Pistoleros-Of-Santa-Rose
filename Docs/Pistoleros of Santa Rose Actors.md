@@ -58,7 +58,7 @@ Cannot Miss or Graze
 
 Gwyneth Remington
 Backpocket check
-At the end of the fight, gain extra cash
+At the end of a fight, gain extra cash
 
 Aiyana
 Happy shot

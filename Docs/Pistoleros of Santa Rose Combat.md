@@ -7,7 +7,7 @@ Notes for combat.
 	*Combat encounters are called Shootouts
     *Turn-based combat
 		*Each turn, every character gets to take an action
-		*Turn order is base on High Tailin' stat and other modifiers
+		*Turn order is based on High Tailin' stat and other modifiers
 			*On even stat, turn order is random
 	*Character actions
 		*Attack
@@ -34,7 +34,7 @@ Notes for combat.
 				*Each index for all Magazines is added for the final cylinder pattern index
 		*Cylinder patterns are always divisible by 4
 			*If a cylinder pattern of a Chamber is shorter than another Magazines, it gets repeated till it matches the longest cylinder pattern
-		*At the start of combat, characters get placed randomly on their cylinder pattern
+		*At the start of combat, characters get placed at the beginning of their cylinder pattern
 			*For each turn, they advance one in their cylinder pattern
 			*When the Cylinder ends, it jumps back to the beginning of the cylinder pattern
 		*Cylinders can have special cylinder indexes, eg. Reload
@@ -153,7 +153,7 @@ Notes for combat.
 			*Self-taunt current row or column
 			*Cylinder increase application
 			*Disrupt second and third column positioning
-	*Camp Caretaker class
+	*Dust Whisperer
 		*Can't hold lead weapons
 		*Can wear less equipment than other classes
 		*High item modifiers
@@ -235,7 +235,7 @@ Notes for combat.
 			*Stats focused on defense
 			*Only equipment type that can give defense to both damage types(with exceptions)
 		*Utility
-			*Bottle Courage Bulldozers and Supports can wear
+			*Bottle Courage Bulldozers and Dust Whisperers can wear
 			*Applications and unique effects
 	*Equipment pieces
 		*John B.
@@ -254,7 +254,7 @@ Notes for combat.
 			*Affects belt space in Shootouts
 		*Pants
 			*Medium resistances
-			*Can have skills¨
+			*Can have skills
 		*Justins
 			*Low-to-medium resistances
 			*Skills are common
@@ -280,6 +280,6 @@ Notes for combat.
     *Defensive damage types
 		*Style
 	*Weapons
-		*Revolvers are general use weapons that can be used by non-support classes
+		*Revolvers are general use weapons that can be used by non-Dust Whisperer classes
 		*Rifles are anti-style weapons that can be used by Gunslingers and Bobtail Guards
 		*Shotguns are anti-sand weapons that can be used by Gunslingers and Line Riders
