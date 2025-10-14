@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=16 format=3 uid="uid://dd8sir4kvrp6t"]
+[gd_resource type="TileSet" load_steps=18 format=3 uid="uid://dd8sir4kvrp6t"]
 
 [ext_resource type="Texture2D" uid="uid://xelj5vck4g5d" path="res://Assets/Tilesets/Grande Cañón/GrandeCañónOverworld.png" id="1_c6vsd"]
 [ext_resource type="Texture2D" uid="uid://cu78o0nttb5uq" path="res://Assets/Tilesets/Locations/LocationsOverworld.png" id="1_u4umg"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dg0eclh66jky" path="res://Assets/Tilesets/Prairie/PrairieOverworld.png" id="3_ppvsy"]
 [ext_resource type="Texture2D" uid="uid://m6sc6o8jpjy8" path="res://Assets/Tilesets/Rocky Hills/RockyHillsOverworld.png" id="4_vx1e8"]
 [ext_resource type="Texture2D" uid="uid://bdn5wsc5cvbh8" path="res://Assets/Tilesets/Wild West/WildWestOverworld.png" id="5_3u4ad"]
+[ext_resource type="Texture2D" uid="uid://cnkkry68qwfpe" path="res://Assets/Tilesets/Snowy Mountains/SnowyMountainsOverworld.png" id="7_te5vj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w3oht"]
 resource_name = "Overworld Locations"
@@ -16,13 +17,17 @@ texture_region_size = Vector2i(24, 48)
 2:0/0 = 0
 0:1/0 = 0
 1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 2:1/0 = 0
 0:2/0 = 0
 1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 2:2/0 = 0
 3:1/0 = 0
 4:3/0 = 0
 3:3/0 = 0
+3:2/0 = 0
+4:2/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e8fap"]
 resource_name = "Grande Cañón"
@@ -150,30 +155,38 @@ texture_region_size = Vector2i(24, 48)
 8:4/0 = 0
 8:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 2:2/0 = 0
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 0:5/animation_columns = 2
 0:5/animation_speed = 0.5
 0:5/animation_frame_0/duration = 1.0
 0:5/animation_frame_1/duration = 1.0
 0:5/0 = 0
+0:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 2:5/animation_columns = 2
 2:5/animation_speed = 0.5
 2:5/animation_frame_0/duration = 1.0
 2:5/animation_frame_1/duration = 1.0
 2:5/0 = 0
+2:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 4:5/animation_speed = 0.5
 4:5/animation_frame_0/duration = 1.0
 4:5/animation_frame_1/duration = 1.0
 4:5/0 = 0
+4:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 6:5/animation_speed = 0.5
 6:5/animation_frame_0/duration = 1.0
 6:5/animation_frame_1/duration = 1.0
 6:5/0 = 0
+6:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 8:5/animation_speed = 0.5
 8:5/animation_frame_0/duration = 1.0
 8:5/animation_frame_1/duration = 1.0
 8:5/0 = 0
+8:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_rg3hm"]
 diffuse_texture = ExtResource("2_gdfq2")
@@ -495,7 +508,9 @@ texture_region_size = Vector2i(24, 48)
 3:2/0 = 0
 3:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 4:2/0 = 0
+4:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 5:2/0 = 0
+5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_oi8io"]
 diffuse_texture = ExtResource("5_3u4ad")
@@ -598,11 +613,24 @@ texture_region_size = Vector2i(24, 48)
 7:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 8:2/0 = 0
 8:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+0:4/animation_columns = 2
+0:4/animation_speed = 0.5
+0:4/animation_frame_0/duration = 1.0
+0:4/animation_frame_1/duration = 1.0
 0:4/0 = 0
-1:4/0 = 0
+0:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+2:4/animation_columns = 2
+2:4/animation_speed = 0.5
+2:4/animation_frame_0/duration = 1.0
+2:4/animation_frame_1/duration = 1.0
 2:4/0 = 0
-3:4/0 = 0
+2:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+4:4/animation_columns = 2
+4:4/animation_speed = 0.5
+4:4/animation_frame_0/duration = 1.0
+4:4/animation_frame_1/duration = 1.0
 4:4/0 = 0
+4:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
 0:5/0 = 0
 0:5/0/terrain_set = 0
 0:5/0/terrain = 1
@@ -651,11 +679,101 @@ texture_region_size = Vector2i(24, 48)
 9:5/0/terrain = 1
 9:5/0/terrains_peering_bit/bottom_right_side = 1
 9:5/0/terrains_peering_bit/top_right_side = 1
-5:4/0 = 0
+6:4/animation_columns = 2
+6:4/animation_speed = 0.5
+6:4/animation_frame_0/duration = 1.0
+6:4/animation_frame_1/duration = 1.0
 6:4/0 = 0
-7:4/0 = 0
+6:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+8:4/animation_columns = 2
+8:4/animation_speed = 0.5
+8:4/animation_frame_0/duration = 1.0
+8:4/animation_frame_1/duration = 1.0
 8:4/0 = 0
-9:4/0 = 0
+8:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+0:6/animation_columns = 2
+0:6/animation_speed = 0.5
+0:6/animation_frame_0/duration = 1.0
+0:6/animation_frame_1/duration = 1.0
+0:6/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pwewa"]
+resource_name = "Snowy Mountains"
+texture = ExtResource("7_te5vj")
+texture_region_size = Vector2i(24, 48)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+5:1/0 = 0
+5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+3:1/0 = 0
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+4:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+5:2/0 = 0
+5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+6:2/0 = 0
+6:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+7:2/0 = 0
+7:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+8:2/0 = 0
+8:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+9:2/0 = 0
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+1:3/0 = 0
+1:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 0, -12, 6, 0, 12, 12, 6)
+0:4/animation_columns = 2
+0:4/animation_speed = 0.5
+0:4/animation_frame_0/duration = 1.0
+0:4/animation_frame_1/duration = 1.0
+0:4/0 = 0
+2:4/animation_columns = 2
+2:4/animation_speed = 0.5
+2:4/animation_frame_0/duration = 1.0
+2:4/animation_frame_1/duration = 1.0
+2:4/0 = 0
+4:4/animation_columns = 2
+4:4/animation_speed = 0.5
+4:4/animation_frame_0/duration = 1.0
+4:4/animation_frame_1/duration = 1.0
+4:4/0 = 0
+6:4/animation_columns = 2
+6:4/animation_speed = 0.5
+6:4/animation_frame_0/duration = 1.0
+6:4/animation_frame_1/duration = 1.0
+6:4/0 = 0
+8:4/animation_columns = 2
+8:4/animation_speed = 0.5
+8:4/animation_frame_0/duration = 1.0
+8:4/animation_frame_1/duration = 1.0
+8:4/0 = 0
+3:3/animation_columns = 2
+3:3/animation_speed = 0.5
+3:3/animation_frame_0/duration = 1.0
+3:3/animation_frame_1/duration = 1.0
+3:3/0 = 0
 
 [resource]
 tile_shape = 1
@@ -685,3 +803,4 @@ sources/0 = SubResource("TileSetAtlasSource_w3oht")
 sources/2 = SubResource("TileSetAtlasSource_6o0hd")
 sources/4 = SubResource("TileSetAtlasSource_cqs2a")
 sources/5 = SubResource("TileSetAtlasSource_ksapm")
+sources/6 = SubResource("TileSetAtlasSource_pwewa")
