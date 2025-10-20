@@ -438,6 +438,21 @@ barrenrun
 *Proudshield Retreat
 *The Blind Haunt
 
+?Swamps
+*Tillhill Waters
+*Morinly Marsh
+*The Mangrove of Pelcana
+*The Abyss of Limingcastle
+*The Blue Glades
+*Flat Bowels
+*Forbidden Waters
+*Barrronto Swamp
+*Nottingsomin Labyrinth
+*Birgrave Bowels
+*The Polder of Taundosa
+*The Basin of Esdiac
+*The Marsh of Thurthon
+
 
 
 
@@ -521,6 +536,8 @@ pezones de señoritas
 A wild rag—also known in various regions as a cowboy scarf, necktie, bandana or kerchief—is a large square-shaped scarf made of silk, cotton, or other soft fabrics that is commonly worn by cowboys.
 Boots / Trotter Boxes, Trotter Cases Mud Pipes Mudpipes Mule-ears
 Mud Pipes – Any kind of boots or shoes, but mostly applied to riding-boots.
+
+“The townsfolk and that no-good hermit can go holler at the tumbleweeds, far as I’m concerned.”
 
 
 
