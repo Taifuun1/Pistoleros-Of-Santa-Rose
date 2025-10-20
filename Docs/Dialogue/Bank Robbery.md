@@ -27,7 +27,7 @@ A "Did you start thinking of this before or <i>after</i> our last failed robbery
 W "I've got this all figured out. First, we're gonna need some special explosives. Like, the Real Stuff."<br>
 W "Not the stuff you get from the general store. No. I'm talking real, civil war–grade explosives."<br>
 W "Then, we're gonna need an explosives expert. Someone who really knows what they're doin'. Not some amateur."<br>
-W "Last, they've got the biggest, meanest, sturdiest safe in the West on that train. So that all the fancy city-folk can feel safe with their jewellery."<br>
+W "Last, they've got the biggest, meanest, sturdiest safe in the West on that train. So that all the fancy city-folk can feel all nice with their jewellery."<br>
 W "We need some safe cracking equipment for that thing."<br>
 W "That's what we'll go for."<br>
 G "Well, that sounds good, but we're not really in a position to do any of that."<br>
@@ -82,7 +82,7 @@ T "You ain't gon' drive me off my own land! I got my rights!"<br>
 T "Either you get off my property, or you'll face judgement from God! Castle doctrine!"<br>
 W "Dang, this Whiskey Bulldozers got gutts, and the gunslingin' to back it up."<br>
 G "Walker, there's no reason to risk our lives here! We're just here to get some horses!"<br>
-W "Time to make a retreat. Let's disappear like coyotes into the night!"
+W "Time to high tail it. Let's disappear like coyotes into the night!"
 
 ### After escaping Texas Freedoms ranch
 W "God damn, the citizens here can be fiercer than the desert wind."<br>
@@ -126,11 +126,11 @@ Everyone except Walker is outside<br>
 G "Where's Walker?"<br>
 A "We were in such a hurry, but he decides to drag his boots..."<br>
 MA "Ey, we've got to go, <i>Amigo!</i> Hurry!"<br>
-The Law Keeper and the local Sheriff walks onto the scene
+The Wyatt Garrett and the local Sheriff walks onto the scene
 Snakeflats Sheriff "Well, well, what do we have here? I thought the commotion was just another saloon brawl, but looks like we've got some real bank robbers on our hands."<br>
 SS "You know, we don't appreciate any brigands 'round deeese parts, pardner."<br>
 MA "We ain't no brigands! We're the big <i>Amigos</i>, friend!"<br>
-Law Keeper "...Hmmm..."<br>
+Wyatt Garrett "...Hmmm..."<br>
 Gwyneth draws her gun<br>
 G "You better stay back, lawgiver. We got a fist full of lead, and you're outgunned!"<br>
 SS "Outgunned? Hah! Come in, boys!"<br>
@@ -143,7 +143,7 @@ A fight ensues
 Multiple lawgivers are dead<br>
 Gwyneth, from behind cover "Surrender! If you'll let us go, we'll spare your life!"<br>
 SS "I'm not gonna give in to a bunch of criminals! You'll never take me alive!"<br>
-Law Keeper "Hold on just a moment."<br>
+Wyatt Garrett "Hold on just a moment."<br>
 SS "Huh? Don't tell me you're gonna negotiate!"<br>
 WG "...Aren't you the Pistoleros of Santa Rose?"<br>
 SS "<i>gasp</i><br>
@@ -230,7 +230,7 @@ A "Fine, as long as we help her."<br>
 W "Where do we get the explosives from, Morrison?"<br>
 MO "...We'll have to travel west, to Copper Branch."<br>
 MO "It's a mining town in the hills. They mine all kinds of minerals there, coal, lead, brass."<br>
-MO "I've heard a rumor that they've found gold there recently."<br>
+MO "The rumor is that they've found gold there recently."<br>
 W "Gold?"<br>
 MO "There's a goldrush happening in the area. Many opportunistic prospectors are trying their luck at hitting it big."<br>
 W "A goldrush? We could make some money on the way..."<br>

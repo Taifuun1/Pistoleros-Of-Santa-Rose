@@ -24,7 +24,7 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "Walker! Do you care more about the gold or our gang?"}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "Give me an answer!"}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Ain't no time to think about that! Move it towards the front!"}},
-		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "The shiny-stuff is right there, if we can get the train a halt!"}},
+		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "The shiny-stuff is right there, if we can get the train to a halt!"}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "Well ain't that something. Honesty, just for once. Didn't know you were capable of that."}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "I always knew you weren't in it for the gang. I always knew... I... I knew... I..."}},
 		{"object": "action", "data": {"description": "Aiyana starts crying"}},

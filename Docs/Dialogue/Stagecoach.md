@@ -24,7 +24,7 @@ TF "I ought to run back to my ranch before them cowboys get too bored of takin' 
 TF "My humblest thanks, Pistoleros. I hope we meet again."<br>
 G "Good fortune, Texas."<br>
 A "Thank you!"<br>
-MA "¡Gracias!"<br>
+MA "<i>¡Gracias, señorita!</i>"<br>
 W "Thanks, partner."<br>
 Nurse gives the gang a status report on Aiyanas health
 Nurse "Aiyana will be fine. The bullet hit her thigh bone, but luckily there was no more damage."<br>
@@ -346,7 +346,7 @@ W "I doubt anything would have made the difference. I drank like the rest of us.
 G "Look, let's stick to the point. We're stuck behind the mountain. That's just a fact."<br>
 G "We got to get out somehow."<br>
 MA "Maybe Walker can <i>orinado</i> a path through mountain for us!"<br>
-MO "...There should be a way out towards west. I know there's some mining sites that way."<br>
+MO "...There should be a way out towards west. I know there's some settlements that way."<br>
 MO "I don't know how well traveled the paths are."<br>
 G "And no doubt it gets just as cold that way as it did through the mountain pass. This isn't looking good."<br>
 G "It seems we need to prepare properly. We need winter gear for the trip. And that means we need more money."<br>
@@ -368,8 +368,7 @@ W "I'm not really looking to get eaten by a bear. Way too many close calls alrea
 
 ## Out of the hills
 
-MO "I think I know this place. It's one of the old mining operations done in Lonmont Rise."<br>
-MO "Pinewood Fields should be down south. Find a creek and follow it."
+MO "We're at Lonmont Rise. Pinewood Fields should be down south. Find a creek and follow it."
 
 ## Arrival at Pinewood Fields
 

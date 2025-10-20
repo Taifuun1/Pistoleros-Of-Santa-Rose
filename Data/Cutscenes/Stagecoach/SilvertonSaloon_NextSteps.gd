@@ -42,7 +42,7 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Look, let's stick to the point. We're stuck behind the mountain. That's just a fact."}},
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "We got to get out somehow."}},
 		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "Maybe Walker can <i>orinado</i> a path through mountain for us!"}},
-		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "...There should be a way out towards west. I know there's some mining sites that way."}},
+		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "...There should be a way out towards west. I know there's some settlements that way."}},
 		{"object": "dialog", "data": {"actor": "Morrison Branson", "text": "I don't know how well traveled the paths are."}},
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "And no doubt it gets just as cold that way as it did through the mountain pass. This isn't looking good."}},
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "It seems we need to prepare properly. We need winter gear for the trip. And that means we need more money."}},

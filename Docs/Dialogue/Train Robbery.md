@@ -106,7 +106,7 @@ A "And the fuck we are! I've had enough!"<br>
 A "Walker! Do you care more about the gold or our gang?"<br>
 A "Give me an answer!"<br>
 W "Ain't no time to think about that! Move it towards the front!"<br>
-W "The shiny-stuff is right there, if we can get the train a halt!"<br>
+W "The shiny-stuff is right there, if we can get the train to a halt!"<br>
 A "Well ain't that something. Honesty, just for once. Didn't know you were capable of that."<br>
 A "I always knew you weren't in it for the gang. I always knew... I... I knew... I..."<br>
 Aiyana starts crying

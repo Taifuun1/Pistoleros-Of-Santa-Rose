@@ -19,7 +19,7 @@ W "Whats that, Morrison?"<br>
 MO "...I don't think we have enough money for the explosives."<br>
 W "Huh? We robbed a bank! We're rolling in the dough!"<br>
 MO "Those civil-war-time explosives are rare, since they don't make them anymore. And they only get rarer each year."<br>
-MO "I doubt we have enough money for both blowing up the jail AND the continental train, AND the safe in the train."<br>
+MO "I doubt we have enough money for both blowing up the jail and the continental train, AND the safe in the train."<br>
 W "Well fuck..."<br>
 A "We didn't come here for nothing, did we!?!"<br>
 W "Naaah, it's all good. This is an opportunity. Opportunity to make some money."<br>
@@ -61,7 +61,7 @@ MA "The Bandidos of El Sacramento! <i>¡Feo!</i>"<br>
 C "Uuuuh, Manuel, <i>malo amigo</i>! We here to give our regards, for last time! Big money, gone with Pistoleros, not good for us."<br>
 C "We take back what ours."<br>
 W "The hell you will! I ain't some yesterdays finch! We worked hard for this money!"<br>
-C "Ooooh, I'm sure you did, <i>amigo</i>. Like in El Tecoo <i>plantación</i>, eh? Big guns, and big words. I give you what for."<br>
+C "Ooooh, I'm sure you did, <i>amigo</i>. Like in El Tecoo <i>plantación</i>, eh? Big guns, and big words. I give you what for."
 A fight ensues
 
 ## After the fight
@@ -102,7 +102,7 @@ CBS "There's a bounty for the leader, Carlos. If you can bring him in alive, the
 CBS "Second, I'm not responsible for what happens to you."<br>
 CBS "You'll be out there on your own. I don't have the lawgivers to help you out."<br>
 W "Yeah, as expected. We'll be heading to the hills then."<br>
-CBS "Now, listen, we might not got the most people to keep the peace round here, but we still got our pride! We work h..."<br>
+CBS "Now, listen, we might not got enough people to keep the peace round here, but we still got our pride! We work h..."<br>
 A "Yeah, I'm sure you do. The amount of prospectors I've seen robbed in the last few days makes me think we only got wilderness law here."<br>
 MA "Ooooh, I thinks we should skidadle out of <i>la oficina del sheriff</i>..."<br>
 CBS "You damn brigands! Strutting in to my office like you own the damn place! Get out of here before I throw you into a cell!"<br>
@@ -119,7 +119,7 @@ W "Here we are... Let's take stock of the situation before we start blastin'."<b
 A "YEEEHAAWWW!<br>
 MA "<i>Oh dios</i>, Aiyana has lost it! She's going in!"<br>
 W "God damnit! Pull out your guns, were doing it her way, double barrels shining! Make 'em feel it!"<br>
-MA "<i>Coraje para Gwyneth!</i>
+MA "<i>Coraje para Gwyneth!
 
 ## The gang meets Carlos
 
@@ -128,7 +128,7 @@ C "Ooooh, it's the <i>Pistoleros del Diablo</i>! We meet again!"<br>
 MA "If you don't give our money back, we'll show you we're worse than <i>el diablo</i> himself!"<br>
 C "Big words, big-big <i>tontos</i>! Time to find <i>dios</i>, Pistoleros!"<br>
 W "We'll settle this right here."<br>
-A "We'll be there, Gwyneth! Just hold on!"
+A "We'll be there, Gwyneth! Just hold on!"<br>
 A fight ensues
 
 ## After the fight
@@ -138,12 +138,12 @@ C "Ooooh... <i>Del diablos</i> got me..."<br>
 W "That's what you get for messing with the Pistoleros of Santa Rose."<br>
 A "I got the money. It's all right here."<br>
 W "Thank fuck something's going our way. We don't got too much time now."<br>
-W "We got to get the explosives, and then run straight to Sandy Cross. There we'll find Gwyneth, in jail."<br>
+W "We got to get the explosives, and then run straight to Sandy Cross. There we'll find Gwyneth, in jail."
 
 ## Arrival at Sandy Cross
 
 A "There's Sandy Cross!"<br>
-W "Good. We'll talk in the saloon."<br>
+W "Good. We'll talk in the saloon."
 
 ## Talk at the Sandy Cross saloon
 
@@ -184,11 +184,11 @@ W "Gwyneth goes free tonight."
 ### At jail
 G "OK, here we are. Morrison, set it up."<br>
 MO "On it..."<br>
-Morrison setts up the explosives and takes cover
-MO "It's gonna blow!"
-Jail wall exlodes
+Morrison sets up the explosives and takes cover<br>
+MO "It's gonna blow!"<br>
+Jail wall exlodes<br>
 W "Alright, boys and girls! Let's get to it! Find Gwyneth!"<br>
-A "YEEEHAAWWW!
+A "YEEEHAAWWW!"
 
 ### Finding Gwyneths cell
 A "Gwyneth! You're okay!"<br>
@@ -265,4 +265,4 @@ W "Move your asses! This is our chance!"
 ### Outside the jail
 G "We're out. Where to now?"<br>
 W "Anywhere is better than here."<br>
-MO "Head north, to Fairpeaks."<br>
+MO "Head north, to Fairpeaks."

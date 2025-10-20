@@ -384,6 +384,7 @@ TF1 "Ghost!"<br>
 TF2 "That's the ghost of Huxley Fin! Run!"<br>
 The townsfolk run<br>
 The ghost emerges from the shadows, turns out it was a dog<br>
+Dog "Woof!"<br>
 W "Welp, it was just a scoundrel."<br>
 A "Fuck..."<br>
 MA "Where did the townsfolk go?"<br>
@@ -395,7 +396,7 @@ WE "Anyways... This was a fun night. Felt like the good old times."<br>
 WE "I'll be helping you on your train robbery."<br>
 G "Great to hear. Perhaps we could meet at Lazysprings?"<br>
 WE "Sounds good. I'll travel there on my own once I've got my things set up here."<br>
-G "The Continental Train will be making it's way through the area soon. Let's make sure we're all there before it arrives."
+G "The Continental Train will be making it's way through the area soon. Let's make sure we've got everything ready before it arrives."
 
 ## Outside Goldsprings
 G "Let's head to Twin Creek saloon and plan out this heist before anything else."
@@ -409,7 +410,7 @@ A "Do we intercept the train deep in the prairie? Or earlier, closer to Gránde 
 G "I say the further from civilization we are, the better."<br>
 MA "Where do we go after <i>el robo?</i> No safe hiding spot here, so we must run for the hills."<br>
 W "We'll just ride for Santa Catherine. The farther west we go, the less Feds there are."<br>
-G "That seems all fine. I guess other than that we'll be relying on our experience as Pistoleros to wade us through."<br>
+G "That all seems fine. I guess other than that we'll be relying on our experience as Pistoleros to wade us through."<br>
 W "Finally, some big–time robbing. I'm ready to grab some shiny–stuff for myself."<br>
 A "I bet you are, Walker. You're always ready to snatch every valuable you can get your hands on."<br>
 A "I wish you'd care more about your gangmembers. My limp isn't getting better any time soon."<br>
@@ -428,7 +429,7 @@ The gang looks at Morrison<br>
 MO "I don't agree how we treated Wells."<br>
 W "Huh? How's that relevant? We got Wells on our team."<br>
 MO "..."<br>
-MO "Wells had his lonely hermit life in that little mine of his. And I wanted to give him more."<br>
+MO "Wells had his lonely hermit life in that little mine of his. And I wanted him to have more."<br>
 MO "You scared them away. With one meaningless comment, they all ran off."<br>
 W "Those scaredy–cats would have ran the moment one horse was hitched wrong. That wasn't a big loss."<br>
 MO "It was a big loss to <i>me</i>! I've wanted to do one good thing in this goddamned mess. And you screwed it all up!"<br>

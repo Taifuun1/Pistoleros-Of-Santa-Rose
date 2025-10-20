@@ -18,7 +18,7 @@ var data = {
 	"shots": [
 		{"object": "camera", "data": {"position": Vector2i(400, 540)}},
 		{"object": "dialog", "data": {"actor": "Gwyneth", "text": "There you are, Manuel. Looking worse for wear."}},
-		{"object": "dialog", "data": {"actor": "Manuel", "text": "I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."}},
+		{"object": "dialog", "data": {"actor": "Manuel", "text": "Ooooh, I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."}},
 		{"object": "dialog", "data": {"actor": "Aiyana", "text": "What happened, Manuel?"}},
 		{"object": "dialog", "data": {"actor": "Manuel", "text": "I rode with Morrison for a long while. The Feds didn't give up <i>la caza</i> easily."}},
 		{"object": "dialog", "data": {"actor": "Manuel", "text": "The gunshots scared my <i>caballo</i>, and it reared. I fell on my side!"}},

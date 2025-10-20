@@ -35,9 +35,9 @@ After a while, the two come up on a bear. They have to fight the bear, before th
 
 Walker "Where the hell could they be?"<br>
 Gwyneth "We will never find them in the forest wandering aimlessly. Let's split up to cover more ground."<br>
-"What's that gonna help? It's like lookin' for a needle in a haystack."<br>
-"We will have a better chance... Bear!"<br>
-"Huh?"<br>
+W "What's that gonna help? It's like lookin' for a needle in a haystack."<br>
+G "We will have a better chance... Bear!"<br>
+W "Huh?"<br>
 Gunfight ensues<br>
 Gwyneth "...Holy smokes. That was close."<br>
 Walker "It's a real struggle. Now the Feds are hiring wildlife to find us. We'll never lose them."<br>
@@ -56,7 +56,7 @@ A "We'll, mostly Walker."<br>
 G "Oh, thank god you're alive, Aiyana. My heart skipped a beat when I saw the jacket in the water."<br>
 W "Do you have the money? Did we get anything out of this miserable fuckup?"<br>
 A "Great to see you too, Walker. I'm fine, thank you for asking."<br>
-A "And no, I don't have the money. The Feds were on our tail. I rode as hard as I could in the woods."<br>
+A "And no, I don't have the money. The Feds were on our tail, which made it a bit difficult to keep track of it."<br>
 A "I rode through a spruce thicklet. The branches tangled on me, and before I knew it, I was on the ground."<br>
 A "The horse rode off with the money."<br>
 W "What about Manuel? Or Morrison? Did they get any of the bags?"<br>
@@ -70,21 +70,19 @@ G "...It's okay. Let's just go see Manuel."
 The half-found gang walks to Manuel, who is laying against a tree with his leg hurt. Manuel is fine after they make him a makeshift splint. Manuel says he saw Morrison run towards Littlehill Grove.
 
 G "There you are, Manuel. Looking worse for wear."<br>
-M "I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."<br>
-A "His leg is hurt. We're not going anywhere before we do something about that."<br>
-W "Gwyneth, make a splint from some sturdy branches off the ground. We're not leaving anyone behind."<br>
-G "On it."<br>
+MA "Ooooh, I've been worse, Gwyneth. The sight of friendly faces washes the bad feelings away."<br>
 A "What happened, Manuel?"<br>
-M "I rode with Morrison for a long while. The Feds didn't give up <i>la caza</i> easily."<br>
-M "The gunshots scared my <i>caballo</i>, and it reared. I fell hard on my side."<br>
-M "Luckily, the Feds didn't see me. They went after Morrison."<br>
+MA "I rode with Morrison for a long while. The Feds didn't give up <i>la caza</i> easily."<br>
+MA "The gunshots scared my <i>caballo</i>, and it reared. I fell on my side!"<br>
+MA "Luckily, the Feds didn't see me. They went after Morrison."<br>
 A "Which direction did he ride to?"<br>
-M "We we're headed for Littlehill Grove."<br>
-Gwyneth fixes up Manuels leg<br>
-G "There, good as new."<br>
+MA "We we're headed for Littlehill Grove."<br>
+G "Can you stand, Manuel?"<br>
+MA "My <i>amigo</i>, my leg is good as new!"<br>
+Gwyneth helps Manuel get up<br>
+G "There, you'll be riding again in no time."<br>
 W "Good. Let's get moving. We have to find Morrison."<br>
-M "Oh, I hope he's okay. He's not the bravest <i>alma</i>."<br>
-A "Let's move!"
+MA "Oh, I hope he's okay. He's not the bravest <i>alma</i>."
 
 ## Littlehill Grove
 
@@ -92,7 +90,7 @@ The gang wonders around for a while, and eventually runs into Morrison. Morrison
 
 MO "Who's there?"<br>
 G "It's just us, Morrison."<br>
-MO "...Thank god. I thought the Feds finally caught up."<br>
+MO "...Oh, heavens. I thought the Feds finally caught up."<br>
 G "Do you have your horse?"<br>
 MO "She's here..."<br>
 Morrison walks the horse out of the brush<br>
@@ -105,7 +103,7 @@ W "ONE bag? Damnit! Damnit all to hell!"<br>
 W "You couldn't grab more than one single bag!"<br>
 MO "I..."<br>
 A "Walker, that's enough. We've had enough troubles for a whole year."<br>
-MA "Eyyyy, <i>Amigos.</i> Let's have a bit more <i>camaradería</i>, eh?"<br>
+MA "Eyyyy, <i>amigos.</i> Let's have a bit more <i>camaradería</i>, eh?"<br>
 G "It's alright. Now we've something to work with. We have supplies, and some money."<br>
 G "Lets take stock of what we have."<br>
 After counting the supplies and the money<br>
@@ -122,4 +120,4 @@ A "Yeah!"<br>
 MA "<i>Salud!</i>"<br>
 MO, almost starts crying "<i>sob</i>"<br>
 W "Alright, let's move it. We're going to Lazysprings."<br>
-A "I can't wait to get to the saloon! Nothing beats whiskey after a bad day!"
+A "I can't wait to get to the saloon! Nothing beats a bottle of whiskey after a bad day!"

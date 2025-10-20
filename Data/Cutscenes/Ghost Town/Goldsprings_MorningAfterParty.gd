@@ -51,6 +51,9 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Those townsfolk were pretty superstitious, and quick to change their mind. I don't expect them to come back."}},
 		{"object": "dialog", "data": {"actor": "Wells", "text": "Ehhh... They're simple folk, I guess. Maybe I'll keep on mining out here alone."}},
 		{"object": "dialog", "data": {"actor": "Wells", "text": "Anyways... This was a fun night. Felt like the good old times."}},
-		{"object": "dialog", "data": {"actor": "Wells", "text": "I'll be helping you on your train robbery."}}
+		{"object": "dialog", "data": {"actor": "Wells", "text": "I'll be helping you on your train robbery."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Great to hear. Perhaps we could meet at Lazysprings?"}},
+		{"object": "dialog", "data": {"actor": "Wells", "text": "Sounds good. I'll travel there on my own once I've got my things set up here."}},
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "The Continental Train will be making it's way through the area soon. Let's make sure we've got everything ready before it arrives."}}
 	]
 }
