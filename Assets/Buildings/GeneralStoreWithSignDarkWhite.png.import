@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5ociebv44p0n"
-path="res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"
+uid="uid://327pcuyggtiq"
+path="res://.godot/imported/GeneralStoreWithSignDarkWhite.png-5c09d7e9dbb53ff5e1fe0faa2ba78a9f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Buildings/Saloon.png"
-dest_files=["res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"]
+source_file="res://Assets/Buildings/GeneralStoreWithSignDarkWhite.png"
+dest_files=["res://.godot/imported/GeneralStoreWithSignDarkWhite.png-5c09d7e9dbb53ff5e1fe0faa2ba78a9f.ctex"]
 
 [params]
 

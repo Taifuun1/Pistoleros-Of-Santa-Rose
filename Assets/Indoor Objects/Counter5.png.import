@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5ociebv44p0n"
-path="res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"
+uid="uid://bcns0djhithvo"
+path="res://.godot/imported/Counter5.png-232e34471a722377da923d6c07cd6ffa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Buildings/Saloon.png"
-dest_files=["res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"]
+source_file="res://Assets/Indoor Objects/Counter5.png"
+dest_files=["res://.godot/imported/Counter5.png-232e34471a722377da923d6c07cd6ffa.ctex"]
 
 [params]
 

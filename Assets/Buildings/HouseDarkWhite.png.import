@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5ociebv44p0n"
-path="res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"
+uid="uid://ewyklcklf0t3"
+path="res://.godot/imported/HouseDarkWhite.png-a410eb5de2ea9321ff6eaee618e5c1e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Buildings/Saloon.png"
-dest_files=["res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"]
+source_file="res://Assets/Buildings/HouseDarkWhite.png"
+dest_files=["res://.godot/imported/HouseDarkWhite.png-a410eb5de2ea9321ff6eaee618e5c1e3.ctex"]
 
 [params]
 

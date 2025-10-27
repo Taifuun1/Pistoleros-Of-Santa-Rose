@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5ociebv44p0n"
-path="res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"
+uid="uid://dlvosdw4j7y5f"
+path="res://.godot/imported/MirrorLarge2.png-0337bd4069e9015c7d07ff21fc1475a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Buildings/Saloon.png"
-dest_files=["res://.godot/imported/Saloon.png-839ba03b431f79b3c6c33bde781a15d7.ctex"]
+source_file="res://Assets/Indoor Objects/MirrorLarge2.png"
+dest_files=["res://.godot/imported/MirrorLarge2.png-0337bd4069e9015c7d07ff21fc1475a0.ctex"]
 
 [params]
 
