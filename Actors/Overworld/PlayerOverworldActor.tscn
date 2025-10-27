@@ -276,7 +276,7 @@ offset = Vector2(0, -24)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_5kcx2")
+&"": SubResource("AnimationLibrary_5kcx2")
 }
 
 [node name="Camera2D" type="Camera2D" parent="."]
