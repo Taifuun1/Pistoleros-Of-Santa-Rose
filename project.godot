@@ -28,6 +28,7 @@ Fight="*res://Globals/Fight.gd"
 FrameData="*res://Globals/FrameData.gd"
 Party="*res://Globals/Party.gd"
 Cutscene="*res://Globals/Cutscene.gd"
+Poker="*res://Globals/Poker.gd"
 
 [display]
 
