@@ -283,5 +283,55 @@ const HANDS = [
 	"High card"
 ]
 
+enum BID_STATES {
+	PASS,
+	CALL
+}
+
+const PLAYER_PERSONALITIES = {
+	"Casual": {
+		"name": "Casual",
+		"raiseLimit": 3
+	},
+	"Gambler": {
+		"name": "Gambler",
+		"raiseLimit": 5
+	},
+	"Pinchpenny": {
+		"name": "Pinchpenny",
+		"raiseLimit": 1
+	},
+	"Random": {
+		"name": "Random",
+		"raiseLimit": 7
+	}
+}
+
 var scripted = false
 var scriptName = null
+
+var players = [
+	{
+		"name": "player1",
+		"money": 100,
+		"playerType": "player"
+	},
+	{
+		"name": "player2",
+		"money": 100,
+		"playerType": "ai",
+		"personality": PLAYER_PERSONALITIES.Casual
+	},
+	{
+		"name": "player3",
+		"money": 100,
+		"playerType": "ai",
+		"personality": PLAYER_PERSONALITIES.Gambler
+	},
+	{
+		"name": "player4",
+		"money": 100,
+		"playerType": "ai",
+		"personality": PLAYER_PERSONALITIES.Pinchpenny
+	}
+]

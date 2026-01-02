@@ -13,14 +13,26 @@ var playersTurnState = {
 	"called": [],
 	"folded": []
 }
+var currentBidState = Poker.BID_STATES.PASS
 
 func _init() -> void:
+	setPlayers()
 	buildDeck()
+	currentBidState = Poker.BID_STATES.PASS
 
 func startGame() -> void:
 	buildDeck()
 	dealCards(2, true)
 	dealCards(3)
+
+func setPlayers(reset = false):
+	if reset:
+		for player in players:
+			players[player].personality = Poker.PLAYER_PERSONALITIES[player.personality.name]
+		return
+	players = Poker.players
+	for player in players:
+		playerOrder.append(player)
 
 func buildDeck() -> void:
 	deck = Poker.CARDS.duplicate(true)
@@ -35,9 +47,262 @@ func dealCards(cardAmount = 1, toPlayers = false) -> void:
 		for i in range(cardAmount):
 			table.cards.append(deck.pop_at(randi() % deck.size() - 1))
 
+func calculatePlayerMove():
+	var playerPersonality = Poker.PLAYER_PERSONALITIES[currentPlayer.personality]
+	var cards = players[currentPlayer.name].cards
+	cards.merge(table.cards)
+	var hand = calculateHand(cards)
+	var playerAction = "pass"
+	var playerActionAmount = 0
+	match playerPersonality:
+		"Casual":
+			if currentBidState == Poker.BID_STATES.CALL:
+				if randi() % 10 == 0:
+					playerAction = "fold"
+				if(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind" or
+						hand == "Two pairs" or
+						hand == "Two of a kind"
+					) and 
+					randi() % 4 == 0
+				):
+					playerAction = "raise"
+					if currentPlayer.money <= 10:
+						playerActionAmount += 10
+					else:
+						playerActionAmount = players[currentPlayer.name].money * 0.05
+						playerActionAmount += players[currentPlayer.name].money * (randi() % 10 / 100)
+				if(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind" or
+						hand == "Two pairs" or
+						hand == "Two of a kind"
+					) and 
+					randi() % 3 == 0
+				):
+					playerAction = "call"
+			if(
+				(
+					hand == "Royal Straight Flush" or
+					hand == "Straight Flush" or
+					hand == "Four of a kind" or
+					hand == "Full house" or
+					hand == "Flush" or
+					hand == "Straight" or
+					hand == "Three of a kind" or
+					hand == "Two pairs" or
+					hand == "Two of a kind"
+				) and
+				randi() % 5 != 0
+			):
+				playerAction = "raise"
+				if currentPlayer.money <= 10:
+					playerActionAmount += 10
+				else:
+					playerActionAmount = players[currentPlayer.name].money * 0.075
+					playerActionAmount += players[currentPlayer.name].money * (randi() % 15 / 100)
+		"Gambler":
+			if currentBidState == Poker.BID_STATES.CALL:
+				if randi() % 20 == 0:
+					playerAction = "fold"
+				if(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind"
+					) and 
+					randi() % 4 != 0
+				):
+					playerAction = "raise"
+					if currentPlayer.money <= 10:
+						playerActionAmount += 10
+					else:
+						playerActionAmount = players[currentPlayer.name].money * 0.1
+						playerActionAmount += players[currentPlayer.name].money * (randi() % 20 / 100)
+				if(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind" or
+						hand == "Two pairs" or
+						hand == "Two of a kind"
+					)
+				):
+					playerAction = "call"
+			if(
+				(
+					hand == "Royal Straight Flush" or
+					hand == "Straight Flush" or
+					hand == "Four of a kind" or
+					hand == "Full house"
+				)
+			):
+				playerAction = "raise"
+				playerActionAmount = players[currentPlayer.name].money
+			if(
+				(
+					hand == "Flush" or
+					hand == "Straight"
+				)
+			):
+				playerAction = "raise"
+				if currentPlayer.money <= 10:
+					playerActionAmount += 10
+				else:
+					playerActionAmount = players[currentPlayer.name].money * 0.4
+					playerActionAmount += players[currentPlayer.name].money * (randi() % 2 / 100)
+			if(
+				(
+					hand == "Three of a kind" or
+					hand == "Two pairs" or
+					hand == "Two of a kind"
+				) and
+				randi() % 2 != 0
+			):
+				playerAction = "raise"
+				if currentPlayer.money <= 10:
+					playerActionAmount += 10
+				else:
+					playerActionAmount = players[currentPlayer.name].money * 0.1
+					playerActionAmount += players[currentPlayer.name].money * (randi() % 40 / 100)
+		"Pinchpenny":
+			if currentBidState == Poker.BID_STATES.CALL:
+				if randi() % 2 == 0:
+					playerAction = "fold"
+				if(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind"
+					) and 
+					randi() % 4 != 0
+				):
+					playerAction = "raise"
+					if currentPlayer.money <= 10:
+						playerActionAmount += 10
+					else:
+						playerActionAmount = players[currentPlayer.name].money * 0.025
+						playerActionAmount += players[currentPlayer.name].money * (randi() % 5 / 100)
+				if(
+					(
+						hand == "Full house" or
+						hand == "Flush"
+					)
+				):
+					playerAction = "call"
+			if(
+				(
+					hand == "Royal Straight Flush" or
+					hand == "Straight Flush" or
+					hand == "Four of a kind"
+				) and 
+				randi() % 4 != 0
+			):
+				playerAction = "raise"
+				if currentPlayer.money <= 10:
+					playerActionAmount += 10
+				else:
+					playerActionAmount = players[currentPlayer.name].money * 0.025
+					playerActionAmount += players[currentPlayer.name].money * (randi() % 5 / 100)
+			if(
+				(
+					hand == "Full house" or
+					hand == "Flush" or
+					hand == "Straight" or
+					hand == "Three of a kind" or
+					hand == "Two pairs" or
+					hand == "Two of a kind"
+				) and
+				randi() % 2 != 0
+			):
+				playerAction = "call"
+		"Random":
+			if currentBidState == Poker.BID_STATES.CALL:
+				if randi() % 15 == 0:
+					playerAction = "fold"
+				elif(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind" or
+						hand == "Two pairs" or
+						hand == "Two of a kind"
+					) and 
+					randi() % 3 == 0
+				):
+					playerAction = "raise"
+					if currentPlayer.money <= 10:
+						playerActionAmount += 10
+					else:
+						playerActionAmount = players[currentPlayer.name].money * 0.05
+						playerActionAmount += players[currentPlayer.name].money * (randi() % 75 / 100)
+				elif(
+					(
+						hand == "Royal Straight Flush" or
+						hand == "Straight Flush" or
+						hand == "Four of a kind" or
+						hand == "Full house" or
+						hand == "Flush" or
+						hand == "Straight" or
+						hand == "Three of a kind" or
+						hand == "Two pairs" or
+						hand == "Two of a kind"
+					) and 
+					randi() % 3 == 0
+				):
+					playerAction = "call"
+				else:
+					playerAction = "fold"
+			if(
+				(
+					hand == "Royal Straight Flush" or
+					hand == "Straight Flush" or
+					hand == "Four of a kind" or
+					hand == "Full house" or
+					hand == "Flush" or
+					hand == "Straight" or
+					hand == "Three of a kind" or
+					hand == "Two pairs" or
+					hand == "Two of a kind"
+				) and
+				randi() % 2 != 0
+			):
+				playerAction = "raise"
+				if currentPlayer.money <= 10:
+					playerActionAmount += 10
+				else:
+					playerActionAmount = players[currentPlayer.name].money * 0.075
+					playerActionAmount += players[currentPlayer.name].money * (randi() % 75 / 100)
+	processPlayerTurn(currentPlayer.playerName, playerAction, playerActionAmount)
+
 func processPlayerTurn(playerName, playerAction, playerActionAmount = 0) -> void:
 	playPlayerTurn(playerName, playerAction, playerActionAmount)
-	if currentPlayer == "player1":
+	if !currentPlayer == "player1":
 		pass
 	if !checkIfPlayersLeft():
 		if table.cards.size() < 5:
@@ -52,8 +317,12 @@ func playPlayerTurn(playerName, playerAction, playerActionAmount) -> void:
 		"raise":
 			table.bets[playerName] += playerActionAmount
 			table.highestBet = table.bets[playerName]
+			players[playerName].money -= playerActionAmount
+			if currentBidState == Poker.BID_STATES.PASS:
+				currentBidState = Poker.BID_STATES.CALL
 		"call":
 			table.bets[playerName] += table.highestBet - table.bets[playerName]
+			players[playerName].money -= table.highestBet - table.bets[playerName]
 	updatePlayerTurnState(playerName, playerAction)
 	updateCurrentPlayer()
 
@@ -69,7 +338,9 @@ func updateCurrentPlayer() -> void:
 	if currentPlayerPosition == players.size():
 		currentPlayer = playerOrder[0]
 		return
-	currentPlayer = playerOrder[playerOrder.find(currentPlayer) + 1]
+	currentPlayer = playerOrder[currentPlayerPosition + 1]
+	if playersTurnState.folded.has(currentPlayer.playerName):
+		updateCurrentPlayer()
 
 func checkIfPlayersLeft() -> bool:
 	if(
