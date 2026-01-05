@@ -1,6 +1,366 @@
-[gd_scene load_steps=2 format=3 uid="uid://4sgwxfvelccv"]
+[gd_scene load_steps=8 format=3 uid="uid://4sgwxfvelccv"]
 
 [ext_resource type="Script" uid="uid://nmfpb04krbby" path="res://Minigames/Poker/Poker.gd" id="1_kiimt"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_5l1q7"]
+[ext_resource type="Texture2D" uid="uid://c10vx47w7bivh" path="res://Assets/Cards/TableBackground.png" id="2_jcj6d"]
+[ext_resource type="Texture2D" uid="uid://cm3myqm6hdqa6" path="res://Assets/Cards/CardDeckRed.png" id="3_ve5sg"]
+[ext_resource type="PackedScene" uid="uid://ba3h1k1b6unsg" path="res://UI/Popup/Popup.tscn" id="7_k75dh"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_5l1q7"]
+keycode = 4194332
+
+[sub_resource type="Shortcut" id="Shortcut_qoy44"]
+events = [SubResource("InputEventKey_5l1q7")]
 
 [node name="Poker" type="Node2D"]
 script = ExtResource("1_kiimt")
+
+[node name="Table" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("2_5l1q7")
+texture = ExtResource("2_jcj6d")
+
+[node name="TableGrid" type="GridContainer" parent="Table"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
+
+[node name="DeckContainer" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 8
+
+[node name="DeckPositionContainer" type="HBoxContainer" parent="Table/TableGrid/DeckContainer"]
+layout_mode = 2
+
+[node name="Deck" type="TextureRect" parent="Table/TableGrid/DeckContainer/DeckPositionContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+texture = ExtResource("3_ve5sg")
+expand_mode = 3
+stretch_mode = 4
+
+[node name="Player3" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Player3Container" type="VBoxContainer" parent="Table/TableGrid/Player3"]
+layout_mode = 2
+alignment = 2
+
+[node name="Player3CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player3/Player3Container"]
+layout_mode = 2
+theme_override_constants/margin_top = 12
+
+[node name="Player3CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player3/Player3Container/Player3CardsMarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsMarginContainer/Player3CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsMarginContainer/Player3CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player3/Player3Container"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer3" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Player2" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Player2Container" type="HBoxContainer" parent="Table/TableGrid/Player2"]
+layout_mode = 2
+
+[node name="Player2CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player2/Player2Container"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+
+[node name="Player2CardsContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container/Player2CardsMarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsMarginContainer/Player2CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsMarginContainer/Player2CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TableContainer" type="MarginContainer" parent="Table/TableGrid"]
+custom_minimum_size = Vector2(266, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TableDataContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer"]
+visible = false
+layout_mode = 2
+
+[node name="TableBetsContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer/TableDataContainer"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 24
+
+[node name="TableBetsCenterContainer" type="CenterContainer" parent="Table/TableGrid/TableContainer/TableDataContainer/TableBetsContainer"]
+layout_mode = 2
+
+[node name="TableCardsContainer" type="HBoxContainer" parent="Table/TableGrid/TableContainer/TableDataContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot3" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot4" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot5" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="MenuUIMarginContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MenuUIContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Deal" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer"]
+layout_mode = 2
+text = "Deal"
+
+[node name="Leave" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer"]
+layout_mode = 2
+text = "Leave"
+
+[node name="Player4" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Player4Container" type="HBoxContainer" parent="Table/TableGrid/Player4"]
+layout_mode = 2
+alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Player4CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player4/Player4Container"]
+layout_mode = 2
+theme_override_constants/margin_right = 24
+
+[node name="Player4CardsContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container/Player4CardsMarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsMarginContainer/Player4CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsMarginContainer/Player4CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="Player1UILeft" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_bottom = 12
+
+[node name="Player1UILeftContainer" type="HBoxContainer" parent="Table/TableGrid/Player1UILeft"]
+layout_mode = 2
+alignment = 2
+
+[node name="Player1UILeftLabelContainer" type="MarginContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Money"
+
+[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Bid"
+
+[node name="Call" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Call"
+
+[node name="Player1UILeftNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+layout_direction = 3
+layout_mode = 2
+text = "0"
+
+[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+layout_direction = 3
+layout_mode = 2
+text = "0"
+
+[node name="Call" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+layout_direction = 3
+layout_mode = 2
+text = "0"
+
+[node name="Player1UILeftAmountContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+custom_minimum_size = Vector2(37, 0)
+layout_mode = 2
+alignment = 2
+
+[node name="+1" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer"]
+layout_mode = 2
+text = "+1
+"
+
+[node name="+5" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer"]
+layout_mode = 2
+text = "+5"
+
+[node name="+10" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer"]
+layout_mode = 2
+text = "+10"
+
+[node name="Player1" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_bottom = 12
+
+[node name="Player1Container" type="HBoxContainer" parent="Table/TableGrid/Player1"]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Raise" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer"]
+layout_mode = 2
+text = "Raise"
+
+[node name="Call" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer"]
+layout_mode = 2
+text = "Call"
+
+[node name="Player1CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player1/Player1Container"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="Player1CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer"]
+layout_mode = 2
+
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer"]
+custom_minimum_size = Vector2(50, 74)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Pass" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2"]
+layout_mode = 2
+text = "Pass"
+
+[node name="Fold" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2"]
+layout_mode = 2
+text = "Fold"
+
+[node name="HelpContainer" type="MarginContainer" parent="Table/TableGrid"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 10
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Help" type="Button" parent="Table/TableGrid/HelpContainer"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "HELP"
+shortcut = SubResource("Shortcut_qoy44")
+shortcut_in_tooltip = false
+text = "?"
+icon_alignment = 1
+
+[node name="Popup" parent="." instance=ExtResource("7_k75dh")]
+
+[connection signal="pressed" from="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer/Deal" to="." method="startGame"]
+[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+1" to="." method="_on_add_to_bid_pressed" binds= [1]]
+[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+5" to="." method="_on_add_to_bid_pressed" binds= [5]]
+[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+10" to="." method="_on_add_to_bid_pressed" binds= [10]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise" to="." method="processPlayerTurn" binds= ["player1", "raised"]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Call" to="." method="processPlayerTurn" binds= ["player1", "called"]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass" to="." method="processPlayerTurn" binds= ["player1", "passed"]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Fold" to="." method="processPlayerTurn" binds= ["player1", "folded"]]
+[connection signal="pressed" from="Table/TableGrid/HelpContainer/Help" to="." method="_on_help_button_pressed"]
