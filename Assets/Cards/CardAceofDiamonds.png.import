@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7876ln550lid"
-path="res://.godot/imported/CardAceHearts.png-8d605beeb0b6dfcbc01aa12bf73ed218.ctex"
+uid="uid://dydku7nw5tq7m"
+path="res://.godot/imported/CardAceofDiamonds.png-58f65bf9d6c1da1d74d3e139d5f044c5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Cards/CardAceHearts.png"
-dest_files=["res://.godot/imported/CardAceHearts.png-8d605beeb0b6dfcbc01aa12bf73ed218.ctex"]
+source_file="res://Assets/Cards/CardAceofDiamonds.png"
+dest_files=["res://.godot/imported/CardAceofDiamonds.png-58f65bf9d6c1da1d74d3e139d5f044c5.ctex"]
 
 [params]
 
