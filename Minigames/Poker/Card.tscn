@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dec1ku7v32o8i"]
+
+[ext_resource type="Script" uid="uid://djmpg78xxt6jp" path="res://Minigames/Poker/Card.gd" id="1_expy5"]
+
+[node name="Card" type="TextureRect"]
+custom_minimum_size = Vector2(49, 73)
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+stretch_mode = 5
+script = ExtResource("1_expy5")
