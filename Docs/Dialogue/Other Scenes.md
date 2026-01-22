@@ -146,3 +146,27 @@ D "Listen here..."<br>
 A "Come on, Dutch. We don't need to get into trouble right away."<br>
 W "As long as that's clear, we're not gonna have a problem."<br>
 A "Fine. Now get the hell out of here."
+
+## Gambling dialogue
+
+### Player loses it big
+
+A "..."<br>
+W "Well ain't that a kick in the head."<br>
+A "Shut it, Walker!"<br>
+MA "<i>¡Compadro!</i> We get unlucky! But we still got each other! No worries!"<br>
+G "We can get the money back. Let's get back to work."
+
+### Player goes mild or even
+
+A "Damn! I got unlucky every time!"<br>
+MA "Eyyyy, Aiyana! One more hand! Next one is big one, I promise!"<br>
+G "I think we ought to quit while we're even. Let's get back at it."
+
+### Player wins it big
+
+A "YAAAAA-HOOOOOOOOO!!!"<br>
+W "Well, ain't that a needle in a haystack..."<br>
+A "Eat it, Walker! Magic hand wins it, every time!"<br>
+W "Lucky greenhorn..."<br>
+G "That solves our money problems pretty good. Let's see if we need to do some work still."
