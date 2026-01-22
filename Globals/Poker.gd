@@ -288,7 +288,7 @@ enum BID_STATES {
 	CALL
 }
 
-const PLAYER_PERSONALITIES = {
+var PLAYER_PERSONALITIES = {
 	"Casual": {
 		"name": "Casual",
 		"raiseLimit": 3
@@ -303,35 +303,64 @@ const PLAYER_PERSONALITIES = {
 	},
 	"Random": {
 		"name": "Random",
-		"raiseLimit": 7
+		"raiseLimit": 10
 	}
 }
+
+const PLAYER_CARD_PATHS = {
+	"player1": {
+		"card1": "Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer/CardSlot1",
+		"card2": "Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer/CardSlot2"
+	},
+	"player2": {
+		"card1": "Table/TableGrid/Player2/Player2Container/Player2CardsContainer/CardSlot1",
+		"card2": "Table/TableGrid/Player2/Player2Container/Player2CardsContainer/CardSlot2"
+	},
+	"player3": {
+		"card1": "Table/TableGrid/Player3/Player3Container/Player3CardsContainer/CardSlot1",
+		"card2": "Table/TableGrid/Player3/Player3Container/Player3CardsContainer/CardSlot2"
+	},
+	"player4": {
+		"card1": "Table/TableGrid/Player4/Player4Container/Player4CardsContainer/CardSlot1",
+		"card2": "Table/TableGrid/Player4/Player4Container/Player4CardsContainer/CardSlot2"
+	}
+}
+
+const TABLE_CARD_PATHS = {
+	"card1": "Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer/CardSlot1",
+	"card2": "Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer/CardSlot2",
+	"card3": "Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer/CardSlot3",
+	"card4": "Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer/CardSlot4",
+	"card5": "Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer/CardSlot5",
+}
+
+const DECK_PATH = "Table/TableGrid/DeckContainer/DeckPositionContainer/Deck"
 
 var scripted = false
 var scriptName = null
 
-var players = [
-	{
+var players = {
+	"player1": {
 		"name": "player1",
 		"money": 100,
 		"playerType": "player"
 	},
-	{
+	"player2": {
 		"name": "player2",
-		"money": 100,
+		"money": 5,
 		"playerType": "ai",
 		"personality": PLAYER_PERSONALITIES.Casual
 	},
-	{
+	"player3": {
 		"name": "player3",
 		"money": 100,
 		"playerType": "ai",
 		"personality": PLAYER_PERSONALITIES.Gambler
 	},
-	{
+	"player4": {
 		"name": "player4",
 		"money": 100,
 		"playerType": "ai",
 		"personality": PLAYER_PERSONALITIES.Pinchpenny
 	}
-]
+}

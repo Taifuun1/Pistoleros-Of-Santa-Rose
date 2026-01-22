@@ -42,7 +42,7 @@ func setRichTextLabel(labelText, color = null, textAlignment = null):
 		#push_error("Error appending bbcode.")
 
 func setRichTextLabelImage(imgSrc):
-	append_text("[img]{%s}[/img]" % imgSrc)
+	append_text("[img]%s[/img]" % imgSrc)
 
 #func setRichTextLabelForGameConsole(_critterName, _text):
 	#var _bbcode = str(_critterName) + ": "

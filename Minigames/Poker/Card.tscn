@@ -1,12 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://dec1ku7v32o8i"]
+[gd_scene load_steps=3 format=3 uid="uid://dec1ku7v32o8i"]
 
+[ext_resource type="Texture2D" uid="uid://cm3myqm6hdqa6" path="res://Assets/Cards/CardDeckRed.png" id="1_b2387"]
 [ext_resource type="Script" uid="uid://djmpg78xxt6jp" path="res://Minigames/Poker/Card.gd" id="1_expy5"]
 
 [node name="Card" type="TextureRect"]
-custom_minimum_size = Vector2(49, 73)
+custom_minimum_size = Vector2(56, 70)
 offset_right = 40.0
 offset_bottom = 40.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
+texture = ExtResource("1_b2387")
 stretch_mode = 5
 script = ExtResource("1_expy5")

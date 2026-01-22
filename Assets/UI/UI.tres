@@ -1,6 +1,9 @@
-[gd_resource type="Theme" load_steps=7 format=3 uid="uid://c40khsw7ty1da"]
+[gd_resource type="Theme" load_steps=8 format=3 uid="uid://c40khsw7ty1da"]
 
 [ext_resource type="FontFile" uid="uid://cu3ytb4o32oi0" path="res://Assets/UI/Unnamed.fnt" id="1_0scx2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y61ul"]
+bg_color = Color(0.53389496, 0.962212, 1, 0.49803922)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0soan"]
 bg_color = Color(0.458824, 0.956863, 1, 0.498039)
@@ -25,6 +28,7 @@ border_color = Color(0.48242, 0.230011, 0.0747058, 1)
 [resource]
 default_font = ExtResource("1_0scx2")
 default_font_size = 10
+Button/styles/disabled = SubResource("StyleBoxFlat_y61ul")
 Button/styles/focus = SubResource("StyleBoxFlat_0soan")
 Button/styles/hover = SubResource("StyleBoxFlat_b58mt")
 Button/styles/normal = SubResource("StyleBoxFlat_lqpfp")
