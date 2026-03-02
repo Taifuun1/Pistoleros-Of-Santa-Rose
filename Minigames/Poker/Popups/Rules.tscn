@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://csc6o6as7s34f"]
+
+[ext_resource type="Script" uid="uid://cxhy567gjq0o" path="res://UI/Popup/Popup.gd" id="1_3byil"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_vl02n"]
+[ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_r03oj"]
+
+[node name="Rules" type="CenterContainer" unique_id=1719729025]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("2_vl02n")
+script = ExtResource("1_3byil")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1979713661]
+custom_minimum_size = Vector2(480, 200)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=969175880]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer" unique_id=1960817003]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer" unique_id=802414591]
+layout_mode = 2
+
+[node name="Header" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1799131269 instance=ExtResource("3_r03oj")]
+layout_mode = 2
+text = "Santa Rose Poker"
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=615804447]
+layout_mode = 2
+text = " Close "
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer" unique_id=1113893209]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer/MarginContainer2" unique_id=1859931900]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer" unique_id=1033704981]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=786125093]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Santa Rose Poker is a game of cards. You bet money to win the entire bid. The highest hand wins. Players' hand is calculated from the two cards in the players' hand and from the shared cards on the table."
+autowrap_mode = 2
+
+[node name="Label3" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=765215949]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "The game flow:"
+autowrap_mode = 2
+
+[node name="Label4" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=2023774358]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "1. Every player gets two cards, and three cards are dealt on the table"
+autowrap_mode = 2
+
+[node name="Label5" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1533265663]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "2. Players decide if they want to bid money, pass, or fold"
+autowrap_mode = 2
+
+[node name="Label6" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1552706462]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "3. If a player raises the bid, all players must raise the bid again, call the bid, or fold"
+autowrap_mode = 2
+
+[node name="Label7" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1023633119]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "4. Once all players pass, call, or fold, a new card is dealt on the table"
+autowrap_mode = 2
+
+[node name="Label8" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=674271624]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "5. Players can bid again"
+autowrap_mode = 2
+
+[node name="Label9" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1754723905]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "6. One more card is dealt on the table"
+autowrap_mode = 2
+
+[node name="Label10" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=147194263]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "7. Players can bid one last time"
+autowrap_mode = 2
+
+[node name="Label11" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1964349705]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "8. After the bidding is done, cards are revealed, and the highest hand wins"
+autowrap_mode = 2
+
+[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/Button" to="." method="_on_close_button_pressed"]

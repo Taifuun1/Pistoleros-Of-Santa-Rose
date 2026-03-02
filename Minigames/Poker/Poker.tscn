@@ -1,11 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://4sgwxfvelccv"]
+[gd_scene format=3 uid="uid://4sgwxfvelccv"]
 
 [ext_resource type="Script" uid="uid://nmfpb04krbby" path="res://Minigames/Poker/Poker.gd" id="1_kiimt"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_5l1q7"]
 [ext_resource type="Texture2D" uid="uid://c10vx47w7bivh" path="res://Assets/Cards/TableBackground.png" id="2_jcj6d"]
 [ext_resource type="Texture2D" uid="uid://b3kwgfkv2c8ma" path="res://Assets/Cards/CardDeckRed2.png" id="4_qoy44"]
 [ext_resource type="Texture2D" uid="uid://5j2u1oqxxwna" path="res://Assets/Icons/CardIcon.png" id="5_qoy44"]
-[ext_resource type="PackedScene" uid="uid://ba3h1k1b6unsg" path="res://UI/Popup/Popup.tscn" id="7_k75dh"]
+[ext_resource type="PackedScene" uid="uid://bqs1wuwjuemnr" path="res://Minigames/Poker/Popups/Cards.tscn" id="7_k75dh"]
+[ext_resource type="PackedScene" uid="uid://csc6o6as7s34f" path="res://Minigames/Poker/Popups/Rules.tscn" id="7_wqdul"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_5l1q7"]
 keycode = 4194332
@@ -13,16 +14,16 @@ keycode = 4194332
 [sub_resource type="Shortcut" id="Shortcut_qoy44"]
 events = [SubResource("InputEventKey_5l1q7")]
 
-[node name="Poker" type="Node2D"]
+[node name="Poker" type="Node2D" unique_id=1294696939]
 script = ExtResource("1_kiimt")
 
-[node name="Table" type="TextureRect" parent="."]
+[node name="Table" type="TextureRect" parent="." unique_id=1241888895]
 offset_right = 40.0
 offset_bottom = 40.0
 theme = ExtResource("2_5l1q7")
 texture = ExtResource("2_jcj6d")
 
-[node name="TableGrid" type="GridContainer" parent="Table"]
+[node name="TableGrid" type="GridContainer" parent="Table" unique_id=1375112246]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,18 +32,18 @@ grow_horizontal = 2
 grow_vertical = 2
 columns = 3
 
-[node name="DeckContainer" type="MarginContainer" parent="Table/TableGrid"]
+[node name="DeckContainer" type="MarginContainer" parent="Table/TableGrid" unique_id=1632591311]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 12
 
-[node name="DeckPositionContainer" type="HBoxContainer" parent="Table/TableGrid/DeckContainer"]
+[node name="DeckPositionContainer" type="HBoxContainer" parent="Table/TableGrid/DeckContainer" unique_id=1759875570]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 
-[node name="Deck" type="TextureRect" parent="Table/TableGrid/DeckContainer/DeckPositionContainer"]
+[node name="Deck" type="TextureRect" parent="Table/TableGrid/DeckContainer/DeckPositionContainer" unique_id=420414282]
 custom_minimum_size = Vector2(54, 78)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -51,398 +52,408 @@ texture = ExtResource("4_qoy44")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="Player3" type="MarginContainer" parent="Table/TableGrid"]
+[node name="Player3" type="MarginContainer" parent="Table/TableGrid" unique_id=1411588464]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/margin_top = 12
 
-[node name="Player3Container" type="HBoxContainer" parent="Table/TableGrid/Player3"]
+[node name="Player3Container" type="HBoxContainer" parent="Table/TableGrid/Player3" unique_id=2055828606]
 layout_mode = 2
 
-[node name="Player3UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player3/Player3Container"]
+[node name="Player3UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player3/Player3Container" unique_id=532688381]
 layout_mode = 2
 
-[node name="Player3UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer"]
+[node name="Player3UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer" unique_id=1250822468]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer" unique_id=1480857479]
 layout_mode = 2
 text = "Player"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer" unique_id=194758234]
 layout_mode = 2
 text = "Money"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopLabelContainer" unique_id=38919920]
 layout_mode = 2
 text = "Bid"
 
-[node name="Player3UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer"]
+[node name="Player3UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer" unique_id=1374269205]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 
-[node name="Player3UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer"]
+[node name="Player3UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer" unique_id=726836274]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer" unique_id=1678095589]
 layout_mode = 2
 text = "Player 3"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer" unique_id=508012706]
 layout_mode = 2
 text = "0"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player3/Player3Container/Player3UITopContainer/Player3UITopNumberMarginContainer/Player3UITopNumberContainer" unique_id=1194412311]
 layout_mode = 2
 text = "0"
 
-[node name="Player3CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player3/Player3Container"]
+[node name="Player3CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player3/Player3Container" unique_id=943201959]
 layout_mode = 2
 size_flags_vertical = 4
 alignment = 1
 
-[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsContainer"]
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsContainer" unique_id=1841554836]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsContainer"]
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player3/Player3Container/Player3CardsContainer" unique_id=741001551]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="MarginContainer3" type="MarginContainer" parent="Table/TableGrid"]
+[node name="MarginContainer3" type="MarginContainer" parent="Table/TableGrid" unique_id=242002099]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Player2" type="MarginContainer" parent="Table/TableGrid"]
+[node name="Player2" type="MarginContainer" parent="Table/TableGrid" unique_id=712332646]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_left = 24
 
-[node name="Player2Container" type="VBoxContainer" parent="Table/TableGrid/Player2"]
+[node name="Player2Container" type="VBoxContainer" parent="Table/TableGrid/Player2" unique_id=830880275]
 layout_mode = 2
 alignment = 1
 
-[node name="Player2UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player2/Player2Container"]
+[node name="Player2UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player2/Player2Container" unique_id=2136583591]
 layout_mode = 2
 
-[node name="Player2UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer"]
+[node name="Player2UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer" unique_id=1240523700]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer" unique_id=779999737]
 layout_mode = 2
 text = "Player"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer" unique_id=1807348856]
 layout_mode = 2
 text = "Money"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopLabelContainer" unique_id=931704145]
 layout_mode = 2
 text = "Bid"
 
-[node name="Player2UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer"]
+[node name="Player2UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer" unique_id=100376771]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 
-[node name="Player2UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer"]
+[node name="Player2UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer" unique_id=69528143]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer" unique_id=1765238]
 layout_mode = 2
 text = "Player 2"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer" unique_id=710449116]
 layout_mode = 2
 text = "0"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player2/Player2Container/Player2UITopContainer/Player2UITopNumberMarginContainer/Player2UITopNumberContainer" unique_id=194003241]
 layout_mode = 2
 text = "0"
 
-[node name="Player2CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player2/Player2Container"]
+[node name="Player2CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player2/Player2Container" unique_id=469331095]
 layout_mode = 2
 
-[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsContainer"]
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsContainer" unique_id=1495809638]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsContainer"]
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player2/Player2Container/Player2CardsContainer" unique_id=686100016]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="TableContainer" type="MarginContainer" parent="Table/TableGrid"]
+[node name="TableContainer" type="MarginContainer" parent="Table/TableGrid" unique_id=1443050796]
 custom_minimum_size = Vector2(266, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TableDataContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer"]
+[node name="TableDataContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer" unique_id=1064793389]
 visible = false
 layout_mode = 2
 
-[node name="TableBetsContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer/TableDataContainer"]
+[node name="TableBetsContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer/TableDataContainer" unique_id=553906077]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_bottom = 24
 
-[node name="TableBetsCenterContainer" type="CenterContainer" parent="Table/TableGrid/TableContainer/TableDataContainer/TableBetsContainer"]
+[node name="TableBetsCenterContainer" type="CenterContainer" parent="Table/TableGrid/TableContainer/TableDataContainer/TableBetsContainer" unique_id=849948237]
 layout_mode = 2
 
-[node name="TableCardsContainer" type="HBoxContainer" parent="Table/TableGrid/TableContainer/TableDataContainer"]
+[node name="TableCardsContainer" type="HBoxContainer" parent="Table/TableGrid/TableContainer/TableDataContainer" unique_id=1611345752]
 layout_mode = 2
 alignment = 1
 
-[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer" unique_id=1475298663]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer" unique_id=1618789419]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot3" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+[node name="CardSlot3" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer" unique_id=1077836281]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot4" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+[node name="CardSlot4" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer" unique_id=705694622]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot5" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer"]
+[node name="CardSlot5" type="TextureRect" parent="Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer" unique_id=314712316]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="MenuUIMarginContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer"]
+[node name="MenuUIMarginContainer" type="MarginContainer" parent="Table/TableGrid/TableContainer" unique_id=666322511]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MenuUIContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer"]
+[node name="MenuUIContainer" type="VBoxContainer" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer" unique_id=2130532718]
 layout_mode = 2
 alignment = 2
 
-[node name="Deal" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer"]
+[node name="Deal" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer" unique_id=1712638618]
 layout_mode = 2
 text = "Deal"
 
-[node name="Leave" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer"]
+[node name="Leave" type="Button" parent="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer" unique_id=2083521330]
 layout_mode = 2
 text = "Leave"
 
-[node name="Player4" type="MarginContainer" parent="Table/TableGrid"]
+[node name="Player4" type="MarginContainer" parent="Table/TableGrid" unique_id=1534466969]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_right = 24
 
-[node name="Player4Container" type="VBoxContainer" parent="Table/TableGrid/Player4"]
+[node name="Player4Container" type="VBoxContainer" parent="Table/TableGrid/Player4" unique_id=1255499817]
 layout_mode = 2
 alignment = 1
 
-[node name="Player4UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player4/Player4Container"]
+[node name="Player4UITopContainer" type="HBoxContainer" parent="Table/TableGrid/Player4/Player4Container" unique_id=543769334]
 layout_mode = 2
 
-[node name="Player4UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer"]
+[node name="Player4UITopLabelContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer" unique_id=1129758625]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer" unique_id=263402188]
 layout_mode = 2
 text = "Player"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer" unique_id=1134131086]
 layout_mode = 2
 text = "Money"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopLabelContainer" unique_id=981165403]
 layout_mode = 2
 text = "Bid"
 
-[node name="Player4UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer"]
+[node name="Player4UITopNumberMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer" unique_id=1599375153]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 
-[node name="Player4UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer"]
+[node name="Player4UITopNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer" unique_id=706411089]
 layout_mode = 2
 
-[node name="Player" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer"]
+[node name="Player" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer" unique_id=1420359335]
 layout_mode = 2
 text = "Player 4"
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer" unique_id=368068962]
 layout_mode = 2
 text = "0"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player4/Player4Container/Player4UITopContainer/Player4UITopNumberMarginContainer/Player4UITopNumberContainer" unique_id=1182579116]
 layout_mode = 2
 text = "0"
 
-[node name="Player4CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player4/Player4Container"]
+[node name="Player4CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player4/Player4Container" unique_id=1691296030]
 layout_mode = 2
 
-[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsContainer"]
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsContainer" unique_id=1062906749]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsContainer"]
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player4/Player4Container/Player4CardsContainer" unique_id=2057078494]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="Player1UILeft" type="MarginContainer" parent="Table/TableGrid"]
+[node name="Player1UILeft" type="MarginContainer" parent="Table/TableGrid" unique_id=1124977719]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_override_constants/margin_bottom = 12
 
-[node name="Player1UILeftContainer" type="HBoxContainer" parent="Table/TableGrid/Player1UILeft"]
+[node name="Player1UILeftContainer" type="HBoxContainer" parent="Table/TableGrid/Player1UILeft" unique_id=1569459670]
 layout_mode = 2
 alignment = 2
 
-[node name="Player1UILeftLabelContainer" type="MarginContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+[node name="Player1UILeftLabelContainer" type="MarginContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer" unique_id=1083763036]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer" unique_id=23116346]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer" unique_id=1682190192]
 layout_mode = 2
 text = "Money"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer" unique_id=456900892]
 layout_mode = 2
 text = "Bid"
 
-[node name="Call" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer"]
+[node name="Raise" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftLabelContainer/VBoxContainer" unique_id=918220809]
 layout_mode = 2
-text = "Call"
+text = "Raise"
 
-[node name="Player1UILeftNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+[node name="Player1UILeftNumberContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer" unique_id=983505864]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+[node name="Money" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer" unique_id=1052591463]
 layout_direction = 3
 layout_mode = 2
 text = "0"
 
-[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+[node name="Bid" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer" unique_id=1908270680]
 layout_direction = 3
 layout_mode = 2
 text = "0"
 
-[node name="Call" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer"]
+[node name="Raise" type="Label" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer" unique_id=1986536232]
 layout_direction = 3
 layout_mode = 2
 text = "0"
 
-[node name="Player1UILeftAmountContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer"]
+[node name="Player1UILeftAmountContainer" type="VBoxContainer" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer" unique_id=846019755]
 custom_minimum_size = Vector2(37, 0)
 layout_mode = 2
 alignment = 2
 
-[node name="+1" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer" groups=["Game"]]
-layout_mode = 2
-text = "+1
-"
-
-[node name="+5" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer" groups=["Game"]]
-layout_mode = 2
-text = "+5"
-
-[node name="+10" type="Button" parent="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer" groups=["Game"]]
-layout_mode = 2
-text = "+10"
-
-[node name="Player1" type="MarginContainer" parent="Table/TableGrid"]
+[node name="Player1" type="MarginContainer" parent="Table/TableGrid" unique_id=605871021]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_override_constants/margin_bottom = 12
 
-[node name="Player1Container" type="HBoxContainer" parent="Table/TableGrid/Player1"]
+[node name="Player1Container" type="HBoxContainer" parent="Table/TableGrid/Player1" unique_id=57560114]
 layout_mode = 2
 alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container" unique_id=361343693]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer"]
+[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer" unique_id=219838052]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Raise" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer" groups=["Game"]]
+[node name="HBoxContainer" type="HBoxContainer" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer" unique_id=594029562]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 1
+alignment = 1
+
+[node name="+1" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer" unique_id=2048611542 groups=["Game"]]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+1
+"
+
+[node name="+5" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer" unique_id=335190472 groups=["Game"]]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+5"
+
+[node name="+10" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer" unique_id=737175026 groups=["Game"]]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+10"
+
+[node name="Raise" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer" unique_id=231285448 groups=["Game"]]
 layout_mode = 2
 text = "Raise"
 
-[node name="Call" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer" groups=["Game"]]
-layout_mode = 2
-text = "Call"
-
-[node name="Player1CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player1/Player1Container"]
+[node name="Player1CardsMarginContainer" type="MarginContainer" parent="Table/TableGrid/Player1/Player1Container" unique_id=968193868]
 layout_mode = 2
 size_flags_vertical = 8
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_right = 8
 
-[node name="Player1CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer"]
+[node name="Player1CardsContainer" type="HBoxContainer" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer" unique_id=734839113]
 layout_mode = 2
 alignment = 1
 
-[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer"]
+[node name="CardSlot1" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer" unique_id=898094271]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer"]
+[node name="CardSlot2" type="TextureRect" parent="Table/TableGrid/Player1/Player1Container/Player1CardsMarginContainer/Player1CardsContainer" unique_id=219334519]
 custom_minimum_size = Vector2(50, 74)
 layout_mode = 2
 stretch_mode = 5
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Table/TableGrid/Player1/Player1Container" unique_id=642960391]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2"]
+[node name="Control" type="Control" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" unique_id=224872310]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Pass" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" groups=["Game"]]
+[node name="Pass" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" unique_id=942316165 groups=["Game"]]
 layout_mode = 2
 text = "Pass"
 
-[node name="Fold" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" groups=["Game"]]
+[node name="Call" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" unique_id=1824641990 groups=["Game"]]
+layout_mode = 2
+text = "Call"
+
+[node name="Fold" type="Button" parent="Table/TableGrid/Player1/Player1Container/VBoxContainer2" unique_id=1734345666 groups=["Game"]]
 layout_mode = 2
 text = "Fold"
 
-[node name="HelpContainer" type="MarginContainer" parent="Table/TableGrid"]
+[node name="HelpContainer" type="MarginContainer" parent="Table/TableGrid" unique_id=722208055]
 layout_mode = 2
 size_flags_horizontal = 10
 size_flags_vertical = 10
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 12
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Table/TableGrid/HelpContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Table/TableGrid/HelpContainer" unique_id=928396679]
 layout_mode = 2
 
-[node name="Hands" type="Button" parent="Table/TableGrid/HelpContainer/HBoxContainer"]
+[node name="Hands" type="Button" parent="Table/TableGrid/HelpContainer/HBoxContainer" unique_id=1871515108]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "HANDS"
@@ -451,7 +462,7 @@ shortcut_in_tooltip = false
 icon = ExtResource("5_qoy44")
 icon_alignment = 1
 
-[node name="Help" type="Button" parent="Table/TableGrid/HelpContainer/HBoxContainer"]
+[node name="Help" type="Button" parent="Table/TableGrid/HelpContainer/HBoxContainer" unique_id=1804243044]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "HELP"
@@ -460,17 +471,19 @@ shortcut_in_tooltip = false
 text = "?"
 icon_alignment = 1
 
-[node name="Popup" parent="." instance=ExtResource("7_k75dh")]
+[node name="Popups" type="CanvasLayer" parent="." unique_id=1937470189]
 
-[node name="Popup2" parent="." instance=ExtResource("7_k75dh")]
+[node name="Rules" parent="Popups" unique_id=879687684 instance=ExtResource("7_wqdul")]
+
+[node name="Cards" parent="Popups" unique_id=1719729025 instance=ExtResource("7_k75dh")]
 
 [connection signal="pressed" from="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer/Deal" to="." method="startGame"]
-[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+1" to="." method="_on_add_to_bid_pressed" binds= [1]]
-[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+5" to="." method="_on_add_to_bid_pressed" binds= [5]]
-[connection signal="pressed" from="Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftAmountContainer/+10" to="." method="_on_add_to_bid_pressed" binds= [10]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+1" to="." method="_on_add_to_bid_pressed" binds= [1]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+5" to="." method="_on_add_to_bid_pressed" binds= [5]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+10" to="." method="_on_add_to_bid_pressed" binds= [10]]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise" to="." method="processPlayerTurn" binds= ["player1", "raised"]]
-[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Call" to="." method="processPlayerTurn" binds= ["player1", "called"]]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass" to="." method="processPlayerTurn" binds= ["player1", "passed"]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Call" to="." method="processPlayerTurn" binds= ["player1", "called"]]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Fold" to="." method="processPlayerTurn" binds= ["player1", "folded"]]
 [connection signal="pressed" from="Table/TableGrid/HelpContainer/HBoxContainer/Hands" to="." method="_on_hands_button_pressed"]
 [connection signal="pressed" from="Table/TableGrid/HelpContainer/HBoxContainer/Help" to="." method="_on_help_button_pressed"]

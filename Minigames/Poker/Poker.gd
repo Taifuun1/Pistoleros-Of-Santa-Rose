@@ -24,32 +24,20 @@ func _ready() -> void:
 	setPlayers()
 	buildDeck()
 	buildTable()
-	$Popup.setPopupText("Santa Rose Poker", [
-		"Santa Rose Poker is a game of cards. You bet money to win the entire bid. The highest hand wins.",
-		"The game flow:",
-		"1. Every player gets two cards, and three cards are dealt on the table",
-		"2. Players decide if they want to bid money, pass, or fold",
-		"3. If a player raises the bid, all players must raise the bid again, call the bid, or fold",
-		"4. Once all players pass, call, or fold, a new card is dealt on the table",
-		"5. Players can bid again",
-		"6. One more card is dealt on the table",
-		"7. Players can bid one last time",
-		"8. After the bidding is done, cards are revealed, and the highest hand wins",
-	])
-	$Popup2.setPopupText("Hands", [
-		"੥੥♡ Hearts: Red",
-		"♢ Diamonds: Brown",
-		"♤ Spades: Purple",
-		"♧ Clubs: Green",
-		"3. If a player raises the bid, all players must raise the bid again, call the bid, or fold",
-		"4. Once all players pass, call, or fold, a new card is dealt on the table",
-		"5. Players can bid again",
-		"6. One more card is dealt on the table",
-		"7. Players can bid one last time",
-		"8. After the bidding is done, cards are revealed, and the highest hand wins",
-	])
-	$Popup2.setPopupImage("res://Assets/Cards/CardTwoofHearts.png")
-	$Popup2.setPopupImage("res://Assets/Cards/CardTwoofSpades.png")
+	#$Popup2.setPopupText("Hands", [
+		#"੥੥♡ Hearts: Red",
+		#"♢ Diamonds: Brown",
+		#"♤ Spades: Purple",
+		#"♧ Clubs: Green",
+		#"3. If a player raises the bid, all players must raise the bid again, call the bid, or fold",
+		#"4. Once all players pass, call, or fold, a new card is dealt on the table",
+		#"5. Players can bid again",
+		#"6. One more card is dealt on the table",
+		#"7. Players can bid one last time",
+		#"8. After the bidding is done, cards are revealed, and the highest hand wins",
+	#])
+	#$Popup2.setPopupImage("res://Assets/Cards/CardTwoofHearts.png")
+	#$Popup2.setPopupImage("res://Assets/Cards/CardTwoofSpades.png")
 
 func _process(_delta: float) -> void:
 	checkUIState()
@@ -63,7 +51,7 @@ func _process(_delta: float) -> void:
 
 func checkUIState():
 	if !uIDisabled:
-		if int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Bid.text) == 0:
+		if int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text) == 0:
 			$Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise.disabled = true
 		else:
 			$Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise.disabled = false
@@ -173,11 +161,12 @@ func calculatePlayerMove():
 						hand.hand == "Two of a kind"
 					) and
 					currentPlayer.personality.raiseLimit > 0 and
+					currentPlayer.money >= 1 and
 					randi() % 4 == 0
 				):
 					playerAction = "raised"
 					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money < 2:
+					if currentPlayer.money <= 2:
 						playerActionAmount = currentPlayer.money
 					else:
 						playerActionAmount = players[currentPlayer.name].money * 0.05
@@ -211,11 +200,13 @@ func calculatePlayerMove():
 					hand.hand == "Two pairs" or
 					hand.hand == "Two of a kind"
 				) and
+				currentPlayer.personality.raiseLimit > 0 and
+				currentPlayer.money >= 1 and
 				randi() % 5 != 0
 			):
 				playerAction = "raised"
 				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money < 2:
+				if currentPlayer.money <= 2:
 					playerActionAmount = currentPlayer.money
 				else:
 					playerActionAmount = players[currentPlayer.name].money * 0.075
@@ -225,7 +216,9 @@ func calculatePlayerMove():
 					playerAction = "folded"
 		"Gambler":
 			if currentBidState == Poker.BID_STATES.CALL:
-				if(
+				if randi() % 25 == 0:
+					playerAction = "called"
+				elif(
 					(
 						hand.hand == "Royal Straight Flush" or
 						hand.hand == "Straight Flush" or
@@ -236,11 +229,12 @@ func calculatePlayerMove():
 						hand.hand == "Three of a kind"
 					) and
 					currentPlayer.personality.raiseLimit > 0 and
+					currentPlayer.money >= 1 and
 					randi() % 8 != 0
 				):
 					playerAction = "raised"
 					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money < 2:
+					if currentPlayer.money <= 2:
 						playerActionAmount = currentPlayer.money
 					else:
 						playerActionAmount = players[currentPlayer.name].money * 0.1
@@ -268,6 +262,7 @@ func calculatePlayerMove():
 					hand.hand == "Four of a kind" or
 					hand.hand == "Full house"
 				) and
+				currentPlayer.money >= 1 and
 				currentPlayer.personality.raiseLimit > 0
 			):
 				playerAction = "raised"
@@ -278,11 +273,12 @@ func calculatePlayerMove():
 					hand.hand == "Flush" or
 					hand.hand == "Straight"
 				) and
+				currentPlayer.money >= 1 and
 				currentPlayer.personality.raiseLimit > 0
 			):
 				playerAction = "raised"
 				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money < 2:
+				if currentPlayer.money <= 2:
 					playerActionAmount = currentPlayer.money
 				else:
 					playerActionAmount = players[currentPlayer.name].money * 0.4
@@ -293,12 +289,13 @@ func calculatePlayerMove():
 					hand.hand == "Two pairs" or
 					hand.hand == "Two of a kind"
 				) and
+				currentPlayer.money >= 1 and
 				currentPlayer.personality.raiseLimit > 0 and
 				randi() % 5 != 0
 			):
 				playerAction = "raised"
 				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money < 2:
+				if currentPlayer.money <= 2:
 					playerActionAmount = currentPlayer.money
 				else:
 					playerActionAmount = players[currentPlayer.name].money * 0.1
@@ -314,12 +311,13 @@ func calculatePlayerMove():
 						hand.hand == "Straight Flush" or
 						hand.hand == "Four of a kind"
 					) and
+					currentPlayer.money >= 1 and
 					currentPlayer.personality.raiseLimit > 0 and
 					randi() % 4 != 0
 				):
 					playerAction = "raised"
 					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money < 2:
+					if currentPlayer.money <= 2:
 						playerActionAmount = currentPlayer.money
 					else:
 						playerActionAmount = players[currentPlayer.name].money * 0.025
@@ -346,11 +344,12 @@ func calculatePlayerMove():
 					hand.hand == "Straight" or
 					hand.hand == "Three of a kind"
 				) and 
+				currentPlayer.money >= 1 and
 				randi() % 2 == 0
 			):
 				playerAction = "raised"
 				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money < 2:
+				if currentPlayer.money <= 2:
 					playerActionAmount = currentPlayer.money
 				else:
 					playerActionAmount = players[currentPlayer.name].money * 0.025
@@ -372,12 +371,13 @@ func calculatePlayerMove():
 						hand.hand == "Two pairs" or
 						hand.hand == "Two of a kind"
 					) and
+					currentPlayer.money >= 1 and
 					currentPlayer.personality.raiseLimit > 0 and
 					randi() % 3 == 0
 				):
 					playerAction = "raised"
 					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money < 2:
+					if currentPlayer.money <= 2:
 						playerActionAmount = currentPlayer.money
 					else:
 						playerActionAmount = players[currentPlayer.name].money * 0.05
@@ -411,12 +411,13 @@ func calculatePlayerMove():
 					hand.hand == "Two pairs" or
 					hand.hand == "Two of a kind"
 				) and
+				currentPlayer.money >= 1 and
 				currentPlayer.personality.raiseLimit > 0 and
 				randi() % 2 == 0
 			):
 				playerAction = "raised"
 				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money < 2:
+				if currentPlayer.money <= 2:
 					playerActionAmount = currentPlayer.money
 				else:
 					playerActionAmount = players[currentPlayer.name].money * 0.075
@@ -424,6 +425,7 @@ func calculatePlayerMove():
 			else:
 				if randi() % 30 == 0:
 					playerAction = "folded"
+	playerActionAmount = int(playerActionAmount)
 	processPlayerTurn(currentPlayer.name, playerAction, playerActionAmount)
 
 func processPlayerTurn(playerName, playerAction, playerActionAmount = 0) -> void:
@@ -466,15 +468,22 @@ func playPlayerTurn(playerName, playerAction, playerActionAmount) -> void:
 		"raised":
 			var raiseAmount = playerActionAmount
 			if playerName == "player1":
-				raiseAmount = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Bid.text)
+				raiseAmount = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text)
 			table[playerName] += raiseAmount
 			table.highestBet = table[playerName]
 			players[playerName].money -= raiseAmount
 			if currentBidState == Poker.BID_STATES.PASS:
 				currentBidState = Poker.BID_STATES.CALL
+			for player in players:
+				for turnState in playersTurnState:
+					if playersTurnState[turnState].has(playerName) and turnState != "folded":
+						playersTurnState[turnState].erase(playerName)
+						playersTurnState.waiting.append(playerName)
+						break
 		"called":
-			table[playerName] += table.highestBet - table[playerName]
-			players[playerName].money -= table.highestBet + table[playerName]
+			var callAmount = table.highestBet - table[playerName]
+			table[playerName] += callAmount
+			players[playerName].money -= callAmount
 	if playerName != "player1":
 		updateBidState(playerName, table[playerName], players[playerName].playerType)
 		updateMoneyState(playerName, players[playerName].money, players[playerName].playerType)
@@ -505,8 +514,7 @@ func checkIfPlayersLeft() -> bool:
 		) or (
 			playersTurnState.waiting.is_empty() and
 			playersTurnState.passed.is_empty() and
-			playersTurnState.raised.is_empty() and
-			playersTurnState.called.size() + playersTurnState.folded.size() == players.size()
+			playersTurnState.called.size() + playersTurnState.folded.size() + playersTurnState.raised.size() == players.size()
 		) or (
 			playersTurnState.folded.size() == players.size() - 1
 		)
@@ -871,7 +879,7 @@ func changeUIDisabledState(disabled = true):
 	checkUIState()
 
 func updateUI():
-	#$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Bid.text = str(0)
+	$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(0)
 	for player in players.values():
 		updateBidState(player.name, table[player.name], player.playerType)
 		updateMoneyState(player.name, players[player.name].money, player.playerType)
@@ -903,10 +911,15 @@ func updateBidState(player, bid, playerType):
 
 
 func _on_help_button_pressed() -> void:
-	$Popup.show()
+	$Popups/Rules.show()
 
 func _on_hands_button_pressed() -> void:
-	$Popup2.show()
+	$Popups/Cards.show()
 
 func _on_add_to_bid_pressed(addToBid: int) -> void:
-	$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Bid.text = str(int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Bid.text) + addToBid)
+	var bid = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text)
+	var totalMoney = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Money.text)
+	if bid + addToBid > totalMoney:
+		$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(totalMoney)
+	else:
+		$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text) + addToBid)

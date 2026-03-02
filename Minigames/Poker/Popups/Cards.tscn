@@ -1,0 +1,254 @@
+[gd_scene format=3 uid="uid://bqs1wuwjuemnr"]
+
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_jt5xm"]
+[ext_resource type="Script" uid="uid://cxhy567gjq0o" path="res://UI/Popup/Popup.gd" id="2_q3hw3"]
+[ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_0blnu"]
+[ext_resource type="Texture2D" uid="uid://csdwg4g5xlw8w" path="res://Assets/Cards/CardTenofSpades.png" id="4_p8v0n"]
+[ext_resource type="Texture2D" uid="uid://bqr4vc1frkjbo" path="res://Assets/Cards/CardSevenofClubs.png" id="6_ht5ig"]
+[ext_resource type="Texture2D" uid="uid://hncb1avahaj6" path="res://Assets/Cards/CardQueenofSpades.png" id="6_mafw8"]
+[ext_resource type="Texture2D" uid="uid://deh0ges50ejux" path="res://Assets/Cards/CardKingofSpades.png" id="7_7u68a"]
+[ext_resource type="Texture2D" uid="uid://c6abdcvf1wp0x" path="res://Assets/Cards/CardSevenofDiamonds.png" id="7_xt4u7"]
+[ext_resource type="Texture2D" uid="uid://gjb3xvb5m818" path="res://Assets/Cards/CardAceofSpades.png" id="8_lscgv"]
+[ext_resource type="Texture2D" uid="uid://cglkwlxj083f0" path="res://Assets/Cards/CardSevenofSpades.png" id="8_vvfrv"]
+[ext_resource type="Texture2D" uid="uid://bgoxik78jsodg" path="res://Assets/Cards/CardFiveofSpades.png" id="9_efytx"]
+[ext_resource type="Texture2D" uid="uid://lrylyht5liwe" path="res://Assets/Cards/CardJackofDiamonds.png" id="9_jhduy"]
+[ext_resource type="Texture2D" uid="uid://bv766njgfguni" path="res://Assets/Cards/CardSixofSpades.png" id="10_hv30c"]
+[ext_resource type="Texture2D" uid="uid://cbng1nh444lnx" path="res://Assets/Cards/CardJackofSpades.png" id="10_rnhhv"]
+[ext_resource type="Texture2D" uid="uid://bju2qpv4acoji" path="res://Assets/Cards/CardJackofClubs.png" id="11_krcf0"]
+[ext_resource type="Texture2D" uid="uid://dim18unpn5mtm" path="res://Assets/Cards/CardEightofSpades.png" id="12_12nhe"]
+[ext_resource type="Texture2D" uid="uid://d1mmm2r1y5uft" path="res://Assets/Cards/CardJackofHearts.png" id="12_ygw12"]
+[ext_resource type="Texture2D" uid="uid://3c7u6jb0sqgj" path="res://Assets/Cards/CardFiveofHearts.png" id="13_ht5ig"]
+[ext_resource type="Texture2D" uid="uid://b50jw55sue8q0" path="res://Assets/Cards/CardNineofSpades.png" id="13_wer5r"]
+[ext_resource type="Texture2D" uid="uid://348ualf1amg0" path="res://Assets/Cards/CardFiveofDiamonds.png" id="14_xt4u7"]
+[ext_resource type="Texture2D" uid="uid://dusrpbflpeehc" path="res://Assets/Cards/CardSixofHearts.png" id="19_7u68a"]
+[ext_resource type="Texture2D" uid="uid://c26f8py3ma3tg" path="res://Assets/Cards/CardSixofDiamonds.png" id="20_lscgv"]
+
+[node name="Cards" type="CenterContainer" unique_id=1719729025]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_jt5xm")
+script = ExtResource("2_q3hw3")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1979713661]
+custom_minimum_size = Vector2(480, 200)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=969175880]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer" unique_id=1960817003]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer" unique_id=802414591]
+layout_mode = 2
+
+[node name="Header" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1799131269 instance=ExtResource("3_0blnu")]
+layout_mode = 2
+text = "Santa Rose Hands"
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=615804447]
+layout_mode = 2
+text = " Close "
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer" unique_id=1113893209]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer/MarginContainer2" unique_id=1859931900]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer" unique_id=1033704981]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label12" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=533804484]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Example hands in order from best to worst:"
+autowrap_mode = 2
+
+[node name="Label13" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=82430618]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Royal straight flush"
+autowrap_mode = 2
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1613737248]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=1428014249]
+layout_mode = 2
+texture = ExtResource("4_p8v0n")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=498263989]
+layout_mode = 2
+texture = ExtResource("10_rnhhv")
+stretch_mode = 4
+
+[node name="TextureRect3" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=1978447237]
+layout_mode = 2
+texture = ExtResource("6_mafw8")
+stretch_mode = 4
+
+[node name="TextureRect4" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=1962003472]
+layout_mode = 2
+texture = ExtResource("7_7u68a")
+stretch_mode = 4
+
+[node name="TextureRect5" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=587921196]
+layout_mode = 2
+texture = ExtResource("8_lscgv")
+stretch_mode = 4
+
+[node name="Label14" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=625951967]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Straight flush"
+autowrap_mode = 2
+
+[node name="HBoxContainer6" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=87599057]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=862416155]
+layout_mode = 2
+texture = ExtResource("9_efytx")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=1767356270]
+layout_mode = 2
+texture = ExtResource("10_hv30c")
+stretch_mode = 4
+
+[node name="TextureRect3" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=1558041203]
+layout_mode = 2
+texture = ExtResource("8_vvfrv")
+stretch_mode = 4
+
+[node name="TextureRect4" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=1541662329]
+layout_mode = 2
+texture = ExtResource("12_12nhe")
+stretch_mode = 4
+
+[node name="TextureRect5" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=959597149]
+layout_mode = 2
+texture = ExtResource("13_wer5r")
+stretch_mode = 4
+
+[node name="Label15" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=873661222]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Four of a kind"
+autowrap_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1478602520]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=2098000754]
+layout_mode = 2
+texture = ExtResource("9_jhduy")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=189778043]
+layout_mode = 2
+texture = ExtResource("10_rnhhv")
+stretch_mode = 4
+
+[node name="TextureRect3" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=969779472]
+layout_mode = 2
+texture = ExtResource("11_krcf0")
+stretch_mode = 4
+
+[node name="TextureRect4" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=769648055]
+layout_mode = 2
+texture = ExtResource("12_ygw12")
+stretch_mode = 4
+
+[node name="Label16" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1139665209]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Three of a kind"
+autowrap_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=418271552]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=1244042219]
+layout_mode = 2
+texture = ExtResource("6_ht5ig")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=879633993]
+layout_mode = 2
+texture = ExtResource("7_xt4u7")
+stretch_mode = 4
+
+[node name="TextureRect3" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=1513299205]
+layout_mode = 2
+texture = ExtResource("8_vvfrv")
+stretch_mode = 4
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=786125093]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Two pairs"
+autowrap_mode = 2
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1370305980]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=147592562]
+layout_mode = 2
+texture = ExtResource("7_xt4u7")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=1377284862]
+layout_mode = 2
+texture = ExtResource("8_vvfrv")
+stretch_mode = 4
+
+[node name="TextureRect3" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=54621093]
+layout_mode = 2
+texture = ExtResource("13_ht5ig")
+stretch_mode = 4
+
+[node name="TextureRect4" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=163675498]
+layout_mode = 2
+texture = ExtResource("14_xt4u7")
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=1378539066]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+text = "Two of a kind"
+autowrap_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer" unique_id=217553361]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=1307923332]
+layout_mode = 2
+texture = ExtResource("19_7u68a")
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/VBoxContainer/MarginContainer2/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=627669750]
+layout_mode = 2
+texture = ExtResource("20_lscgv")
+stretch_mode = 4
+
+[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/Button" to="." method="_on_close_button_pressed"]
