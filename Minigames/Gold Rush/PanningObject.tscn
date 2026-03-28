@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c2ktnujngdlbt"]
+
+[ext_resource type="Script" uid="uid://b7r0fogtdtql6" path="res://Minigames/Gold Rush/PanningObject.gd" id="1_mos2p"]
+
+[node name="PanningObject" type="TextureRect" unique_id=658901333]
+script = ExtResource("1_mos2p")
