@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://dp8vuxhsq9x2g" path="res://Minigames/Gold Rush/RobbingObject.gd" id="1_h2q8n"]
 
-[node name="RobbingObject" type="TextureRect" unique_id=209497550]
+[node name="RobbingObject" type="AnimatedSprite2D" unique_id=209497550]
 script = ExtResource("1_h2q8n")

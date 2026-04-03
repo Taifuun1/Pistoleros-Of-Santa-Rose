@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cp5vowrxvwgre"]
 
-[ext_resource type="Texture2D" uid="uid://b8w34wmh2uiy" path="res://Assets/Gold Rush/Panning/Pan.png" id="1_w6eta"]
+[ext_resource type="Texture2D" uid="uid://dysusdscic0p6" path="res://Assets/Gold Rush/Mining/BackgroundWithTrees.png" id="1_w6eta"]
 [ext_resource type="Script" uid="uid://dcjdi18c5lr44" path="res://Minigames/Gold Rush/Robbing.gd" id="2_w6eta"]
 
 [node name="Robbing" type="TextureRect" unique_id=209497549]

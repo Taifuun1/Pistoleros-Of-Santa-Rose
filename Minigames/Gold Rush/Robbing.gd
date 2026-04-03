@@ -6,7 +6,6 @@ extends TextureRect
 var spawnTimer: Timer
 var spawnInterval: float = 0.5  # Spawn a new object every 0.5 seconds
 var objectLifetime: float = 3.0  # Objects disappear after 3 seconds
-var maxObjectCount: int = 20  # Maximum concurrent objects
 var currentObjectCount: int = 0
 
 # Movement settings
@@ -25,8 +24,7 @@ func _ready() -> void:
 	spawnTimer.start()
 
 func _onSpawnTimerTimeout() -> void:
-	if currentObjectCount < maxObjectCount:
-		_spawnRobbingObject()
+	_spawnRobbingObject()
 
 func _spawnRobbingObject() -> void:
 	var obj = robbingObject.instantiate()
@@ -35,16 +33,15 @@ func _spawnRobbingObject() -> void:
 	
 	# Random spawn position within bounds
 	var spawnPos = Vector2(
-		randf_range(spawnBounds.position.x, spawnBounds.size.x),
-		randf_range(spawnBounds.position.y, spawnBounds.size.y)
+		randf_range(spawnBounds.position.x, spawnBounds.position.x + spawnBounds.size.x),
+		randf_range(spawnBounds.position.y, spawnBounds.position.y + spawnBounds.size.y)
 	)
 	obj.position = spawnPos
-	
+	obj.parentScene = self
 	# Random movement direction (8 directions + slight variations)
 	var angle = randf() * TAU
 	var velocity = Vector2(cos(angle), sin(angle)) * movementSpeed
 	obj.velocity = velocity
-	obj.parentScene = self
 	
 	# Schedule disappearance
 	await get_tree().create_timer(objectLifetime).timeout
@@ -53,12 +50,11 @@ func _spawnRobbingObject() -> void:
 		currentObjectCount -= 1
 
 func _process(delta: float) -> void:
-	# Move all robbing objects and keep them in bounds
 	for child in get_children():
-		if child is TextureRect and child.name == "RobbingObject":
-			if child.get("velocity") != null:
+		if child is Node2D and child.name == "RobbingObject":
+			if "velocity" in child:
 				child.position += child.velocity * delta
 				
 				# Clamp position to stay within bounds
-				child.position.x = clamp(child.position.x, spawnBounds.position.x, spawnBounds.size.x)
-				child.position.y = clamp(child.position.y, spawnBounds.position.y, spawnBounds.size.y)
+				child.position.x = clamp(child.position.x, spawnBounds.position.x, spawnBounds.position.x + spawnBounds.size.x - 24)
+				child.position.y = clamp(child.position.y, spawnBounds.position.y, spawnBounds.position.y + spawnBounds.size.y - 24)
