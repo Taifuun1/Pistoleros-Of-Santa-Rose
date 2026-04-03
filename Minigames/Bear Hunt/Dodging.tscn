@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://nvu52ed4p5nt"]
+
+[ext_resource type="Texture2D" uid="uid://bjlbpgr78m7m3" path="res://Assets/Bear Hunt/SnowBackground.png" id="1_qqpgk"]
+[ext_resource type="Script" uid="uid://qvjtndnsdt5e" path="res://Minigames/Bear Hunt/Dodging.gd" id="2_dodging"]
+
+[node name="Dodging" type="TextureRect" unique_id=209497549]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_qqpgk")
+script = ExtResource("2_dodging")
