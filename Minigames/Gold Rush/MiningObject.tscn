@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dp8vuxhsrax2h"]
+
+[ext_resource type="Script" uid="uid://p2tnpmhd7bry" path="res://Minigames/Gold Rush/MiningObject.gd" id="1_mining_obj"]
+
+[node name="MiningObject" type="TextureRect" unique_id=209497551]
+script = ExtResource("1_mining_obj")
