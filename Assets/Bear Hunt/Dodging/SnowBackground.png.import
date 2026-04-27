@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b0ihya3p01ru4"
-path="res://.godot/imported/SnowballTiny.png-b2d83d43a334e9287e66c2278133ab5d.ctex"
+uid="uid://bjlbpgr78m7m3"
+path="res://.godot/imported/SnowBackground.png-40e652e424dd606777bac271dc78d0e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Bear Hunt/SnowballTiny.png"
-dest_files=["res://.godot/imported/SnowballTiny.png-b2d83d43a334e9287e66c2278133ab5d.ctex"]
+source_file="res://Assets/Bear Hunt/Dodging/SnowBackground.png"
+dest_files=["res://.godot/imported/SnowBackground.png-40e652e424dd606777bac271dc78d0e3.ctex"]
 
 [params]
 

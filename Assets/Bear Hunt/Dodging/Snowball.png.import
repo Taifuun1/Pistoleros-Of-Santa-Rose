@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgla1we6wbvy2"
-path="res://.godot/imported/PolarBearPaw.png-1c1fdcd269ea9a879c22830532dc4107.ctex"
+uid="uid://d4fh17ptdkf3e"
+path="res://.godot/imported/Snowball.png-b5d80e3967570d21466da5250c7489ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Bear Hunt/PolarBearPaw.png"
-dest_files=["res://.godot/imported/PolarBearPaw.png-1c1fdcd269ea9a879c22830532dc4107.ctex"]
+source_file="res://Assets/Bear Hunt/Dodging/Snowball.png"
+dest_files=["res://.godot/imported/Snowball.png-b5d80e3967570d21466da5250c7489ca.ctex"]
 
 [params]
 

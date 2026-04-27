@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://td7xrwwlrfbn"
-path="res://.godot/imported/PolarBearFace.png-3c6886c442d72654eec447d9c16f1283.ctex"
+uid="uid://dgla1we6wbvy2"
+path="res://.godot/imported/PolarBearPaw.png-02a59675b05f23c95e076ff87117c2d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Bear Hunt/PolarBearFace.png"
-dest_files=["res://.godot/imported/PolarBearFace.png-3c6886c442d72654eec447d9c16f1283.ctex"]
+source_file="res://Assets/Bear Hunt/Dodging/PolarBearPaw.png"
+dest_files=["res://.godot/imported/PolarBearPaw.png-02a59675b05f23c95e076ff87117c2d2.ctex"]
 
 [params]
 

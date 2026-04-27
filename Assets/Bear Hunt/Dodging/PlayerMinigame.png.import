@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjlbpgr78m7m3"
-path="res://.godot/imported/SnowBackground.png-8eb5bb5fe1bdb009e558ca3ad9bb1898.ctex"
+uid="uid://dga8nm2injx3m"
+path="res://.godot/imported/PlayerMinigame.png-002cbaa9ab51e8af25dc4efe54682071.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Bear Hunt/SnowBackground.png"
-dest_files=["res://.godot/imported/SnowBackground.png-8eb5bb5fe1bdb009e558ca3ad9bb1898.ctex"]
+source_file="res://Assets/Bear Hunt/Dodging/PlayerMinigame.png"
+dest_files=["res://.godot/imported/PlayerMinigame.png-002cbaa9ab51e8af25dc4efe54682071.ctex"]
 
 [params]
 

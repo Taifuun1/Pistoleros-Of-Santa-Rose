@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dga8nm2injx3m"
-path="res://.godot/imported/PlayerMinigame.png-1e510558e3993eaf3ef345144c9890fe.ctex"
+uid="uid://td7xrwwlrfbn"
+path="res://.godot/imported/PolarBearFace.png-e2e7b3320291b9a9b16c3b4527d9cd35.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Bear Hunt/PlayerMinigame.png"
-dest_files=["res://.godot/imported/PlayerMinigame.png-1e510558e3993eaf3ef345144c9890fe.ctex"]
+source_file="res://Assets/Bear Hunt/Dodging/PolarBearFace.png"
+dest_files=["res://.godot/imported/PolarBearFace.png-e2e7b3320291b9a9b16c3b4527d9cd35.ctex"]
 
 [params]
 
