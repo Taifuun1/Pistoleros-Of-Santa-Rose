@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbtre1q6owabb"
-path="res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"
+uid="uid://bnwe107bjw8qq"
+path="res://.godot/imported/HungryPolarbearWalk.png-8070121e7b67a5013c9b40cf2d92fc29.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHills2.png"
-dest_files=["res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"]
+source_file="res://Assets/Characters/Animals/HungryPolarbearWalk.png"
+dest_files=["res://.godot/imported/HungryPolarbearWalk.png-8070121e7b67a5013c9b40cf2d92fc29.ctex"]
 
 [params]
 

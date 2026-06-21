@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbtre1q6owabb"
-path="res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"
+uid="uid://c18t7mxoh54bh"
+path="res://.godot/imported/PanningStation2.png-ce9ac031af758b8b802c0e8e9ff980fd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHills2.png"
-dest_files=["res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"]
+source_file="res://Assets/Outdoor Objects/PanningStation2.png"
+dest_files=["res://.godot/imported/PanningStation2.png-ce9ac031af758b8b802c0e8e9ff980fd.ctex"]
 
 [params]
 

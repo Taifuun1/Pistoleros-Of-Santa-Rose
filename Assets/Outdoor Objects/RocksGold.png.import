@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbtre1q6owabb"
-path="res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"
+uid="uid://bb65eq7xjbddi"
+path="res://.godot/imported/RocksGold.png-acd4108d529b5eaee6303c4c5fa1e361.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Tilesets/Rocky Hills/RockyHills2.png"
-dest_files=["res://.godot/imported/RockyHills2.png-cbbeffc6d03df36bb4a59629ee11909f.ctex"]
+source_file="res://Assets/Outdoor Objects/RocksGold.png"
+dest_files=["res://.godot/imported/RocksGold.png-acd4108d529b5eaee6303c4c5fa1e361.ctex"]
 
 [params]
 
