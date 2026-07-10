@@ -26,6 +26,8 @@ const LOOT_VALUES = [10, 15, 20]
 
 const WALL_TEXTURE = "res://Assets/Bear Hunt/Gathering/GatheringWall.png"
 
+const MINIGAME_DURATION = 60.0
+
 var player: Area2D
 var player_sprite: AnimatedSprite2D
 var player_tween: Tween
@@ -35,7 +37,7 @@ var bear_tweens = {}
 var loot = []
 var walls = []
 var score = 0
-var time_remaining = 60.0
+var time_remaining = MINIGAME_DURATION
 var game_over = false
 var bear_spawn_timer = 0.0
 const BEAR_SPAWN_INTERVAL = 5.0
@@ -223,7 +225,8 @@ func _process(delta):
 	time_remaining -= delta
 	if time_remaining <= 0:
 		time_remaining = 0
-		_end_game()
+		_end_minigame(score)
+		return
 	
 	time_label.text = "Time: %.1f" % time_remaining
 	score_label.text = "Score: %d" % score
@@ -400,12 +403,28 @@ func _on_bear_caught(area: Area2D, bear: Area2D):
 		# Spawn particle effect
 		_spawn_catch_particles(player.position)
 		
-		_end_game()
+		# Lose condition: end with current score (no bonus)
+		_end_minigame(score)
 
-func _end_game():
+func _end_minigame(points: int):
+	if game_over:
+		return
 	game_over = true
-	print("Game Over! Final Score: ", score)
-	time_label.text = "GAME OVER! Score: %d" % score
+	print("Gathering minigame ended. Points: ", points)
+	time_label.text = "GAME OVER! Score: %d" % points
+
+	# Store points in global
+	Locations.minigamePoints["Gathering"] += points
+
+	# Remove this minigame scene after a short delay so the player can see the score
+	await get_tree().create_timer(2.0).timeout
+
+	# Unpause the player
+	var player_actor = get_tree().current_scene.get_node_or_null("Entities/Actors/PlayerActor")
+	if player_actor != null:
+		player_actor.paused = false
+
+	queue_free()
 
 func _spawn_pickup_particles(position: Vector2):
 	var particles = CPUParticles2D.new()

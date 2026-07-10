@@ -53,6 +53,9 @@ func _gui_input(event: InputEvent) -> void:
 		_collect()
 
 func _collect() -> void:
+	# Notify parent scene that a robber was caught
+	if parentScene != null and parentScene.has_method("_on_robber_caught"):
+		parentScene._on_robber_caught()
 	_spawnRobbingCollectibles()
 	queue_free()
 
@@ -64,6 +67,8 @@ func _spawnRobbingCollectibles() -> void:
 		crates.size = Vector2(18, 18)
 		crates.position = position + Vector2(randf_range(-25, 25), randf_range(-25, 25))
 		crates.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
+		if parentScene != null and parentScene.has_method("_on_collectible_collected"):
+			crates.collected.connect(Callable(parentScene, "_on_collectible_collected"))
 		parentScene.add_child(crates)
 
 	# option: quick particle effect on break

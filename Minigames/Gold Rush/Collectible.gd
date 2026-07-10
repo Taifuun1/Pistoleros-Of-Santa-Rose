@@ -6,6 +6,8 @@ var pickupRange: float = 15.0  # Distance in pixels to pick up
 var isCollected: bool = false
 var animating = true
 
+signal collected(collectibleType: String, value: int)
+
 func _ready() -> void:
 	var texturePath = texture.resource_path
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -34,6 +36,9 @@ func _process(delta: float) -> void:
 func collect() -> void:
 	isCollected = true
 
+	# Notify parent scene of collection
+	collected.emit(collectibleType, value)
+
 	# Spawn collection particles
 	spawnCollectionParticles()
 
@@ -44,11 +49,7 @@ func collect() -> void:
 	tween.tween_property(self, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(queue_free)
 
-	# TODO: Add to player inventory/score
 	print("Collected ", collectibleType, " worth ", value)
-
-	# You could emit a signal here to notify the parent scene
-	# emit_signal("collectible_collected", collectibleType, value)
 
 func spawnCollectionParticles() -> void:
 	# Create sparkle/glow particles when collecting

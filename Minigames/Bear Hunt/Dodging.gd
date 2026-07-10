@@ -7,11 +7,23 @@ const MAX_PATTERNS = 7
 var current_pattern_index = 0
 const PATTERNS = ["line", "shotgun", "rapid", "wave", "spiral", "double_spread", "burst_circle"]
 
-const PLAYER_SPRITESHEET = "res://Assets/Bear Hunt/PlayerMinigame.png"
+const PLAYER_SPRITESHEET = "res://Assets/Bear Hunt/Dodging/PlayerMinigame.png"
 const PLAYER_FRAME_COUNT = 2
 const PLAYER_ANIMATION_SPEED = 6.0
 
+const MINIGAME_DURATION = 60.0  # Seconds before the minigame ends
+var time_remaining = MINIGAME_DURATION
+var game_over = false
+
+var time_label: Label
+
 func _ready():
+	# Create timer label
+	time_label = Label.new()
+	time_label.add_theme_font_size_override("font_size", 32)
+	time_label.position = Vector2(0, 0)
+	add_child(time_label)
+
 	# Create player as Area2D for collision detection
 	player = Area2D.new()
 	
@@ -56,6 +68,18 @@ func _ready():
 	spawn_pattern(PATTERNS[current_pattern_index])
 
 func _process(delta):
+	if game_over:
+		return
+
+	# Update countdown timer
+	time_remaining -= delta
+	if time_remaining <= 0:
+		time_remaining = 0
+		_end_minigame(0)
+		return
+
+	time_label.text = "Time: %.1f" % time_remaining
+
 	# Move player left/right
 	var move_speed = 200
 	if Input.is_action_pressed("MOVE_LEFT"):
@@ -109,12 +133,18 @@ func spawn_pattern(type: String):
 	get_tree().create_timer(4.0).connect("timeout", Callable(self, "next_pattern"))
 
 func spawn_single_rapid():
+	if game_over:
+		return
 	spawn_projectile(Vector2(randf_range(20, 220), 30), Vector2(0, 100))
 
 func _spawn_wave_projectile(x: float):
+	if game_over:
+		return
 	spawn_projectile(Vector2(x, 30), Vector2(60 if x < 120 else -60, 120))
 
 func _spawn_double_projectile(i: int):
+	if game_over:
+		return
 	# Spawn from left side
 	spawn_projectile(Vector2(30, 30), Vector2(randf_range(40, 100), 100))
 	# Spawn from right side
@@ -123,7 +153,7 @@ func _spawn_double_projectile(i: int):
 func spawn_projectile(pos: Vector2, vel: Vector2):
 	var proj = Area2D.new()
 	var proj_sprite = Sprite2D.new()
-	proj_sprite.texture = load("res://Assets/Bear Hunt/Snowball.png")
+	proj_sprite.texture = load("res://Assets/Bear Hunt/Dodging/Snowball.png")
 	proj.add_child(proj_sprite)
 	
 	# Add collision shape to projectile
@@ -150,16 +180,45 @@ func _physics_process(delta):
 			proj.queue_free()
 
 func _on_projectile_hit(area: Area2D):
+	if game_over:
+		return
 	if area.get_meta("is_projectile"):
-		# Player hit by projectile
+		# Player hit by projectile - lose condition
 		print("Player hit! Game over.")
-		# TODO: Handle game over (e.g., emit signal, change scene)
+		_end_minigame(0)
 
 func next_pattern():
+	if game_over:
+		return
 	pattern_count += 1
 	if pattern_count >= MAX_PATTERNS:
 		print("All patterns dodged! You win.")
-		# TODO: Handle win (e.g., emit signal, change scene)
+		# Award points for surviving all patterns
+		_end_minigame(100)
 	else:
 		current_pattern_index = (current_pattern_index + 1) % PATTERNS.size()
 		spawn_pattern(PATTERNS[current_pattern_index])
+
+func _end_minigame(points: int):
+	if game_over:
+		return
+	game_over = true
+	print("Dodging minigame ended. Points: ", points)
+
+	if points > 0:
+		time_label.text = "YOU WIN! Points: %d" % points
+	else:
+		time_label.text = "GAME OVER!"
+
+	# Store points in global
+	Locations.minigamePoints["Dodging"] += points
+
+	# Short delay so the player can see the result
+	await get_tree().create_timer(2.0).timeout
+
+	# Unpause the player
+	var player_actor = get_tree().current_scene.get_node_or_null("Entities/Actors/PlayerActor")
+	if player_actor != null:
+		player_actor.paused = false
+
+	queue_free()

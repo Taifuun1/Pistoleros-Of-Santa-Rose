@@ -179,6 +179,7 @@ func createCollectible() -> Node:
 	var spritePath = collectibleSprites[randi() % collectibleSprites.size()]
 	collectible.texture = load(spritePath)
 	collectible.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
+	collectible.collected.connect(Callable(parentScene, "_on_collectible_collected"))
 	
 	var xPos
 	if randi() % 2 == 0:
@@ -224,14 +225,14 @@ func createValuableCollectible() -> Node:
 	var targetX = clamp(position.x + offset.x, parentScene.spawnBounds.position.x + 12, parentScene.spawnBounds.position.x + parentScene.spawnBounds.size.x - collectible.size.x - 12)
 	var targetY = clamp(position.y + offset.y, parentScene.spawnBounds.position.y + 12, parentScene.spawnBounds.position.y + parentScene.spawnBounds.size.y - collectible.size.y - 12)
 	
+	collectible.collected.connect(Callable(parentScene, "_on_collectible_collected"))
+
 	var tween1 = collectible.create_tween()
 	tween1.tween_property(collectible, "position:y", min(offset.y - 50, position.y - 50), 0.25).as_relative()
 	tween1.tween_property(collectible, "position:y", targetY, 0.25).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	tween1.tween_callback(collectible.animatingDone)
 	var tween2 = collectible.create_tween()
 	tween2.tween_property(collectible, "position:x", targetX, 0.5)
-	
-	collectible.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
 	
 	return collectible
 
