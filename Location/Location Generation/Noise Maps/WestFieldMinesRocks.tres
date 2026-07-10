@@ -1,0 +1,9 @@
+[gd_resource type="FastNoiseLite" format=3 uid="uid://wfm_rocks_noise"]
+
+[resource]
+noise_type = 3
+frequency = 0.1
+fractal_octaves = 3
+fractal_lacunarity = 1.5
+fractal_gain = 0.4
+fractal_weighted_strength = 0.6
