@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://boir6xdsg6wny"]
+
+[ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_wfmi2"]
+[ext_resource type="Script" uid="uid://b2auf7seb4ivl" path="res://Location/Location Generation/Wave Function Collapse/InputTemplate.gd" id="2_wfmi2"]
+
+[node name="TileMap" type="TileMap" unique_id=2070290904]
+y_sort_enabled = true
+tile_set = ExtResource("1_wfmi2")
+format = 2
+layer_0/y_sort_enabled = true
+layer_0/tile_data = PackedInt32Array(0, 2, 0, 1, 2, 0, 2, 2, 0, 3, 2, 0, 65536, 2, 0, 65537, 1, 0, 65538, 1, 0, 65539, 2, 0, 131072, 2, 0, 131073, 1, 0, 131074, 1, 0, 131075, 2, 0, 196608, 2, 0, 196609, 2, 0, 196610, 2, 0, 196611, 2, 0)
+script = ExtResource("2_wfmi2")

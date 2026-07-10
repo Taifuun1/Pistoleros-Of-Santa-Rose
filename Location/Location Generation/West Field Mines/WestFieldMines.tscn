@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://b3wfm1n2x4q7r"]
+
+[ext_resource type="Script" uid="uid://beegavp5ohucg" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
+[ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_3cuy1"]
+[ext_resource type="Script" uid="uid://6aoesv5hce05" path="res://Location/Location Generation/LocationChunk.gd" id="3_esotd"]
+[ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="4_8ndb6"]
+[ext_resource type="Script" uid="uid://dpxt2vduncm1a" path="res://Location/Location Generation/LocationGeneration.gd" id="5_nw3qr"]
+[ext_resource type="PackedScene" uid="uid://docllrl8hvf3k" path="res://Location/Location Generation/Chunk Generation/WFCChunkGenerator.tscn" id="6_8aq2h"]
+[ext_resource type="PackedScene" uid="uid://c60dx2f3r0a8n" path="res://Location/Location Generation/Chunk Generation/ChunkProcessor.tscn" id="7_oaj5l"]
+[ext_resource type="PackedScene" uid="uid://365qx512icmc" path="res://Location/Location Generation/LocationMapLayoutGeneration.tscn" id="8_hikfy"]
+[ext_resource type="PackedScene" uid="uid://by1sy8j6ekgk4" path="res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.tscn" id="9_0lcwv"]
+[ext_resource type="PackedScene" uid="uid://bv4nj3hnjc8im" path="res://Actors/Location/PlayerLocationActor.tscn" id="10_5ny1b"]
+[ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/Location/LocationActor.tscn" id="11_hmdgl"]
+[ext_resource type="Script" uid="uid://ct0e026q7u5rr" path="res://Actors/AI.gd" id="12_d3bb8"]
+[ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="13_yviso"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_5ks3n"]
+vertices = PackedVector2Array(578, 398, 10, 398, 10, 4, 578, 4)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, -6, 588, -6, 588, 408, 0, 408)])
+parsed_geometry_type = 1
+source_geometry_group_name = &"Map"
+
+[node name="WestFieldMines" type="Node2D" unique_id=372840963]
+script = ExtResource("1_m33h7")
+
+[node name="Map" type="TileMap" parent="." unique_id=68208360]
+y_sort_enabled = true
+tile_set = ExtResource("2_3cuy1")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("3_esotd")
+
+[node name="ChunkGenerators" type="Node2D" parent="." unique_id=1078665595]
+
+[node name="Gen1" type="TileMap" parent="ChunkGenerators" unique_id=1991293426]
+y_sort_enabled = true
+tile_set = ExtResource("4_8ndb6")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("5_nw3qr")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen1" unique_id=1221523936 instance=ExtResource("6_8aq2h")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen1" unique_id=1501557071 instance=ExtResource("7_oaj5l")]
+
+[node name="Gen2" type="TileMap" parent="ChunkGenerators" unique_id=109555737]
+y_sort_enabled = true
+tile_set = ExtResource("4_8ndb6")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("5_nw3qr")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen2" unique_id=1080972104 instance=ExtResource("6_8aq2h")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen2" unique_id=467185567 instance=ExtResource("7_oaj5l")]
+
+[node name="Gen3" type="TileMap" parent="ChunkGenerators" unique_id=302515734]
+y_sort_enabled = true
+tile_set = ExtResource("4_8ndb6")
+format = 2
+layer_0/y_sort_enabled = true
+script = ExtResource("5_nw3qr")
+
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen3" unique_id=144797294 instance=ExtResource("6_8aq2h")]
+
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen3" unique_id=1613738274 instance=ExtResource("7_oaj5l")]
+
+[node name="LocationMapLayoutGeneration" parent="ChunkGenerators" unique_id=1349086130 instance=ExtResource("8_hikfy")]
+
+[node name="WFCInputCreation" parent="ChunkGenerators" unique_id=704878962 instance=ExtResource("9_0lcwv")]
+
+[node name="Entities" type="Node2D" parent="." unique_id=1527494666]
+y_sort_enabled = true
+
+[node name="Actors" type="Node2D" parent="Entities" unique_id=952459688]
+y_sort_enabled = true
+
+[node name="PlayerActor" parent="Entities/Actors" unique_id=2146207406 instance=ExtResource("10_5ny1b")]
+
+[node name="LocationActor" parent="Entities/Actors" unique_id=44031685 instance=ExtResource("11_hmdgl")]
+
+[node name="OutdoorObjects" type="Node2D" parent="Entities" unique_id=1543578217]
+y_sort_enabled = true
+
+[node name="Interactables" type="Node2D" parent="Entities" unique_id=411245103]
+y_sort_enabled = true
+
+[node name="Exits" type="Node2D" parent="Entities" unique_id=2024240711]
+y_sort_enabled = true
+
+[node name="AI" type="Node2D" parent="." unique_id=1064411007]
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="AI" unique_id=888407314]
+navigation_polygon = SubResource("NavigationPolygon_5ks3n")
+
+[node name="Pathfinding" type="Node2D" parent="AI" unique_id=542821893]
+script = ExtResource("12_d3bb8")
+
+[node name="Timer" type="Timer" parent="AI/Pathfinding" unique_id=299001515]
+autostart = true
+
+[node name="UI" type="Control" parent="." unique_id=1186835911]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Loading" parent="UI" unique_id=1711383859 instance=ExtResource("13_yviso")]
+layout_mode = 1
+
+[node name="Minigame" type="CanvasLayer" parent="." unique_id=2109724479]
+
+[connection signal="timeout" from="AI/Pathfinding/Timer" to="AI/Pathfinding" method="_on_timer_timeout"]
