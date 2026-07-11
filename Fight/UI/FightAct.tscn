@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bs1sty5b56jic"]
+[gd_scene format=3 uid="uid://bs1sty5b56jic"]
 
 [ext_resource type="Texture2D" uid="uid://du6gxqpjaiso4" path="res://Assets/Icons/MoneyIcon.png" id="1_0cmnt"]
 [ext_resource type="Script" uid="uid://d3prv3hqyqryi" path="res://Fight/UI/FightAct.gd" id="2_eejde"]
@@ -7,18 +7,18 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_aj2j5"]
 size = Vector2(24, 24)
 
-[node name="FightItem" type="TextureRect"]
+[node name="FightItem" type="TextureRect" unique_id=1298970307]
 texture = ExtResource("1_0cmnt")
 stretch_mode = 3
 script = ExtResource("2_eejde")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=1313060580]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1358682148]
 position = Vector2(12, 12)
 shape = SubResource("RectangleShape2D_aj2j5")
 
-[node name="Highlight" type="Sprite2D" parent="."]
+[node name="Highlight" type="Sprite2D" parent="." unique_id=1194981645]
 visible = false
 texture = ExtResource("3_mvse3")
 centered = false

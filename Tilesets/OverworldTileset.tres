@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=18 format=3 uid="uid://dd8sir4kvrp6t"]
+[gd_resource type="TileSet" format=3 uid="uid://dd8sir4kvrp6t"]
 
 [ext_resource type="Texture2D" uid="uid://xelj5vck4g5d" path="res://Assets/Tilesets/Grande Cañón/GrandeCañónOverworld.png" id="1_c6vsd"]
 [ext_resource type="Texture2D" uid="uid://cu78o0nttb5uq" path="res://Assets/Tilesets/Locations/LocationsOverworld.png" id="1_u4umg"]
