@@ -1,40 +1,45 @@
-[gd_scene load_steps=5 format=3 uid="uid://coobutj7mt8js"]
+[gd_scene format=3 uid="uid://coobutj7mt8js"]
 
 [ext_resource type="Script" uid="uid://3rhi1m8eky53" path="res://Overworld/Overworld.gd" id="1_2gavc"]
 [ext_resource type="PackedScene" uid="uid://c8y8ry3iy1a0o" path="res://Overworld/OverworldTileChunkTemplate.tscn" id="3_cx6mi"]
 [ext_resource type="PackedScene" uid="uid://dvlk3muixwpyx" path="res://Actors/Overworld/PlayerOverworldActor.tscn" id="3_q70do"]
+[ext_resource type="PackedScene" uid="uid://c22f6rbqr1nmq" path="res://UI/OverworldEvent/OverworldEventPopup.tscn" id="4_evpop"]
 
 [sub_resource type="TileSet" id="TileSet_4f8r2"]
 tile_size = Vector2i(1536, 384)
 
-[node name="Overworld" type="TileMap"]
+[node name="Overworld" type="TileMap" unique_id=17317850]
 y_sort_enabled = true
 tile_set = SubResource("TileSet_4f8r2")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("1_2gavc")
 
-[node name="Chunks" type="Node2D" parent="."]
+[node name="Chunks" type="Node2D" parent="." unique_id=1016117481]
 
-[node name="OverworldTileChunkTemplate" parent="." instance=ExtResource("3_cx6mi")]
+[node name="OverworldTileChunkTemplate" parent="." unique_id=2049347028 instance=ExtResource("3_cx6mi")]
 
-[node name="Locations" type="Node2D" parent="."]
+[node name="Locations" type="Node2D" parent="." unique_id=1044453967]
 
-[node name="Spawnpoints" type="Node2D" parent="."]
+[node name="Spawnpoints" type="Node2D" parent="." unique_id=276214057]
 
-[node name="Actors" type="Node2D" parent="."]
+[node name="Actors" type="Node2D" parent="." unique_id=1739496328]
 y_sort_enabled = true
 
-[node name="PlayerOverworldActor" parent="Actors" instance=ExtResource("3_q70do")]
+[node name="PlayerOverworldActor" parent="Actors" unique_id=1740414410 instance=ExtResource("3_q70do")]
 speed = null
 
-[node name="Animals" type="Node2D" parent="Actors"]
+[node name="Animals" type="Node2D" parent="Actors" unique_id=824937113]
 y_sort_enabled = true
 
-[node name="Timers" type="Node2D" parent="."]
+[node name="Timers" type="Node2D" parent="." unique_id=2060384480]
 
-[node name="SpawnPointTimer" type="Timer" parent="Timers"]
+[node name="SpawnPointTimer" type="Timer" parent="Timers" unique_id=2053863096]
 wait_time = 10.0
 autostart = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1685941262]
+
+[node name="OverworldEventPopup" parent="CanvasLayer" unique_id=439920544 instance=ExtResource("4_evpop")]
 
 [connection signal="timeout" from="Timers/SpawnPointTimer" to="." method="_on_animal_spawn_point_timer_timeout"]

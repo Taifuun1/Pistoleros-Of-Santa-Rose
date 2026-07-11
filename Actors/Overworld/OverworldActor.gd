@@ -9,3 +9,9 @@ func initOverworldActor(actorName, actorType, actorPosition):
 	add_child(animations)
 	
 	position = actorPosition
+
+
+# Called by OverworldEventPopup when the player selects a choice.
+# result is the result string defined in the event data.
+func process_event_result(result: String) -> void:
+	pass
