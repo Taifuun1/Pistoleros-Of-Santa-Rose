@@ -1,0 +1,117 @@
+[gd_scene load_steps=14 format=3 uid="uid://wfm_robbing_anim"]
+
+[ext_resource type="Script" path="res://Animations/Locations/Gold Rush/GoldRushInteractable.gd" id="1_rbanim"]
+[ext_resource type="Texture2D" uid="uid://dysusdscic0p6" path="res://Assets/Gold Rush/Mining/BackgroundWithTrees.png" id="2_rbanim"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rb_shake1"]
+atlas = ExtResource("2_rbanim")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rb_shake2"]
+atlas = ExtResource("2_rbanim")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rb_sway1"]
+atlas = ExtResource("2_rbanim")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rb_sway2"]
+atlas = ExtResource("2_rbanim")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_robbing"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rb_shake1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rb_shake2")
+}],
+"loop": true,
+"name": &"Shake",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rb_sway1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rb_sway2")
+}],
+"loop": true,
+"name": &"Sway",
+"speed": 2.0
+}]
+
+[sub_resource type="Animation" id="Animation_rb_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_rb_shake"]
+resource_name = "Shake"
+length = 0.25
+step = 0.125
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.125),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="Animation" id="Animation_rb_sway"]
+resource_name = "Sway"
+length = 2.0
+step = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_robbing"]
+_data = {
+&"RESET": SubResource("Animation_rb_reset"),
+&"Shake": SubResource("Animation_rb_shake"),
+&"Sway": SubResource("Animation_rb_sway")
+}
+
+[node name="Animation" type="Node2D"]
+script = ExtResource("1_rbanim")
+minigameScene = "res://Minigames/Gold Rush/Robbing.tscn"
+
+[node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_robbing")
+animation = &"Sway"
+offset = Vector2(0, -3)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_robbing")
+}
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

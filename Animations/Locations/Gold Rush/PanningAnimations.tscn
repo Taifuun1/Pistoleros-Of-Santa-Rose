@@ -1,0 +1,117 @@
+[gd_scene load_steps=14 format=3 uid="uid://wfm_panning_anim"]
+
+[ext_resource type="Script" path="res://Animations/Locations/Gold Rush/GoldRushInteractable.gd" id="1_pnanim"]
+[ext_resource type="Texture2D" uid="uid://b8w34wmh2uiy" path="res://Assets/Gold Rush/Panning/Pan.png" id="2_pnanim"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pn_shake1"]
+atlas = ExtResource("2_pnanim")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pn_shake2"]
+atlas = ExtResource("2_pnanim")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pn_sway1"]
+atlas = ExtResource("2_pnanim")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pn_sway2"]
+atlas = ExtResource("2_pnanim")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_panning"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pn_shake1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pn_shake2")
+}],
+"loop": true,
+"name": &"Shake",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pn_sway1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pn_sway2")
+}],
+"loop": true,
+"name": &"Sway",
+"speed": 2.0
+}]
+
+[sub_resource type="Animation" id="Animation_pn_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_pn_shake"]
+resource_name = "Shake"
+length = 0.25
+step = 0.125
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.125),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="Animation" id="Animation_pn_sway"]
+resource_name = "Sway"
+length = 2.0
+step = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimationSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_panning"]
+_data = {
+&"RESET": SubResource("Animation_pn_reset"),
+&"Shake": SubResource("Animation_pn_shake"),
+&"Sway": SubResource("Animation_pn_sway")
+}
+
+[node name="Animation" type="Node2D"]
+script = ExtResource("1_pnanim")
+minigameScene = "res://Minigames/Gold Rush/Panning.tscn"
+
+[node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_panning")
+animation = &"Sway"
+offset = Vector2(0, -3)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_panning")
+}
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]

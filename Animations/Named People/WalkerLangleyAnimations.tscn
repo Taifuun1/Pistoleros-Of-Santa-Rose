@@ -1,4 +1,4 @@
-[gd_scene load_steps=82 format=3 uid="uid://c5238q541h47"]
+[gd_scene format=3 uid="uid://c5238q541h47"]
 
 [ext_resource type="Script" uid="uid://bq6jayolks7el" path="res://Animations/Animations.gd" id="1_jexox"]
 [ext_resource type="Texture2D" uid="uid://d1pr0i3es2807" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdle.png" id="3_a1xox"]
@@ -295,12 +295,12 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_j6qic")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Idle",
 "speed": 5.0
 }, {
 "frames": [],
-"loop": true,
+"loop": 1,
 "name": &"Idle Look",
 "speed": 5.0
 }, {
@@ -329,7 +329,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_dqleu")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle Revolver",
 "speed": 5.0
 }, {
@@ -358,7 +358,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_3x20s")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle Rifle",
 "speed": 5.0
 }, {
@@ -396,7 +396,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_27r53")
 }],
-"loop": false,
+"loop": 0,
 "name": &"Shoot Revolver",
 "speed": 5.0
 }, {
@@ -452,7 +452,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_th3oh")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Shoot Rifle",
 "speed": 5.0
 }, {
@@ -496,7 +496,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ykck8")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Snap",
 "speed": 5.0
 }]
@@ -629,18 +629,16 @@ _data = {
 &"Snap": SubResource("Animation_71pi1")
 }
 
-[node name="Animation" type="Node2D"]
+[node name="Animation" type="Node2D" unique_id=1370906821]
 script = ExtResource("1_jexox")
 
-[node name="AnimationSprite" type="AnimatedSprite2D" parent="."]
+[node name="AnimationSprite" type="AnimatedSprite2D" parent="." unique_id=274945723]
 sprite_frames = SubResource("SpriteFrames_ddvav")
 animation = &"Shoot Rifle"
 offset = Vector2(0, -15)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_5fada")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1665791812]
+libraries/ = SubResource("AnimationLibrary_5fada")
 
 [connection signal="frame_changed" from="AnimationSprite" to="." method="_on_animation_sprite_frame_changed"]
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
