@@ -16,6 +16,11 @@ func init(interactableType, interactableName, interactablePosition):
 
 func _physics_process(_delta):
 	if Input.is_action_just_pressed("INTERACT") and playerClose:
+		# If the animation node supports launching a minigame, trigger it first
+		var animNode = get_node_or_null(NodePath(name))
+		if animNode != null and animNode.has_method("launchMinigame"):
+			animNode.launchMinigame()
+		get_tree().current_scene.get_node("Entities/Actors/PlayerActor").paused = true
 		queue_free()
 
 

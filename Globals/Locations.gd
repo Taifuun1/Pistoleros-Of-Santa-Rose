@@ -7,3 +7,12 @@ var actorId = 0
 
 var playerPosition
 
+# Points earned from minigames, keyed by minigame name
+var minigamePoints = {
+	"Dodging": 0,
+	"Gathering": 0,
+	"Hunting": 0,
+	"Mining": 0,
+	"Panning": 0,
+	"Robbing": 0,
+}

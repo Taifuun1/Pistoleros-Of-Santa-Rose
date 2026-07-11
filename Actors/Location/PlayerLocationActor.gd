@@ -4,6 +4,8 @@ extends CharacterBody2D
 
 var transparentShader = load("res://Shaders/Transparent.tres")
 
+var paused = false
+
 
 func get_input():
 	var input_direction = Input.get_vector("MOVE_LEFT", "MOVE_RIGHT", "MOVE_UP", "MOVE_DOWN")
@@ -24,8 +26,9 @@ func get_input():
 
 
 func _physics_process(_delta):
-	get_input()
-	move_and_slide()
+	if !paused:
+		get_input()
+		move_and_slide()
 
 
 func _on_area_2d_body_entered(body):

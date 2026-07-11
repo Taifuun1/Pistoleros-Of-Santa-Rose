@@ -74,6 +74,6 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "The town here has a lot of <i>viajeros</i> going every direction."}},
 		{"object": "dialog", "data": {"actor": "Manuel Cárdenas", "text": "We could find cheap <i>bueyes</i> here."}},
 		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Not a bad idea. We'll need to stay here for awhile anyways, so might as well look around."}},
-		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Let's ask around at the Messenger Post for opportunities."}}	]
+		{"object": "dialog", "data": {"actor": "Gwyneth Remington", "text": "Let's ask around at the Messenger Post for opportunities."}}
 	]
 }
