@@ -8,19 +8,28 @@ var movementPath = []
 var currentMovementTarget = null
 
 
+func _location_scene() -> Node:
+	var scene := get_tree().current_scene
+	# Location scenes can be embedded by tests or transition wrappers.
+	if scene != null and not scene.has_node("Entities/Actors/LocationActor") and get_parent() != null:
+		return get_parent().get_parent()
+	return scene
+
+
 func init(newAIType):
 	aIType = newAIType
 
 func _physics_process(delta):
 	if currentMovementTarget != null:
 		var direction = Vector2.ZERO
-		var localActorPosition = get_tree().current_scene.get_node("Entities/Actors/LocationActor").global_position
+		var scene := _location_scene()
+		var localActorPosition = scene.get_node("Entities/Actors/LocationActor").global_position
 		#localActorPosition.y += 6
 		
 		direction = currentMovementTarget - localActorPosition
 		direction = direction.normalized()
 		
-		get_tree().current_scene.get_node("Entities/Actors/LocationActor").global_position = localActorPosition.move_toward(currentMovementTarget, delta * speed)
+		scene.get_node("Entities/Actors/LocationActor").global_position = localActorPosition.move_toward(currentMovementTarget, delta * speed)
 		
 		#get_tree().current_scene.get_node("Entities/Actors/NpcActor").velocity = direction * speed
 		#
@@ -29,7 +38,7 @@ func _physics_process(delta):
 		#print(currentMovementTarget)
 		#print(movementPath)
 		#print(direction)
-		if get_tree().current_scene.get_node("Entities/Actors/LocationActor").position.distance_to(currentMovementTarget) < 1:
+		if scene.get_node("Entities/Actors/LocationActor").position.distance_to(currentMovementTarget) < 1:
 			currentMovementTarget = null
 		
 		return
@@ -41,7 +50,7 @@ func checkMovementTarget():
 		changeMovementTarget()
 
 func changeMovementTarget():
-	currentMovementTarget = get_tree().current_scene.get_node("Map").map_to_local(movementPath[0])
+	currentMovementTarget = _location_scene().get_node("Map").map_to_local(movementPath[0])
 	#currentMovementTarget.x += HelperVariables.tileSize.x / 2
 	currentMovementTarget.y += HelperVariables.tileSize.y / 2
 	movementPath.remove_at(0)
@@ -52,8 +61,11 @@ func _on_timer_timeout():
 		match aIType:
 			"passive":
 				if randi() % 2 == 0:
-					var randomNearbyPosition = Vector2i(get_tree().current_scene.get_node("Entities/Actors/LocationActor").position) + Vector2i(((randi() % 4 + 1) + -2) * HelperVariables.tileSize.x, ((randi() % 4 + 1) + -2) * HelperVariables.tileSize.y)
-					if get_tree().current_scene.has_node("Map"):
-						movementPath = get_tree().current_scene.get_node("AI/Pathfinding").calculatePath(pathfindingAstarNode, get_tree().current_scene.get_node("Map").local_to_map(to_local(get_tree().current_scene.get_node("Entities/Actors/LocationActor").position - Vector2(0, HelperVariables.tileSize.y / 2))), get_tree().current_scene.get_node("Map").local_to_map(to_local(randomNearbyPosition)))
+					var scene := _location_scene()
+					if scene == null or not scene.has_node("Entities/Actors/LocationActor"):
+						return
+					var randomNearbyPosition = Vector2i(scene.get_node("Entities/Actors/LocationActor").position) + Vector2i(((randi() % 4 + 1) + -2) * HelperVariables.tileSize.x, ((randi() % 4 + 1) + -2) * HelperVariables.tileSize.y)
+					if scene.has_node("Map") and pathfindingAstarNode != null:
+						movementPath = scene.get_node("AI/Pathfinding").calculatePath(pathfindingAstarNode, scene.get_node("Map").local_to_map(to_local(scene.get_node("Entities/Actors/LocationActor").position - Vector2(0, HelperVariables.tileSize.y / 2))), scene.get_node("Map").local_to_map(to_local(randomNearbyPosition)))
 					checkMovementTarget()
 				$Timer.start(3)

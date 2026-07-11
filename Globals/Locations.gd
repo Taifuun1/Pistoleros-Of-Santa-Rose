@@ -1,8 +1,9 @@
 extends Node
 
-var currentLocation = "Donnafolk Cave"
+var currentLocation = "Clearwater Grove"
 var currentQuest = "Pistoleros Regroup"
 
 var actorId = 0
 
 var playerPosition
+

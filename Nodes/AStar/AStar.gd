@@ -54,19 +54,19 @@ func connectWalkableCells(astarNode, points):
 	for point in points:
 		var pointIndex = id(point)
 		var pointsRelative
+		# Connect only toward the next row and make those edges bidirectional.
+		# The previous four-direction loop visited every edge twice and created two
+		# directed connections, doubling the expensive AStar graph setup performed
+		# several times during chunk post-processing.
 		if int(point.y) % 2 == 0:
 			pointsRelative = PackedVector2Array([
-				Vector2i(point.x, point.y - 1),
 				Vector2i(point.x, point.y + 1),
-				Vector2i(point.x - 1, point.y + 1),
-				Vector2i(point.x - 1, point.y - 1)
+				Vector2i(point.x - 1, point.y + 1)
 			])
 		else:
 			pointsRelative = PackedVector2Array([
-				Vector2i(point.x, point.y - 1),
 				Vector2i(point.x, point.y + 1),
-				Vector2i(point.x + 1, point.y + 1),
-				Vector2i(point.x + 1, point.y - 1)
+				Vector2i(point.x + 1, point.y + 1)
 			])
 		for pointRelative in pointsRelative:
 			var pointRelativeIndex = id(pointRelative)
@@ -74,7 +74,32 @@ func connectWalkableCells(astarNode, points):
 				continue
 			if not astarNode.has_point(pointRelativeIndex):
 				continue
-			astarNode.connect_points(pointIndex, pointRelativeIndex, false)
+			astarNode.connect_points(pointIndex, pointRelativeIndex, true)
+
+func addWalkablePoint(astarNode: AStar2D, point: Vector2i) -> void:
+	var pointIndex = id(point)
+	if astarNode.has_point(pointIndex):
+		return
+	astarNode.add_point(pointIndex, point, 1.0)
+	var pointsRelative: PackedVector2Array
+	if point.y % 2 == 0:
+		pointsRelative = PackedVector2Array([
+			Vector2i(point.x, point.y - 1),
+			Vector2i(point.x, point.y + 1),
+			Vector2i(point.x - 1, point.y + 1),
+			Vector2i(point.x - 1, point.y - 1)
+		])
+	else:
+		pointsRelative = PackedVector2Array([
+			Vector2i(point.x, point.y - 1),
+			Vector2i(point.x, point.y + 1),
+			Vector2i(point.x + 1, point.y + 1),
+			Vector2i(point.x + 1, point.y - 1)
+		])
+	for pointRelative in pointsRelative:
+		var relativeIndex = id(pointRelative)
+		if astarNode.has_point(relativeIndex):
+			astarNode.connect_points(pointIndex, relativeIndex, true)
 
 func isTileIllegible(tile, illegibleIds):
 	for illegibleId in illegibleIds:

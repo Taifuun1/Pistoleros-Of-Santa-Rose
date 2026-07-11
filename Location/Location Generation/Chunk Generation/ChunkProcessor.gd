@@ -158,8 +158,11 @@ func connectBorderEntrance(openBorder, otherOpenBorder):
 	for tile in path:
 		var tileI = Vector2i(tile.x, tile.y)
 		$"..".generatedChunk.tiles[tileI] = 1
-	$"..".initPathfindingAstarNode($"..".generatedChunk.tiles)
-	$"..".initWeightedAstarNode($"..".generatedChunk.tiles)
+		# The weighted graph already contains every tile; update the carved path's
+		# cost in place. Likewise, grow the walkable graph by only the new path
+		# instead of rebuilding both 1,152-node graphs after every connection.
+		$"..".weightedAstarNode.set_point_weight_scale($"..".id(tileI), 1.0)
+		$"..".addWalkablePoint($"..".pathfindingAstarNode, tileI)
 
 func fillVisibleEmptyTiles():
 	for border in $"..".generatedChunk.openBorders:
@@ -453,13 +456,29 @@ func cleanUpBorders():
 				$"..".generatedChunk.tiles[Vector2i(x, y)] = 2
 
 func cleanUpTile(parameters):
-	var areas = []
+	# Track membership as a hash set while flood-filling. The old implementation
+	# rescanned every previously discovered area for every tile and used Array.has
+	# inside the flood fill, making this command quadratic (100+ ms for one
+	# 24x48 chunk) and causing a visible main-thread hitch after every WFC solve.
+	var visited := {}
 	for x in range(24):
 		for y in range(48):
-			if $"..".generatedChunk.tiles[Vector2i(x, y)] == parameters.fromTile and !isTileAlreadyInAnArea(Vector2i(x, y), areas):
-				areas.append(getArea(Vector2i(x, y), parameters.fromTile))
-	
-	for area in areas:
-		if area.size() < parameters.areaSize:
-			for tilePosition in area:
-				$"..".generatedChunk.tiles[tilePosition] = parameters.toTile
+			var start := Vector2i(x, y)
+			if visited.has(start) or $"..".generatedChunk.tiles[start] != parameters.fromTile:
+				continue
+
+			var area := []
+			var pending := [start]
+			visited[start] = true
+			while not pending.is_empty():
+				var tile: Vector2i = pending.pop_back()
+				area.append(tile)
+				for adjacentTile in checkAdjacentTilesForTile(tile, [parameters.fromTile]):
+					if visited.has(adjacentTile):
+						continue
+					visited[adjacentTile] = true
+					pending.append(adjacentTile)
+
+			if area.size() < parameters.areaSize:
+				for tilePosition in area:
+					$"..".generatedChunk.tiles[tilePosition] = parameters.toTile

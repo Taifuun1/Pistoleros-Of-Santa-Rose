@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dd2grmiyvq04d"]
+[gd_scene format=3 uid="uid://dd2grmiyvq04d"]
 
 [ext_resource type="TileSet" uid="uid://kc6nv2luoiie" path="res://Tilesets/WFCGeneration.tres" id="1_3s7mu"]
 [ext_resource type="Script" uid="uid://beegavp5ohucg" path="res://Location/Location Generation/LocationMap.gd" id="1_m33h7"]
@@ -21,93 +21,93 @@ outlines = Array[PackedVector2Array]([PackedVector2Array(0, -6, 588, -6, 588, 40
 parsed_geometry_type = 1
 source_geometry_group_name = &"Map"
 
-[node name="ClearwaterGrove" type="Node2D"]
+[node name="ClearwaterGrove" type="Node2D" unique_id=273375940]
 script = ExtResource("1_m33h7")
 
-[node name="Map" type="TileMap" parent="."]
+[node name="Map" type="TileMap" parent="." unique_id=1345078214]
 y_sort_enabled = true
 tile_set = ExtResource("2_3cuy1")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("3_esotd")
 
-[node name="ChunkGenerators" type="Node2D" parent="."]
+[node name="ChunkGenerators" type="Node2D" parent="." unique_id=1617219846]
 
-[node name="Gen1" type="TileMap" parent="ChunkGenerators"]
+[node name="Gen1" type="TileMap" parent="ChunkGenerators" unique_id=269776257]
 y_sort_enabled = true
 tile_set = ExtResource("1_3s7mu")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("3_3gfy0")
 
-[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen1" instance=ExtResource("3_y2lwj")]
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen1" unique_id=1391744176 instance=ExtResource("3_y2lwj")]
 
-[node name="ChunkProcessor" parent="ChunkGenerators/Gen1" instance=ExtResource("5_w0ig6")]
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen1" unique_id=1760380739 instance=ExtResource("5_w0ig6")]
 
-[node name="Gen2" type="TileMap" parent="ChunkGenerators"]
+[node name="Gen2" type="TileMap" parent="ChunkGenerators" unique_id=1959857941]
 y_sort_enabled = true
 tile_set = ExtResource("1_3s7mu")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("3_3gfy0")
 
-[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen2" instance=ExtResource("3_y2lwj")]
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen2" unique_id=759770767 instance=ExtResource("3_y2lwj")]
 
-[node name="ChunkProcessor" parent="ChunkGenerators/Gen2" instance=ExtResource("5_w0ig6")]
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen2" unique_id=1871268007 instance=ExtResource("5_w0ig6")]
 
-[node name="Gen3" type="TileMap" parent="ChunkGenerators"]
+[node name="Gen3" type="TileMap" parent="ChunkGenerators" unique_id=1914979235]
 y_sort_enabled = true
 tile_set = ExtResource("1_3s7mu")
 format = 2
 layer_0/y_sort_enabled = true
 script = ExtResource("3_3gfy0")
 
-[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen3" instance=ExtResource("3_y2lwj")]
+[node name="WFCChunkGenerator" parent="ChunkGenerators/Gen3" unique_id=616997216 instance=ExtResource("3_y2lwj")]
 
-[node name="ChunkProcessor" parent="ChunkGenerators/Gen3" instance=ExtResource("5_w0ig6")]
+[node name="ChunkProcessor" parent="ChunkGenerators/Gen3" unique_id=1107931738 instance=ExtResource("5_w0ig6")]
 
-[node name="LocationMapLayoutGeneration" parent="ChunkGenerators" instance=ExtResource("7_7rsor")]
+[node name="LocationMapLayoutGeneration" parent="ChunkGenerators" unique_id=1100693889 instance=ExtResource("7_7rsor")]
 
-[node name="WFCInputCreation" parent="ChunkGenerators" instance=ExtResource("8_rqtc4")]
+[node name="WFCInputCreation" parent="ChunkGenerators" unique_id=952239929 instance=ExtResource("8_rqtc4")]
 
-[node name="Entities" type="Node2D" parent="."]
+[node name="Entities" type="Node2D" parent="." unique_id=1802380720]
 y_sort_enabled = true
 
-[node name="Actors" type="Node2D" parent="Entities"]
+[node name="Actors" type="Node2D" parent="Entities" unique_id=817396969]
 y_sort_enabled = true
 
-[node name="PlayerActor" parent="Entities/Actors" instance=ExtResource("3_ptpse")]
+[node name="PlayerActor" parent="Entities/Actors" unique_id=1563698309 instance=ExtResource("3_ptpse")]
 
-[node name="LocationActor" parent="Entities/Actors" instance=ExtResource("11_ipqrn")]
+[node name="LocationActor" parent="Entities/Actors" unique_id=1740064016 instance=ExtResource("11_ipqrn")]
 
-[node name="OutdoorObjects" type="Node2D" parent="Entities"]
+[node name="OutdoorObjects" type="Node2D" parent="Entities" unique_id=65396415]
 y_sort_enabled = true
 
-[node name="Interactables" type="Node2D" parent="Entities"]
+[node name="Interactables" type="Node2D" parent="Entities" unique_id=678041097]
 y_sort_enabled = true
 
-[node name="Exits" type="Node2D" parent="Entities"]
+[node name="Exits" type="Node2D" parent="Entities" unique_id=644720882]
 y_sort_enabled = true
 
-[node name="AI" type="Node2D" parent="."]
+[node name="AI" type="Node2D" parent="." unique_id=1535489473]
 
-[node name="NavigationRegion2D" type="NavigationRegion2D" parent="AI"]
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="AI" unique_id=720725700]
 navigation_polygon = SubResource("NavigationPolygon_5ks3n")
 
-[node name="Pathfinding" type="Node2D" parent="AI"]
+[node name="Pathfinding" type="Node2D" parent="AI" unique_id=297152270]
 script = ExtResource("12_pq735")
 
-[node name="Timer" type="Timer" parent="AI/Pathfinding"]
+[node name="Timer" type="Timer" parent="AI/Pathfinding" unique_id=821789380]
 autostart = true
 
-[node name="UI" type="Control" parent="."]
+[node name="UI" type="Control" parent="." unique_id=338505619]
 visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Loading" parent="UI" instance=ExtResource("10_t2ahg")]
+[node name="Loading" parent="UI" unique_id=1290194601 instance=ExtResource("10_t2ahg")]
 layout_mode = 1
 
 [connection signal="timeout" from="AI/Pathfinding/Timer" to="AI/Pathfinding" method="_on_timer_timeout"]

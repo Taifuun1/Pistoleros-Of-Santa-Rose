@@ -5,9 +5,6 @@ var tiles = [Vector2i(0, 0)]
 var borderTiles = [Vector2i(0, 0)]
 
 
-func _ready():
-	generateMapLayout()
-
 func generateMapLayout(type: String = "Clearwater Grove") -> Array:
 	match type:
 		"Clearwater Grove":

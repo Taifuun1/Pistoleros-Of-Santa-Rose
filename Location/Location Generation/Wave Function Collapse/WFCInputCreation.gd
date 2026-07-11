@@ -6,10 +6,16 @@ signal done
 func initWFCGeneration(inputs: Array):
 	done.connect(Callable($"../..", "initWFCGenerationFinished"))
 	for input in inputs:
-		addInputs(input)
+		# addInputs deliberately yields for a frame so instantiated TileMaps finish
+		# entering the tree. Waiting for it also keeps input extraction/removal in
+		# sequence instead of continuing while addInputs is still suspended.
+		await addInputs(input)
 		WaveFunctionCollapse.inputs[input] = assignInputsForInputSet()
+		# Precompute the immutable adjacency model once so worker threads only read it.
+		WaveFunctionCollapse.models[input] = WFCModelBuilder.build(WaveFunctionCollapse.inputs[input])
 		removeInputs()
 	done.emit()
+
 
 #######################################
 ### Input node processing functions ###

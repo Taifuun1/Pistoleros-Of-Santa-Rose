@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=9 format=3 uid="uid://kc6nv2luoiie"]
+[gd_resource type="TileSet" format=3 uid="uid://kc6nv2luoiie"]
 
 [ext_resource type="Texture2D" uid="uid://c6880r8f6me7y" path="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration.png" id="1_osvds"]
 [ext_resource type="Texture2D" uid="uid://d08l2m3sxb16b" path="res://Assets/Tilesets/Wave Function Collapse/WFCGeneration2.png" id="2_ey5x3"]

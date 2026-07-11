@@ -1,5 +1,10 @@
 extends LocationMapBase
 
+## Keep background generation deliberately conservative. WFC is CPU-heavy and
+## there is no benefit in saturating several cores to generate distant chunks
+## while the player is using the already-ready current chunk.
+const CONCURRENT_CHUNK_GENERATORS := 1
+
 
 func _ready():
 	randomize()
@@ -10,7 +15,7 @@ func _ready():
 func initWFCGenerationFinished():
 	emptyChunks.append_array($ChunkGenerators/LocationMapLayoutGeneration.generateMapLayout())
 	emptyChunks.erase(Vector2i(0, 0))
-	for idleGenerator in 3:
+	for _generator in CONCURRENT_CHUNK_GENERATORS:
 		generateNewChunk()
 
 func chunkFinished(generatedChunk: Vector2i, data: Dictionary, idleGenerator: String):
@@ -22,8 +27,11 @@ func generateNewChunk():
 	if emptyChunks.is_empty():
 		return
 	var generatorName = idleGenerators.pop_front()
+	var generator = get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName }))
 	if chunkPriority != null and !generatedChunks.has(chunkPriority):
-		get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", chunkPriority, Locations.currentLocation)
+		var prioritizedChunk: Vector2i = chunkPriority
 		chunkPriority = null
+		emptyChunks.erase(prioritizedChunk)
+		generator.call_deferred("initGeneration", prioritizedChunk, Locations.currentLocation)
 		return
-	get_node("ChunkGenerators/{generatorName}".format({ "generatorName": generatorName })).call_thread_safe("initGeneration", emptyChunks.pop_front(), Locations.currentLocation)
+	generator.call_deferred("initGeneration", emptyChunks.pop_front(), Locations.currentLocation)
