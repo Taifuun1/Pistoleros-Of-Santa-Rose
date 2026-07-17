@@ -10,14 +10,23 @@ Notes for combat.
 		*Turn order is based on High Tailin' stat and other modifiers
 			*On even stat, turn order is random
 	*Character actions
-		*Attack
-			*Attack target(s) with held weapon
-		*Ability
-			*Use one of characters abilities
-		*Item
-			*Use item on belt
-		*Duck
-			*Changes characters cylinders to be one lower for the turn
+		*Four actions max in fights for any given character
+		*Actions can be activated and deactivated outside of fights
+		*Action types depend on what class and name the character has
+			*Attacks
+				*Attack target(s) with held weapon, with any modifiers applied from the attacks
+			*Abilities
+				*Characters can have abilities based on their class and worn equipment
+				*Class abilities
+					*Usually focused on utility
+				*Equipment abilities
+					*Usually focused on damage
+			*Items
+				*Consumables that can have varying effects
+				*Amount that can be brought to a Shootout is decided by belt space
+				*Limited amounts, must be bought at town areas
+			*Ducks
+				*Defensive moves that apply buffs to allied characters
 	*Cylinders
 		*Cylinder or a cylinder pattern is a sequence of numbers
 		*Each number in a Cylinder is called a Chamber
@@ -29,20 +38,20 @@ Notes for combat.
 					*3 is Critical Hit
 		*Each character, class and weapon has a cylinder pattern
 			*These individual cylinder patterns are called Magazines
-			*Each cylinder pattern Chamber index can have a value between -3-3
+			*Each cylinder pattern Chamber index can have a value between -3 to 3
 			*All of the cylinder pattern Magazines get added up to form the final cylinder pattern
 				*Each index for all Magazines is added for the final cylinder pattern index
-		*Cylinder patterns are always divisible by 4
-			*If a cylinder pattern of a Chamber is shorter than another Magazines, it gets repeated till it matches the longest cylinder pattern
+		*Cylinder patterns are always a length of 6
 		*At the start of combat, characters get placed at the beginning of their cylinder pattern
-			*For each turn, they advance one in their cylinder pattern
+			*For each turn they take, they advance one in their cylinder pattern
 			*When the Cylinder ends, it jumps back to the beginning of the cylinder pattern
-		*Cylinders can have special cylinder indexes, eg. Reload
+		*Cylinders can have special cylinder indexes, eg. Reload, Jammed, that are additional Chambers on top of the usual 6
+			*The special indexes cannot be modified
 	*Positions
 		*Characters have a position in fights
-		*DD style positioning, with a 3x3 grid (3 height, 3 width)
+		*Darkest Dungeon style positioning, with 4 positions
 		*Characters can use a turn to move between adjacent positions in a fight
-		*Specific weapons can fire only from specific friendly columns, and target only specific enemy columns
+		*Specific weapons and attacks can fire only from specific friendly columns, and target only specific enemy columns
 
 ## Stats
 	*Stats are based on characters base stats, held weapon, worn equipment and item modifiers
@@ -61,7 +70,7 @@ Notes for combat.
 				*Explosive
 					*Base level is decided by class
 					*Influenced by Rodeo and item modifiers
-				*Melee
+				*Lasso
 					*Base level is decided by weapon damage
 			*Defensive
 				*Style
@@ -75,40 +84,37 @@ Notes for combat.
 	*Characters can be applied or afflicted effects
 	*Types
 		*Bleed
-			*Damage every character turn start
+			*Damage every afflicted character turn start
 			*Won't stop until healed with items or abilities
-			*Doesn't stack
+			*Doesn't stack, only highest affliction applies
 		*Poison
-			*Damage every turn start
-			*Slowly wears off
+			*Damage every whole turn start
+			*Slowly wears off, some percentage like 35%
 			*Can stack
 		*Cylinder
-			*Cylinders for character increase or decrease
+			*Character increase or decrease for cylinders
 			*Can target specific cylinder index or all cylinders
-			*Won't change until modified with another cylinder modifier
+			*Won't change until modified with another cylinder modifier, or after fight ends
 		*Mark
 			*Mark a character
-			*After one turn, dealing damage to the character deals extra damage
+			*After one whole turn, dealing damage to the character deals extra damage, consuming the mark
 			*Can be cleansed with items or abilities
 			*Doesn't stack
 		*Damage type mark
 			*Mark a character
-			*Dealing damage to the character with a specific damage type deals extra damage
+			*Dealing damage to the character with a specific damage type deals extra damage, keeping the mark for the turn
 			*Can be cleansed with items or abilities
 			*Doesn't stack
 		*Damage piercing
-			*Increases characters damage piercing against a defensive damage types
+			*Increases characters damage piercing against a defensive damage type
 			*Lasts for an amount of turns
 		*Damage decrease
 			*Decreases characters damage against a defensive damage type
 			*Lasts for an amount of turns
 		*Taunt
-			*Taunt friendly row or column character is standing on
+			*Taunt friendly positions characters are standing on
 			*All targeted characters on taunted tiles get directed to the taunt caster
 			*Defensive buffs to the caster on taunted attacks
-			*Lasts for an amount of turns
-		*Silence
-			*Disable abilities
 			*Lasts for an amount of turns
 
 ## Classes
@@ -116,8 +122,9 @@ Notes for combat.
 	*Gunslinger/Gunslinget
 		*Damage class
 		*Can hold all weapons
-		*Can wear most equipment
-		*Abilities work in first and second column
+		*Can wear Style equipment
+		*Abilities work in first, second and third rows
+		*Targets all rows
 		*Abilities
 			*Attack and self-increase hit rate
 			*Attack and bleed affliction
@@ -126,9 +133,9 @@ Notes for combat.
 	*Bobtail Guard
 		*Anti-style class
 		*Can hold rifles
-		*Can wear most equipment
-		*Abilities work in second and third column
-		*Targets backrows
+		*Can wear Sand equipment
+		*Abilities work in third and fourth rows
+		*Can't target the first row
 		*Abilities
 			*Attack and poison affliction
 			*Cylinder drop affliction
@@ -136,9 +143,9 @@ Notes for combat.
 	*Line Rider
 		*Anti-sand class
 		*Can hold shotguns
-		*Can wear most equipment
-		*Abilities work in second column
-		*Targets frontrows
+		*Can wear Style equipment
+		*Abilities work in second and third columns
+		*Targets all rows
 		*Abilities
 			*Poison cleanse
 			*Self-increase damage piercing
@@ -146,18 +153,18 @@ Notes for combat.
 	*Bottle Courage Bulldozer
 		*Tank class
 		*Can't hold rifles or shotguns
-		*Can wear any equipment
+		*Can wear Sand equipment
 		*Abilities work in first column
 		*Abilities
 			*Self-increase damage type defense
-			*Self-taunt current row or column
+			*Self-taunt column
 			*Cylinder increase application
 			*Disrupt second and third column positioning
 	*Dust Whisperer
 		*Can't hold lead weapons
-		*Can wear less equipment than other classes
+		*Can wear less equipment than other classes, maybe no equipment classes at all? Only non-style and non-sand equipment?
 		*High item modifiers
-		*Abilities work in third column
+		*Abilities work in third and fourth row
 		*Abilities
 			*Bleed cleanse and affliction
 			*Poison cleanse and affliction
@@ -167,21 +174,15 @@ Notes for combat.
 
 ## Rodeo
 	*Characters passive ability
+	*Lots of game-warping Rodeos
 	*Rodeo is active during combat
 		*Always active
 		*Activated at the beginning or at the end of the fight
-		*Activated at the beginning or end of every turn
+		*Activated at the beginning or end of every whole turn
 		*Activated at the beginning or end of every character turn
 	*Decided by character class
 		*Unique named characters can have unique Rodeos
 		*Higher level characters have higher values for the Rodeo (if applicable)
-
-## Abilities
-	*Characters can have abilities based on their class and worn equipment
-	*Class abilities
-		*Usually focused on utility
-	*Equipment abilities
-		*Usually focused on damage
 
 ## Weapons
 	*Lead weapons
@@ -192,28 +193,25 @@ Notes for combat.
 			*High damage against characters with no resistances
 			*Both Style and Sand affect damage
 				*Higher value is used
-			*Can usually hit most rows
 		*Rifles
 			*High damage against characters with high Style
 			*Style resistance increases damage, Sand resistance lowers damage
-			*Can usually only hit the back rows
 		*Shotguns
 			*High damage against characters with high Sand
 			*Sand resistance increases damage, Style resistance lowers damage
-			*Can usually only hit the front rows
 	*Explosive weapons
-		*Main weapons for certain classes
+		*Main weapons for certain classes, like the Dust Whisperer
 		*Applies and afflicts effects
 		*Main purpose is to apply large amounts of effects to multiple enemies
-		*Gunpowder
+		*Gunpowder Stick
 			*Silence
-		*Liquid
+		*Liquid Skull Bottle
 			*Poison
-		*Shrapnel
+		*Shrapnel Kaboom
 			*Bleed
-	*Melee weapons
-		*Damage not affected by stats, only weapon base damage is counted
-		*Mostly used by animals
+	*Lasso weapons
+		*Damage not affected by stats, only weapon base damage is counted?
+			*Good for low damage scaling classes like the Dust Whisperer who benefit from high flat damage
 
 ## Equipment
 	*Equipment has types that decide which classes can wear them and what stats they generally give
@@ -221,13 +219,14 @@ Notes for combat.
 		*Generic
 			*All classes can wear
 			*General-use equipment
-			*Generic equipment should always have value, even if more niche equipment is better for a given situation
-		*Damage
-			*Gunslingers and Bobtail guards can wear
+			*Lower values or missing abilities compared to class specific equipment
+			*Generic equipment should always have value in certain cases, even if more niche equipment is often better
+		*Damage class equipment
+			*Gunslingers and Lineriders can wear
 			*Direct damage buffs and afflictions
 			*Style resistances
-		*Dot
-			*Gunslingers and Line Riders can wear
+		*Tank class equipment
+			*Bobtail Guards and Line Riders can wear
 			*Buffs to DOTs
 			*Sand resistances
 		*Tank
@@ -235,7 +234,7 @@ Notes for combat.
 			*Stats focused on defense
 			*Only equipment type that can give defense to both damage types(with exceptions)
 		*Utility
-			*Bottle Courage Bulldozers and Dust Whisperers can wear
+			*Dust Whisperers can wear
 			*Applications and unique effects
 	*Equipment pieces
 		*John B.
@@ -243,7 +242,8 @@ Notes for combat.
 			*Low resistances
 			*Most impactfull skills
 		*Bandana
-			*Mostly cosmetic
+			*Mostly cosmetic, low stats
+			*No skills
 			*Needed for some quests
 		*Jacket
 			*Highest resistances
@@ -261,7 +261,7 @@ Notes for combat.
 
 
 ## Items
-	*Characters have a limited fight inventory
+	*Characters have a limited fight inventory, based on slots on belt
 	*Using an item takes a turn
 	*Item types
 		*Healing
@@ -277,9 +277,9 @@ Notes for combat.
 			*Can be used on other friendly characters
 
 ## Balance
-    *Defensive damage types
-		*Style
 	*Weapons
-		*Revolvers are general use weapons that can be used by non-Dust Whisperer classes
-		*Rifles are anti-style weapons that can be used by Gunslingers and Bobtail Guards
-		*Shotguns are anti-sand weapons that can be used by Gunslingers and Line Riders
+		*TBD
+    *Defensive damage types
+		*Style and Sand
+		*With two types, hopefully balancing is easier and makes gameplay more varied
+		*Hopefully creates sort of rock-paper-scissor-dynamic
