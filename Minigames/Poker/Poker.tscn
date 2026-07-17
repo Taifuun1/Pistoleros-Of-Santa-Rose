@@ -7,12 +7,29 @@
 [ext_resource type="Texture2D" uid="uid://5j2u1oqxxwna" path="res://Assets/Icons/CardIcon.png" id="5_qoy44"]
 [ext_resource type="PackedScene" uid="uid://bqs1wuwjuemnr" path="res://Minigames/Poker/Popups/Cards.tscn" id="7_k75dh"]
 [ext_resource type="PackedScene" uid="uid://csc6o6as7s34f" path="res://Minigames/Poker/Popups/Rules.tscn" id="7_wqdul"]
+[ext_resource type="AudioStream" uid="uid://hvh6kbnnvbta" path="res://Assets/Sounds/Poker/Deal.wav" id="8_wqdul"]
+[ext_resource type="AudioStream" uid="uid://cdswru86afurx" path="res://Assets/Sounds/Poker/Raise.wav" id="9_pqekr"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_5l1q7"]
 keycode = 4194332
 
+[sub_resource type="InputEventKey" id="InputEventKey_hands"]
+keycode = 4194333
+
 [sub_resource type="Shortcut" id="Shortcut_qoy44"]
 events = [SubResource("InputEventKey_5l1q7")]
+
+[sub_resource type="Shortcut" id="Shortcut_hands"]
+events = [SubResource("InputEventKey_hands")]
+
+[sub_resource type="AudioStreamInteractive" id="AudioStreamInteractive_pqekr"]
+clip_count = 2
+clip_0/name = &"Deal"
+clip_0/stream = ExtResource("8_wqdul")
+clip_0/auto_advance = 0
+clip_1/name = &"Raise"
+clip_1/stream = ExtResource("9_pqekr")
+clip_1/auto_advance = 0
 
 [node name="Poker" type="Node2D" unique_id=1294696939]
 script = ExtResource("1_kiimt")
@@ -457,7 +474,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 tooltip_text = "HANDS"
-shortcut = SubResource("Shortcut_qoy44")
+shortcut = SubResource("Shortcut_hands")
 shortcut_in_tooltip = false
 icon = ExtResource("5_qoy44")
 icon_alignment = 1
@@ -477,13 +494,24 @@ icon_alignment = 1
 
 [node name="Cards" parent="Popups" unique_id=1719729025 instance=ExtResource("7_k75dh")]
 
+[node name="Audio" type="Control" parent="." unique_id=744136638]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="Audio" unique_id=1972531898]
+stream = SubResource("AudioStreamInteractive_pqekr")
+max_polyphony = 5
+
 [connection signal="pressed" from="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer/Deal" to="." method="startGame"]
+[connection signal="pressed" from="Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer/Leave" to="." method="leaveGame"]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+1" to="." method="_on_add_to_bid_pressed" binds= [1]]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+5" to="." method="_on_add_to_bid_pressed" binds= [5]]
 [connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/HBoxContainer/+10" to="." method="_on_add_to_bid_pressed" binds= [10]]
-[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise" to="." method="processPlayerTurn" binds= ["player1", "raised"]]
-[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass" to="." method="processPlayerTurn" binds= ["player1", "passed"]]
-[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Call" to="." method="processPlayerTurn" binds= ["player1", "called"]]
-[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Fold" to="." method="processPlayerTurn" binds= ["player1", "folded"]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise" to="." method="processPlayerTurn" binds= ["player1", 2]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass" to="." method="processPlayerTurn" binds= ["player1", 1]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Call" to="." method="processPlayerTurn" binds= ["player1", 3]]
+[connection signal="pressed" from="Table/TableGrid/Player1/Player1Container/VBoxContainer2/Fold" to="." method="processPlayerTurn" binds= ["player1", 4]]
 [connection signal="pressed" from="Table/TableGrid/HelpContainer/HBoxContainer/Hands" to="." method="_on_hands_button_pressed"]
 [connection signal="pressed" from="Table/TableGrid/HelpContainer/HBoxContainer/Help" to="." method="_on_help_button_pressed"]

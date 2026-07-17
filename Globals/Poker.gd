@@ -336,9 +336,6 @@ const TABLE_CARD_PATHS = {
 
 const DECK_PATH = "Table/TableGrid/DeckContainer/DeckPositionContainer/Deck"
 
-var scripted = false
-var scriptName = null
-
 var players = {
 	"player1": {
 		"name": "player1",

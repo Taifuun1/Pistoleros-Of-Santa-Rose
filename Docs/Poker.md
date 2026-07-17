@@ -1,7 +1,7 @@
 
 # Poker
 
-Pistoleros of Santa Rose has a way to gamble through Poker. Poker variation used is Texas hold 'em.
+Pistoleros of Santa Rose has a way to gamble through Poker. Poker variation used is Texas hold 'em with four different suits.
 
 ## Rules
 

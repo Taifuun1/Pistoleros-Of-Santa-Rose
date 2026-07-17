@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://bg7yd5w02cbil"]
+
+[sub_resource type="Curve" id="Curve_g4630"]
+_data = [Vector2(0.35457066, 1), 0.0, 0.0, 0, 0]
+point_count = 1
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_ct2ol"]
+curve_y = SubResource("Curve_g4630")
+
+[sub_resource type="Curve" id="Curve_1wc5h"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.19667593, 0.82375276), 0.0, 0.0, 0, 0, Vector2(0.3157895, 0.9506508), 0.0, 0.0, 0, 0, Vector2(0.4127424, 0.64750546), 0.0, 0.0, 0, 0, Vector2(0.5900277, 0.8096529), 0.0, 0.0, 0, 0, Vector2(0.7174516, 0.5558569), 0.0, 0.0, 0, 0, Vector2(0.9224378, 0.68275493), 0.0, 0.0, 0, 0, Vector2(1, 0.25271153), 0.0, 0.0, 0, 0]
+point_count = 8
+
+[sub_resource type="CurveTexture" id="CurveTexture_mmv0m"]
+curve = SubResource("Curve_1wc5h")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_iobde"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(-40, 12, 0)
+angular_velocity_min = 9.019983
+angular_velocity_max = 135.31998
+directional_velocity_min = -30.000015
+directional_velocity_max = -25.000015
+directional_velocity_curve = SubResource("CurveXYZTexture_ct2ol")
+radial_velocity_min = -2.2351742e-05
+radial_velocity_max = 14.999977
+gravity = Vector3(0, 50, 0)
+linear_accel_min = 24.999998
+linear_accel_max = 49.999996
+scale_min = 1.5
+scale_max = 3.0
+scale_curve = SubResource("CurveTexture_mmv0m")
+color = Color(0.815948, 0.9403147, 0.5082963, 1)
+hue_variation_min = 0.29999998
+hue_variation_max = 0.97999996
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_1wc5h"]
+curve_y = SubResource("Curve_g4630")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_mmv0m"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(40, 12, 0)
+angular_velocity_min = -135.32
+angular_velocity_max = -9.020016
+directional_velocity_min = -30.000015
+directional_velocity_max = -25.000015
+directional_velocity_curve = SubResource("CurveXYZTexture_1wc5h")
+radial_velocity_min = -2.2351742e-05
+radial_velocity_max = 14.999977
+gravity = Vector3(0, 30, 0)
+linear_accel_min = 24.999998
+linear_accel_max = 49.999996
+scale_min = 1.5
+scale_max = 3.0
+scale_curve = SubResource("CurveTexture_mmv0m")
+color = Color(0.815948, 0.9403147, 0.5082963, 1)
+hue_variation_min = 0.29999998
+hue_variation_max = 0.97999996
+
+[node name="Control" type="Control" unique_id=559839178]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." unique_id=1098124228]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 0
+offset_left = -14.0
+offset_top = -11.0
+offset_right = 21.0
+offset_bottom = 12.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[color=cyan]Pass"
+fit_content = true
+autowrap_mode = 0
+
+[node name="ActionLeft" type="GPUParticles2D" parent="." unique_id=576640573]
+position = Vector2(24, -10)
+lifetime = 0.5
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_iobde")
+
+[node name="ActionRight" type="GPUParticles2D" parent="." unique_id=1779030268]
+position = Vector2(-18, -9)
+lifetime = 0.75
+explosiveness = 0.9
+process_material = SubResource("ParticleProcessMaterial_mmv0m")

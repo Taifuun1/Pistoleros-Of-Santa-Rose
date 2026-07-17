@@ -1,85 +1,127 @@
-extends Node2D
+extends BasePoker
 
-var deck = []
-var players = {}
-var playerOrder = []
-var table = {}
+const CARD_SCENE: PackedScene = preload("res://Minigames/Poker/Card.tscn")
+const CARD_TWEEN_DURATION := 0.15
+const BLIND_AMOUNT := 5
+const SHOWDOWN_REVEAL_DELAY := 1.5
 
-var currentPlayer
-var playersTurnState = {
-	"waiting": [],
-	"passed": [],
-	"raised": [],
-	"called": [],
-	"folded": []
+## Hand ranks, matching the order of Poker.HANDS. Lower is better.
+const RANK := {
+	"ROYAL_STRAIGHT_FLUSH": 0,
+	"STRAIGHT_FLUSH": 1,
+	"FOUR_OF_A_KIND": 2,
+	"FULL_HOUSE": 3,
+	"FLUSH": 4,
+	"STRAIGHT": 5,
+	"THREE_OF_A_KIND": 6,
+	"TWO_PAIRS": 7,
+	"TWO_OF_A_KIND": 8,
+	"HIGH_CARD": 9,
 }
-var currentBidState = Poker.BID_STATES.PASS
 
-var nextPlayerReady = false
-var uIDisabled = true
-var animatedObjects = []
+## Hand sizes for this poker variant: flushes and straight flushes count
+## four cards, a straight counts five.
+const FLUSH_SIZE := 4
+const STRAIGHT_FLUSH_SIZE := 4
+const STRAIGHT_SIZE := 5
+
+var deck: Array = []
+var players: Dictionary = {}
+var playerOrder: Array = []
+var table: Dictionary = {}
+var hands: Dictionary = {}
+
+var currentPlayer: Dictionary = {}
+var playersTurnState: Dictionary = {
+	ACTION.WAITING: [],
+	ACTION.PASSED: [],
+	ACTION.RAISED: [],
+	ACTION.CALLED: [],
+	ACTION.FOLDED: [],
+}
+var currentBidState: int = Poker.BID_STATES.PASS
+
+var nextPlayerReady := false
+var uIDisabled := true
+var animatedObjects: Array = []
+var gameActive := false
+
+@onready var menuUI: MarginContainer = $Table/TableGrid/TableContainer/MenuUIMarginContainer
+@onready var tableData: VBoxContainer = $Table/TableGrid/TableContainer/TableDataContainer
+@onready var tableCardsContainer: HBoxContainer = $Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer
+@onready var raiseLabel: Label = $Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise
+@onready var raiseButton: Button = $Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise
+@onready var passButton: Button = $Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass
+@onready var callButton: Button = $Table/TableGrid/Player1/Player1Container/VBoxContainer2/Call
+@onready var dealButton: Button = $Table/TableGrid/TableContainer/MenuUIMarginContainer/MenuUIContainer/Deal
+@onready var sfxPlayer: AudioStreamPlayer = $Audio/SFXPlayer
+@onready var deckNode: TextureRect = $Table/TableGrid/DeckContainer/DeckPositionContainer/Deck
 
 func _ready() -> void:
-	changeUIDisabledState()
 	setPlayers()
-	buildDeck()
-	buildTable()
-	#$Popup2.setPopupText("Hands", [
-		#"੥੥♡ Hearts: Red",
-		#"♢ Diamonds: Brown",
-		#"♤ Spades: Purple",
-		#"♧ Clubs: Green",
-		#"3. If a player raises the bid, all players must raise the bid again, call the bid, or fold",
-		#"4. Once all players pass, call, or fold, a new card is dealt on the table",
-		#"5. Players can bid again",
-		#"6. One more card is dealt on the table",
-		#"7. Players can bid one last time",
-		#"8. After the bidding is done, cards are revealed, and the highest hand wins",
-	#])
-	#$Popup2.setPopupImage("res://Assets/Cards/CardTwoofHearts.png")
-	#$Popup2.setPopupImage("res://Assets/Cards/CardTwoofSpades.png")
+	dealButton.disabled = players["player1"].money <= 0
+	changeUIDisabledState(true)
 
 func _process(_delta: float) -> void:
-	checkUIState()
-	if nextPlayerReady and !currentPlayer.name == "player1":
-		nextPlayerReady = false
-		if playersTurnState.folded.has(currentPlayer.name):
-			updateCurrentPlayer()
-			animateObject()
-			return
-		calculatePlayerMove()
+	if not gameActive or not nextPlayerReady:
+		return
+	if currentPlayer.is_empty() or currentPlayer.name == "player1":
+		return
+	nextPlayerReady = false
+	if playersTurnState[ACTION.FOLDED].has(currentPlayer.name):
+		updateCurrentPlayer()
+		animateObject()
+		return
+	calculatePlayerMove()
 
-func checkUIState():
-	if !uIDisabled:
-		if int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text) == 0:
-			$Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise.disabled = true
-		else:
-			$Table/TableGrid/Player1/Player1Container/VBoxContainer/Raise.disabled = false
-		if playersTurnState.raised.size() != 0 or playersTurnState.called.size() != 0:
-			$Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass.disabled = true
-		else:
-			$Table/TableGrid/Player1/Player1Container/VBoxContainer2/Pass.disabled = false
+func setPlayers() -> void:
+	if not Poker.players.has("player1"):
+		# player1 busted out earlier this session and was removed from the
+		# global player list; restore the entry so the table can load.
+		Poker.players["player1"] = { "name": "player1", "money": 0, "playerType": "player" }
+	players = Poker.players
+	players["player1"].money = PokerMoney.money
+	playerOrder.clear()
+	for playerName in players:
+		playerOrder.append(playerName)
+	currentPlayer = players[playerOrder[0]]
+
+func resetAIPersonalities() -> void:
+	# Each AI gets a fresh copy of its personality every game so raise
+	# limits reset and the shared templates are never mutated.
+	for player in players.values():
+		if player.playerType == "ai":
+			player.personality = Poker.PLAYER_PERSONALITIES[player.personality.name].duplicate(true)
+
+func resetTurnState() -> void:
+	for turnState in playersTurnState:
+		playersTurnState[turnState].clear()
+	for playerName in players:
+		playersTurnState[ACTION.WAITING].append(playerName)
 
 func startGame() -> void:
-	$Table/TableGrid/TableContainer/MenuUIMarginContainer.hide()
-	$Table/TableGrid/TableContainer/TableDataContainer.show()
+	gameActive = true
+	menuUI.hide()
+	tableData.show()
+	resetAIPersonalities()
+	resetTurnState()
+	currentBidState = Poker.BID_STATES.PASS
+	currentPlayer = players[playerOrder[0]]
 	buildDeck()
 	buildTable()
 	setBlinds()
 	updateUI()
+	# Wait a frame so the freshly shown containers finish layout before
+	# card slot positions are read for the deal animations.
+	await get_tree().process_frame
 	dealCards(2, true)
 	dealCards(3)
 	animateObject()
 
-func setPlayers(reset = false):
-	if reset:
-		for player in players.values:
-			player.personality = Poker.PLAYER_PERSONALITIES[player.personality.name].duplicate(true)
-		return
-	currentPlayer = Poker.players["player1"]
-	players = Poker.players
-	for player in players:
-		playerOrder.append(player)
+func leaveGame() -> void:
+	if players.has("player1"):
+		PokerMoney.money = players["player1"].money
+	get_tree().change_scene_to_file("res://Overworld/Overworld.tscn")
 
 func buildDeck() -> void:
 	deck = Poker.CARDS.duplicate(true)
@@ -88,827 +130,485 @@ func buildDeck() -> void:
 func buildTable() -> void:
 	table = {
 		"cards": [],
-		"highestBet": 0
+		"highestBet": 0,
 	}
-	for player in players.values():
-		table[player.name] = 0
+	hands.clear()
+	for playerName in players:
+		table[playerName] = 0
+		hands[playerName] = []
 
-func setBlinds():
-	for player in players:
-		var blind = 0
-		if players[player].money < 5:
-			blind += players[player].money
-			players[player].money = 0
-		else:
-			blind += 5
-			players[player].money -= 5
-		table[player] += blind
+func setBlinds() -> void:
+	for playerName in players:
+		var blind: int = mini(players[playerName].money, BLIND_AMOUNT)
+		players[playerName].money -= blind
+		table[playerName] += blind
 
-func dealCards(cardAmount = 1, toPlayers = false) -> void:
+func dealCards(cardAmount: int = 1, toPlayers: bool = false) -> void:
+	sfxPlayer["parameters/switch_to_clip"] = "Deal"
 	if toPlayers:
-		for player in players.values():
+		for playerName in players:
 			for i in range(1, cardAmount + 1):
-				#Poker.PLAYER_CARD_PATHS[player.name]["card" + str(i)].cards.append(deck.pop_at(randi() % deck.size() - 1))
-				var card = deck.pop_at(randi() % deck.size() - 1)
-				createCard(
-					card,
-					"Card" + card.name.replace(" ", ""),
-					Poker.PLAYER_CARD_PATHS[player.name]["card" + str(i)],
-					get_node(Poker.PLAYER_CARD_PATHS[player.name]["card" + str(i)]).global_position,
-					.15
-				)
+				var cardData: Dictionary = deck.pop_back()
+				hands[playerName].append(cardData)
+				var slotPath: String = Poker.PLAYER_CARD_PATHS[playerName]["card" + str(i)]
+				createCard(cardData, slotPath, players[playerName].playerType != "player", get_node(slotPath).global_position)
 	else:
 		for i in range(1, cardAmount + 1):
-			var card = deck.pop_at(randi() % deck.size() - 1)
-			table.cards.append(card)
-			createCard(
-				card,
-				"Card" + card.name.replace(" ", ""),
-				Poker.TABLE_CARD_PATHS["card" + str(table.cards.size())],
-				get_node(Poker.TABLE_CARD_PATHS["card" + str(table.cards.size())]).global_position,
-				.15
-			)
+			var cardData: Dictionary = deck.pop_back()
+			table.cards.append(cardData)
+			var slotPath: String = Poker.TABLE_CARD_PATHS["card" + str(table.cards.size())]
+			createCard(cardData, slotPath, false, get_node(slotPath).global_position)
 
-func createCard(card, cardName, cardPath, cardEndPosition, cardDuration):
-	var cardNode = load("res://Minigames/Poker/Card.tscn").instantiate()
-	get_node(cardPath).add_child(cardNode)
-	cardNode.init(card, cardName, cardPath, cardEndPosition, cardDuration)
+func createCard(cardData: Dictionary, slotPath: String, faceDown: bool, endPosition: Vector2) -> void:
+	var cardNode = CARD_SCENE.instantiate()
+	get_node(slotPath).add_child(cardNode)
+	cardNode.init(cardData, faceDown, endPosition, CARD_TWEEN_DURATION)
 	animatedObjects.append(cardNode)
 
-func calculatePlayerMove():
-	var cards = []
-	for player in Poker.PLAYER_CARD_PATHS:
-		if player == currentPlayer.name:
-			for card in Poker.PLAYER_CARD_PATHS[player]:
-				cards.append(get_node(Poker.PLAYER_CARD_PATHS[player][card]).get_child(0).card)
-	cards.append_array(table.cards)
-	var hand = calculateHand(cards)
-	var playerAction = "passed"
-	var playerActionAmount = 0
+func calculatePlayerMove() -> void:
+	var hand: Dictionary = calculateHand(hands[currentPlayer.name] + table.cards)
+	var playerAction: int = ACTION.PASSED
+	var playerActionAmount := 0
+	var canRaise: bool = currentPlayer.personality.raiseLimit > 0 and currentPlayer.money >= 1
 	match currentPlayer.personality.name:
 		"Casual":
 			if currentBidState == Poker.BID_STATES.CALL:
-				if(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind" or
-						hand.hand == "Two pairs" or
-						hand.hand == "Two of a kind"
-					) and
-					currentPlayer.personality.raiseLimit > 0 and
-					currentPlayer.money >= 1 and
-					randi() % 4 == 0
-				):
-					playerAction = "raised"
-					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money <= 2:
-						playerActionAmount = currentPlayer.money
-					else:
-						playerActionAmount = players[currentPlayer.name].money * 0.05
-						playerActionAmount += players[currentPlayer.name].money * (randi() % 10 / 100.0)
-				elif(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind" or
-						hand.hand == "Two pairs" or
-						hand.hand == "Two of a kind"
-					) and 
-					randi() % 4 != 0
-				):
-					playerAction = "called"
+				if hand.rank <= RANK.TWO_OF_A_KIND and canRaise and randi() % 4 == 0:
+					playerAction = ACTION.RAISED
+					playerActionAmount = _raiseAmount(0.05, 10)
+				elif hand.rank <= RANK.TWO_OF_A_KIND and randi() % 4 != 0:
+					playerAction = ACTION.CALLED
 				else:
-					playerAction = "folded"
-			elif(
-				(
-					hand.hand == "Royal Straight Flush" or
-					hand.hand == "Straight Flush" or
-					hand.hand == "Four of a kind" or
-					hand.hand == "Full house" or
-					hand.hand == "Flush" or
-					hand.hand == "Straight" or
-					hand.hand == "Three of a kind" or
-					hand.hand == "Two pairs" or
-					hand.hand == "Two of a kind"
-				) and
-				currentPlayer.personality.raiseLimit > 0 and
-				currentPlayer.money >= 1 and
-				randi() % 5 != 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money <= 2:
-					playerActionAmount = currentPlayer.money
-				else:
-					playerActionAmount = players[currentPlayer.name].money * 0.075
-					playerActionAmount += players[currentPlayer.name].money * (randi() % 15 / 100.0)
-			else:
-				if randi() % 20 == 0:
-					playerAction = "folded"
+					playerAction = ACTION.FOLDED
+			elif hand.rank <= RANK.TWO_OF_A_KIND and canRaise and randi() % 5 != 0:
+				playerAction = ACTION.RAISED
+				playerActionAmount = _raiseAmount(0.075, 15)
+			elif randi() % 20 == 0:
+				playerAction = ACTION.FOLDED
 		"Gambler":
 			if currentBidState == Poker.BID_STATES.CALL:
 				if randi() % 25 == 0:
-					playerAction = "called"
-				elif(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind"
-					) and
-					currentPlayer.personality.raiseLimit > 0 and
-					currentPlayer.money >= 1 and
-					randi() % 8 != 0
-				):
-					playerAction = "raised"
-					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money <= 2:
-						playerActionAmount = currentPlayer.money
-					else:
-						playerActionAmount = players[currentPlayer.name].money * 0.1
-						playerActionAmount += players[currentPlayer.name].money * (randi() % 20 / 100.0)
-				elif(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind" or
-						hand.hand == "Two pairs" or
-						hand.hand == "Two of a kind"
-					)
-				):
-					playerAction = "called"
+					playerAction = ACTION.CALLED
+				elif hand.rank <= RANK.THREE_OF_A_KIND and canRaise and randi() % 8 != 0:
+					playerAction = ACTION.RAISED
+					playerActionAmount = _raiseAmount(0.1, 20)
+				elif hand.rank <= RANK.TWO_OF_A_KIND:
+					playerAction = ACTION.CALLED
 				else:
-					playerAction = "folded"
-			elif(
-				(
-					hand.hand == "Royal Straight Flush" or
-					hand.hand == "Straight Flush" or
-					hand.hand == "Four of a kind" or
-					hand.hand == "Full house"
-				) and
-				currentPlayer.money >= 1 and
-				currentPlayer.personality.raiseLimit > 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				playerActionAmount = players[currentPlayer.name].money
-			elif(
-				(
-					hand.hand == "Flush" or
-					hand.hand == "Straight"
-				) and
-				currentPlayer.money >= 1 and
-				currentPlayer.personality.raiseLimit > 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money <= 2:
-					playerActionAmount = currentPlayer.money
-				else:
-					playerActionAmount = players[currentPlayer.name].money * 0.4
-					playerActionAmount += players[currentPlayer.name].money * (randi() % 2 / 100.0)
-			elif(
-				(
-					hand.hand == "Three of a kind" or
-					hand.hand == "Two pairs" or
-					hand.hand == "Two of a kind"
-				) and
-				currentPlayer.money >= 1 and
-				currentPlayer.personality.raiseLimit > 0 and
-				randi() % 5 != 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money <= 2:
-					playerActionAmount = currentPlayer.money
-				else:
-					playerActionAmount = players[currentPlayer.name].money * 0.1
-					playerActionAmount += players[currentPlayer.name].money * (randi() % 40 / 100.0)
-			else:
-				if randi() % 50 == 0:
-					playerAction = "folded"
+					playerAction = ACTION.FOLDED
+			elif hand.rank <= RANK.FULL_HOUSE and canRaise:
+				playerAction = ACTION.RAISED
+				playerActionAmount = currentPlayer.money
+			elif hand.rank <= RANK.STRAIGHT and canRaise:
+				playerAction = ACTION.RAISED
+				playerActionAmount = _raiseAmount(0.4, 2)
+			elif hand.rank <= RANK.TWO_OF_A_KIND and canRaise and randi() % 5 != 0:
+				playerAction = ACTION.RAISED
+				playerActionAmount = _raiseAmount(0.1, 40)
+			elif randi() % 50 == 0:
+				playerAction = ACTION.FOLDED
 		"Pinchpenny":
 			if currentBidState == Poker.BID_STATES.CALL:
-				if(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind"
-					) and
-					currentPlayer.money >= 1 and
-					currentPlayer.personality.raiseLimit > 0 and
-					randi() % 4 != 0
-				):
-					playerAction = "raised"
-					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money <= 2:
-						playerActionAmount = currentPlayer.money
-					else:
-						playerActionAmount = players[currentPlayer.name].money * 0.025
-						playerActionAmount += players[currentPlayer.name].money * (randi() % 5 / 100.0)
-				elif(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush"
-					)
-				):
-					playerAction = "called"
+				if hand.rank <= RANK.FOUR_OF_A_KIND and canRaise and randi() % 4 != 0:
+					playerAction = ACTION.RAISED
+					playerActionAmount = _raiseAmount(0.025, 5)
+				elif hand.rank <= RANK.FLUSH:
+					playerAction = ACTION.CALLED
 				else:
-					playerAction = "folded"
-			elif(
-				(
-					hand.hand == "Royal Straight Flush" or
-					hand.hand == "Straight Flush" or
-					hand.hand == "Four of a kind" or
-					hand.hand == "Full house" or
-					hand.hand == "Flush" or
-					hand.hand == "Straight" or
-					hand.hand == "Three of a kind"
-				) and 
-				currentPlayer.money >= 1 and
-				randi() % 2 == 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money <= 2:
-					playerActionAmount = currentPlayer.money
-				else:
-					playerActionAmount = players[currentPlayer.name].money * 0.025
-					playerActionAmount += players[currentPlayer.name].money * (randi() % 5 / 100.0)
-			else:
-				if randi() % 15 == 0:
-					playerAction = "folded"
+					playerAction = ACTION.FOLDED
+			elif hand.rank <= RANK.THREE_OF_A_KIND and canRaise and randi() % 2 == 0:
+				playerAction = ACTION.RAISED
+				playerActionAmount = _raiseAmount(0.025, 5)
+			elif randi() % 15 == 0:
+				playerAction = ACTION.FOLDED
 		"Random":
 			if currentBidState == Poker.BID_STATES.CALL:
-				if(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind" or
-						hand.hand == "Two pairs" or
-						hand.hand == "Two of a kind"
-					) and
-					currentPlayer.money >= 1 and
-					currentPlayer.personality.raiseLimit > 0 and
-					randi() % 3 == 0
-				):
-					playerAction = "raised"
-					currentPlayer.personality.raiseLimit -= 1
-					if currentPlayer.money <= 2:
-						playerActionAmount = currentPlayer.money
-					else:
-						playerActionAmount = players[currentPlayer.name].money * 0.05
-						playerActionAmount += players[currentPlayer.name].money * (randi() % 75 / 100.0)
-				elif(
-					(
-						hand.hand == "Royal Straight Flush" or
-						hand.hand == "Straight Flush" or
-						hand.hand == "Four of a kind" or
-						hand.hand == "Full house" or
-						hand.hand == "Flush" or
-						hand.hand == "Straight" or
-						hand.hand == "Three of a kind" or
-						hand.hand == "Two pairs" or
-						hand.hand == "Two of a kind"
-					) and 
-					randi() % 2 == 0
-				):
-					playerAction = "called"
+				if hand.rank <= RANK.TWO_OF_A_KIND and canRaise and randi() % 3 == 0:
+					playerAction = ACTION.RAISED
+					playerActionAmount = _raiseAmount(0.05, 75)
+				elif hand.rank <= RANK.TWO_OF_A_KIND and randi() % 2 == 0:
+					playerAction = ACTION.CALLED
 				else:
-					playerAction = "folded"
-			elif(
-				(
-					hand.hand == "Royal Straight Flush" or
-					hand.hand == "Straight Flush" or
-					hand.hand == "Four of a kind" or
-					hand.hand == "Full house" or
-					hand.hand == "Flush" or
-					hand.hand == "Straight" or
-					hand.hand == "Three of a kind" or
-					hand.hand == "Two pairs" or
-					hand.hand == "Two of a kind"
-				) and
-				currentPlayer.money >= 1 and
-				currentPlayer.personality.raiseLimit > 0 and
-				randi() % 2 == 0
-			):
-				playerAction = "raised"
-				currentPlayer.personality.raiseLimit -= 1
-				if currentPlayer.money <= 2:
-					playerActionAmount = currentPlayer.money
-				else:
-					playerActionAmount = players[currentPlayer.name].money * 0.075
-					playerActionAmount += players[currentPlayer.name].money * (randi() % 75 / 100.0)
-			else:
-				if randi() % 30 == 0:
-					playerAction = "folded"
-	playerActionAmount = int(playerActionAmount)
+					playerAction = ACTION.FOLDED
+			elif hand.rank <= RANK.TWO_OF_A_KIND and canRaise and randi() % 2 == 0:
+				playerAction = ACTION.RAISED
+				playerActionAmount = _raiseAmount(0.075, 75)
+			elif randi() % 30 == 0:
+				playerAction = ACTION.FOLDED
+	if playerAction == ACTION.RAISED:
+		currentPlayer.personality.raiseLimit -= 1
 	processPlayerTurn(currentPlayer.name, playerAction, playerActionAmount)
 
-func processPlayerTurn(playerName, playerAction, playerActionAmount = 0) -> void:
-	print("processPlayerTurn ",  playerName, " ", playerAction, " ", playerActionAmount)
+## Bet sizing shared by all personalities: base percentage of the player's
+## money plus a random extra percentage, at least 1, everything when broke.
+func _raiseAmount(baseFraction: float, randomPercent: int) -> int:
+	if currentPlayer.money <= 2:
+		return currentPlayer.money
+	var amount: float = currentPlayer.money * baseFraction
+	amount += currentPlayer.money * (randi() % randomPercent / 100.0)
+	return maxi(int(amount), 1)
+
+func processPlayerTurn(playerName: String, playerAction: int, playerActionAmount: int = 0) -> void:
+	if not gameActive or playerName != currentPlayer.name:
+		return
+	if playerAction == ACTION.PASSED and table.highestBet > table[playerName]:
+		# Illegal: facing a bet, the player must call, raise, or fold.
+		return
+	if playerName == "player1":
+		changeUIDisabledState(true)
 	playPlayerTurn(playerName, playerAction, playerActionAmount)
-	if !checkIfPlayersLeft():
-		if playersTurnState.folded.size() == players.size() - 1:
-			var winner = calculateWinner()
-			dealWinnings(winner)
-			updatePlayers()
-			currentBidState = Poker.BID_STATES.PASS
-			nextPlayerReady = false
-			animatedObjects.clear()
-			updateUI()
-			resetUI()
-			$Table/TableGrid/TableContainer/MenuUIMarginContainer.show()
-			$Table/TableGrid/TableContainer/TableDataContainer.hide()
-			return
-		elif table.cards.size() < 5:
-			dealCards(1)
-			for player in players:
-				if !playersTurnState.folded.has(player):
-					updatePlayerTurnState(player, "waiting")
-		else:
-			var winner = calculateWinner()
-			dealWinnings(winner)
-			updatePlayers()
-			currentBidState = Poker.BID_STATES.PASS
-			nextPlayerReady = false
-			animatedObjects.clear()
-			updateUI()
-			resetUI()
-			$Table/TableGrid/TableContainer/MenuUIMarginContainer.show()
-			$Table/TableGrid/TableContainer/TableDataContainer.hide()
-			return
+	if not shouldRoundContinue():
+		endBettingRound()
+		return
 	animateObject()
 
-func playPlayerTurn(playerName, playerAction, playerActionAmount) -> void:
-	match playerAction:
-		"raised":
-			var raiseAmount = playerActionAmount
-			if playerName == "player1":
-				raiseAmount = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text)
+func playPlayerTurn(playerName: String, playerAction: int, playerActionAmount: int) -> void:
+	var effectiveAction := playerAction
+	if effectiveAction == ACTION.RAISED:
+		var raiseAmount := playerActionAmount
+		if playerName == "player1":
+			raiseAmount = int(raiseLabel.text)
+		raiseAmount = mini(raiseAmount, players[playerName].money)
+		if table[playerName] + raiseAmount <= table.highestBet:
+			# Not enough to raise above the current highest bet (for example
+			# an all-in below it): treat the action as a call instead.
+			effectiveAction = ACTION.CALLED
+		else:
 			table[playerName] += raiseAmount
-			table.highestBet = table[playerName]
+			table.highestBet = maxi(table.highestBet, table[playerName])
 			players[playerName].money -= raiseAmount
-			if currentBidState == Poker.BID_STATES.PASS:
-				currentBidState = Poker.BID_STATES.CALL
-			for player in players:
-				for turnState in playersTurnState:
-					if playersTurnState[turnState].has(playerName) and turnState != "folded":
-						playersTurnState[turnState].erase(playerName)
-						playersTurnState.waiting.append(playerName)
-						break
-		"called":
-			var callAmount = table.highestBet - table[playerName]
-			table[playerName] += callAmount
-			players[playerName].money -= callAmount
+			currentBidState = Poker.BID_STATES.CALL
+			# A raise reopens the betting: everyone still in the hand must act again.
+			for otherPlayerName in players:
+				if otherPlayerName != playerName and not playersTurnState[ACTION.FOLDED].has(otherPlayerName):
+					setPlayerTurnState(otherPlayerName, ACTION.WAITING)
+			sfxPlayer["parameters/switch_to_clip"] = "Raise"
+			sfxPlayer.play()
+	if effectiveAction == ACTION.CALLED and table.highestBet <= table[playerName]:
+		# Nothing to call: the action is equivalent to a pass.
+		effectiveAction = ACTION.PASSED
+	if effectiveAction == ACTION.CALLED:
+		var callAmount: int = clampi(table.highestBet - table[playerName], 0, players[playerName].money)
+		table[playerName] += callAmount
+		players[playerName].money -= callAmount
 	if playerName != "player1":
 		updateBidState(playerName, table[playerName], players[playerName].playerType)
 		updateMoneyState(playerName, players[playerName].money, players[playerName].playerType)
 	updateUI()
-	updatePlayerTurnState(playerName, playerAction)
+	setPlayerTurnState(playerName, effectiveAction)
 	updateCurrentPlayer()
 
-func updatePlayerTurnState(playerName, playerAction = null) -> void:
+func setPlayerTurnState(playerName: String, turnState: int) -> void:
+	removePlayerFromTurnState(playerName)
+	playersTurnState[turnState].append(playerName)
+
+func removePlayerFromTurnState(playerName: String) -> void:
 	for turnState in playersTurnState:
-		if playersTurnState[turnState].has(playerName):
-			playersTurnState[turnState].erase(playerName)
-			break
-	if playerAction != null:
-		playersTurnState[playerAction].append(playerName)
+		playersTurnState[turnState].erase(playerName)
 
 func updateCurrentPlayer() -> void:
-	var currentPlayerPosition = playerOrder.find(currentPlayer.name)
-	if currentPlayerPosition + 1 == players.size():
-		currentPlayer = players[playerOrder[0]]
+	if playerOrder.is_empty():
 		return
-	currentPlayer = players[playerOrder[currentPlayerPosition + 1]]
+	var playerPosition := playerOrder.find(currentPlayer.name)
+	currentPlayer = players[playerOrder[(playerPosition + 1) % playerOrder.size()]]
 
-func checkIfPlayersLeft() -> bool:
-	if(
-		(
-			playersTurnState.waiting.is_empty() and
-			playersTurnState.passed.size() + playersTurnState.folded.size() == players.size()
-		) or (
-			playersTurnState.waiting.is_empty() and
-			playersTurnState.passed.is_empty() and
-			playersTurnState.called.size() + playersTurnState.folded.size() + playersTurnState.raised.size() == players.size()
-		) or (
-			playersTurnState.folded.size() == players.size() - 1
-		)
-	):
+func shouldRoundContinue() -> bool:
+	var waiting: Array = playersTurnState[ACTION.WAITING]
+	var passed: Array = playersTurnState[ACTION.PASSED]
+	var raised: Array = playersTurnState[ACTION.RAISED]
+	var called: Array = playersTurnState[ACTION.CALLED]
+	var folded: Array = playersTurnState[ACTION.FOLDED]
+	if folded.size() == players.size() - 1:
+		return false
+	if waiting.is_empty() and passed.size() + folded.size() == players.size():
+		return false
+	if waiting.is_empty() and passed.is_empty() and called.size() + raised.size() + folded.size() == players.size():
 		return false
 	return true
 
-func calculateWinner() -> String:
-	if playersTurnState.folded.size() == players.size() - 1:
-		for playerState in playersTurnState:
-			if playersTurnState[playerState].size() != 0 and playerState != "folded":
-				return playersTurnState[playerState][0]
-	return calculateWinningHand()
+func endBettingRound() -> void:
+	if playersTurnState[ACTION.FOLDED].size() == players.size() - 1:
+		endRound()
+		return
+	if table.cards.size() < 5:
+		dealCards(1)
+		for playerName in players:
+			if not playersTurnState[ACTION.FOLDED].has(playerName):
+				setPlayerTurnState(playerName, ACTION.WAITING)
+		currentBidState = Poker.BID_STATES.PASS
+		animateObject()
+		return
+	endRound()
 
-func calculateWinningHand() -> String:
-	var winner
-	var currentWinningHand = {
-		"player": null,
-		"hand": null
+func endRound() -> void:
+	nextPlayerReady = false
+	animatedObjects.clear()
+	revealCards()
+	var winners: Array = calculateWinner()
+	dealWinnings(winners)
+	updatePlayers()
+	currentBidState = Poker.BID_STATES.PASS
+	# Keep the game marked active during the reveal so nothing (the Deal
+	# button included) can start the next game before the cleanup below.
+	await get_tree().create_timer(SHOWDOWN_REVEAL_DELAY).timeout
+	gameActive = false
+	resetUI()
+	if not players.has("player1"):
+		gameOver()
+		return
+	updateUI()
+	menuUI.show()
+	tableData.hide()
+
+func gameOver() -> void:
+	PokerMoney.money = 0
+	dealButton.disabled = true
+	menuUI.show()
+	tableData.hide()
+
+func calculateWinner() -> Array:
+	if playersTurnState[ACTION.FOLDED].size() == players.size() - 1:
+		for turnState in playersTurnState:
+			if turnState == ACTION.FOLDED:
+				continue
+			if not playersTurnState[turnState].is_empty():
+				return [playersTurnState[turnState][0]]
+	return calculateWinningHands()
+
+func calculateWinningHands() -> Array:
+	var winners: Array = []
+	var bestScore: Array = []
+	for playerName in players:
+		if playersTurnState[ACTION.FOLDED].has(playerName):
+			continue
+		var hand: Dictionary = calculateHand(hands[playerName] + table.cards)
+		var score: Array = [hand.rank]
+		score.append_array(hand.tiebreak)
+		if winners.is_empty() or compareHands(score, bestScore) < 0:
+			bestScore = score
+			winners = [playerName]
+		elif compareHands(score, bestScore) == 0:
+			winners.append(playerName)
+	return winners
+
+## Compares two hand scores of [rank, tiebreak1, tiebreak2, ...].
+## Returns a negative number when a wins, positive when b wins, 0 on a tie.
+func compareHands(a: Array, b: Array) -> int:
+	if a[0] != b[0]:
+		return a[0] - b[0]
+	for i in range(1, mini(a.size(), b.size())):
+		if a[i] != b[i]:
+			return b[i] - a[i]
+	return 0
+
+func calculateHand(cards: Array) -> Dictionary:
+	var amountCounts := {}
+	var suitedAmounts := {}
+	for cardData in cards:
+		amountCounts[cardData.amount] = amountCounts.get(cardData.amount, 0) + 1
+		if not suitedAmounts.has(cardData.suit):
+			suitedAmounts[cardData.suit] = []
+		suitedAmounts[cardData.suit].append(cardData.amount)
+
+	var amountsDesc: Array = amountCounts.keys()
+	amountsDesc.sort()
+	amountsDesc.reverse()
+	for suit in suitedAmounts:
+		suitedAmounts[suit].sort()
+		suitedAmounts[suit].reverse()
+
+	# Amounts grouped by how many times they appear, each group high to low.
+	var amountsByCount := {}
+	for amount in amountsDesc:
+		var count: int = amountCounts[amount]
+		if not amountsByCount.has(count):
+			amountsByCount[count] = []
+		amountsByCount[count].append(amount)
+
+	var flushSuit := -1
+	for suit in suitedAmounts:
+		if suitedAmounts[suit].size() >= FLUSH_SIZE:
+			flushSuit = suit
+			break
+
+	if flushSuit != -1:
+		var suited: Array = suitedAmounts[flushSuit]
+		if suited.has(10) and suited.has(11) and suited.has(12) and suited.has(13):
+			return _makeHand(RANK.ROYAL_STRAIGHT_FLUSH, [13])
+		var straightFlushHigh := findStraightHigh(suited, STRAIGHT_FLUSH_SIZE)
+		if straightFlushHigh != -1:
+			return _makeHand(RANK.STRAIGHT_FLUSH, [straightFlushHigh])
+	if amountsByCount.has(4):
+		var fourAmount: int = amountsByCount[4][0]
+		return _makeHand(RANK.FOUR_OF_A_KIND, [fourAmount] + _highestExcept(amountsDesc, [fourAmount], 1))
+	if amountsByCount.has(3):
+		var threeAmount: int = amountsByCount[3][0]
+		var pairAmount := -1
+		if amountsByCount[3].size() > 1:
+			pairAmount = amountsByCount[3][1]
+		if amountsByCount.has(2):
+			pairAmount = maxi(pairAmount, amountsByCount[2][0])
+		if pairAmount != -1:
+			return _makeHand(RANK.FULL_HOUSE, [threeAmount, pairAmount])
+	if flushSuit != -1:
+		return _makeHand(RANK.FLUSH, suitedAmounts[flushSuit].slice(0, FLUSH_SIZE))
+	var straightHigh := findStraightHigh(amountsDesc, STRAIGHT_SIZE)
+	if straightHigh != -1:
+		return _makeHand(RANK.STRAIGHT, [straightHigh])
+	if amountsByCount.has(3):
+		var threeAmount: int = amountsByCount[3][0]
+		return _makeHand(RANK.THREE_OF_A_KIND, [threeAmount] + _highestExcept(amountsDesc, [threeAmount], 2))
+	if amountsByCount.has(2) and amountsByCount[2].size() > 1:
+		var highPair: int = amountsByCount[2][0]
+		var lowPair: int = amountsByCount[2][1]
+		return _makeHand(RANK.TWO_PAIRS, [highPair, lowPair] + _highestExcept(amountsDesc, [highPair, lowPair], 1))
+	if amountsByCount.has(2):
+		var pairAmount: int = amountsByCount[2][0]
+		return _makeHand(RANK.TWO_OF_A_KIND, [pairAmount] + _highestExcept(amountsDesc, [pairAmount], 3))
+	return _makeHand(RANK.HIGH_CARD, amountsDesc.slice(0, 5))
+
+func _makeHand(rank: int, tiebreak: Array) -> Dictionary:
+	return {
+		"hand": Poker.HANDS[rank],
+		"rank": rank,
+		"tiebreak": tiebreak,
 	}
-	for player in players.values():
-		var cards = []
-		for playerName in Poker.PLAYER_CARD_PATHS:
-			if player.name == playerName:
-				for card in Poker.PLAYER_CARD_PATHS[player.name]:
-					cards.append(get_node(Poker.PLAYER_CARD_PATHS[player.name][card]).get_child(0).card)
-				break
-		cards.append_array(table.cards)
-		var hand = calculateHand(cards)
-		var winningHand = calculateHigherHand(hand, currentWinningHand)
-		if !currentWinningHand.hand == winningHand:
-			currentWinningHand = {
-				"player": player.name,
-				"hand": winningHand
-			}
-	winner = currentWinningHand
-	return winner.player
 
-func calculateHand(cards) -> Dictionary:
-	for hand in Poker.HANDS:
-		match hand:
-			"Royal Straight Flush":
-				for card in cards:
-					if card.amount == 10:
-						var royalStraightFlush = [card]
-						for i in range(1, 5):
-							for checkedCard in cards:
-								if checkedCard.amount == card.amount + i and checkedCard.suit == card.suit:
-									royalStraightFlush.append(checkedCard)
-									break
-						if royalStraightFlush.size() == 4:
-							return {
-								"hand": hand,
-								"cards": royalStraightFlush
-							}
-			"Straight Flush":
-				for card in cards:
-					var straightFlush = [card]
-					for i in range(1, 5):
-						for checkedCard in cards:
-							if checkedCard.amount == straightFlush.back().amount + i and checkedCard.suit == card.suit:
-								straightFlush.append(checkedCard)
-								break
-					if straightFlush.size() == 4:
-						return {
-							"hand": hand,
-							"cards": straightFlush
-						}
-			"Four of a kind":
-				var fourOfAKind = []
-				for card in cards:
-					fourOfAKind.clear()
-					for checkedCard in cards:
-						if card.amount == checkedCard.amount and !fourOfAKind.has(checkedCard):
-							fourOfAKind.append(checkedCard)
-							break
-					if fourOfAKind.size() == 4:
-						return {
-							"hand": hand,
-							"cards": fourOfAKind
-						}
-			"Full house":
-				var pair = null
-				for card in cards:
-					for checkedCard in cards:
-						if card.amount == checkedCard.amount and card != checkedCard:
-							pair = [card, checkedCard]
-				var three = null
-				for card in cards:
-					for checkedCard in cards:
-						if(
-							card.amount == checkedCard.amount and
-							card != checkedCard and
-							pair[0] != card and
-							pair[0] != checkedCard and
-							pair[1] != card and
-							pair[1] != checkedCard
-						):
-							three = [card, checkedCard]
-				if pair and pair.size() == 2 and three and three.size() == 3:
-					return {
-						"hand": hand,
-						"cards": {
-							"pair": pair,
-							"three": three
-						}
-					}
-			"Flush":
-				for card in cards:
-					var flush = [card]
-					for i in range(1, 5):
-						for checkedCard in cards:
-							if checkedCard.suit == card.suit and !flush.has(checkedCard):
-								flush.append(checkedCard)
-					if flush.size() == 4:
-						return {
-							"hand": hand,
-							"cards": flush
-						}
-			"Straight":
-				for card in cards:
-					var straight = [card]
-					for i in range(1, 6):
-						for checkedCard in cards:
-							if checkedCard.amount == straight.back().amount + i:
-								straight.append(checkedCard)
-								break
-					if straight.size() == 5:
-						return {
-							"hand": hand,
-							"cards": straight
-						}
-			"Three of a kind":
-				var threeOfAKind = []
-				for card in cards:
-					threeOfAKind.clear()
-					for checkedCard in cards:
-						if card.amount == checkedCard.amount and !threeOfAKind.has(checkedCard):
-							threeOfAKind.append(checkedCard)
-							break
-					if threeOfAKind.size() == 3:
-						return {
-							"hand": hand,
-							"cards": threeOfAKind
-						}
-			"Two pairs":
-				var firstPair = null
-				for card in cards:
-					for checkedCard in cards:
-						if card.amount == checkedCard.amount and card != checkedCard:
-							firstPair = [card, checkedCard]
-				var secondPair = null
-				for card in cards:
-					for checkedCard in cards:
-						if(
-							card.amount == checkedCard.amount and
-							card != checkedCard and
-							firstPair[0] != card and
-							firstPair[0] != checkedCard and
-							firstPair[1] != card and
-							firstPair[1] != checkedCard
-						):
-							secondPair = [card, checkedCard]
-				if firstPair and firstPair.size() == 2 and secondPair and secondPair.size() == 2:
-					return {
-						"hand": hand,
-						"cards": {
-							"firstPair": firstPair,
-							"secondPair": secondPair
-						}
-					}
-			"Two of a kind":
-				var twoOfAKind = []
-				for card in cards:
-					twoOfAKind.clear()
-					for checkedCard in cards:
-						if card.amount == checkedCard.amount and !twoOfAKind.has(checkedCard):
-							twoOfAKind.append(checkedCard)
-							break
-					if twoOfAKind.size() == 2:
-						return {
-							"hand": hand,
-							"cards": twoOfAKind
-						}
-			"High card":
-				var highestCard = null
-				for card in cards:
-					if highestCard == null:
-						highestCard = card
-					if card.amount > highestCard.amount:
-						highestCard = card
-				return {
-					"hand": hand,
-					"cards": highestCard
-				}
-	push_error("No valid hand!")
-	return {}
+## Returns the highest card amount completing a run of runLength consecutive
+## amounts, or -1 when there is no run. The ace counts as both high and low.
+func findStraightHigh(amounts: Array, runLength: int) -> int:
+	var uniqueAmounts := amounts.duplicate()
+	uniqueAmounts.sort()
+	if uniqueAmounts.has(14):
+		uniqueAmounts.push_front(1)
+	var best := -1
+	var run := 1
+	for i in range(1, uniqueAmounts.size()):
+		if uniqueAmounts[i] == uniqueAmounts[i - 1] + 1:
+			run += 1
+			if run >= runLength:
+				best = uniqueAmounts[i]
+		elif uniqueAmounts[i] != uniqueAmounts[i - 1]:
+			run = 1
+	return best
 
-func calculateHigherHand(newHand, currentWinningHand):
-	var newHandTypeRanking = Poker.HANDS.find(newHand.hand)
-	var currentWinningHandTypeRanking = Poker.HANDS.find(currentWinningHand.hand)
-	if newHandTypeRanking > currentWinningHandTypeRanking:
-		return newHand
-	elif currentWinningHandTypeRanking > newHandTypeRanking:
-		return currentWinningHand
-	match newHandTypeRanking:
-		"Royal Straight Flush":
-			if !(typeof(currentWinningHand) == TYPE_ARRAY):
-				return [currentWinningHand, newHand]
-			return currentWinningHand.append(newHand)
-		"Full house":
-			if (
-				currentWinningHand.cards.has("pair") and
-				currentWinningHand.cards.has("three") and
-				newHand.cards.has("pair") and
-				newHand.cards.has("three")
-			):
-				if (
-					typeof(currentWinningHand) == TYPE_ARRAY and
-					newHand.cards.pair[0].amount == currentWinningHand[0].cards.pair[0].amount and
-					newHand.cards.pair[0].amount == currentWinningHand[0].cards.pair[0].amount and
-					newHand.cards.three[0].amount == currentWinningHand[0].cards.three[0].amount and
-					newHand.cards.three[0].amount == currentWinningHand[0].cards.three[0].amount
-				):
-					return currentWinningHand.merge(newHand)
-				if (
-					newHand.cards.pair[0].amount == currentWinningHand.cards.pair[0].amount and
-					newHand.cards.pair[0].amount == currentWinningHand.cards.pair[0].amount and
-					newHand.cards.three[0].amount == currentWinningHand.cards.three[0].amount and
-					newHand.cards.three[0].amount == currentWinningHand.cards.three[0].amount
-				):
-					return [currentWinningHand, newHand]
-				var newHandHighestThreeCard = newHand.three.cards[0].amount
-				var currentHighestHandHighhestThreeCard = currentWinningHand.three.cards[0].amount
-				var newHandHighestPairCard = newHand.pair.cards[0].amount
-				var currentHighestHandHighhestPairCard = currentWinningHand.pair.cards[0].amount
-				if (
-					newHandHighestThreeCard > currentHighestHandHighhestThreeCard or
-					(
-						newHandHighestPairCard > currentHighestHandHighhestPairCard and
-						newHandHighestThreeCard < currentHighestHandHighhestThreeCard
-					)
-				):
-					return newHand
-		"Straight Flush", "Flush", "Straight":
-			var newHandHighestCard = null
-			var currentWinningHandHighestCard = null
-			var currentWinningHandCards
-			if typeof(currentWinningHandHighestCard) == TYPE_ARRAY:
-				currentWinningHandCards = currentWinningHand[0].cards[0]
-			else:
-				currentWinningHandCards = currentWinningHandCards.cards[0]
-			for card in newHand.cards:
-				if newHandHighestCard == null:
-					newHandHighestCard = card
-				if card.amount > newHandHighestCard:
-					newHandHighestCard = card
-			for card in currentWinningHandCards:
-				if currentWinningHandHighestCard == null:
-					currentWinningHandHighestCard = card
-				if card.amount > currentWinningHandHighestCard:
-					currentWinningHandHighestCard = card
-			if (
-				typeof(currentWinningHand) == TYPE_ARRAY and
-				newHandHighestCard == currentWinningHandHighestCard
-			):
-				return currentWinningHand.merge(newHand)
-			if newHandHighestCard == currentWinningHandHighestCard:
-				return [currentWinningHand, newHand]
-			if newHandHighestCard > currentWinningHandHighestCard:
-				return newHand
-		"Two pairs":
-			if (
-				currentWinningHand.cards.has("firstPair") and
-				currentWinningHand.cards.has("secondPair") and
-				newHand.cards.has("firstPair") and
-				newHand.cards.has("secondPair")
-			):
-				if (
-					typeof(currentWinningHand) == TYPE_ARRAY and
-					newHand.cards.firstPair[0].amount == currentWinningHand[0].cards.firstPair[0].amount and
-					newHand.cards.firstPair[0].amount == currentWinningHand[0].cards.firstPair[0].amount and
-					newHand.cards.secondPair[0].amount == currentWinningHand[0].cards.secondPair[0].amount and
-					newHand.cards.secondPair[0].amount == currentWinningHand[0].cards.secondPair[0].amount
-				):
-					return currentWinningHand.merge(newHand)
-				if (
-					newHand.cards.firstPair[0].amount == currentWinningHand.cards.firstPair[0].amount and
-					newHand.cards.firstPair[0].amount == currentWinningHand.cards.firstPair[0].amount and
-					newHand.cards.secondPair[0].amount == currentWinningHand.cards.secondPair[0].amount and
-					newHand.cards.secondPair[0].amount == currentWinningHand.cards.secondPair[0].amount
-				):
-					return [currentWinningHand, newHand]
-				var newHandHighestCard = newHand.firstPair.cards[0].amount
-				var currentHighestHandHighhestCard = currentWinningHand.firstPair.cards[0].amount
-				if newHand.secondPair.cards[0].amount > newHandHighestCard:
-					newHandHighestCard = newHand.secondPair.cards[0].amount
-				if currentWinningHand.secondPair.cards[0].amount > currentHighestHandHighhestCard:
-					currentHighestHandHighhestCard = currentWinningHand.secondPair.cards[0].amount
-				if newHandHighestCard > currentHighestHandHighhestCard:
-					return newHand
-		"Four of a kind", "Three of a kind", "Two of a kind":
-			if (
-				typeof(currentWinningHand) == TYPE_ARRAY and
-				newHand.cards[0].amount == currentWinningHand[0].cards[0].amount
-			):
-				return currentWinningHand.merge(newHand)
-			if newHand.cards[0].amount == currentWinningHand.cards[0].amount:
-				return [currentWinningHand, newHand]
-			if newHand.cards[0].amount > currentWinningHand.cards[0].amount:
-				return newHand
-		"High card":
-			if (
-				typeof(currentWinningHand) == TYPE_ARRAY and
-				newHand.cards.amount == currentWinningHand[0].cards.amount
-			):
-				return currentWinningHand.merge(newHand)
-			if newHand.cards.amount == currentWinningHand.cards.amount:
-				return [currentWinningHand, newHand]
-			if newHand.cards.amount > currentWinningHand.cards.amount:
-				return newHand
-	return currentWinningHand
+func _highestExcept(amountsDesc: Array, excluded: Array, count: int) -> Array:
+	var result := []
+	for amount in amountsDesc:
+		if excluded.has(amount):
+			continue
+		result.append(amount)
+		if result.size() == count:
+			break
+	return result
 
-func dealWinnings(winner):
-	var winnings = 0
-	for player in table:
-		if "player" in player:
-			winnings += table[player]
-	if typeof(winner) == TYPE_ARRAY:
-		pass
-	players[winner].money += winnings
+func dealWinnings(winners: Array) -> void:
+	var winnings := 0
+	for playerName in players:
+		winnings += table[playerName]
+	var share: int = floori(float(winnings) / winners.size())
+	var remainder: int = winnings - share * winners.size()
+	for i in range(winners.size()):
+		players[winners[i]].money += share + (1 if i < remainder else 0)
 
 func updatePlayers() -> void:
-	for player in players.keys():
-		if players[player].money <= 0:
-			playerOrder.erase(player)
-			players.erase(player)
-			table.erase(player)
-			updatePlayerTurnState(player, null)
-			get_node("Table/TableGrid/{player}/{player}Container".format({ "player": player[0].to_upper() + player.substr(1,-1) })).hide()
-	for player in players:
-		updatePlayerTurnState(player, "waiting")
-	playerOrder.push_front(playerOrder.pop_back())
-
-
-func animateObject():
-	if animatedObjects.is_empty():
-		nextPlayerReady = true
-		changeUIDisabledState(false)
+	for playerName in players.keys():
+		if players[playerName].money <= 0:
+			playerOrder.erase(playerName)
+			players.erase(playerName)
+			table.erase(playerName)
+			hands.erase(playerName)
+			removePlayerFromTurnState(playerName)
+			get_node("Table/TableGrid/{player}/{player}Container".format({ "player": _playerNodeName(playerName) })).hide()
+	if players.is_empty():
 		return
-	var tween = get_tree().create_tween()
-	var object = animatedObjects.pop_front()
-	tween.tween_property(get_node(object.path), "global_position", object.global_position, object.duration).from(get_node(Poker.DECK_PATH).global_position)
-	tween.tween_callback(animateObject)
-	await get_tree().physics_frame
-	object.show()
+	for playerName in players:
+		setPlayerTurnState(playerName, ACTION.WAITING)
+	playerOrder.push_front(playerOrder.pop_back())
+	if currentPlayer.is_empty() or not players.has(currentPlayer.name):
+		currentPlayer = players[playerOrder[0]]
 
-func changeUIDisabledState(disabled = true):
+func revealCards() -> void:
+	for playerName in players:
+		if players[playerName].playerType == "player":
+			continue
+		if playersTurnState[ACTION.FOLDED].has(playerName):
+			continue
+		for slotPath in Poker.PLAYER_CARD_PATHS[playerName].values():
+			for cardNode in get_node(slotPath).get_children():
+				cardNode.reveal()
+
+func animateObject() -> void:
+	if animatedObjects.is_empty():
+		onAnimationsFinished()
+		return
+	var cardNode = animatedObjects.pop_front()
+	var tween := get_tree().create_tween()
+	tween.tween_property(cardNode, "global_position", cardNode.endPosition, cardNode.duration).from(deckNode.global_position)
+	tween.tween_callback(animateObject)
+	await get_tree().process_frame
+	cardNode.show()
+	sfxPlayer.play()
+
+func onAnimationsFinished() -> void:
+	if not gameActive:
+		return
+	if currentPlayer.name == "player1":
+		changeUIDisabledState(false)
+	else:
+		nextPlayerReady = true
+
+func changeUIDisabledState(disabled: bool = true) -> void:
 	uIDisabled = disabled
 	for node in get_tree().get_nodes_in_group("Game"):
 		node.disabled = disabled
-	checkUIState()
+	if not disabled:
+		updateActionButtons()
 
-func updateUI():
-	$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(0)
+func updateActionButtons() -> void:
+	if uIDisabled or not players.has("player1"):
+		return
+	var callDeficit: int = table.highestBet - table.get("player1", 0)
+	callButton.disabled = callDeficit <= 0
+	passButton.disabled = callDeficit > 0
+	raiseButton.disabled = int(raiseLabel.text) == 0 or players["player1"].money <= callDeficit
+
+func updateUI() -> void:
+	raiseLabel.text = str(0)
 	for player in players.values():
-		updateBidState(player.name, table[player.name], player.playerType)
-		updateMoneyState(player.name, players[player.name].money, player.playerType)
+		updateBidState(player.name, table.get(player.name, 0), player.playerType)
+		updateMoneyState(player.name, player.money, player.playerType)
+	updateActionButtons()
 
-func resetUI():
+func resetUI() -> void:
 	for paths in Poker.PLAYER_CARD_PATHS.values():
-		for path in paths.values():
-			for card in get_node(path).get_children():
-				card.queue_free()
-	for cards in $Table/TableGrid/TableContainer/TableDataContainer/TableCardsContainer.get_children():
-		for card in cards.get_children():
-			card.queue_free()
+		for slotPath in paths.values():
+			for cardNode in get_node(slotPath).get_children():
+				cardNode.queue_free()
+	for slotNode in tableCardsContainer.get_children():
+		for cardNode in slotNode.get_children():
+			cardNode.queue_free()
 
-func updateMoneyState(player, money, playerType):
-	var moneyNode
+## "player1" -> "Player1", matching the UI node names. (String.capitalize()
+## would insert a space before the digit.)
+func _playerNodeName(playerName: String) -> String:
+	return playerName[0].to_upper() + playerName.substr(1)
+
+func updateMoneyState(playerName: String, money: int, playerType: String) -> void:
+	var moneyNode: Label
 	if playerType == "player":
-		moneyNode = get_node("Table/TableGrid/{player}UILeft/{player}UILeftContainer/{player}UILeftNumberContainer/Money".format({ "player": player[0].to_upper() + player.substr(1,-1) }))
+		moneyNode = get_node("Table/TableGrid/{player}UILeft/{player}UILeftContainer/{player}UILeftNumberContainer/Money".format({ "player": _playerNodeName(playerName) }))
 	else:
-		moneyNode = get_node("Table/TableGrid/{player}/{player}Container/{player}UITopContainer/{player}UITopNumberMarginContainer/{player}UITopNumberContainer/Money".format({ "player": player[0].to_upper() + player.substr(1,-1) }))
+		moneyNode = get_node("Table/TableGrid/{player}/{player}Container/{player}UITopContainer/{player}UITopNumberMarginContainer/{player}UITopNumberContainer/Money".format({ "player": _playerNodeName(playerName) }))
 	moneyNode.text = str(money)
 
-func updateBidState(player, bid, playerType):
-	var bidNode
+func updateBidState(playerName: String, bid: int, playerType: String) -> void:
+	var bidNode: Label
 	if playerType == "player":
-		bidNode = get_node("Table/TableGrid/{player}UILeft/{player}UILeftContainer/{player}UILeftNumberContainer/Bid".format({ "player": player[0].to_upper() + player.substr(1,-1) }))
+		bidNode = get_node("Table/TableGrid/{player}UILeft/{player}UILeftContainer/{player}UILeftNumberContainer/Bid".format({ "player": _playerNodeName(playerName) }))
 	else:
-		bidNode = get_node("Table/TableGrid/{player}/{player}Container/{player}UITopContainer/{player}UITopNumberMarginContainer/{player}UITopNumberContainer/Bid".format({ "player": player[0].to_upper() + player.substr(1,-1) }))
+		bidNode = get_node("Table/TableGrid/{player}/{player}Container/{player}UITopContainer/{player}UITopNumberMarginContainer/{player}UITopNumberContainer/Bid".format({ "player": _playerNodeName(playerName) }))
 	bidNode.text = str(bid)
-
 
 func _on_help_button_pressed() -> void:
 	$Popups/Rules.show()
@@ -917,9 +617,7 @@ func _on_hands_button_pressed() -> void:
 	$Popups/Cards.show()
 
 func _on_add_to_bid_pressed(addToBid: int) -> void:
-	var bid = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text)
-	var totalMoney = int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Money.text)
-	if bid + addToBid > totalMoney:
-		$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(totalMoney)
-	else:
-		$Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text = str(int($Table/TableGrid/Player1UILeft/Player1UILeftContainer/Player1UILeftNumberContainer/Raise.text) + addToBid)
+	if not players.has("player1"):
+		return
+	raiseLabel.text = str(mini(int(raiseLabel.text) + addToBid, players["player1"].money))
+	updateActionButtons()
