@@ -7,6 +7,29 @@ signal item
 var actOpen = null
 
 
+func setHoveredActorStats(characterData, characterStats) -> void:
+	var panel = $VBoxContainer/GridContainer/PanelContainer3
+	panel.visible = true
+	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredName").text = characterData.Name
+	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredHPContainer/HoveredHP").text = str(characterData.HP)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer/HoveredSixShootin").text = str(characterStats.SixShootin)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer/HoveredHighTailin").text = str(characterStats.HighTailin)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer/HoveredTaffyin").text = str(characterStats.Taffyin)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer/HoveredRevolver").text = str(characterStats.Revolver)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer/HoveredRifle").text = str(characterStats.Rifle)
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer/HoveredShotgun").text = str(characterStats.Shotgun)
+
+func clearHoveredActorStats() -> void:
+	var panel = $VBoxContainer/GridContainer/PanelContainer3
+	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredName").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredHPContainer/HoveredHP").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer/HoveredSixShootin").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer/HoveredHighTailin").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer/HoveredTaffyin").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer/HoveredRevolver").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer/HoveredRifle").text = "-"
+	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer/HoveredShotgun").text = "-"
+
 func setPlayerCharacterStats(characterData, characterStats) -> void:
 	#for data in characterData:
 		##get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/{data}Container/{data}Title".format({ "data": data })).setRichTextLabel(characterData[data])

@@ -7,9 +7,21 @@ var data = {
 	"walkingSpeed": 75,
 	"runningSpeed": 25,
 	"stats": {
-		"sixShootin": 1,
+		"sixShootin": 0,
 		"highTailin": 7,
-		"taffyin": -2
+		"taffyin": 0,
+		"damage": {
+			"lead": {
+				"revolver": 1,
+				"rifle": 1,
+				"shotgun": 1
+			},
+			"explosive": {
+				"gunpowder": 1,
+				"liquid": 1,
+				"shrapnel": 1
+			}
+		}
 	},
 	"rodeo": null,
 	"weapon": {

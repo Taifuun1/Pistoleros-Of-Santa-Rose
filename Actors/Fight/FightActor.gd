@@ -4,6 +4,8 @@ var outlineShader = load("res://Shaders/Outline.tres")
 
 signal actorSelected
 signal actorTurn
+signal actorHovered
+signal actorUnhovered
 
 var items = ["Paregoric", "Paregoric"]
 var abilities = ["Sharp Shot"]
@@ -27,7 +29,7 @@ func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 	animations.playAnimation(idleAnimation)
 	add_child(animations)
 	
-	position = Fight.fightPositions[actorSide][actorPosition.column][actorPosition.row]
+	position = Fight.fightPositions[actorSide][actorPosition]
 	#position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
 	actorTurn.connect(toggleActorTurn)
 
@@ -48,6 +50,8 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 
 func _on_area_2d_mouse_entered() -> void:
 	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = outlineShader
+	actorHovered.emit()
 
 func _on_area_2d_mouse_exited() -> void:
 	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = null
+	actorUnhovered.emit()

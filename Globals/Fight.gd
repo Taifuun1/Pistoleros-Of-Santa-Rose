@@ -3,58 +3,73 @@ extends Node
 
 var fightPositions = {
 	"player team": {
-		1: {
-			1: Vector2i(275, 240),
-			2: Vector2i(265, 252),
-			3: Vector2i(255, 264)
-			#4: Vector2i(260, 261)
-		},
-		2: {
-			1: Vector2i(180, 260),
-			2: Vector2i(170, 275),
-			3: Vector2i(160, 290),
-			4: Vector2i(150, 305)
-		},
-		3: {
-			1: Vector2i(130, 260),
-			2: Vector2i(120, 275),
-			3: Vector2i(110, 290),
-			4: Vector2i(100, 305)
-		},
-		4: {
-			1: Vector2i(80, 260),
-			2: Vector2i(70, 275),
-			3: Vector2i(60, 290),
-			4: Vector2i(50, 305)
-		}
+		1: Vector2i(280, 252),
+		2: Vector2i(250, 252),
+		3: Vector2i(220, 252),
+		4: Vector2i(190, 252)
 	},
 	"enemy team": {
-		1: {
-			1: Vector2i(350, 240),
-			2: Vector2i(360, 252),
-			3: Vector2i(370, 264)
-			#4: Vector2i(400, 265)
-		},
-		2: {
-			1: Vector2i(410, 260),
-			2: Vector2i(420, 275),
-			3: Vector2i(430, 290),
-			4: Vector2i(440, 305)
-		},
-		3: {
-			1: Vector2i(490, 260),
-			2: Vector2i(500, 275),
-			3: Vector2i(510, 290),
-			4: Vector2i(520, 305)
-		},
-		4: {
-			1: Vector2i(540, 260),
-			2: Vector2i(550, 275),
-			3: Vector2i(560, 290),
-			4: Vector2i(570, 305)
-		}
+		1: Vector2i(340, 252),
+		2: Vector2i(370, 252),
+		3: Vector2i(400, 252),
+		4: Vector2i(430, 252)
 	}
 }
+
+#var fightPositions = {
+	#"player team": {
+		#1: {
+			#1: Vector2i(275, 240),
+			#2: Vector2i(265, 252),
+			#3: Vector2i(255, 264)
+			##4: Vector2i(260, 261)
+		#},
+		#2: {
+			#1: Vector2i(180, 260),
+			#2: Vector2i(170, 275),
+			#3: Vector2i(160, 290),
+			#4: Vector2i(150, 305)
+		#},
+		#3: {
+			#1: Vector2i(130, 260),
+			#2: Vector2i(120, 275),
+			#3: Vector2i(110, 290),
+			#4: Vector2i(100, 305)
+		#},
+		#4: {
+			#1: Vector2i(80, 260),
+			#2: Vector2i(70, 275),
+			#3: Vector2i(60, 290),
+			#4: Vector2i(50, 305)
+		#}
+	#},
+	#"enemy team": {
+		#1: {
+			#1: Vector2i(350, 240),
+			#2: Vector2i(360, 252),
+			#3: Vector2i(370, 264)
+			##4: Vector2i(400, 265)
+		#},
+		#2: {
+			#1: Vector2i(410, 260),
+			#2: Vector2i(420, 275),
+			#3: Vector2i(430, 290),
+			#4: Vector2i(440, 305)
+		#},
+		#3: {
+			#1: Vector2i(490, 260),
+			#2: Vector2i(500, 275),
+			#3: Vector2i(510, 290),
+			#4: Vector2i(520, 305)
+		#},
+		#4: {
+			#1: Vector2i(540, 260),
+			#2: Vector2i(550, 275),
+			#3: Vector2i(560, 290),
+			#4: Vector2i(570, 305)
+		#}
+	#}
+#}
 
 #var fightPositions = {
 	#"player team": {
@@ -118,6 +133,7 @@ var abilitiesData = {
 		"side": "enemy",
 		"positions": {
 			"type": "single",
+			"actorUser": [1, 2, 3, 4],
 			"targets": {
 				"columns": [1, 2, 3, 4]
 			}

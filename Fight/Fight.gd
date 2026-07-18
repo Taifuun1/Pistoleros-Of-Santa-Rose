@@ -28,19 +28,19 @@ func _ready():
 			"player team": {
 				"Named People": {
 					"Walker Langley": {
-						"positions": [
-							{
-								"column": 1,
-								"row": 1
-							},
-							{
-								"column": 1,
-								"row": 2
-							},
-							{
-								"column": 1,
-								"row": 3
-							},
+						"positions": [1, 2, 3
+							#{
+								#"column": 1,
+								#"row": 1
+							#},
+							#{
+								#"column": 1,
+								#"row": 2
+							#},
+							#{
+								#"column": 1,
+								#"row": 3
+							#},
 							#{
 								#"column": 1,
 								#"row": 4
@@ -100,19 +100,19 @@ func _ready():
 			"enemy team": {
 				"Animals": {
 					"Squeky rat": {
-						"positions": [
-							{
-								"column": 1,
-								"row": 1
-							},
-							{
-								"column": 1,
-								"row": 2
-							},
-							{
-								"column": 1,
-								"row": 3
-							},
+						"positions": [1, 2, 3
+							#{
+								#"column": 1,
+								#"row": 1
+							#},
+							#{
+								#"column": 1,
+								#"row": 2
+							#},
+							#{
+								#"column": 1,
+								#"row": 3
+							#},
 							#{
 								#"column": 1,
 								#"row": 4
@@ -197,6 +197,8 @@ func init(actors: Dictionary):
 						actorSide
 					)
 					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind(actorNameIndexed))
+					$Actors.get_children()[$Actors.get_child_count() - 1].actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
+					$Actors.get_children()[$Actors.get_child_count() - 1].actorUnhovered.connect(clearHoveredActorStats)
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(manageAnimations)
 					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
@@ -208,6 +210,23 @@ func init(actors: Dictionary):
 	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
 	#playerHasControl = true
 	processEnemyTurn()
+
+func showHoveredActorStats(actorName: String) -> void:
+	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
+	$CanvasLayer/FightUI.setHoveredActorStats({
+		"Name": actor.actorName,
+		"HP": actor.hp
+	}, {
+		"SixShootin": actor.stats.sixShootin,
+		"HighTailin": actor.stats.highTailin,
+		"Taffyin": actor.stats.taffyin,
+		"Revolver": actor.stats.damage.lead.revolver,
+		"Rifle": actor.stats.damage.lead.rifle,
+		"Shotgun": actor.stats.damage.lead.shotgun
+	})
+
+func clearHoveredActorStats() -> void:
+	$CanvasLayer/FightUI.clearHoveredActorStats()
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
