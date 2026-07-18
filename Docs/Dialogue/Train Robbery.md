@@ -121,7 +121,7 @@ W "We ought to..."<br>
 MA "Fly like the wind, <i>villano!</i>"<br>
 G "I hope you'll lead us, Walker. This time at least."<br>
 W "..."<br>
-W "Fine, I'll move."
+W "Fine, I'll go."
 
 ### Walker meets Wyatt Garrett on top of the train
 
