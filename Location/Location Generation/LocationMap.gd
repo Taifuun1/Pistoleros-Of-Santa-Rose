@@ -11,6 +11,11 @@ func _ready():
 	setChunkPriority(Vector2i(0, 0))
 	$Entities/Actors/PlayerActor.position = $Map.map_to_local(Vector2i(11, 1))
 	$ChunkGenerators/WFCInputCreation.initWFCGeneration([Locations.currentLocation])
+	
+	# Initialize the player reveal controller
+	var reveal_controller = $Entities/PlayerRevealController
+	if reveal_controller != null:
+		reveal_controller.init($Entities/Actors/PlayerActor)
 
 func initWFCGenerationFinished():
 	emptyChunks.append_array($ChunkGenerators/LocationMapLayoutGeneration.generateMapLayout())

@@ -118,6 +118,10 @@ func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 	var treeSprites = { "type": "Outdoor Objects", "sprites": []}
 	for index in range(1, treeTypeAmount + 1):
 		treeSprites.sprites.append("{treeType}{index}".format({ "treeType": treeType, "index": index }))
+	
+	# Get the reveal controller if it exists
+	var reveal_controller = $"Entities/PlayerRevealController"
+	
 	#for cell in $Map.get_used_cells_by_id(0, 2, Vector2i(0, 0)):
 	for cell in tiles:
 		var tree = dynamicSprite.instantiate()
@@ -125,6 +129,11 @@ func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 		tree.init(treeSprites)
 		tree.position = $Map.map_to_local(cell)
 		tree.name = str(currentChunk) + str(cell)
+		# Add tree to revealable group for transparency effect
+		tree.add_to_group("revealable")
+		# Apply the reveal material to the tree's sprite
+		if reveal_controller != null:
+			reveal_controller._apply_material_to_node(tree)
 		
 		get_node("Entities/OutdoorObjects/{tree}".format({ "tree": str(currentChunk) + str(cell) })).call_deferred("add_child",
 			createCollision(
@@ -141,9 +150,18 @@ func addTrees(tiles: Array, treeType: String, treeTypeAmount: int):
 func addInteractables(interactables, tiles):
 	var interactableNode = load("res://Location/Entities/Interactable/Interactable.tscn")
 	var newInteractables = interactables
+	
+	# Get the reveal controller if it exists
+	var reveal_controller = $"Entities/PlayerRevealController"
+	
 	for interactablePosition in newInteractables:
 		var newInteractable = interactableNode.instantiate()
 		newInteractable.init(newInteractables[interactablePosition].type, newInteractables[interactablePosition].name, Vector2i($Map.map_to_local(interactablePosition)))
+		# Add interactable to revealable group for transparency effect
+		newInteractable.add_to_group("revealable")
+		# Apply the reveal material to the interactable's sprite
+		if reveal_controller != null:
+			reveal_controller._apply_material_to_node(newInteractable)
 		$Entities/Interactables.call_deferred("add_child", newInteractable)
 
 func getInteractablePositions(interactables, tiles):

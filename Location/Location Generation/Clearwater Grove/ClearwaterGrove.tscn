@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="10_t2ahg"]
 [ext_resource type="PackedScene" uid="uid://b5cua2845tcsx" path="res://Actors/Location/LocationActor.tscn" id="11_ipqrn"]
 [ext_resource type="Script" uid="uid://ct0e026q7u5rr" path="res://Actors/AI.gd" id="12_pq735"]
+[ext_resource type="PackedScene" uid="uid://c0revealcontroller" path="res://Shaders/PlayerRevealController.tscn" id="13_reveal"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_5ks3n"]
 vertices = PackedVector2Array(578, 398, 10, 398, 10, 4, 578, 4)
@@ -88,6 +89,8 @@ y_sort_enabled = true
 
 [node name="Exits" type="Node2D" parent="Entities" unique_id=644720882]
 y_sort_enabled = true
+
+[node name="PlayerRevealController" type="Node2D" parent="Entities" unique_id=999999999 instance=ExtResource("13_reveal")]
 
 [node name="AI" type="Node2D" parent="." unique_id=1535489473]
 
