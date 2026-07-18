@@ -1,8 +1,8 @@
-[gd_scene load_steps=46 format=3 uid="uid://bv4nj3hnjc8im"]
+[gd_scene format=3 uid="uid://bv4nj3hnjc8im"]
 
 [ext_resource type="Script" uid="uid://cd6k1u7um735t" path="res://Actors/Location/PlayerLocationActor.gd" id="1_c7mty"]
-[ext_resource type="Texture2D" uid="uid://dvjv3lbb0dx8o" path="res://Assets/Characters/Test/Test2Animation_40x40.png" id="2_hbh6m"]
-[ext_resource type="Texture2D" uid="uid://ddcjiuo272i2d" path="res://Assets/Characters/Test/Test2Animation_40x40_run_smears_4_outline.png" id="3_4p4mj"]
+[ext_resource type="Texture2D" uid="uid://dvjv3lbb0dx8o" path="res://Assets/Characters/Test/Legacy/Test2Animation_40x40.png" id="2_hbh6m"]
+[ext_resource type="Texture2D" uid="uid://ddcjiuo272i2d" path="res://Assets/Characters/Test/Legacy/Test2Animation_40x40_run_smears_4_outline.png" id="3_4p4mj"]
 [ext_resource type="Texture2D" uid="uid://b1fn778spn2eb" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyRun.png" id="4_eu21m"]
 [ext_resource type="Texture2D" uid="uid://cwuqyqbihv8xj" path="res://Assets/Characters/Named People/Walker Langley/WalkerLangeyRun2.png" id="5_7g2kv"]
 
@@ -164,7 +164,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_48gjy")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle",
 "speed": 5.0
 }, {
@@ -193,7 +193,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_qvejw")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Idle2",
 "speed": 5.0
 }, {
@@ -222,7 +222,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_450eu")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Run",
 "speed": 5.0
 }, {
@@ -251,7 +251,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_hcj3k")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Run2",
 "speed": 5.0
 }]
@@ -346,34 +346,32 @@ _data = {
 &"Run2": SubResource("Animation_ccyuh")
 }
 
-[node name="PlayerActor" type="CharacterBody2D"]
+[node name="PlayerActor" type="CharacterBody2D" unique_id=1060274108]
 y_sort_enabled = true
 collision_mask = 3
 motion_mode = 1
 wall_min_slide_angle = 0.0
 script = ExtResource("1_c7mty")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1013564901]
 shape = SubResource("CircleShape2D_88dve")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=140380230]
 sprite_frames = SubResource("SpriteFrames_ddvav")
 animation = &"Idle"
 offset = Vector2(0, -15)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_5fada")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1440062733]
+libraries/ = SubResource("AnimationLibrary_5fada")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2083909465]
 zoom = Vector2(2, 2)
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=1107942790]
 collision_layer = 4
 collision_mask = 2
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=918894076]
 polygon = PackedVector2Array(-75, 10, 75, 10, 85, 105, -85, 105)
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
