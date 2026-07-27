@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://cp5vowrxvwgre"]
 
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_o5aqp"]
 [ext_resource type="Texture2D" uid="uid://dysusdscic0p6" path="res://Assets/Gold Rush/Mining/BackgroundWithTrees.png" id="1_w6eta"]
 [ext_resource type="Script" uid="uid://dcjdi18c5lr44" path="res://Minigames/Gold Rush/Robbing.gd" id="2_w6eta"]
 
@@ -15,5 +16,6 @@ offset_right = 120.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_o5aqp")
 texture = ExtResource("1_w6eta")
 script = ExtResource("2_w6eta")

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c8j4m8x2v1q8k"]
 
 [ext_resource type="Texture2D" uid="uid://de4p4yij6crfw" path="res://Assets/Gold Rush/Mining/Background.png" id="1_oaxu2"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_vbe1h"]
 [ext_resource type="Script" uid="uid://yrpi7sji3wl6" path="res://Minigames/Gold Rush/Mining.gd" id="2_oaxu2"]
 
 [node name="Mining" type="TextureRect" unique_id=209497550]
@@ -15,5 +16,6 @@ offset_right = 120.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_vbe1h")
 texture = ExtResource("1_oaxu2")
 script = ExtResource("2_oaxu2")

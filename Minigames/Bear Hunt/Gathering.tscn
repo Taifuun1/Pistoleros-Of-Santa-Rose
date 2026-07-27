@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://dhf7r8fmb8ar"]
 
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_6j8fi"]
 [ext_resource type="Texture2D" uid="uid://4wjls6i6vbc6" path="res://Assets/Bear Hunt/Gathering/GatheringBackground.png" id="2_background"]
 [ext_resource type="Script" uid="uid://jfiyau0tl68w" path="res://Minigames/Bear Hunt/Gathering.gd" id="3_gathering"]
 
@@ -15,5 +16,6 @@ offset_right = 120.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_6j8fi")
 texture = ExtResource("2_background")
 script = ExtResource("3_gathering")

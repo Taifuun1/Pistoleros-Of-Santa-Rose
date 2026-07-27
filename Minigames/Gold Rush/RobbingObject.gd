@@ -12,8 +12,8 @@ var robbingTextures = [
 	"res://Assets/Gold Rush/Robbing/ProspectorYellow.png",
 ]
 
-var animationSpeed: float = 10.0  # Frames per second
-var frameCount: int = 2  # Adjust based on your spritesheet
+var animationSpeed: float = 10.0
+var frameCount: int = 2
 
 var robbingCollectibleTextures = [
 	"res://Assets/Gold Rush/Robbing/Coin.png",
@@ -21,57 +21,173 @@ var robbingCollectibleTextures = [
 	"res://Assets/Gold Rush/Robbing/CashStack.png",
 ]
 
+var panningMaterialTextures = {
+	"rock": [
+		"res://Assets/Gold Rush/Panning/Rock.png",
+		"res://Assets/Gold Rush/Panning/RockTiny.png"
+	],
+	"soil": [
+		"res://Assets/Gold Rush/Panning/Soil.png",
+		"res://Assets/Gold Rush/Panning/SoilTiny.png"
+	]
+}
+
 func _ready() -> void:
-	# Select a random spritesheet for this instance
 	var randomTexturePath = robbingTextures[randi() % robbingTextures.size()]
-	
-	# Create SpriteFrames with animation
+
 	var spriteFrames = SpriteFrames.new()
 	spriteFrames.add_animation("walk")
 	spriteFrames.set_animation_loop("walk", true)
 	spriteFrames.set_animation_speed("walk", animationSpeed)
-	
-	# Load spritesheet and create texture atlas frames
+
 	var spritesheet = load(randomTexturePath)
 	var frameWidth = spritesheet.get_width() / frameCount
 	var frameHeight = spritesheet.get_height()
-	
-	for frame in range(frameCount):
+
+	for animationFrame in range(frameCount):
 		var atlas = AtlasTexture.new()
 		atlas.atlas = spritesheet
-		atlas.region = Rect2(frame * frameWidth, 0, frameWidth, frameHeight)
+		atlas.region = Rect2(animationFrame * frameWidth, 0, frameWidth, frameHeight)
 		spriteFrames.add_frame("walk", atlas)
 	
+	var tween = get_tree().create_tween()
+	tween.set_parallel(true)
+	
+	scale = Vector2(0.5, 0.5)
+	modulate.a = 0.0
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.25)
+	tween.tween_property(self, "modulate:a", 1.0, 0.25)
+
 	sprite_frames = spriteFrames
 	play("walk")
-	
-	# Randomly flip for visual variation
-	flip_h = randi() % 2 == 1
 
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_collect()
+func get_frame_size() -> Vector2:
+	if sprite_frames != null and sprite_frames.has_animation("walk"):
+		var animationFrame = sprite_frames.get_frame_texture("walk", 0)
+		if animationFrame != null:
+			return animationFrame.get_size()
+	return Vector2(24, 24)
 
-func _collect() -> void:
-	# Notify parent scene that a robber was caught
+func collect() -> void:
 	if parentScene != null and parentScene.has_method("_on_robber_caught"):
-		parentScene._on_robber_caught()
+		parentScene._on_robber_caught(self)
 	_spawnRobbingCollectibles()
-	queue_free()
+	_spawnCatchParticles()
+	var tween = get_tree().create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, "scale", Vector2(0.0, 0.0), 0.2)
+	tween.tween_property(self, "modulate:a", 0.0, 0.2)
+	tween.finished.connect(func(): queue_free())
 
 func _spawnRobbingCollectibles() -> void:
 	var numCollectibles = randi() % 3 + 1
-	for i in range(numCollectibles):
-		var crates = TextureRect.new()
-		crates.texture = load(robbingCollectibleTextures[randi() % robbingCollectibleTextures.size()])
-		crates.size = Vector2(18, 18)
-		crates.position = position + Vector2(randf_range(-25, 25), randf_range(-25, 25))
-		crates.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
+	var numCoinCollectibles = randi() % 4 + 3
+	var bounds = parentScene.spawnBounds if parentScene != null else Rect2(Vector2.ZERO, Vector2(240, 240))
+	
+	# Low chance to drop a rock or soil piece for the panning minigame
+	if randi() % 4 == 0:
+		var materialType = "rock" if randi() % 2 == 0 else "soil"
+		_spawnPanningMaterialCollectible(materialType, bounds)
+	
+	for i in range(numCoinCollectibles):
+		var collectible = TextureRect.new()
+		collectible.texture = load(robbingCollectibleTextures[0])
+		var collectibleSize = collectible.texture.get_size() if collectible.texture != null else Vector2(24, 24)
+		var halfSize = collectibleSize / 2.0
+		var spawnOffset = Vector2(randf_range(-75, 75), randf_range(-25, 25))
+		var rawPos = position + spawnOffset
+		var clampedPos = Vector2(
+			clampf(rawPos.x, bounds.position.x + halfSize.x, bounds.position.x + bounds.size.x - halfSize.x - collectibleSize.x),
+			clampf(rawPos.y, bounds.position.y + halfSize.y, bounds.position.y + bounds.size.y - halfSize.y - collectibleSize.y)
+		)
+		collectible.position.x = position.x
+		collectible.position.y = clampedPos.y
+		collectible.pivot_offset = halfSize
+		collectible.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
 		if parentScene != null and parentScene.has_method("_on_collectible_collected"):
-			crates.collected.connect(Callable(parentScene, "_on_collectible_collected"))
-		parentScene.add_child(crates)
+			collectible.collected.connect(Callable(parentScene, "_on_collectible_collected"))
+		parentScene.add_child(collectible)
 
-	# option: quick particle effect on break
+		collectible.scale = Vector2(0.5, 0.5)
+		var tween = collectible.create_tween()
+		tween.tween_property(collectible, "scale", Vector2(1, 1), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_callback(collectible.animatingDone)
+
+		var tween1 = collectible.create_tween()
+		tween1.tween_property(collectible, "position:y", min(offset.y - 20, position.y - 20), 0.2).as_relative().set_trans(Tween.TRANS_SINE)
+		tween1.tween_property(collectible, "position:y", clampedPos.y, 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+		tween1.tween_callback(collectible.animatingDone)
+		var tween2 = collectible.create_tween()
+		tween2.tween_property(collectible, "position:x", clampedPos.x, 0.4).set_trans(Tween.TRANS_QUAD)
+	for i in range(numCollectibles):
+		var collectible = TextureRect.new()
+		collectible.texture = load(robbingCollectibleTextures[1 if randi() % 2 == 0 else 2])
+		var collectibleSize = collectible.texture.get_size() if collectible.texture != null else Vector2(24, 24)
+		var halfSize = collectibleSize / 2.0
+		var spawnOffset = Vector2(randf_range(-25, 25), randf_range(-25, 25))
+		var rawPos = position + spawnOffset
+		var clampedPos = Vector2(
+			clampf(rawPos.x, bounds.position.x + halfSize.x, bounds.position.x + bounds.size.x - halfSize.x - collectibleSize.x),
+			clampf(rawPos.y, bounds.position.y + halfSize.y, bounds.position.y + bounds.size.y - halfSize.y - collectibleSize.y)
+		)
+		collectible.position.x = position.x
+		collectible.position.y = clampedPos.y
+		collectible.pivot_offset = halfSize
+		collectible.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
+		if parentScene != null and parentScene.has_method("_on_collectible_collected"):
+			collectible.collected.connect(Callable(parentScene, "_on_collectible_collected"))
+		parentScene.add_child(collectible)
+
+		collectible.scale = Vector2(0.5, 0.5)
+		var tween = collectible.create_tween()
+		tween.tween_property(collectible, "scale", Vector2(1, 1), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_callback(collectible.animatingDone)
+
+		var tween1 = collectible.create_tween()
+		tween1.tween_property(collectible, "position:y", min(offset.y - 20, position.y - 20), 0.2).as_relative().set_trans(Tween.TRANS_SINE)
+		tween1.tween_property(collectible, "position:y", clampedPos.y, 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+		tween1.tween_callback(collectible.animatingDone)
+		var tween2 = collectible.create_tween()
+		tween2.tween_property(collectible, "position:x", clampedPos.x, 0.4).set_trans(Tween.TRANS_QUAD)
+
+func _spawnPanningMaterialCollectible(materialType: String, bounds: Rect2) -> void:
+	var collectible = TextureRect.new()
+	collectible.texture = load(panningMaterialTextures[materialType][randi() % panningMaterialTextures[materialType].size()])
+	var collectibleSize = collectible.texture.get_size() if collectible.texture != null else Vector2(24, 24)
+	var halfSize = collectibleSize / 2.0
+	var spawnOffset = Vector2(randf_range(-60, 60), randf_range(-25, 25))
+	var rawPos = position + spawnOffset
+	var clampedPos = Vector2(
+		clampf(rawPos.x, bounds.position.x + halfSize.x, bounds.position.x + bounds.size.x - halfSize.x - collectibleSize.x),
+		clampf(rawPos.y, bounds.position.y + halfSize.y, bounds.position.y + bounds.size.y - halfSize.y - collectibleSize.y)
+	)
+	collectible.position.x = position.x
+	collectible.position.y = clampedPos.y
+	collectible.pivot_offset = halfSize
+	collectible.set_script(load("res://Minigames/Gold Rush/Collectible.gd"))
+	if parentScene != null and parentScene.has_method("_on_collectible_collected"):
+		collectible.collected.connect(Callable(parentScene, "_on_collectible_collected"))
+	collectible.collected.connect(_on_panning_material_collected)
+	parentScene.add_child(collectible)
+
+	collectible.scale = Vector2(0.5, 0.5)
+	var tween = collectible.create_tween()
+	tween.tween_property(collectible, "scale", Vector2(1, 1), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(collectible.animatingDone)
+
+	var tween1 = collectible.create_tween()
+	tween1.tween_property(collectible, "position:y", min(offset.y - 20, position.y - 20), 0.2).as_relative().set_trans(Tween.TRANS_SINE)
+	tween1.tween_property(collectible, "position:y", clampedPos.y, 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tween1.tween_callback(collectible.animatingDone)
+	var tween2 = collectible.create_tween()
+	tween2.tween_property(collectible, "position:x", clampedPos.x, 0.4).set_trans(Tween.TRANS_QUAD)
+
+func _on_panning_material_collected(collectibleType: String, _value: int) -> void:
+	if collectibleType == "rock" or collectibleType == "soil":
+		if Locations.collectedPanningMaterials.has(collectibleType):
+			Locations.collectedPanningMaterials[collectibleType] += 1
+
+func _spawnCatchParticles() -> void:
 	var particles = CPUParticles2D.new()
 	parentScene.add_child(particles)
 	particles.position = position
@@ -88,12 +204,7 @@ func _spawnRobbingCollectibles() -> void:
 	particles.gravity = Vector2(0, 300)
 	particles.initial_velocity_min = 80
 	particles.initial_velocity_max = 140
-	var timer = Timer.new()
-	timer.wait_time = particles.lifetime + 0.1
-	timer.one_shot = true
-	timer.timeout.connect(func(): particles.queue_free())
-	parentScene.add_child(timer)
-	timer.start()
+	particles.finished.connect(func(): particles.queue_free())
 
 func createRobbingObject(objectPosition: Vector2, objectTypeParam = null) -> void:
 	position = objectPosition

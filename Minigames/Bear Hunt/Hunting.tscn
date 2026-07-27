@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c2nvo7d6mkxmr"]
 
 [ext_resource type="Texture2D" uid="uid://dmtxwo8ei8ub4" path="res://Assets/Bear Hunt/Hunting/Background.png" id="1_background"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_lqtsb"]
 [ext_resource type="Script" uid="uid://dr2gsuxlfvpln" path="res://Minigames/Bear Hunt/Hunting.gd" id="2_hunting"]
 
 [node name="Hunting" type="TextureRect" unique_id=2136487990]
@@ -15,5 +16,6 @@ offset_right = 120.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_lqtsb")
 texture = ExtResource("1_background")
 script = ExtResource("2_hunting")

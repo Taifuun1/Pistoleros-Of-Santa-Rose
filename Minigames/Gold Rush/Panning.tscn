@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bqmayhn6yxay8"]
 
 [ext_resource type="Texture2D" uid="uid://b8w34wmh2uiy" path="res://Assets/Gold Rush/Panning/Pan.png" id="1_a3nmi"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_imvdu"]
 [ext_resource type="Script" uid="uid://cqjrddwnmdquk" path="res://Minigames/Gold Rush/Panning.gd" id="2_imvdu"]
 
 [node name="Panning" type="TextureRect" unique_id=209497549]
@@ -15,5 +16,6 @@ offset_right = 120.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_imvdu")
 texture = ExtResource("1_a3nmi")
 script = ExtResource("2_imvdu")
