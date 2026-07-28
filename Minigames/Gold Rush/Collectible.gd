@@ -1,5 +1,7 @@
 extends TextureRect
 
+const ITEM_NUMBER_SCENE = preload("res://Nodes/Item Number/ItemNumber.tscn")
+
 var collectibleType: String = "rock"  # rock, gold, gem
 var value: int = 1
 var pickupRange: float = 15.0  # Distance in pixels to pick up
@@ -65,6 +67,7 @@ func collect() -> void:
 	collected.emit(collectibleType, value)
 
 	spawnCollectionParticles()
+	spawnItemNumber(value)
 
 	pivot_offset = size / 2
 	var tween = get_tree().create_tween()
@@ -73,6 +76,13 @@ func collect() -> void:
 	tween.tween_property(self, "scale", Vector2(1.35, 1.35), 0.1)
 	tween.tween_property(self, "modulate:a", 0.0, 0.1)
 	tween.finished.connect(func(): queue_free())
+
+func spawnItemNumber(itemValue: int) -> void:
+	if itemValue <= 0:
+		return
+	var itemNumber = ITEM_NUMBER_SCENE.instantiate()
+	get_parent().add_child(itemNumber)
+	itemNumber.init("+%d" % itemValue, position + size / 2.0)
 
 func spawnCollectionParticles() -> void:
 	var particles = CPUParticles2D.new()

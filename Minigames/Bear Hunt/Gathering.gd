@@ -41,6 +41,8 @@ const LOOT_TEXTURES = [
 
 const WALL_TEXTURE = "res://Assets/Bear Hunt/Gathering/GatheringWall.png"
 
+const ITEM_NUMBER_SCENE = preload("res://Nodes/Item Number/ItemNumber.tscn")
+
 const MINIGAME_DURATION = 40.0
 
 const SPAWN_INTERVAL_MIN = 3.0
@@ -576,8 +578,9 @@ func _on_loot_collected(area: Area2D, loot_item: Area2D):
 		score += 1
 		print("Collected loot! Score: ", score)
 		
-		# Spawn particle effect
+		# Spawn particle effect and item number
 		_spawn_pickup_particles(loot_item.position)
+		_spawn_item_number(loot_item.position, 1)
 		
 		if loot_item in loot:
 			loot.erase(loot_item)
@@ -694,6 +697,11 @@ func _end_minigame(points: int):
 		player_actor.paused = false
 
 	queue_free()
+
+func _spawn_item_number(spawn_position: Vector2, amount: int) -> void:
+	var item_number = ITEM_NUMBER_SCENE.instantiate()
+	add_child(item_number)
+	item_number.init("+%d" % amount, spawn_position)
 
 func _spawn_pickup_particles(position: Vector2):
 	var particles = CPUParticles2D.new()

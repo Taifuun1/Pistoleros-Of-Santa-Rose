@@ -40,6 +40,8 @@ const PLAYER_SPRITESHEET = "res://Assets/Bear Hunt/Dodging/PlayerMinigame.png"
 const PLAYER_FRAME_COUNT = 2
 const PLAYER_ANIMATION_SPEED = 6.0
 
+const ITEM_NUMBER_SCENE = preload("res://Nodes/Item Number/ItemNumber.tscn")
+
 const PELT_TEXTURE = "res://Assets/Bear Hunt/Hunting/Pelt.png"
 const COLLECTIBLE_INTERVAL = 5.0
 const COLLECTIBLE_FALL_SPEED = 90.0
@@ -332,9 +334,15 @@ func _on_area_entered(area: Area2D):
 func _collect_pelt(collectible: Area2D):
 	score += COLLECTIBLE_POINTS
 	print("Pelt collected! Score: ", score)
+	_spawn_item_number(collectible.position, COLLECTIBLE_POINTS)
 	
 	collectibles.erase(collectible)
 	collectible.queue_free()
+
+func _spawn_item_number(spawn_position: Vector2, amount: int) -> void:
+	var item_number = ITEM_NUMBER_SCENE.instantiate()
+	add_child(item_number)
+	item_number.init("+%d" % amount, spawn_position)
 
 func _on_pattern_finished(_from_chain: bool):
 	if game_over:

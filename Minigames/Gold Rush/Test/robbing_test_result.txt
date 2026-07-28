@@ -1,6 +1,6 @@
 PASS: Robbers spawn
 PASS: Clicking a robber awards 10 points
-PASS: Caught robber is freed
+FAIL: Caught robber is freed
 PASS: Caught robber is removed from activeRobbers
 PASS: Catching a robber spawns collectibles
 PASS: Collectible is clickable after pop-in animation
@@ -11,4 +11,4 @@ PASS: Uncaught robbers despawn after their lifetime
 PASS: Minigame ends when time runs out
 PASS: Points are stored in Locations.minigamePoints
 PASS: Minigame scene is freed after ending
---- RobbingTest finished: 13 passed, 0 failed ---
+--- RobbingTest finished: 12 passed, 1 failed ---

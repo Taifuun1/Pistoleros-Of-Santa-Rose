@@ -28,6 +28,8 @@ const PELT_TEXTURE := "res://Assets/Bear Hunt/Hunting/Pelt.png"
 const PELT_LIFETIME_MIN := 1.0
 const PELT_LIFETIME_MAX := 2.0
 
+const ITEM_NUMBER_SCENE = preload("res://Nodes/Item Number/ItemNumber.tscn")
+
 const PLAYFIELD_SIZE := 240.0
 const PLAYFIELD_MIN_Y := 20.0
 const PLAYFIELD_MAX_Y := 220.0
@@ -378,6 +380,7 @@ func _is_offscreen(pos: Vector2) -> bool:
 
 func _spawn_pelt(spawn_position: Vector2) -> void:
 	pelt_count += 1
+	_spawn_item_number(spawn_position, 1)
 	var pelt := Area2D.new()
 	var pelt_sprite := Sprite2D.new()
 	pelt_sprite.texture = load(PELT_TEXTURE)
@@ -407,6 +410,12 @@ func _spawn_pelt(spawn_position: Vector2) -> void:
 	expire_timer.timeout.connect(func(): _expire_pelt(pelt))
 	add_child(expire_timer)
 	expire_timer.start()
+
+
+func _spawn_item_number(spawn_position: Vector2, amount: int) -> void:
+	var item_number = ITEM_NUMBER_SCENE.instantiate()
+	add_child(item_number)
+	item_number.init("+%d" % amount, spawn_position)
 
 
 func _expire_pelt(pelt: Area2D) -> void:

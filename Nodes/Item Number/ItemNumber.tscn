@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwf5n4u33qedq"]
+
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://enhjsyvvbg4d" path="res://Nodes/Item Number/ItemNumber.gd" id="2_gd"]
+
+[node name="ItemNumber" type="Label"]
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+script = ExtResource("2_gd")
