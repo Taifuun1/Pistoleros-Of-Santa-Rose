@@ -16,3 +16,9 @@ var minigamePoints = {
 	"Panning": 0,
 	"Robbing": 0,
 }
+
+# Materials collected during Mining and Robbing that feed into the Panning minigame
+var collectedPanningMaterials = {
+	"rock": 20,
+	"soil": 10,
+}
