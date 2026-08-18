@@ -211,8 +211,9 @@ func checkIfChangeChunk(body, direction, directionRelative):
 		if direction == "top" and directionRelative == Vector2i(0, -1) and currentChunk == Vector2i(0, 0):
 			Overworld.spawnChunk = Vector2i(8, 18)
 			Overworld.spawnTile = Vector2i(26, 62)
-			get_tree().call_deferred("change_scene_to_file", "res://Overworld/Overworld.tscn")
+			HelperFunctions.changeScene("overworld")
 			return
+
 		changeChunk(direction, directionRelative)
 
 func resetChunk():

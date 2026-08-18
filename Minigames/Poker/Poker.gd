@@ -121,7 +121,8 @@ func startGame() -> void:
 func leaveGame() -> void:
 	if players.has("player1"):
 		PokerMoney.money = players["player1"].money
-	get_tree().change_scene_to_file("res://Overworld/Overworld.tscn")
+	HelperFunctions.changeScene("overworld")
+
 
 func buildDeck() -> void:
 	deck = Poker.CARDS.duplicate(true)

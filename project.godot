@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Pistoleros of Santa Rose"
-run/main_scene="res://Overworld/Overworld.tscn"
+run/main_scene="res://Nodes/Scene Manager/SceneManager.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://Assets/Icons/FileIcon.png"
 config/windows_native_icon="res://Assets/Icons/FileIcon.ico"

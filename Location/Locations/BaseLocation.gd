@@ -28,6 +28,7 @@ func exitLocation(_body: Node2D, exitTo: Dictionary) -> void:
 func _on_fade_animation_finished(animationName: StringName) -> void:
 	if animationName == "Fade Out":
 		if playCutsceneNext:
-			get_tree().change_scene_to_file("res://Cutscenes/Cutscene.tscn")
+			HelperFunctions.changeScene("cutscene")
 			return
-		get_tree().change_scene_to_file("res://Location/Locations/Location.tscn")
+		HelperFunctions.changeScene("location")
+

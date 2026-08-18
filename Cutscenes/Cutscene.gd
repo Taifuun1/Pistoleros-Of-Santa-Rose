@@ -176,6 +176,7 @@ func _on_fade_animation_finished(animationName: StringName) -> void:
 	if animationName == "Fade Out":
 		Locations.currentLocation = cutscene.nextLocation
 		#Locations.currentQuest = cutscene.nextLocation
-		get_tree().change_scene_to_file("res://Location/Locations/Location.tscn")
+		HelperFunctions.changeScene("location")
+
 	wait = false
 	advanceScene()

@@ -63,13 +63,19 @@ const SCENES := {
 	"overworld": "res://Overworld/Overworld.tscn",
 	"cutscene": "res://Cutscenes/Cutscene.tscn",
 	"fight": "res://Fight/Fight.tscn",
-	"location": "res://Location/Locations/{location}/{location}.tscn",            # pregenerated
-	"wfc_location": "res://Location/Location Generation/{location}/{file}.tscn",  # WFC generation
+	# Generic location loader; reads Locations.currentLocation / currentQuest.
+	"location": "res://Location/Locations/Location.tscn",
+	# Pregenerated location loaded directly from its scene.
+	"pregenerated_location": "res://Location/Locations/{location}/{location}.tscn",
+	# WFC-generated location; the file name strips whitespace.
+	"wfc_location": "res://Location/Location Generation/{location}/{file}.tscn",
 }
 ```
 
 - Location paths are resolved with the same formatting rules currently used in `Overworld.gd:enterLocation()` (pregenerated locations keep whitespace in the folder name; WFC locations strip whitespace for the file name).
 - An optional `change_scene_to_path(path)` fallback handles one-off scenes (e.g. test scenes) that are not in the registry.
+- **As implemented:** callers go through `HelperFunctions.changeScene(sceneKey, context)`, which routes to the scene manager when it is in the tree and falls back to `get_tree().change_scene_to_file()` when a scene is run directly (F6) without it.
+
 
 ### 5. Public API
 

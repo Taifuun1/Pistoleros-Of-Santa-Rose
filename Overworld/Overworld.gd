@@ -119,10 +119,10 @@ func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
 	Locations.currentLocation = locationName
 	if body.name == "PlayerOverworldActor":
 		if pregenerated:
-			get_tree().call_deferred("change_scene_to_file", "res://Location/Locations/{locationName}/{locationName}.tscn".format({ "locationName": locationName }))
+			HelperFunctions.changeScene("pregenerated_location", { "location": locationName })
 		else:
-			var noWhitespacelocationName = locationName.replace(" ", "")
-			get_tree().call_deferred("change_scene_to_file", "res://Location/Location Generation/{locationName}/{noWhitespacelocationName}.tscn".format({ "locationName": locationName, "noWhitespacelocationName": noWhitespacelocationName }))
+			HelperFunctions.changeScene("wfc_location", { "location": locationName })
+
 
 func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool):
 	var area = Area2D.new()
