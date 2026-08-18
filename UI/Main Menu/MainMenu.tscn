@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://UI/Main Menu/MainMenu.gd" id="1_mainmenu"]
+[ext_resource type="Theme" path="res://UI/UITheme.tres" id="2_theme"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_mainmenu")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Pistoleros of Santa Rose"
+horizontal_alignment = 1
+
+[node name="NewGame" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "New Game"
+
+[node name="Continue" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Continue"
+
+[node name="Quit" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quit"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Continue" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
