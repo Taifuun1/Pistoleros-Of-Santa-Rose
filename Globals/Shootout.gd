@@ -1,7 +1,7 @@
 extends Node
 
 
-var fightPositions = {
+var shootoutPositions = {
 	"player team": {
 		1: Vector2i(280, 252),
 		2: Vector2i(250, 252),
@@ -142,7 +142,7 @@ var abilitiesData = {
 			{
 				"target": "selectedActor",
 				"sprite": "icon",
-				"path": "res://Animations/Fight/Abilities/SharpShotAnimations.tscn"
+				"path": "res://Animations/Shootout/Abilities/SharpShotAnimations.tscn"
 			},
 			{
 				"target": "actingActor",
@@ -167,7 +167,7 @@ var itemsData = {
 			{
 				"target": "selectedActor",
 				"sprite": "icon",
-				"path": "res://Animations/Fight/Items/ParegoricAnimations.tscn"
+				"path": "res://Animations/Shootout/Items/ParegoricAnimations.tscn"
 			}
 		]
 	},
@@ -185,8 +185,8 @@ var itemsData = {
 	}
 }
 
-func checkIfActorIsOnSide(actorName, actorSide, fightActors):
-	for checkedActorName in fightActors[actorSide]:
+func checkIfActorIsOnSide(actorName, actorSide, shootoutActors):
+	for checkedActorName in shootoutActors[actorSide]:
 		if actorName == checkedActorName:
 			return true
 	return false

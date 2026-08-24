@@ -1,6 +1,6 @@
-extends ActFight
+extends ActShootout
 
-@onready var fightActor = preload("res://Actors/Fight/FightActor.tscn")
+@onready var shootoutActor = preload("res://Actors/Shootout/ShootoutActor.tscn")
 @onready var damageNumber = preload("res://Nodes/Damage Number/DamageNumber.tscn")
 
 signal actorDone
@@ -9,7 +9,7 @@ var outlineShader = load("res://Shaders/Outline.tres")
 
 var playerHasControl = false
 
-var fightActors = {
+var shootoutActors = {
 	"player team": {
 		
 	},
@@ -179,9 +179,9 @@ func init(actors: Dictionary):
 			for actorName in actors[actorSide][actorType]:
 				var index = 0
 				for actorPosition in actors[actorSide][actorType][actorName].positions:
-					var newFightActor = fightActor.instantiate()
+					var newShootoutActor = shootoutActor.instantiate()
 					var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index})
-					$Actors.add_child(newFightActor)
+					$Actors.add_child(newShootoutActor)
 					if Party.party.has(actorName):
 						$Actors.get_children()[$Actors.get_child_count() - 1].init(Party.party[actorName])
 					else:
@@ -190,7 +190,7 @@ func init(actors: Dictionary):
 								{ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") }
 							)
 						).new().data)
-					$Actors.get_children()[$Actors.get_child_count() - 1].initFightActor(
+					$Actors.get_children()[$Actors.get_child_count() - 1].initShootoutActor(
 						actorType,
 						actorNameIndexed,
 						actorPosition,
@@ -201,7 +201,7 @@ func init(actors: Dictionary):
 					$Actors.get_children()[$Actors.get_child_count() - 1].actorUnhovered.connect(clearHoveredActorStats)
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
 					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(manageAnimations)
-					fightActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
+					shootoutActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
 					index += 1
 	createTurnOrder()
 	#selectActor()
@@ -213,7 +213,7 @@ func init(actors: Dictionary):
 
 func showHoveredActorStats(actorName: String) -> void:
 	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-	$CanvasLayer/FightUI.setHoveredActorStats({
+	$CanvasLayer/ShootoutUI.setHoveredActorStats({
 		"Name": actor.actorName,
 		"HP": actor.hp
 	}, {
@@ -226,7 +226,7 @@ func showHoveredActorStats(actorName: String) -> void:
 	})
 
 func clearHoveredActorStats() -> void:
-	$CanvasLayer/FightUI.clearHoveredActorStats()
+	$CanvasLayer/ShootoutUI.clearHoveredActorStats()
 
 func processEnemyTurn():
 	var actorName = turnOrder.front()
@@ -235,8 +235,8 @@ func processEnemyTurn():
 
 func createTurnOrder():
 	var actorsHighTailin = []
-	for actorSide in fightActors:
-		for actorName in fightActors[actorSide]:
+	for actorSide in shootoutActors:
+		for actorName in shootoutActors[actorSide]:
 			var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
 			actorsHighTailin.append({
 				"actorName": actorName,
@@ -252,9 +252,9 @@ func checkIfActorDead(actor) -> bool:
 	if actor.hp <= 0:
 		if turnOrder.has(actor.name):
 			turnOrder.remove_at(turnOrder.find(actor.name))
-		for actorSide in fightActors:
-			if fightActors[actorSide].has(actor.name):
-				fightActors[actorSide].erase(actor.name)
+		for actorSide in shootoutActors:
+			if shootoutActors[actorSide].has(actor.name):
+				shootoutActors[actorSide].erase(actor.name)
 				break
 		actor.queue_free()
 		checkIfSideIsDead()
@@ -262,16 +262,16 @@ func checkIfActorDead(actor) -> bool:
 	return false
 
 func checkIfSideIsDead():
-	for fightSide in fightActors:
-		if fightActors[fightSide].is_empty():
+	for shootoutSide in shootoutActors:
+		if shootoutActors[shootoutSide].is_empty():
 			turnOrder.clear()
 
-func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
+func selectActor(actorName = shootoutActors["enemy team"].keys()[0]) -> void:
 	if playerHasControl and playerAction and selectedAct != null:
 		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
 		selectedActor = actorName
 		if selectedAct.type == "Attack":
-			if Fight.checkIfActorIsOnSide(actorName, "player team", fightActors):
+			if Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors):
 				return
 			#actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
 		elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
@@ -280,12 +280,12 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 					selectedAct.type == "Items" and
 					(
 						(
-							Fight.itemsData[selectedAct.name].side == "player" and
-							Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+							Shootout.itemsData[selectedAct.name].side == "player" and
+							Shootout.checkIfActorIsOnSide(actorName, "enemy team", shootoutActors)
 						) or
 						(
-							Fight.itemsData[selectedAct.name].side == "enemy" and
-							Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
+							Shootout.itemsData[selectedAct.name].side == "enemy" and
+							Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors)
 						)
 					)
 				) or
@@ -293,12 +293,12 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 					selectedAct.type == "Abilities" and
 					(
 						(
-							Fight.abilitiesData[selectedAct.name].side == "player" and
-							Fight.checkIfActorIsOnSide(actorName, "enemy team", fightActors)
+							Shootout.abilitiesData[selectedAct.name].side == "player" and
+							Shootout.checkIfActorIsOnSide(actorName, "enemy team", shootoutActors)
 						) or
 						(
-							Fight.abilitiesData[selectedAct.name].side == "enemy" and
-							Fight.checkIfActorIsOnSide(actorName, "player team", fightActors)
+							Shootout.abilitiesData[selectedAct.name].side == "enemy" and
+							Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors)
 						)
 					)
 				)
@@ -306,16 +306,16 @@ func selectActor(actorName = fightActors["enemy team"].keys()[0]) -> void:
 				return
 			if selectedAct.type == "Items":
 				actor.items.erase(selectedAct.name)
-				animations = Fight.itemsData[selectedAct.name].animations.duplicate(true)
+				animations = Shootout.itemsData[selectedAct.name].animations.duplicate(true)
 			if selectedAct.type == "Abilities":
-				animations = Fight.abilitiesData[selectedAct.name].animations.duplicate(true)
-		$CanvasLayer/FightUI/VBoxContainer/CenterContainer.visible = false
+				animations = Shootout.abilitiesData[selectedAct.name].animations.duplicate(true)
+		$CanvasLayer/ShootoutUI/VBoxContainer/CenterContainer.visible = false
 		playerHasControl = false
 		actor.actorTurn.emit()
 		manageAnimations()
 
 func isPlayerActing(actor):
-	for actorName in fightActors["player team"]:
+	for actorName in shootoutActors["player team"]:
 		if actorName == actor:
 			return true
 	return false
@@ -327,7 +327,7 @@ func createDamageNumber(damage, targetPosition):
 
 func setActorCharacterStats():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	$CanvasLayer/FightUI.setPlayerCharacterStats({
+	$CanvasLayer/ShootoutUI.setPlayerCharacterStats({
 		"Name": actor.actorName,
 		"HP": actor.hp
 	}, {
@@ -341,9 +341,9 @@ func setActorCharacterStats():
 
 func setActorCharacterActs(actType: String):
 	if actType == "Abilities":
-		$CanvasLayer/FightUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).abilities, actType)
+		$CanvasLayer/ShootoutUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).abilities, actType)
 	elif actType == "Items":
-		$CanvasLayer/FightUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items, actType)
+		$CanvasLayer/ShootoutUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items, actType)
 
 func manageAnimations():
 	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
@@ -370,7 +370,7 @@ func manageAnimations():
 			#actor.get_node(str(actor.name)).playAnimation(animation.animation, true, true)
 
 func actAnimation():
-	var animation = load("res://Animations/Fight/{actType}/{actName}.tscn".format({ "actType": selectedAct.type, "actName": selectedAct.name.replace(" ", "") }))
+	var animation = load("res://Animations/Shootout/{actType}/{actName}.tscn".format({ "actType": selectedAct.type, "actName": selectedAct.name.replace(" ", "") }))
 	var animationInstance = animation.instantiate()
 	#animationInstance.position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
 	#animationInstance.position.y -= 40
@@ -396,7 +396,7 @@ func damageTarget():
 		targetActorName = selectedActor
 	else:
 		actor.actorTurn.emit()
-		targetActorName = fightActors["player team"].keys()[randi() % fightActors["player team"].size()]
+		targetActorName = shootoutActors["player team"].keys()[randi() % shootoutActors["player team"].size()]
 	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
 	var damage
 	if actor.weapon.type == "melee":
@@ -413,18 +413,18 @@ func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "acto
 	turnOrder.pop_front()
 	actorDone.emit()
 
-func _on_fight_ui_attack() -> void:
+func _on_shootout_ui_attack() -> void:
 	selectedAct = {
 		"type": "Attack"
 	}
 
-func _on_fight_ui_ability(abilityName: String) -> void:
+func _on_shootout_ui_ability(abilityName: String) -> void:
 	selectedAct = {
 		"name": abilityName,
 		"type": "Abilities"
 	}
 
-func _on_fight_ui_item(itemName: String) -> void:
+func _on_shootout_ui_item(itemName: String) -> void:
 	selectedAct = {
 		"name": itemName,
 		"type": "Items"

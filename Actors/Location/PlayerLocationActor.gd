@@ -33,7 +33,7 @@ func _physics_process(_delta):
 
 func _on_area_2d_body_entered(body):
 	if body.has_node("Sprite2D"):
-		body.get_node("Sprite2D").material = transparentShader
+		body.get_node("Sprite2D").material = null
 
 func _on_area_2d_body_exited(body):
 	if body.has_node("Sprite2D"):

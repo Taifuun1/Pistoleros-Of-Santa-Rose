@@ -11,7 +11,7 @@ var items = ["Paregoric", "Paregoric"]
 var abilities = ["Sharp Shot"]
 
 
-func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
+func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
 	var frameHit = FrameData.frameData.animationHits[weapon.weapon]
 	var idleAnimation
@@ -29,7 +29,7 @@ func initFightActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
 	animations.playAnimation(idleAnimation)
 	add_child(animations)
 	
-	position = Fight.fightPositions[actorSide][actorPosition]
+	position = Shootout.shootoutPositions[actorSide][actorPosition]
 	#position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
 	actorTurn.connect(toggleActorTurn)
 

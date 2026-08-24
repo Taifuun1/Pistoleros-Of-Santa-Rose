@@ -14,7 +14,7 @@ const SCENES := {
 	"main_menu": "res://UI/Main Menu/MainMenu.tscn",
 	"overworld": "res://Overworld/Overworld.tscn",
 	"cutscene": "res://Cutscenes/Cutscene.tscn",
-	"fight": "res://Fight/Fight.tscn",
+	"shootout": "res://Shootout/Shootout.tscn",
 	# Generic location loader; reads Locations.currentLocation / currentQuest.
 	"location": "res://Location/Locations/Location.tscn",
 	# Pregenerated location loaded directly from its scene.

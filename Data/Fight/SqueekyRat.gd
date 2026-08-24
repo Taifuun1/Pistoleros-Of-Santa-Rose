@@ -1,6 +1,6 @@
 extends Node
 
-var fight = [
+var shootout = [
 	{
 		"front": {
 			0: "Squeeky rat",
