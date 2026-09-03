@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ifq5lijqjhhy"
-path="res://.godot/imported/RollUpSleeves.png-40821990ebc8c1146b746b1f59dc9f5b.ctex"
+uid="uid://dlup24mkfl65u"
+path="res://.godot/imported/CowboysWhiskey.png-f1d8c91965ca7c50096a504671aae414.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/RollUpSleeves.png"
-dest_files=["res://.godot/imported/RollUpSleeves.png-40821990ebc8c1146b746b1f59dc9f5b.ctex"]
+source_file="res://Assets/Moves/CowboysWhiskey.png"
+dest_files=["res://.godot/imported/CowboysWhiskey.png-f1d8c91965ca7c50096a504671aae414.ctex"]
 
 [params]
 

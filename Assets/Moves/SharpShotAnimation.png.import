@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3bl6xvc2hhp3"
-path="res://.godot/imported/LoadMorePellets.png-fbdf9548373f77d74e95a2836fc7737a.ctex"
+uid="uid://bde6q4oncwpir"
+path="res://.godot/imported/SharpShotAnimation.png-7f8c144f6257f6bda7e6df4a31185783.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/LoadMorePellets.png"
-dest_files=["res://.godot/imported/LoadMorePellets.png-fbdf9548373f77d74e95a2836fc7737a.ctex"]
+source_file="res://Assets/Moves/SharpShotAnimation.png"
+dest_files=["res://.godot/imported/SharpShotAnimation.png-7f8c144f6257f6bda7e6df4a31185783.ctex"]
 
 [params]
 

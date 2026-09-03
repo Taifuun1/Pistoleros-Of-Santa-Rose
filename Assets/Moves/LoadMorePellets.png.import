@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bu4j65mamh0k7"
-path="res://.godot/imported/WhiskeyCure.png-18f53ac928dc908d1abb9eb75b645a7d.ctex"
+uid="uid://d3bl6xvc2hhp3"
+path="res://.godot/imported/LoadMorePellets.png-b41c6b0b9bd251e67cd91282e3bdd09c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/WhiskeyCure.png"
-dest_files=["res://.godot/imported/WhiskeyCure.png-18f53ac928dc908d1abb9eb75b645a7d.ctex"]
+source_file="res://Assets/Moves/LoadMorePellets.png"
+dest_files=["res://.godot/imported/LoadMorePellets.png-b41c6b0b9bd251e67cd91282e3bdd09c.ctex"]
 
 [params]
 

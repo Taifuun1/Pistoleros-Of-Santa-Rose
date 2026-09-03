@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4svnamcnsomp"
-path="res://.godot/imported/BulkShoulders.png-37bc08cf7f59ab0865c7013a1b412223.ctex"
+uid="uid://dy1ihgkqslhts"
+path="res://.godot/imported/CowboyUp.png-00e204bc44f56671249f7832f297ba81.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/BulkShoulders.png"
-dest_files=["res://.godot/imported/BulkShoulders.png-37bc08cf7f59ab0865c7013a1b412223.ctex"]
+source_file="res://Assets/Moves/CowboyUp.png"
+dest_files=["res://.godot/imported/CowboyUp.png-00e204bc44f56671249f7832f297ba81.ctex"]
 
 [params]
 

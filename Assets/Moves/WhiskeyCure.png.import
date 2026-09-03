@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dy1ihgkqslhts"
-path="res://.godot/imported/CowboyUp.png-dd13b4380d9e171433597882a6aee500.ctex"
+uid="uid://bu4j65mamh0k7"
+path="res://.godot/imported/WhiskeyCure.png-b2294f8c045bbfe175efa5ab5b5e1187.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/CowboyUp.png"
-dest_files=["res://.godot/imported/CowboyUp.png-dd13b4380d9e171433597882a6aee500.ctex"]
+source_file="res://Assets/Moves/WhiskeyCure.png"
+dest_files=["res://.godot/imported/WhiskeyCure.png-b2294f8c045bbfe175efa5ab5b5e1187.ctex"]
 
 [params]
 

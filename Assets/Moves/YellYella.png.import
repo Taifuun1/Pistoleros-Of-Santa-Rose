@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbc2e05nxkxoh"
-path="res://.godot/imported/HandShot.png-36dd624fe18cd75bba8dcf6f12866e22.ctex"
+uid="uid://dskbryifg7y8e"
+path="res://.godot/imported/YellYella.png-4676969af5b76aa6a202f2d1ea59ab8e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/HandShot.png"
-dest_files=["res://.godot/imported/HandShot.png-36dd624fe18cd75bba8dcf6f12866e22.ctex"]
+source_file="res://Assets/Moves/YellYella.png"
+dest_files=["res://.godot/imported/YellYella.png-4676969af5b76aa6a202f2d1ea59ab8e.ctex"]
 
 [params]
 

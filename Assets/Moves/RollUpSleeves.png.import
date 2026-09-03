@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bde6q4oncwpir"
-path="res://.godot/imported/SharpShotAnimation.png-3fb492528ca5c74d2ff6e2612bcc4eaa.ctex"
+uid="uid://ifq5lijqjhhy"
+path="res://.godot/imported/RollUpSleeves.png-dea0d71d587984d695ffd2cd0035fd4a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/SharpShotAnimation.png"
-dest_files=["res://.godot/imported/SharpShotAnimation.png-3fb492528ca5c74d2ff6e2612bcc4eaa.ctex"]
+source_file="res://Assets/Moves/RollUpSleeves.png"
+dest_files=["res://.godot/imported/RollUpSleeves.png-dea0d71d587984d695ffd2cd0035fd4a.ctex"]
 
 [params]
 

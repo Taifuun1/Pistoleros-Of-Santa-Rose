@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bxiws0r4flm1c"
-path="res://.godot/imported/HuntersBullet.png-f47ca1e3ddfa29dc1e2d6bdaa8e2ecad.ctex"
+uid="uid://c4svnamcnsomp"
+path="res://.godot/imported/BulkShoulders.png-25e15da2e2ca29bc6582c3818aec2670.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/HuntersBullet.png"
-dest_files=["res://.godot/imported/HuntersBullet.png-f47ca1e3ddfa29dc1e2d6bdaa8e2ecad.ctex"]
+source_file="res://Assets/Moves/BulkShoulders.png"
+dest_files=["res://.godot/imported/BulkShoulders.png-25e15da2e2ca29bc6582c3818aec2670.ctex"]
 
 [params]
 

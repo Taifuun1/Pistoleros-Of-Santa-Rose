@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b450t18f0k7on"
-path="res://.godot/imported/SharpShot.png-f09ba5545dce794ed1e1c4e3661f76c7.ctex"
+uid="uid://co66mkmd2bwki"
+path="res://.godot/imported/CoralHerd.png-3cc05a84a5750f919ee9c7fdbe78ea9e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/SharpShot.png"
-dest_files=["res://.godot/imported/SharpShot.png-f09ba5545dce794ed1e1c4e3661f76c7.ctex"]
+source_file="res://Assets/Moves/CoralHerd.png"
+dest_files=["res://.godot/imported/CoralHerd.png-3cc05a84a5750f919ee9c7fdbe78ea9e.ctex"]
 
 [params]
 

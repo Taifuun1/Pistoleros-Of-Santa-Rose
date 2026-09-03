@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dskbryifg7y8e"
-path="res://.godot/imported/YellYella.png-f70810a6bdd75f21423b8a6e197c5485.ctex"
+uid="uid://dk0u6j7ba2i8n"
+path="res://.godot/imported/RollCylinder.png-53295c42c34e3e0e19b24c28d9d1129e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/YellYella.png"
-dest_files=["res://.godot/imported/YellYella.png-f70810a6bdd75f21423b8a6e197c5485.ctex"]
+source_file="res://Assets/Moves/RollCylinder.png"
+dest_files=["res://.godot/imported/RollCylinder.png-53295c42c34e3e0e19b24c28d9d1129e.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bx2o2lew5k8bn"
-path="res://.godot/imported/ShootHat.png-ed568c6b03f9c4e74ec791e47ca6359a.ctex"
+uid="uid://b450t18f0k7on"
+path="res://.godot/imported/SharpShot.png-af78c52f48a19024c4c8c050ab2861e0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Abilities/ShootHat.png"
-dest_files=["res://.godot/imported/ShootHat.png-ed568c6b03f9c4e74ec791e47ca6359a.ctex"]
+source_file="res://Assets/Moves/SharpShot.png"
+dest_files=["res://.godot/imported/SharpShot.png-af78c52f48a19024c4c8c050ab2861e0.ctex"]
 
 [params]
 
