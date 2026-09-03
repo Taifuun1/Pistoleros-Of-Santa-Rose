@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://bffl4006qdd4x"
+path="res://.godot/imported/FFF Forward Outline 8px.fnt-164c2116ce7b08da2b06771f73ffc3ec.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFF Forward Outline 8px.fnt"
+dest_files=["res://.godot/imported/FFF Forward Outline 8px.fnt-164c2116ce7b08da2b06771f73ffc3ec.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=0

@@ -1,33 +1,35 @@
 [gd_resource type="Theme" format=3 uid="uid://c40khsw7ty1da"]
 
-[ext_resource type="FontFile" uid="uid://cu3ytb4o32oi0" path="res://Assets/UI/Unnamed.fnt" id="1_0scx2"]
+[ext_resource type="FontFile" uid="uid://c8g6dpi2wrjjc" path="res://Assets/UI/FFF Forward Outline 12px.fnt" id="3_f0h75"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y61ul"]
-bg_color = Color(0.53389496, 0.962212, 1, 0.49803922)
+bg_color = Color(0.95686275, 0.8627451, 0.6, 0.49803922)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0soan"]
 bg_color = Color(0.458824, 0.956863, 1, 0.498039)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b58mt"]
-bg_color = Color(7.70092e-07, 0.915785, 0.973893, 1)
+bg_color = Color(0.93295527, 0.77938, 0.6095147, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lqpfp"]
-bg_color = Color(0.456915, 0.957641, 1, 1)
+bg_color = Color(0.95686275, 0.8627451, 0.6, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rjfyb"]
-bg_color = Color(2.11775e-06, 0.705992, 0.422728, 1)
+bg_color = Color(0.972549, 0.83137256, 0.8039216, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7bk0n"]
-bg_color = Color(1, 0.564524, 0.79426, 1)
+bg_color = Color(0.25493783, 0.4855513, 0.27548033, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.48242, 0.230011, 0.0747058, 1)
+border_color = Color(0.53227663, 0.23604882, 0.32117972, 1)
 
 [resource]
-default_font = ExtResource("1_0scx2")
-default_font_size = 10
+default_font = ExtResource("3_f0h75")
+default_font_size = 12
+Button/font_sizes/font_size = 12
+Button/fonts/font = ExtResource("3_f0h75")
 Button/styles/disabled = SubResource("StyleBoxFlat_y61ul")
 Button/styles/focus = SubResource("StyleBoxFlat_0soan")
 Button/styles/hover = SubResource("StyleBoxFlat_b58mt")
@@ -35,5 +37,7 @@ Button/styles/normal = SubResource("StyleBoxFlat_lqpfp")
 Button/styles/pressed = SubResource("StyleBoxFlat_rjfyb")
 GridContainer/constants/v_separation = 12
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_7bk0n")
-RichTextLabel/font_sizes/normal_font_size = 10
+RichTextLabel/constants/line_separation = 1
+RichTextLabel/font_sizes/normal_font_size = 12
+RichTextLabel/fonts/normal_font = ExtResource("3_f0h75")
 VBoxContainer/constants/separation = 4
