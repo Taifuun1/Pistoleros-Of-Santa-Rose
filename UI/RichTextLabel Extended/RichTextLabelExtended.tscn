@@ -1,14 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://ce2thwvlne3vr"]
+[gd_scene format=3 uid="uid://ce2thwvlne3vr"]
 
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_3s1hn"]
 [ext_resource type="Script" uid="uid://mjovl8hvs72g" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.gd" id="1_lmsom"]
 
-[node name="RichTextLabelExtended" type="RichTextLabel"]
+[node name="RichTextLabelExtended" type="RichTextLabel" unique_id=1294598600]
 texture_filter = 1
+custom_minimum_size = Vector2(0, 22)
 clip_contents = false
-offset_bottom = 12.0
+offset_right = 48.0
+offset_bottom = 25.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+offset_transform_enabled = true
+offset_transform_position = Vector2(2, 5)
+theme = ExtResource("1_3s1hn")
+theme_override_constants/line_separation = 8
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
+theme_override_font_sizes/bold_italics_font_size = 12
+theme_override_font_sizes/italics_font_size = 12
+theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
+text = "ABOBA!"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0

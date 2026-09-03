@@ -3,21 +3,64 @@
 [ext_resource type="Script" uid="uid://dxuuu0o12w3q3" path="res://Shootout/UI/ShootoutUI.gd" id="1_2qgxu"]
 [ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Shootout/UI/ShootoutButton.tscn" id="1_drfjl"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_w5ldf"]
+[ext_resource type="Texture2D" uid="uid://din58ef8od4fn" path="res://Assets/Shootout Backgrounds/GrassLandsShootoutBackground.png" id="3_3n0l5"]
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
 [ext_resource type="Texture2D" uid="uid://cjocgotg0hgx5" path="res://Assets/Icons/SixShootinIcon.png" id="4_8ob0s"]
 [ext_resource type="Script" uid="uid://b88mfmepglnl" path="res://UI/Miscellaneous/AddTooltip.gd" id="4_8sf7b"]
+[ext_resource type="Texture2D" uid="uid://bx2o2lew5k8bn" path="res://Assets/Moves/ShootHat.png" id="4_23rvq"]
+[ext_resource type="Texture2D" uid="uid://dy1ihgkqslhts" path="res://Assets/Moves/CowboyUp.png" id="4_r3ka0"]
 [ext_resource type="Texture2D" uid="uid://6gju4eo6vq5g" path="res://Assets/Icons/HP.png" id="4_vga8u"]
 [ext_resource type="PackedScene" uid="uid://dm8v87vsh2qow" path="res://UI/Tooltip/Tooltip.tscn" id="5_5ysdm"]
+[ext_resource type="Texture2D" uid="uid://b806g7ql2crji" path="res://Assets/Icons/Moves.png" id="5_d8xx0"]
 [ext_resource type="Texture2D" uid="uid://bss3bqrqmrnsd" path="res://Assets/Icons/HighTailinIcon.png" id="5_docnv"]
 [ext_resource type="Texture2D" uid="uid://0ubbng08j00g" path="res://Assets/Icons/TaffyinIcon.png" id="6_0he6b"]
+[ext_resource type="PackedScene" uid="uid://6cv348wwh588" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="7_3n0l5"]
 [ext_resource type="Texture2D" uid="uid://7lfh3mc1k4yr" path="res://Assets/Icons/RevolverIcon.png" id="7_gux81"]
+[ext_resource type="Texture2D" uid="uid://co66mkmd2bwki" path="res://Assets/Moves/CoralHerd.png" id="8_60wve"]
 [ext_resource type="Texture2D" uid="uid://d4bch7qystpkq" path="res://Assets/Icons/RifleIcon.png" id="8_caqsy"]
+[ext_resource type="Texture2D" uid="uid://c8lsl42lt5pw7" path="res://Assets/Icons/BeltIcon.png" id="9_p0scf"]
+[ext_resource type="Texture2D" uid="uid://c8yfhq3nsj0qj" path="res://Assets/Icons/END.png" id="9_splkh"]
 [ext_resource type="Texture2D" uid="uid://cauyymj7hycqb" path="res://Assets/Icons/ShotgunIcon3.png" id="12_hg5u7"]
-[ext_resource type="Texture2D" uid="uid://dewx4hp52xhi0" path="res://Assets/Icons/HatIcon.png" id="13_6b66j"]
-[ext_resource type="Texture2D" uid="uid://kkjrp44uu1xb" path="res://Assets/Icons/JacketIcon.png" id="14_5jpxk"]
-[ext_resource type="Texture2D" uid="uid://c7vkat2mjbsgg" path="res://Assets/Icons/TrousersIcon.png" id="15_apkiq"]
-[ext_resource type="Texture2D" uid="uid://bma8337qkm4k0" path="res://Assets/Icons/BootsIcon.png" id="16_gbypl"]
-[ext_resource type="Texture2D" uid="uid://bgoy1atgoo1vb" path="res://Assets/Icons/MoneyIcon2.png" id="17_sriqk"]
+[ext_resource type="Texture2D" uid="uid://dbh65f8pdglmt" path="res://Assets/Stats/HitrateHit.png" id="16_bfb8p"]
+[ext_resource type="Texture2D" uid="uid://bmu0kalnsjcms" path="res://Assets/Icons/WalkerLangleyIcon.png" id="18_uoiiw"]
+[ext_resource type="Texture2D" uid="uid://cl2ji0yh8iuaw" path="res://Assets/Icons/BootsIconGrey.png" id="22_k6mq4"]
+[ext_resource type="Texture2D" uid="uid://bw2sxebujni7t" path="res://Assets/Icons/RevolverIconGrey.png" id="24_4uxyg"]
+[ext_resource type="Texture2D" uid="uid://bj72vs5661htn" path="res://Assets/Icons/HatIconGrey.png" id="24_p0scf"]
+[ext_resource type="Texture2D" uid="uid://cighl6uihh4wi" path="res://Assets/Icons/JacketIconGrey.png" id="25_4uxyg"]
+[ext_resource type="Texture2D" uid="uid://cy2de1vevncoq" path="res://Assets/Icons/TrousersIconGrey.png" id="26_60wve"]
+[ext_resource type="Texture2D" uid="uid://b3afdekoeodw1" path="res://Assets/Stats/Sand.png" id="26_m6353"]
+[ext_resource type="Texture2D" uid="uid://byidakxtgjfki" path="res://Assets/Icons/BeltIconGrey.png" id="27_4uxyg"]
+[ext_resource type="Texture2D" uid="uid://oi1ky4jjmynp" path="res://Assets/Stats/Style.png" id="27_32rvh"]
+[ext_resource type="Texture2D" uid="uid://cbc2e05nxkxoh" path="res://Assets/Moves/HandShot.png" id="30_p0scf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3s1hn"]
+bg_color = Color(0.8918874, 0.47035939, 0.1614792, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yf5fn"]
+bg_color = Color(0.91974264, 0.4910543, 0.93530285, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85731065, 0.8036649, 0.5690886, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_57qmd"]
+draw_center = false
+border_width_top = 1
+border_color = Color(0.85882354, 0.3254902, 0.43137255, 0.49803922)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g4v7s"]
+bg_color = Color(0.9098039, 0.90588236, 0.72156864, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 
 [node name="ShootoutUI" type="Control" unique_id=1514112631]
 texture_filter = 1
@@ -31,490 +74,1121 @@ mouse_filter = 2
 theme = ExtResource("1_w5ldf")
 script = ExtResource("1_2qgxu")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1991508070]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=753712354]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("3_3n0l5")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=712509608]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1991508070]
+layout_mode = 2
 alignment = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer" unique_id=1663316958]
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer" unique_id=1663316958]
 visible = false
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CenterContainer" unique_id=2102060427]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/CenterContainer" unique_id=2102060427]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Acts" type="HBoxContainer" parent="VBoxContainer/CenterContainer/PanelContainer" unique_id=196508921]
+[node name="Acts" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/PanelContainer" unique_id=196508921]
 layout_mode = 2
 alignment = 1
 
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer" unique_id=1357400511]
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=1357400511]
 layout_mode = 2
-columns = 3
+columns = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/GridContainer" unique_id=148783013]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=148783013]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/GridContainer/PanelContainer" unique_id=28419874]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer" unique_id=28419874]
 layout_mode = 2
 theme_override_constants/margin_left = 3
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 3
 
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer" unique_id=1575175695]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer" unique_id=193366404]
 layout_mode = 2
-columns = 2
+theme_override_constants/separation = 2
 
-[node name="Data" type="VBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer" unique_id=2027492489]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2000955173]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
-[node name="NameContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data" unique_id=296699381]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1411309040]
 layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
+theme_override_styles/panel = SubResource("StyleBoxFlat_3s1hn")
 
-[node name="Name2" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" unique_id=275768073 instance=ExtResource("3_f1det")]
-visible = false
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer" unique_id=994450716]
 layout_mode = 2
-mouse_filter = 2
-visible_characters = 12
+texture = ExtResource("18_uoiiw")
 
-[node name="Name" type="Label" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" unique_id=328111308]
+[node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1675274788]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "-"
-vertical_alignment = 1
-text_overrun_behavior = 3
-ellipsis_char = "."
+theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
 
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" unique_id=1716909041 instance=ExtResource("5_5ysdm")]
-
-[node name="HPContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data" unique_id=90227123]
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer6" unique_id=779842888]
 layout_mode = 2
-size_flags_vertical = 3
-alignment = 1
-script = ExtResource("4_8sf7b")
+texture = ExtResource("5_d8xx0")
 
-[node name="TextureRect7" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" unique_id=916868905]
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=334558390]
 layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("4_vga8u")
-stretch_mode = 5
+icon = ExtResource("4_23rvq")
 
-[node name="HP" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" unique_id=978941208 instance=ExtResource("3_f1det")]
+[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=445226995]
 layout_mode = 2
-size_flags_vertical = 8
-mouse_filter = 2
-text = "-"
+icon = ExtResource("4_r3ka0")
 
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" unique_id=348959617 instance=ExtResource("5_5ysdm")]
-
-[node name="Stats" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer" unique_id=87362554]
+[node name="Button3" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=529659850]
 layout_mode = 2
-size_flags_horizontal = 3
-columns = 3
+icon = ExtResource("8_60wve")
 
-[node name="SixShootinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=1734946694]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="TextureRect6" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" unique_id=738847711]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("4_8ob0s")
-stretch_mode = 5
-
-[node name="SixShootin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" unique_id=1479781137 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" unique_id=505883869 instance=ExtResource("5_5ysdm")]
-
-[node name="HighTailinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=1016010701]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="HighTailinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" unique_id=1016554565]
+[node name="AttackButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1597423866 instance=ExtResource("1_drfjl")]
 visible = false
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-mouse_filter = 2
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-
-[node name="TextureRect5" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" unique_id=15284586]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("5_docnv")
-stretch_mode = 5
-
-[node name="HighTailin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" unique_id=850158632 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" unique_id=1029274004 instance=ExtResource("5_5ysdm")]
-
-[node name="TaffyinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=1401444095]
-layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="TaffyinTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" unique_id=339718952]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-mouse_filter = 2
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-
-[node name="TextureRect4" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" unique_id=686474108]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("6_0he6b")
-stretch_mode = 5
-
-[node name="Taffyin" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" unique_id=660730901 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" unique_id=1745472156 instance=ExtResource("5_5ysdm")]
-
-[node name="RevolverContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=181254928]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="RevolverTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" unique_id=541467963]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-mouse_filter = 2
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-
-[node name="TextureRect3" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" unique_id=643117037]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("7_gux81")
-stretch_mode = 5
-
-[node name="Revolver" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" unique_id=1947543887 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" unique_id=529767531 instance=ExtResource("5_5ysdm")]
-
-[node name="RifleContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=1907330609]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="RifleTitle" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" unique_id=205741561]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-mouse_filter = 2
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-
-[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" unique_id=1991744042]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("8_caqsy")
-stretch_mode = 5
-
-[node name="Rifle" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" unique_id=1405494583 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" unique_id=1193910474 instance=ExtResource("5_5ysdm")]
-
-[node name="ShotgunContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats" unique_id=758481464]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-script = ExtResource("4_8sf7b")
-
-[node name="ShotgunIcon" type="RichTextLabel" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" unique_id=1186833982]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 7
-size_flags_vertical = 7
-mouse_filter = 2
-bbcode_enabled = true
-text = "-"
-scroll_active = false
-
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" unique_id=889990808]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("12_hg5u7")
-stretch_mode = 5
-
-[node name="Shotgun" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" unique_id=1364413777 instance=ExtResource("3_f1det")]
-layout_mode = 2
-mouse_filter = 2
-text = "-"
-
-[node name="Tooltip" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" unique_id=694923031 instance=ExtResource("5_5ysdm")]
-
-[node name="Equipment" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer" unique_id=105413845]
-layout_mode = 2
-
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=1456239697]
-layout_mode = 2
-texture = ExtResource("7_gux81")
-
-[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=262023267]
-layout_mode = 2
-texture = ExtResource("13_6b66j")
-
-[node name="TextureRect3" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=916164209]
-layout_mode = 2
-texture = ExtResource("14_5jpxk")
-
-[node name="TextureRect4" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=241540059]
-layout_mode = 2
-texture = ExtResource("15_apkiq")
-
-[node name="TextureRect5" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=1760020077]
-layout_mode = 2
-texture = ExtResource("16_gbypl")
-
-[node name="TextureRect6" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Equipment" unique_id=358595699]
-layout_mode = 2
-texture = ExtResource("17_sriqk")
-
-[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer/GridContainer" unique_id=143225412]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer2" unique_id=2039285480]
-layout_mode = 2
-theme_override_constants/v_separation = 4
-columns = 2
-
-[node name="AttackButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" unique_id=1597423866 instance=ExtResource("1_drfjl")]
-custom_minimum_size = Vector2(0, 24)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme = null
 text = "Attack"
 
-[node name="AbilityButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" unique_id=728386076 instance=ExtResource("1_drfjl")]
-custom_minimum_size = Vector2(0, 24)
+[node name="MoveButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=728386076 instance=ExtResource("1_drfjl")]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = null
-text = "Ability
+text = "Move
 "
 
-[node name="ItemButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" unique_id=1266723861 instance=ExtResource("1_drfjl")]
-custom_minimum_size = Vector2(0, 24)
+[node name="ItemButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1266723861 instance=ExtResource("1_drfjl")]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = null
 text = "Item"
 
-[node name="DuckButton" parent="VBoxContainer/GridContainer/PanelContainer2/GridContainer" unique_id=624912918 instance=ExtResource("1_drfjl")]
-custom_minimum_size = Vector2(0, 24)
+[node name="DuckButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=624912918 instance=ExtResource("1_drfjl")]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = null
 text = "Duck
 "
 
-[node name="PanelContainer3" type="PanelContainer" parent="VBoxContainer/GridContainer" unique_id=59106041]
+[node name="PanelContainer7" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=396288265]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer7" unique_id=444982822]
+layout_mode = 2
+texture = ExtResource("9_p0scf")
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1869279048]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2" unique_id=1282333892]
+layout_mode = 2
+texture = ExtResource("4_23rvq")
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=996340548]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3" unique_id=1766777220]
+layout_mode = 2
+texture = ExtResource("4_23rvq")
+
+[node name="PanelContainer4" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=910015207]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4" unique_id=1943158542]
+layout_mode = 2
+texture = ExtResource("4_23rvq")
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1369607485]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_57qmd")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1838559291]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=616587270]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1951962330]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/GridContainer/PanelContainer3" unique_id=1327454898]
+[node name="RichTextLabelExtended8px" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1294598600 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "Walker Langley"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1681174447]
+layout_mode = 2
+
+[node name="RichTextLabelExtended8px2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=696762 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "Pistolero"
+
+[node name="RichTextLabelExtended8px3" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=575415204 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "Rodeo"
+
+[node name="Data" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=2027492489]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HPContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data" unique_id=90227123]
+layout_mode = 2
+alignment = 1
+script = ExtResource("4_8sf7b")
+
+[node name="HPIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=916868905]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_vga8u")
+stretch_mode = 5
+
+[node name="HP" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=1671721679 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00/00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=348959617 instance=ExtResource("5_5ysdm")]
+
+[node name="EnduranceContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data" unique_id=296699381]
+layout_mode = 2
+script = ExtResource("4_8sf7b")
+
+[node name="EnduranceIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=83820805]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_splkh")
+stretch_mode = 5
+
+[node name="Endurance" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=621143703 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00/00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=1716909041 instance=ExtResource("5_5ysdm")]
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1309542305]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SandContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=2038102741]
+layout_mode = 2
+script = ExtResource("4_8sf7b")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1594476288]
+layout_mode = 2
+texture = ExtResource("26_m6353")
+stretch_mode = 5
+
+[node name="RichTextLabelExtended8px2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1888791404 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1558058711 instance=ExtResource("5_5ysdm")]
+
+[node name="StyleContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1584868530]
+layout_mode = 2
+script = ExtResource("4_8sf7b")
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=1428024332]
+layout_mode = 2
+texture = ExtResource("27_32rvh")
+stretch_mode = 5
+
+[node name="RichTextLabelExtended8px4" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=131679672 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=968512137 instance=ExtResource("5_5ysdm")]
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=2023299423]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_57qmd")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=23333215]
+layout_mode = 2
+
+[node name="Stats" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=87362554]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 3
+
+[node name="SixShootinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=1734946694]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="TextureRect6" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" unique_id=738847711]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_8ob0s")
+stretch_mode = 5
+
+[node name="SixShootin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" unique_id=1200918949 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" unique_id=505883869 instance=ExtResource("5_5ysdm")]
+
+[node name="HighTailinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=1016010701]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="HighTailinTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" unique_id=1016554565]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect5" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" unique_id=15284586]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("5_docnv")
+stretch_mode = 5
+
+[node name="HighTailin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" unique_id=59873499 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" unique_id=1029274004 instance=ExtResource("5_5ysdm")]
+
+[node name="TaffyinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=1401444095]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="TaffyinTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" unique_id=339718952]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect4" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" unique_id=686474108]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("6_0he6b")
+stretch_mode = 5
+
+[node name="Taffyin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" unique_id=12000496 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" unique_id=1745472156 instance=ExtResource("5_5ysdm")]
+
+[node name="RevolverContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=181254928]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="RevolverTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" unique_id=541467963]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect3" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" unique_id=643117037]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("7_gux81")
+stretch_mode = 5
+
+[node name="Revolver" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" unique_id=197586396 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" unique_id=529767531 instance=ExtResource("5_5ysdm")]
+
+[node name="RifleContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=1907330609]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="RifleTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" unique_id=205741561]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" unique_id=1991744042]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("8_caqsy")
+stretch_mode = 5
+
+[node name="Rifle" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" unique_id=1583513789 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" unique_id=1193910474 instance=ExtResource("5_5ysdm")]
+
+[node name="ShotgunContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats" unique_id=758481464]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
+
+[node name="ShotgunIcon" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=1186833982]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=889990808]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("12_hg5u7")
+stretch_mode = 5
+
+[node name="Shotgun" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=124923013 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(15, 18)
+layout_mode = 2
+text = "00"
+visible_characters = 2
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=694923031 instance=ExtResource("5_5ysdm")]
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1963777971]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+
+[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer" unique_id=1659631199]
+layout_mode = 2
+size_flags_horizontal = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=304519948]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer" unique_id=1132037402]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+offset_transform_enabled = true
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=754159496]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer2" unique_id=79281846]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=341862877]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer3" unique_id=763309980]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=354940357]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer4" unique_id=1247313684]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=941441536]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer5" unique_id=1589282554]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=294878642]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer6" unique_id=2047074068]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="Equipment" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=378459354]
+layout_mode = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=218794172]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer" unique_id=1456239697]
+modulate = Color(1, 1, 1, 0.49803922)
+layout_mode = 2
+texture = ExtResource("24_4uxyg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1476777415]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer2" unique_id=262023267]
+modulate = Color(1, 1, 1, 0.49803922)
+layout_mode = 2
+texture = ExtResource("24_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=285847855]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect3" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer3" unique_id=916164209]
+modulate = Color(1, 1, 1, 0.49803922)
+layout_mode = 2
+texture = ExtResource("25_4uxyg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1363536015]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect6" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer6" unique_id=358595699]
+layout_mode = 2
+texture = ExtResource("27_4uxyg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer4" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1592694311]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect4" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer4" unique_id=241540059]
+modulate = Color(1, 1, 1, 0.49803922)
+layout_mode = 2
+texture = ExtResource("26_60wve")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer5" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=340262394]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect5" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer5" unique_id=1760020077]
+modulate = Color(1, 1, 1, 0.49803922)
+layout_mode = 2
+texture = ExtResource("22_k6mq4")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=59106041]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3" unique_id=1327454898]
 layout_mode = 2
 theme_override_constants/margin_left = 3
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 3
 
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer" unique_id=451007391]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer" unique_id=684105470]
 layout_mode = 2
-columns = 2
 
-[node name="HoveredData" type="VBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer" unique_id=1342876935]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1731955173]
+layout_mode = 2
+
+[node name="RichTextLabelExtended" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1326427417 instance=ExtResource("3_f1det")]
+layout_mode = 2
+text = "Enemy name"
+
+[node name="RichTextLabelExtended2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1704562685 instance=ExtResource("3_f1det")]
+visible = false
+layout_mode = 2
+text = "[right]HP[/right]"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer" unique_id=154984445]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 
-[node name="HoveredName" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredData" unique_id=903231681]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=1469764701]
 layout_mode = 2
-size_flags_horizontal = 3
-text = "-"
-vertical_alignment = 1
-text_overrun_behavior = 3
-ellipsis_char = "."
-
-[node name="HoveredHPContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredData" unique_id=1917004411]
-layout_mode = 2
-size_flags_vertical = 3
-alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredData/HoveredHPContainer" unique_id=1473169947]
-layout_mode = 2
-mouse_filter = 2
 texture = ExtResource("4_vga8u")
 stretch_mode = 5
 
-[node name="HoveredHP" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredData/HoveredHPContainer" unique_id=299136011]
+[node name="RichTextLabelExtended3" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=901734640 instance=ExtResource("3_f1det")]
 layout_mode = 2
-text = "-"
+text = "00/00"
 
-[node name="HoveredStats" type="GridContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer" unique_id=308876734]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=480547666]
+layout_mode = 2
+size_flags_vertical = 6
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=455500434]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="SandContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3" unique_id=515458900]
+layout_mode = 2
+script = ExtResource("4_8sf7b")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" unique_id=1056766062]
+layout_mode = 2
+texture = ExtResource("26_m6353")
+stretch_mode = 5
+
+[node name="RichTextLabelExtended8px2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" unique_id=1724757760 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" unique_id=294361002 instance=ExtResource("5_5ysdm")]
+
+[node name="StyleContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3" unique_id=126771115]
+layout_mode = 2
+script = ExtResource("4_8sf7b")
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" unique_id=626468701]
+layout_mode = 2
+texture = ExtResource("27_32rvh")
+stretch_mode = 5
+
+[node name="RichTextLabelExtended8px4" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" unique_id=886515542 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "00"
+
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" unique_id=2043490835 instance=ExtResource("5_5ysdm")]
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=502765009]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1467022180]
+layout_mode = 2
+
+[node name="RichTextLabelExtended8px" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer" unique_id=952284179 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "Hitrate to be dealt"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1523464559]
+layout_mode = 2
+
+[node name="RichTextLabelExtended8px" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer2" unique_id=1146267603 instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "Damage to be dealt"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1933302357]
+layout_mode = 2
+
+[node name="Stats" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=46578046]
+layout_mode = 2
+size_flags_horizontal = 0
 columns = 3
 
-[node name="HoveredSixShootinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=740047540]
+[node name="SixShootinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=2011324456]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer" unique_id=1320539542]
+[node name="TextureRect6" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" unique_id=153493246]
 layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("4_8ob0s")
 stretch_mode = 5
 
-[node name="HoveredSixShootin" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer" unique_id=616153540]
+[node name="SixShootin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" unique_id=1347347807 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[node name="HoveredHighTailinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=1666402151]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" unique_id=102710914 instance=ExtResource("5_5ysdm")]
+
+[node name="HighTailinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=1957718996]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer" unique_id=274135603]
+[node name="HighTailinTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" unique_id=1923078557]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect5" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" unique_id=944787686]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("5_docnv")
 stretch_mode = 5
 
-[node name="HoveredHighTailin" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer" unique_id=741209517]
+[node name="HighTailin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" unique_id=849843318 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[node name="HoveredTaffyinContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=1993413476]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" unique_id=1263123146 instance=ExtResource("5_5ysdm")]
+
+[node name="TaffyinContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=998778470]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer" unique_id=2018331242]
+[node name="TaffyinTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" unique_id=129233558]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect4" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" unique_id=1512291930]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("6_0he6b")
 stretch_mode = 5
 
-[node name="HoveredTaffyin" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer" unique_id=2029154000]
+[node name="Taffyin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" unique_id=1619292098 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[node name="HoveredRevolverContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=836181446]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" unique_id=669111771 instance=ExtResource("5_5ysdm")]
+
+[node name="RevolverContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=1113599272]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer" unique_id=520799037]
+[node name="RevolverTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" unique_id=1501883437]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect3" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" unique_id=921163411]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("7_gux81")
 stretch_mode = 5
 
-[node name="HoveredRevolver" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer" unique_id=911817833]
+[node name="Revolver" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" unique_id=1805680799 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[node name="HoveredRifleContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=1596283671]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" unique_id=2112855194 instance=ExtResource("5_5ysdm")]
+
+[node name="RifleContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=361510382]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer" unique_id=1025790850]
+[node name="RifleTitle" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" unique_id=1596508508]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" unique_id=67864263]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("8_caqsy")
 stretch_mode = 5
 
-[node name="HoveredRifle" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer" unique_id=347310622]
+[node name="Rifle" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" unique_id=391234854 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[node name="HoveredShotgunContainer" type="HBoxContainer" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats" unique_id=552003426]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" unique_id=1040316822 instance=ExtResource("5_5ysdm")]
+
+[node name="ShotgunContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats" unique_id=108408060]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource("4_8sf7b")
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer" unique_id=1602429704]
+[node name="ShotgunIcon" type="RichTextLabel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" unique_id=2097944062]
+visible = false
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 7
+mouse_filter = 2
+bbcode_enabled = true
+text = "-"
+scroll_active = false
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" unique_id=265211234]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
 mouse_filter = 2
 texture = ExtResource("12_hg5u7")
 stretch_mode = 5
 
-[node name="HoveredShotgun" type="Label" parent="VBoxContainer/GridContainer/PanelContainer3/MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer" unique_id=907653539]
+[node name="Shotgun" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" unique_id=2023566238 instance=ExtResource("7_3n0l5")]
+custom_minimum_size = Vector2(12, 18)
 layout_mode = 2
-text = "-"
+text = "00"
+visible_characters = 2
 
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" method="_on_mouse_entered" binds= ["Name", "Character name"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" method="_on_mouse_entered" binds= ["[img]res://Assets/Icons/SixShootinIcon.png[/img] Six Shootin'", "Six Shootin' decides your damage with firearms."]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/SixShootinContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" method="_on_mouse_entered" binds= ["High Tailin'", "High Tailin' decides the turn order"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/HighTailinContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" method="_on_mouse_entered" binds= ["Taffyin'", "Taffyin' decides Style amount"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/TaffyinContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" method="_on_mouse_entered" binds= ["Revolver", "Damage with revolvers"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RevolverContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" method="_on_mouse_entered" binds= ["Rifle", "Damage with rifles"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/RifleContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" method="_on_mouse_entered" binds= ["Shotgun", "Damage with shotguns"]]
-[connection signal="mouse_exited" from="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" to="VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/ShotgunContainer" method="_on_mouse_exited"]
-[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/AttackButton" to="." method="_on_fight_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/AbilityButton" to="." method="_on_ability_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/GridContainer/PanelContainer2/GridContainer/ItemButton" to="." method="_on_item_button_pressed"]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" unique_id=1294468844 instance=ExtResource("5_5ysdm")]
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=823402391]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+
+[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer" unique_id=187506558]
+layout_mode = 2
+size_flags_horizontal = 6
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=58044263]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer" unique_id=1211518767]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+offset_transform_enabled = true
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1666704888]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer2" unique_id=1238426982]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=602640048]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer3" unique_id=369290960]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=82960973]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer4" unique_id=1453379797]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1862212931]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer5" unique_id=468283696]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1953518678]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer6" unique_id=983241671]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("16_bfb8p")
+
+[node name="Moves" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1948791486]
+layout_mode = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=1196041842]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer" unique_id=888839038]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=697373408]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer2" unique_id=803341908]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=1533704792]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect3" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer3" unique_id=1378542567]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer4" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=615924508]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect4" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer4" unique_id=1665801264]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer5" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=711361776]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect5" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer5" unique_id=522265420]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves" unique_id=855779437]
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="TextureRect6" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Moves/PanelContainer6" unique_id=1312654777]
+layout_mode = 2
+texture = ExtResource("30_p0scf")
+expand_mode = 2
+stretch_mode = 4
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AttackButton" to="." method="_on_shootout_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/MoveButton" to="." method="_on_move_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ItemButton" to="." method="_on_item_button_pressed"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" method="_on_mouse_entered" binds= ["Endurance", "Endurance amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" method="_on_mouse_entered" binds= ["Sand", "Sand amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" method="_on_mouse_entered" binds= ["Style", "Style amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" method="_on_mouse_entered" binds= ["[img]res://Assets/Icons/SixShootinIcon.png[/img] Six Shootin'", "Six Shootin' decides your damage with firearms."]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" method="_on_mouse_entered" binds= ["High Tailin'", "High Tailin' decides the turn order"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" method="_on_mouse_entered" binds= ["Taffyin'", "Taffyin' decides Style amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" method="_on_mouse_entered" binds= ["Revolver", "Damage with revolvers"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" method="_on_mouse_entered" binds= ["Rifle", "Damage with rifles"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" method="_on_mouse_entered" binds= ["Shotgun", "Damage with shotguns"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" method="_on_mouse_entered" binds= ["Sand", "Sand amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/SandContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" method="_on_mouse_entered" binds= ["Style", "Style amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer3/StyleContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" method="_on_mouse_entered" binds= ["[img]res://Assets/Icons/SixShootinIcon.png[/img] Six Shootin'", "Six Shootin' decides your damage with firearms."]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/SixShootinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" method="_on_mouse_entered" binds= ["High Tailin'", "High Tailin' decides the turn order"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/HighTailinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" method="_on_mouse_entered" binds= ["Taffyin'", "Taffyin' decides Style amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/TaffyinContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" method="_on_mouse_entered" binds= ["Revolver", "Damage with revolvers"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RevolverContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" method="_on_mouse_entered" binds= ["Rifle", "Damage with rifles"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/RifleContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" method="_on_mouse_entered" binds= ["Shotgun", "Damage with shotguns"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" method="_on_mouse_exited"]
