@@ -7,7 +7,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ejeyy"]
 size = Vector2(16, 12)
 
-[node name="FightActor" type="Node2D"]
+[node name="ShootoutActor" type="Node2D"]
 script = ExtResource("1_3o4kd")
 
 [node name="Area2D" type="Area2D" parent="."]

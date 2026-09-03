@@ -8,7 +8,7 @@ signal actorHovered
 signal actorUnhovered
 
 var items = ["Paregoric", "Paregoric"]
-var abilities = ["Sharp Shot"]
+var moves = ["Sharp Shot"]
 
 
 func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
@@ -30,7 +30,6 @@ func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> vo
 	add_child(animations)
 	
 	position = Shootout.shootoutPositions[actorSide][actorPosition]
-	#position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
 	actorTurn.connect(toggleActorTurn)
 
 func toggleActorTurn() -> void:
@@ -38,6 +37,9 @@ func toggleActorTurn() -> void:
 		$Highlight2.show()
 		return
 	$Highlight2.hide()
+
+func getAnimations() -> Node:
+	return get_node(str(name))
 
 
 func _on_area_2d_input_event(_viewport, event, _shape_idx):

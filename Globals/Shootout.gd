@@ -1,6 +1,13 @@
 extends Node
 
 
+const TEAM_PLAYER = "player team"
+const TEAM_ENEMY = "enemy team"
+
+const ACT_TYPE_ATTACK = "Attack"
+const ACT_TYPE_MOVES = "Moves"
+const ACT_TYPE_ITEMS = "Items"
+
 var shootoutPositions = {
 	"player team": {
 		1: Vector2i(280, 252),
@@ -16,177 +23,30 @@ var shootoutPositions = {
 	}
 }
 
-#var fightPositions = {
-	#"player team": {
-		#1: {
-			#1: Vector2i(275, 240),
-			#2: Vector2i(265, 252),
-			#3: Vector2i(255, 264)
-			##4: Vector2i(260, 261)
-		#},
-		#2: {
-			#1: Vector2i(180, 260),
-			#2: Vector2i(170, 275),
-			#3: Vector2i(160, 290),
-			#4: Vector2i(150, 305)
-		#},
-		#3: {
-			#1: Vector2i(130, 260),
-			#2: Vector2i(120, 275),
-			#3: Vector2i(110, 290),
-			#4: Vector2i(100, 305)
-		#},
-		#4: {
-			#1: Vector2i(80, 260),
-			#2: Vector2i(70, 275),
-			#3: Vector2i(60, 290),
-			#4: Vector2i(50, 305)
-		#}
-	#},
-	#"enemy team": {
-		#1: {
-			#1: Vector2i(350, 240),
-			#2: Vector2i(360, 252),
-			#3: Vector2i(370, 264)
-			##4: Vector2i(400, 265)
-		#},
-		#2: {
-			#1: Vector2i(410, 260),
-			#2: Vector2i(420, 275),
-			#3: Vector2i(430, 290),
-			#4: Vector2i(440, 305)
-		#},
-		#3: {
-			#1: Vector2i(490, 260),
-			#2: Vector2i(500, 275),
-			#3: Vector2i(510, 290),
-			#4: Vector2i(520, 305)
-		#},
-		#4: {
-			#1: Vector2i(540, 260),
-			#2: Vector2i(550, 275),
-			#3: Vector2i(560, 290),
-			#4: Vector2i(570, 305)
-		#}
-	#}
-#}
+var movesData = {}
+var itemsData = {}
 
-#var fightPositions = {
-	#"player team": {
-		#1: {
-			#1: Vector2i(230, 260),
-			#2: Vector2i(220, 275),
-			#3: Vector2i(210, 290),
-			#4: Vector2i(200, 305)
-		#},
-		#2: {
-			#1: Vector2i(180, 260),
-			#2: Vector2i(170, 275),
-			#3: Vector2i(160, 290),
-			#4: Vector2i(150, 305)
-		#},
-		#3: {
-			#1: Vector2i(130, 260),
-			#2: Vector2i(120, 275),
-			#3: Vector2i(110, 290),
-			#4: Vector2i(100, 305)
-		#},
-		#4: {
-			#1: Vector2i(80, 260),
-			#2: Vector2i(70, 275),
-			#3: Vector2i(60, 290),
-			#4: Vector2i(50, 305)
-		#}
-	#},
-	#"enemy team": {
-		#1: {
-			#1: Vector2i(410, 260),
-			#2: Vector2i(420, 275),
-			#3: Vector2i(430, 290),
-			#4: Vector2i(440, 305)
-		#},
-		#2: {
-			#1: Vector2i(450, 260),
-			#2: Vector2i(460, 275),
-			#3: Vector2i(470, 290),
-			#4: Vector2i(480, 305)
-		#},
-		#3: {
-			#1: Vector2i(490, 260),
-			#2: Vector2i(500, 275),
-			#3: Vector2i(510, 290),
-			#4: Vector2i(520, 305)
-		#},
-		#4: {
-			#1: Vector2i(540, 260),
-			#2: Vector2i(550, 275),
-			#3: Vector2i(560, 290),
-			#4: Vector2i(570, 305)
-		#}
-	#}
-#}
 
-var abilitiesData = {
-	"Sharp Shot": {
-		"baseAmount": 5,
-		"statScaling": 0.25,
-		"side": "enemy",
-		"positions": {
-			"type": "single",
-			"actorUser": [1, 2, 3, 4],
-			"targets": {
-				"columns": [1, 2, 3, 4]
-			}
-		},
-		"animations": [
-			{
-				"target": "selectedActor",
-				"sprite": "icon",
-				"path": "res://Animations/Shootout/Abilities/SharpShotAnimations.tscn"
-			},
-			{
-				"target": "actingActor",
-				"animation": "Shoot"
-			}
-		]
-	}
-}
+func _ready():
+	loadData()
 
-var itemsData = {
-	"Paregoric": {
-		"baseAmount": 5,
-		"statScaling": 0.5,
-		"side": "player",
-		"positions": {
-			"type": "single",
-			"targets": {
-				"columns": [1, 2, 3, 4]
-			}
-		},
-		"animations": [
-			{
-				"target": "selectedActor",
-				"sprite": "icon",
-				"path": "res://Animations/Shootout/Items/ParegoricAnimations.tscn"
-			}
-		]
-	},
-	"multiHeal": {
-		"baseAmount": 1,
-		"statScaling": 0.5,
-		"side": "player",
-		"positions": {
-			"type": "multi",
-			"shape": "column",
-			"targets": {
-				"columns": [1, 2, 3, 4]
-			}
-		}
-	}
-}
+func loadData() -> void:
+	movesData = loadDataFolder("res://Data/Shootout/Moves")
+	itemsData = loadDataFolder("res://Data/Shootout/Items")
+
+func loadDataFolder(folderPath: String) -> Dictionary:
+	var data = {}
+	for fileName in DirAccess.get_files_at(folderPath):
+		if !fileName.ends_with(".gd"):
+			continue
+		var entry = load("{folderPath}/{fileName}".format({
+			"folderPath": folderPath,
+			"fileName": fileName
+		})).new()
+		var entryData = entry.get("data")
+		if entryData != null:
+			data[entryData.name] = entryData
+	return data
 
 func checkIfActorIsOnSide(actorName, actorSide, shootoutActors):
-	for checkedActorName in shootoutActors[actorSide]:
-		if actorName == checkedActorName:
-			return true
-	return false
+	return shootoutActors.has(actorSide) and shootoutActors[actorSide].has(actorName)

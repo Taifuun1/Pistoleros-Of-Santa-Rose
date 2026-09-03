@@ -1,8 +1,5 @@
-[gd_scene load_steps=2 format=3 uid="uid://biv2pthnfytk4"]
+[gd_scene format=3 uid="uid://biv2pthnfytk4"]
 
-[ext_resource type="Theme" uid="uid://cqvnxa7wpxk1i" path="res://UI/UITheme.tres" id="1_n42v3"]
-
-[node name="FightButton" type="Button"]
+[node name="ShootoutButton" type="Button" unique_id=1544747168]
 offset_right = 8.0
 offset_bottom = 8.0
-theme = ExtResource("1_n42v3")

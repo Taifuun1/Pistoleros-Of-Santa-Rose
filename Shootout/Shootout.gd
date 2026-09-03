@@ -1,444 +1,246 @@
-extends ActShootout
+extends Node2D
 
-@onready var shootoutActor = preload("res://Actors/Shootout/ShootoutActor.tscn")
-@onready var damageNumber = preload("res://Nodes/Damage Number/DamageNumber.tscn")
 
 signal actorDone
+signal shootoutEnded(winningSide)
 
-var outlineShader = load("res://Shaders/Outline.tres")
+const ShootoutActorScene = preload("res://Actors/Shootout/ShootoutActor.tscn")
+const DamageNumberScene = preload("res://Nodes/Damage Number/DamageNumber.tscn")
+const EncounterData = preload("res://Data/Shootout/Encounters/RatAmbush.gd")
+const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
+const TargetingManagerScript = preload("res://Shootout/ShootoutTargetingManager.gd")
+const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
+const AnimationSequencerScript = preload("res://Shootout/ShootoutAnimationSequencer.gd")
+const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 
+@onready var actorsRoot = $Actors
+@onready var ui = $CanvasLayer/ShootoutUI
+
+var turnManager
+var targetingManager
+var actionResolver
+var animationSequencer
+var enemyAI
+
+var selectedAct = null
+var selectedActor = ""
 var playerHasControl = false
-
-var shootoutActors = {
-	"player team": {
-		
-	},
-	"enemy team": {
-		
-	}
-}
-
-var turnOrder = []
 var playerAction = false
+var battleOver = false
+var pendingResolution = false
 
 
-func _ready():
-	init(
-		{
-			"player team": {
-				"Named People": {
-					"Walker Langley": {
-						"positions": [1, 2, 3
-							#{
-								#"column": 1,
-								#"row": 1
-							#},
-							#{
-								#"column": 1,
-								#"row": 2
-							#},
-							#{
-								#"column": 1,
-								#"row": 3
-							#},
-							#{
-								#"column": 1,
-								#"row": 4
-							#},
-							#{
-								#"column": 2,
-								#"row": 1
-							#},
-							#{
-								#"column": 2,
-								#"row": 2
-							#},
-							#{
-								#"column": 2,
-								#"row": 3
-							#},
-							#{
-								#"column": 2,
-								#"row": 4
-							#},
-							#{
-								#"column": 3,
-								#"row": 1
-							#},
-							#{
-								#"column": 3,
-								#"row": 2
-							#},
-							#{
-								#"column": 3,
-								#"row": 3
-							#},
-							#{
-								#"column": 3,
-								#"row": 4
-							#},
-							#{
-								#"column": 4,
-								#"row": 1
-							#},
-							#{
-								#"column": 4,
-								#"row": 2
-							#},
-							#{
-								#"column": 4,
-								#"row": 3
-							#},
-							#{
-								#"column": 4,
-								#"row": 4
-							#}
-						]
-					}
-				}
-			},
-			"enemy team": {
-				"Animals": {
-					"Squeky rat": {
-						"positions": [1, 2, 3
-							#{
-								#"column": 1,
-								#"row": 1
-							#},
-							#{
-								#"column": 1,
-								#"row": 2
-							#},
-							#{
-								#"column": 1,
-								#"row": 3
-							#},
-							#{
-								#"column": 1,
-								#"row": 4
-							#},
-							#{
-								#"column": 2,
-								#"row": 1
-							#},
-							#{
-								#"column": 2,
-								#"row": 2
-							#},
-							#{
-								#"column": 2,
-								#"row": 3
-							#},
-							#{
-								#"column": 2,
-								#"row": 4
-							#},
-							#{
-								#"column": 3,
-								#"row": 1
-							#},
-							#{
-								#"column": 3,
-								#"row": 2
-							#},
-							#{
-								#"column": 3,
-								#"row": 3
-							#},
-							#{
-								#"column": 3,
-								#"row": 4
-							#},
-							#{
-								#"column": 4,
-								#"row": 1
-							#},
-							#{
-								#"column": 4,
-								#"row": 2
-							#},
-							#{
-								#"column": 4,
-								#"row": 3
-							#},
-							#{
-								#"column": 4,
-								#"row": 4
-							#}
-						]
-					}
-				}
-			}
-		}
-	)
-
-func init(actors: Dictionary):
+func _ready() -> void:
+	turnManager = TurnManagerScript.new()
+	turnManager.init(self)
+	turnManager.battleEnded.connect(_on_battle_ended)
+	targetingManager = TargetingManagerScript.new()
+	targetingManager.init(turnManager)
+	actionResolver = ActionResolverScript.new()
+	actionResolver.init(self)
+	enemyAI = EnemyAIScript.new()
+	animationSequencer = AnimationSequencerScript.new()
+	add_child(animationSequencer)
+	animationSequencer.frameHit.connect(resolveActOnce)
+	animationSequencer.sequenceDone.connect(resolveActOnce)
+	ui.attack.connect(_on_shootout_ui_attack)
+	ui.move.connect(_on_shootout_ui_move)
+	ui.item.connect(_on_shootout_ui_item)
+	ui.moveActsRequested.connect(_on_shootout_ui_move_acts_requested)
+	ui.itemActsRequested.connect(_on_shootout_ui_item_acts_requested)
 	actorDone.connect(_on_actor_done)
+	init(EncounterData.new().data)
+
+
+func init(actors: Dictionary) -> void:
 	for actorSide in actors:
 		for actorType in actors[actorSide]:
 			for actorName in actors[actorSide][actorType]:
 				var index = 0
 				for actorPosition in actors[actorSide][actorType][actorName].positions:
-					var newShootoutActor = shootoutActor.instantiate()
-					var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index})
-					$Actors.add_child(newShootoutActor)
-					if Party.party.has(actorName):
-						$Actors.get_children()[$Actors.get_child_count() - 1].init(Party.party[actorName])
-					else:
-						$Actors.get_children()[$Actors.get_child_count() - 1].init(
-							load("res://Data/Actors/{actorType}/{actorName}.gd".format(
-								{ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") }
-							)
-						).new().data)
-					$Actors.get_children()[$Actors.get_child_count() - 1].initShootoutActor(
-						actorType,
-						actorNameIndexed,
-						actorPosition,
-						actorSide
-					)
-					$Actors.get_children()[$Actors.get_child_count() - 1].actorSelected.connect(selectActor.bind(actorNameIndexed))
-					$Actors.get_children()[$Actors.get_child_count() - 1].actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
-					$Actors.get_children()[$Actors.get_child_count() - 1].actorUnhovered.connect(clearHoveredActorStats)
-					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onAnimationFrameHit.connect(actorFrameHit)
-					$Actors.get_children()[$Actors.get_child_count() - 1].get_node(actorNameIndexed).onNextAnimation.connect(manageAnimations)
-					shootoutActors[actorSide][actorNameIndexed] = { "actorPosition": actorPosition }
+					spawnActor(actorSide, actorType, actorName, actorPosition, index)
 					index += 1
-	createTurnOrder()
-	#selectActor()
-	#setActorCharacterStats()
-	#setActorCharacterItems()
-	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
-	#playerHasControl = true
-	processEnemyTurn()
+	turnManager.createTurnOrder()
+	startCurrentTurn()
 
-func showHoveredActorStats(actorName: String) -> void:
-	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-	$CanvasLayer/ShootoutUI.setHoveredActorStats({
-		"Name": actor.actorName,
-		"HP": actor.hp
-	}, {
-		"SixShootin": actor.stats.sixShootin,
-		"HighTailin": actor.stats.highTailin,
-		"Taffyin": actor.stats.taffyin,
-		"Revolver": actor.stats.damage.lead.revolver,
-		"Rifle": actor.stats.damage.lead.rifle,
-		"Shotgun": actor.stats.damage.lead.shotgun
-	})
+func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, index: int) -> void:
+	var newShootoutActor = ShootoutActorScene.instantiate()
+	var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index })
+	actorsRoot.add_child(newShootoutActor)
+	if Party.party.has(actorName):
+		newShootoutActor.init(Party.party[actorName])
+	else:
+		newShootoutActor.init(load("res://Data/Actors/{actorType}/{actorName}.gd".format({
+			"actorType": actorType,
+			"actorName": actorName.capitalize().replace(" ", "")
+		})).new().data)
+	newShootoutActor.initShootoutActor(actorType, actorNameIndexed, actorPosition, actorSide)
+	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
+	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
+	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats)
+	newShootoutActor.getAnimations().onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
+	turnManager.registerActor(actorSide, actorNameIndexed, actorPosition)
 
-func clearHoveredActorStats() -> void:
-	$CanvasLayer/ShootoutUI.clearHoveredActorStats()
+func getActor(actorName: String) -> Node:
+	if actorName == "":
+		return null
+	return actorsRoot.get_node_or_null(actorName)
 
-func processEnemyTurn():
-	var actorName = turnOrder.front()
-	var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-	actor.get_node(str(actor.name)).playAnimation("Melee", true, true)
-
-func createTurnOrder():
-	var actorsHighTailin = []
-	for actorSide in shootoutActors:
-		for actorName in shootoutActors[actorSide]:
-			var actor = get_node("Actors/{actorName}".format({ "actorName": actorName }))
-			actorsHighTailin.append({
-				"actorName": actorName,
-				"highTailin": actor.stats.highTailin
-			})
-	actorsHighTailin.sort_custom(HelperFunctions.sortToTurnOrder)
-	var newTurnOrder = []
-	for actor in actorsHighTailin:
-		newTurnOrder.append(actor.actorName)
-	turnOrder = newTurnOrder
-
-func checkIfActorDead(actor) -> bool:
-	if actor.hp <= 0:
-		if turnOrder.has(actor.name):
-			turnOrder.remove_at(turnOrder.find(actor.name))
-		for actorSide in shootoutActors:
-			if shootoutActors[actorSide].has(actor.name):
-				shootoutActors[actorSide].erase(actor.name)
-				break
-		actor.queue_free()
-		checkIfSideIsDead()
-		return true
-	return false
-
-func checkIfSideIsDead():
-	for shootoutSide in shootoutActors:
-		if shootoutActors[shootoutSide].is_empty():
-			turnOrder.clear()
-
-func selectActor(actorName = shootoutActors["enemy team"].keys()[0]) -> void:
-	if playerHasControl and playerAction and selectedAct != null:
-		var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-		selectedActor = actorName
-		if selectedAct.type == "Attack":
-			if Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors):
-				return
-			#actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
-		elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
-			if (
-				(
-					selectedAct.type == "Items" and
-					(
-						(
-							Shootout.itemsData[selectedAct.name].side == "player" and
-							Shootout.checkIfActorIsOnSide(actorName, "enemy team", shootoutActors)
-						) or
-						(
-							Shootout.itemsData[selectedAct.name].side == "enemy" and
-							Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors)
-						)
-					)
-				) or
-				(
-					selectedAct.type == "Abilities" and
-					(
-						(
-							Shootout.abilitiesData[selectedAct.name].side == "player" and
-							Shootout.checkIfActorIsOnSide(actorName, "enemy team", shootoutActors)
-						) or
-						(
-							Shootout.abilitiesData[selectedAct.name].side == "enemy" and
-							Shootout.checkIfActorIsOnSide(actorName, "player team", shootoutActors)
-						)
-					)
-				)
-			):
-				return
-			if selectedAct.type == "Items":
-				actor.items.erase(selectedAct.name)
-				animations = Shootout.itemsData[selectedAct.name].animations.duplicate(true)
-			if selectedAct.type == "Abilities":
-				animations = Shootout.abilitiesData[selectedAct.name].animations.duplicate(true)
-		$CanvasLayer/ShootoutUI/VBoxContainer/CenterContainer.visible = false
-		playerHasControl = false
-		actor.actorTurn.emit()
-		manageAnimations()
-
-func isPlayerActing(actor):
-	for actorName in shootoutActors["player team"]:
-		if actorName == actor:
-			return true
-	return false
-
-func createDamageNumber(damage, targetPosition):
-	var newDamageNumber = damageNumber.instantiate()
-	add_child(newDamageNumber)
-	newDamageNumber.init(damage, "red", targetPosition)
-
-func setActorCharacterStats():
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	$CanvasLayer/ShootoutUI.setPlayerCharacterStats({
-		"Name": actor.actorName,
-		"HP": actor.hp
-	}, {
-		"SixShootin": actor.stats.sixShootin,
-		"HighTailin": actor.stats.highTailin,
-		"Taffyin": actor.stats.taffyin,
-		"Revolver": actor.stats.damage.lead.revolver,
-		"Rifle": actor.stats.damage.lead.rifle,
-		"Shotgun": actor.stats.damage.lead.shotgun
-	})
-
-func setActorCharacterActs(actType: String):
-	if actType == "Abilities":
-		$CanvasLayer/ShootoutUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).abilities, actType)
-	elif actType == "Items":
-		$CanvasLayer/ShootoutUI.setPlayerCharacterActs(get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).items, actType)
-
-func manageAnimations():
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	if animations != null and animations.is_empty() and !selectedAct.type == "Attack":
-		animations = null
-		actorFrameHit()
+func startCurrentTurn() -> void:
+	var actorName = turnManager.currentActorName()
+	var actor = getActor(actorName)
+	if actor == null:
 		return
-	if selectedAct.type == "Attack":
-		if actor.weapon.weapon == "revolver":
-			actor.get_node(str(actor.name)).playAnimation("Shoot Revolver", true, true)
-		elif actor.weapon.weapon == "rifle":
-			actor.get_node(str(actor.name)).playAnimation("Shoot Rifle", true, true)
-		#actor.get_node(str(actor.name)).playAnimation("Shoot", true, true)
-	elif selectedAct.type == "Abilities" or selectedAct.type == "Items":
-		var animation = animations.pop_front()
-		if animation.target == "selectedActor":
-			actAnimation()
-			#actor.get_node(str(actor.name)).playAnimation(, true, true)
-		elif animation.target == "actingActor":
-			if actor.weapon.weapon == "revolver":
-				actor.get_node(str(actor.name)).playAnimation("Shoot Revolver", true, true)
-			elif actor.weapon.weapon == "rifle":
-				actor.get_node(str(actor.name)).playAnimation("Shoot Rifle", true, true)
-			#actor.get_node(str(actor.name)).playAnimation(animation.animation, true, true)
+	actor.actorTurn.emit()
+	if turnManager.isPlayerActing(actorName):
+		playerAction = true
+		playerHasControl = true
+		ui.playerHasControl = true
+		setActorCharacterStats(actorName)
+	else:
+		playerAction = false
+		playerHasControl = false
+		ui.playerHasControl = false
+		executeEnemyTurn(actor)
 
-func actAnimation():
-	var animation = load("res://Animations/Shootout/{actType}/{actName}.tscn".format({ "actType": selectedAct.type, "actName": selectedAct.name.replace(" ", "") }))
-	var animationInstance = animation.instantiate()
-	#animationInstance.position.y -= animations.get_node("AnimationSprite").sprite_frames.get_frame_texture(animations.get_node("AnimationSprite").animation, animations.get_node("AnimationSprite").frame).get_size().y / 2
-	#animationInstance.position.y -= 40
-	get_node("Actors/{actorName}".format({ "actorName": selectedActor })).add_child(animationInstance)
-	animationInstance.tree_exited.connect(manageAnimations)
-	animationInstance.playAnimation("Effect")
+func executeEnemyTurn(actor) -> void:
+	pendingResolution = true
+	animationSequencer.play([{ "target": "actingActor" }], actor)
 
-func actorFrameHit():
+func selectActor(actorName: String = "") -> void:
+	if !playerHasControl or !playerAction or selectedAct == null:
+		return
+	var actingActorName = turnManager.currentActorName()
+	if !targetingManager.isValidTarget(selectedAct, actorName, actingActorName):
+		return
+	var actingActor = getActor(actingActorName)
+	selectedActor = actorName
+	if selectedAct.type == Shootout.ACT_TYPE_ITEMS:
+		actingActor.items.erase(selectedAct.name)
+	ui.hideActsPanel()
+	playerHasControl = false
+	ui.playerHasControl = false
+	actingActor.actorTurn.emit()
+	pendingResolution = true
+	animationSequencer.play(buildActSteps(), actingActor, getActor(selectedActor))
+
+func buildActSteps() -> Array:
+	match selectedAct.type:
+		Shootout.ACT_TYPE_MOVES:
+			return Shootout.movesData[selectedAct.name].get("animations", [])
+		Shootout.ACT_TYPE_ITEMS:
+			return Shootout.itemsData[selectedAct.name].get("animations", [])
+	return [{ "target": "actingActor" }]
+
+func resolveActOnce() -> void:
+	if !pendingResolution or battleOver:
+		return
+	pendingResolution = false
+	var actingActor = getActor(turnManager.currentActorName())
+	if actingActor == null:
+		return
+	var targetActor
 	if playerAction:
-		if selectedAct.type == "Attack":
-			damageTarget()
-		elif selectedAct.type == "Abilities":
-			actWithAbility(selectedAct.name)
-		elif selectedAct.type == "Items":
-			actWithItem(selectedAct.name)
+		targetActor = getActor(selectedActor)
+		if targetActor == null:
+			finishTurn(null)
+			return
+		match selectedAct.type:
+			Shootout.ACT_TYPE_ATTACK:
+				actionResolver.resolveAttack(actingActor, targetActor)
+			Shootout.ACT_TYPE_MOVES:
+				actionResolver.resolveMove(selectedAct.name, actingActor, targetActor)
+			Shootout.ACT_TYPE_ITEMS:
+				actionResolver.resolveItem(selectedAct.name, actingActor, targetActor)
 	else:
-		damageTarget()
+		targetActor = getActor(enemyAI.chooseTarget(turnManager.shootoutActors))
+		if targetActor == null:
+			return
+		actingActor.actorTurn.emit()
+		actionResolver.resolveAttack(actingActor, targetActor)
+	finishTurn(targetActor)
 
-func damageTarget():
-	var actor = get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() }))
-	var targetActorName
-	if playerAction:
-		targetActorName = selectedActor
-	else:
-		actor.actorTurn.emit()
-		targetActorName = shootoutActors["player team"].keys()[randi() % shootoutActors["player team"].size()]
-	var targetActor = get_node("Actors/{actorName}".format({ "actorName": targetActorName }))
-	var damage
-	if actor.weapon.type == "melee":
-		damage = 2
-	else:
-		damage = actor.stats.damage[actor.weapon.type][actor.weapon.weapon]
-	targetActor.hp -= damage
-	createDamageNumber(damage, targetActor.position - Vector2(4, 24))
-	doEndOfTurnCheck(targetActor)
-
-func doEndOfTurnCheck(targetActor = get_node("Actors/{actorName}".format({ "actorName": selectedActor }))):
-	if checkIfActorDead(targetActor):
-		selectActor()
-	turnOrder.pop_front()
+func finishTurn(targetActor) -> void:
+	if targetActor != null:
+		turnManager.checkActorDead(targetActor)
+	turnManager.advanceTurn()
+	selectedAct = null
+	selectedActor = ""
 	actorDone.emit()
 
-func _on_shootout_ui_attack() -> void:
-	selectedAct = {
-		"type": "Attack"
-	}
+func _on_actor_done() -> void:
+	if battleOver:
+		return
+	if turnManager.turnOrder.is_empty():
+		turnManager.createTurnOrder()
+	startCurrentTurn()
 
-func _on_shootout_ui_ability(abilityName: String) -> void:
-	selectedAct = {
-		"name": abilityName,
-		"type": "Abilities"
-	}
+func _on_battle_ended(winningSide: String) -> void:
+	battleOver = true
+	playerHasControl = false
+	ui.playerHasControl = false
+	shootoutEnded.emit(winningSide)
+	print("Shootout ended. Winner: {winningSide}".format({ "winningSide": winningSide }))
+
+func spawnDamageNumber(label, color: String, targetPosition: Vector2) -> void:
+	var newDamageNumber = DamageNumberScene.instantiate()
+	add_child(newDamageNumber)
+	newDamageNumber.init(label, color, targetPosition)
+
+func actorStatsPayload(actor) -> Array:
+	return [
+		{
+			"Name": actor.actorName,
+			"HP": actor.hp
+		},
+		{
+			"SixShootin": actor.stats.sixShootin,
+			"HighTailin": actor.stats.highTailin,
+			"Taffyin": actor.stats.taffyin,
+			"Revolver": actor.stats.damage.lead.revolver,
+			"Rifle": actor.stats.damage.lead.rifle,
+			"Shotgun": actor.stats.damage.lead.shotgun
+		}
+	]
+
+func showHoveredActorStats(actorName: String) -> void:
+	var actor = getActor(actorName)
+	if actor == null:
+		return
+	var payload = actorStatsPayload(actor)
+	ui.setHoveredActorStats(payload[0], payload[1])
+
+func clearHoveredActorStats() -> void:
+	ui.clearHoveredActorStats()
+
+func setActorCharacterStats(actorName: String) -> void:
+	var actor = getActor(actorName)
+	if actor == null:
+		return
+	var payload = actorStatsPayload(actor)
+	ui.setPlayerCharacterStats(payload[0], payload[1])
+
+func _on_shootout_ui_attack() -> void:
+	if !playerHasControl:
+		return
+	selectedAct = { "type": Shootout.ACT_TYPE_ATTACK }
+
+func _on_shootout_ui_move(moveName: String) -> void:
+	if !playerHasControl:
+		return
+	selectedAct = { "name": moveName, "type": Shootout.ACT_TYPE_MOVES }
 
 func _on_shootout_ui_item(itemName: String) -> void:
-	selectedAct = {
-		"name": itemName,
-		"type": "Items"
-	}
-
-func _on_actor_done():
-	if turnOrder.is_empty():
-		createTurnOrder()
-	get_node("Actors/{actorName}".format({ "actorName": turnOrder.front() })).actorTurn.emit()
-	if isPlayerActing(turnOrder.front()):
-		playerAction = true
-		setActorCharacterStats()
-		playerHasControl = true
+	if !playerHasControl:
 		return
-	playerAction = false
-	processEnemyTurn()
-	playerHasControl = false
+	selectedAct = { "name": itemName, "type": Shootout.ACT_TYPE_ITEMS }
+
+func _on_shootout_ui_move_acts_requested() -> void:
+	var actor = getActor(turnManager.currentActorName())
+	if actor != null:
+		ui.setPlayerCharacterActs(actor.moves, Shootout.ACT_TYPE_MOVES)
+
+func _on_shootout_ui_item_acts_requested() -> void:
+	var actor = getActor(turnManager.currentActorName())
+	if actor != null:
+		ui.setPlayerCharacterActs(actor.items, Shootout.ACT_TYPE_ITEMS)

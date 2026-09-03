@@ -17,12 +17,8 @@ tile_set = ExtResource("3_ba4lx")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1208174123]
 
-[node name="FightUI" parent="CanvasLayer" unique_id=814712803 instance=ExtResource("3_d821d")]
+[node name="ShootoutUI" parent="CanvasLayer" unique_id=1514112631 instance=ExtResource("3_d821d")]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=313100722]
 position = Vector2(313, 228)
 zoom = Vector2(2, 2)
-
-[connection signal="ability" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_ability"]
-[connection signal="attack" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_attack"]
-[connection signal="item" from="CanvasLayer/FightUI" to="." method="_on_fight_ui_item"]

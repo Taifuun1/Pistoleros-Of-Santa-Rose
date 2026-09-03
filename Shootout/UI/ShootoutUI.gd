@@ -1,10 +1,13 @@
 extends Control
 
 signal attack
-signal ability
+signal move
 signal item
+signal moveActsRequested
+signal itemActsRequested
 
 var actOpen = null
+var playerHasControl = false
 
 
 func setHoveredActorStats(characterData, characterStats) -> void:
@@ -31,33 +34,36 @@ func clearHoveredActorStats() -> void:
 	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer/HoveredShotgun").text = "-"
 
 func setPlayerCharacterStats(characterData, characterStats) -> void:
-	#for data in characterData:
-		##get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/{data}Container/{data}Title".format({ "data": data })).setRichTextLabel(characterData[data])
-		#get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/{data}Container/{data}".format({ "data": data })).setRichTextLabel(characterData[data])
-	#get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer/Name").text = characterData.Name
 	get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer/Name").text = characterData.Name
 	get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer/HP").setRichTextLabel(characterData.HP)
 	for stat in characterStats:
-		#get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/{stat}Container/{stat}Title".format({ "stat": stat }))
 		get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(characterStats[stat])
 
 func setPlayerCharacterActs(acts: Array, actType: String) -> void:
 	var actNode = load("res://Shootout/UI/ShootoutAct.tscn")
-	for actName in $VBoxContainer/CenterContainer/PanelContainer/Acts.get_children():
-		actName.queue_free()
+	for actButton in $VBoxContainer/CenterContainer/PanelContainer/Acts.get_children():
+		actButton.queue_free()
 	for actName in acts:
 		var newAct = actNode.instantiate()
 		newAct.init(actName, actType)
 		$VBoxContainer/CenterContainer/PanelContainer/Acts.add_child(newAct)
-		$VBoxContainer/CenterContainer/PanelContainer/Acts.get_children()[$VBoxContainer/CenterContainer/PanelContainer/Acts.get_child_count() - 1].actClicked.connect(func(): if actType == "Items": item.emit(actName) elif actType == "Abilities": ability.emit(actName))
+		newAct.actClicked.connect(func():
+			if actType == "Items":
+				item.emit(actName)
+			elif actType == "Moves":
+				move.emit(actName)
+		)
+
+func hideActsPanel() -> void:
+	$VBoxContainer/CenterContainer.visible = false
 
 func manageActMenus(act: String):
-	if $"/root/BaseShootout".playerHasControl:
+	if playerHasControl:
 		if act == "shootout":
-			$VBoxContainer/CenterContainer.visible = false
+			hideActsPanel()
 		elif !(
-			(actOpen == "item" and act == "ability") or
-			(actOpen == "ability" and act == "item")
+			(actOpen == "item" and act == "move") or
+			(actOpen == "move" and act == "item")
 		):
 			$VBoxContainer/CenterContainer.visible = !$VBoxContainer/CenterContainer.visible
 		if act == actOpen or act == "shootout":
@@ -72,8 +78,8 @@ func _on_shootout_button_pressed() -> void:
 
 func _on_item_button_pressed() -> void:
 	manageActMenus("item")
-	setPlayerCharacterActs(get_node("../../Actors/{actorName}".format({ "actorName": $"../..".turnOrder.front() })).items, "Items")
+	itemActsRequested.emit()
 
-func _on_ability_button_pressed() -> void:
-	manageActMenus("ability")
-	setPlayerCharacterActs(get_node("../../Actors/{actorName}".format({ "actorName": $"../..".turnOrder.front() })).abilities, "Abilities")
+func _on_move_button_pressed() -> void:
+	manageActMenus("move")
+	moveActsRequested.emit()

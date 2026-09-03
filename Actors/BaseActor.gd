@@ -7,6 +7,7 @@ var walkingSpeed
 var runningSpeed
 
 var hp
+var maxHp
 
 var stats = {
 	"sixShootin": -1,
@@ -47,6 +48,7 @@ func init(actorData: Dictionary):
 	runningSpeed = actorData.runningSpeed
 	
 	hp = actorData.hp
+	maxHp = actorData.get("maxHp", actorData.hp)
 	
 	stats = actorData.stats
 	rodeo = actorData.rodeo
