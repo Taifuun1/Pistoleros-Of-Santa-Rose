@@ -17,7 +17,7 @@ Aiyana
 Bottle Courage Bulldozer
 
 Morrison Branson
-Support
+Dust Whisperer
 
 
 ## NPC parties
@@ -28,7 +28,7 @@ Can be found almost anywhere on the map
 Party composition depends on location, so many actor compositions are possible
 
 Lead Diggers
-Specializes in supports
+Specializes in Dust Whisperers
 Can be found mostly in the south-western section of the map
 
 Running Deers
@@ -77,13 +77,13 @@ Gunslinger
 - Cleanse bleed on Shoot
 - Damage type can't be decreased
 - Gain additional cash after winning a shootout
-- Increase hit-rate of row or column at the start of the Shootout for an amount of turns
+- Increase Cylinder of position at the start of the Shootout for an amount of turns
 
 Bobtail Guard
 - Shoot marks enemy when hitting against Style
 - Hit through taunt
-- Hit-rate can't be decreased
-- Increase hit-rate for one turn after using an ability
+- Cylinder can't be decreased
+- Increase Cylinder for one turn after using an ability
 
 Line Rider
 - Cleanse poison on Shoot
@@ -96,9 +96,9 @@ Bottle Courage Bulldozer
 - Damage reduction against first hit
 - Immunity to Marks
 - Position can't be disrupted
-- Increase hit-rate of row or column at the end of every turn
+- Increase Cylinder of row or column at the end of every turn
 
-Support
+Dust Whisperer
 - Using all items refreshes items for free for the Shootout once
 - Additional poison stacks on affliction
 - Additional bleed turns on affliction
@@ -109,7 +109,7 @@ Support
 
 Gunslinger
 - Hit stride
-    - Attack and self-increase hit-rate
+    - Attack and self-increase Cylinder
 - Sharp shot
     - Attack and bleed affliction
 - Roll up sleeves
@@ -121,7 +121,7 @@ Bobtail Guard
 - Hunting bullet
     - Attack and poison affliction
 - Hand shot
-    - Hit-rate drop affliction
+    - Cylinder drop affliction
 - Shoot hat
     - Mark affliction
 
@@ -130,20 +130,20 @@ Line Rider
     - Poison cleanse
 - Reload more pellets
     - Self-increase damage piercing
-- Coral herd
+- Corral herd
     - Disrupt first and second column positioning
 
 Bottle Courage Bulldozer
-- Comboy up
+- Cowboy up
     - Self-increase damage type defense
 - Yell Yella
     - Self-taunt row or column
 - Roll cylinder
-    - Hit-rate increase application
+    - Cylinder increase application
 - Bulk shoulders
     - Disrupt second and third column positioning
 
-Support
+Dust Whisperer
 - Bleed cleanse and affliction
 - Poison cleanse and affliction
 - Damage type mark applications

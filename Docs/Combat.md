@@ -87,7 +87,6 @@ Base stats referenced in this doc (full definitions live in the stats doc, TBD):
 ## Stats
 
 - Stats are based on character's base stats, held weapon, worn equipment and other modifiers
-- There is no hit-rate stat: accuracy is entirely decided by Cylinders and cylinder modifiers
 - Types
 	- Health
 		- MxHp decides how much damage a character can take
@@ -180,10 +179,10 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 | Cylinder | Replaces previous modifier | Until modified or fight ends | Another cylinder modifier, fight end |
 | Mark | No | Until consumed or cleansed | Triggering, cleanse |
 | Damage type mark | No | One Round | Cleanse, round end |
-| Damage piercing | TBD | Amount of turns | Expiry |
-| Damage decrease | TBD | Amount of turns | Expiry |
-| Taunt | TBD | Amount of turns | Expiry |
-| Silence | TBD | Amount of turns | Expiry |
+| Damage piercing | Yes, to a limit | Amount of turns | Expiry |
+| Damage decrease | Yes, to a limit | Amount of turns | Expiry |
+| Taunt | - | Amount of turns | Expiry |
+| Silence | - | Amount of turns | Expiry |
 
 ## Classes
 
@@ -195,8 +194,8 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 | Gunslinger/Gunslinget | Damage | All lead weapons | Style | Positions 1-3 | All positions |
 | Bobtail Guard | Anti-Style | Rifles | Sand | Positions 3-4 | All except enemy position 1 |
 | Line Rider | Anti-Sand | Shotguns, lassos | Style | Positions 2-3 | All positions |
-| Bottle Courage Bulldozer | Tank | Revolvers only | Sand | Position 1 | TBD |
-| Dust Whisperer | Support/affliction | Explosives, lassos | Undecided (see Open Questions) | Positions 3-4 | TBD |
+| Bottle Courage Bulldozer | Tank | Revolvers only | Sand | Position 1 | Positions 1-3 |
+| Dust Whisperer | Support/affliction | Explosives, lassos | None | Positions 3-4 | All positions |
 
 ### Gunslinger/Gunslinget
 
@@ -325,7 +324,7 @@ Weapon family summary:
 		- Low resistances
 		- Most impactful moves
 	- Bandana
-		- Mostly cosmetic, low stats
+		- Cosmetic, no stats
 		- No moves
 		- Needed for some quests
 	- Jacket
@@ -337,7 +336,7 @@ Weapon family summary:
 		- Affects belt space in Shootouts
 	- Pants
 		- Medium resistances
-		- Can have moves
+		- No moves
 	- Justins
 		- Low-to-medium resistances
 		- Moves are common
@@ -364,6 +363,7 @@ Weapon family summary:
 - Injury
 	- Characters MxHP is modified by how much damage they have taken on any given journey
 	- The more damage a character takes, the less MxHP they have in future fights
+	- Characters have an internal modifier that decides how much hp they need to lose until they lose a point of MxHP
 	- MxHP can be restored with bought camp items
 	- MxHP resets when entering a town
 - Knockout
@@ -375,49 +375,81 @@ Weapon family summary:
 	- Half of all loot is lost
 	- If any quest is in progress, the party is thrown to the last checkpoint
 - Fleeing
-	- Possible after 15 turns
-	- Lose a portion of money when fleeing
+	- Possible after 10 turns in major fights, in minor fights instant
+	- Lose a portion of MxHP when fleeing
 
 ## Rewards
 
-TBD. Winning a Shootout should grant cash and resources (several Rodeos already reference post-fight gains). Define XP/leveling and loot.
-
 - Levels
-	- Levels are gained on quest completion
-	- So level progression follows quest progression
+	- The whole party shares a level
+	- Levels are gained on quest completion, so level progression follows quest progression
+	- Increase character stats and Rodeo effectiveness
+	- Increase Stagecoach speed slightly
 - Loot
-	-
+	- Different enemies have different loot tables, based on party name
+	- Rodeos can increase or decrease loot
+	- Possible drops
+		- Weapons and equipment
+			- Both have affixes and rarity
+			- No uniques from shootouts, unless it's a quest
+		- Money
+			- Additional currency on top of quest farming
+			- Should not be too much
+		- Comestibles and consumables
+			- Largely similar as from town vendors
 
 ## Encounters
 
-TBD. Define:
-
-- How Shootouts start (overworld contact, ambushes, story)
-- Typical party sizes and compositions (see Actors.md for NPC parties)
-- Boss encounters and difficulty scaling
-- How animals fight: do they have Cylinders, positions and classes?
-
-Shootouts happen in three ways: in Overworld events, in Locations as ambushes, and during story quests
+Shootouts happen in three ways: in Overworld events, in Locations as ambushes, and during story quests. Each shootout can be a minor or a major shootout (needs more western naming).
 
 - Overworld events can have multiple results based on chosen options
-- Ambushes are randomly spawned in Locations 
+- Ambushes are randomly spawned in Locations
+	- Could have a visible indicator of some sort, that is triggered if the player gets too close or interacts with it
+- Quest shootouts are scripted events that happen in prebuilt locations, with predefined party compositions
+	- Player chooses when they want to start the quest
+- Minor and major shootouts
+	- Differentiates if the shootout is an attritional one or a difficult one
+	- Minor shootouts mainly happen in Locations, and are more numerous
+	- Major shootouts are quest fights and sometimes event results
+- Bosses
+	- Bosses are defined by higher stats than average, unique enemies, and game-warping Rodeos
+	- Boss fights can have different win conditions, defeat a character, survive for turns, defeat the party etc.
+	- Each boss should feel unique
+- Enemies have different party compositions based on location on the map and current quest
+	- Grass Lands
+		- Enemies are weaker and have balanced party compositions
+		- Low difficulty since it's the starting area
+		- Enemies have compositions that lean on Pistoleros
+	- Prairie
+		- Middle portion of the map, where the player spends time throughout the game
+		- Has varied enemies and compositions
+	- Rocky Hills
+		- Enemies have compositions that lean on Dust Whisperers
+	- Snowy Mountains
+		- Enemies have compositions that lean on Line Riders
+	- Wild West
+		- Enemies have compositions that lean on Bottle Courage Bulldozers
 
 ## Balance
 
 - Weapons
-	- TBD
+	- Each weapon type has its own niche
+	- Weapon types that are ineffective outside their niche should deal very little damage, to incentivize specialization
 - Defensive damage types
 	- Style and Sand
 	- With two types, hopefully balancing is easier and makes gameplay more varied
 	- Hopefully creates a sort of rock-paper-scissors dynamic
-- Target metrics (TBD)
+- Target metrics
 	- Average Shootout length in Rounds
 		- 5-10 rounds
 		- Shootouts should be more about attrition, expect in quests where the difficulty is higher
 	- Expected hits-to-kill per class archetype
+		- Regular enemies die in 3-5 hits
+		- Powerful enemies take more, 10+
 	- Healing economy per fight
 		- Healing is generally reserved for rare difficult fights and quest Shootouts
-		-
+		- Otherwise generally too expensive to buy healing items
+		- Healing should feel impactful, so less heals that are bigger
 	- Item scarcity goals for belt space
 		- Low item classes like Pistolero should only have 0-1 slots
 		- Dust Whisperers can have up to 5 slots
