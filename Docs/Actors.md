@@ -149,3 +149,24 @@ Dust Whisperer
 - Damage type mark applications
 - Damage decrease applications
 - Damage piercing application
+
+## Body Types
+
+- Average
+- Large
+- Small
+- Slender
+- Slender and tall
+- Wide
+
+## Base Stats
+
+- Six-shootin'
+	- Weapon requirements
+- High tailin'
+	- Initiative
+	- Combat actions
+- Taffyin'
+	- Shop haggling
+	- Most NPC interactions
+	- Combat actions

@@ -185,6 +185,14 @@ The final scene has Walker limp, mortally wounded, in the wreckage of the destro
 	*Historical reference ideas
 		*Bill Cassidy
 
+	*Lucky Luke comic references
+		*Ghost town - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-2?id=74026#9
+		*Jail break - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-2?id=74026#1
+		*Caravan trip over the mountains - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-25?id=74039#1 and https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-35?id=74070#16
+		*Family feud - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-12?id=74008#12
+		*Indians - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-17?id=74020#1
+		*Gold rush - https://readcomiconline.li/Comic/A-Lucky-Luke-Adventure/Issue-20?id=74028#1
+
 ## Notes
 
 Jail break with gold rush. Need money for expensive explosive to blow up the jail, and so have to participate in the gold rush.

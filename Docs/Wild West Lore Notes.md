@@ -258,3 +258,121 @@ Totem Wrangler – sets totems that empower or protect teammates
 Prairie Seer – divines incoming threats, buffs allies’ foresight
 
 
+
+## Lingo and Vocabulary
+
+### Robbers and gunslingers
+
+- Robber
+	- Ladrona / Ladrón (el ladrón)
+	- El salteador
+- Highwayman
+	- Salteador de caminos
+	- Bandolero
+- Bandit
+	- Bandida / Bandido (el bandido, el bandolero)
+- Gunslinger
+	- Pistolero
+	- Bronc Buster
+- Other terms: gunmen, gunfighters, goons, vaqueros, charro, greaser
+
+### Cowboy terms
+
+- Lasso / lariat
+- Chaps / chaparevas
+- Rodeo
+- Buckeroo / vacero
+- Mustang / mustengo
+- Bandolier / bandolera
+- Stampede / stampeda
+- Ranch / rancho
+- Excavadora de whisky
+- Barroom, ginmill, taproom
+
+### Slang notes
+
+- Prairie Tenor – Coyote
+- Prairillon – A small prairie
+- Prat – Buttock, behind
+- Boots – Trotter Boxes, Trotter Cases, Mud Pipes, Mudpipes, Mule-ears
+- Mud Pipes – Any kind of boots or shoes, but mostly applied to riding-boots
+- Wild rag – also known in various regions as a cowboy scarf, necktie, bandana or kerchief; a large square-shaped scarf made of silk, cotton, or other soft fabrics, commonly worn by cowboys
+- ¡Muy bien!
+
+## Food and Drink
+
+- Hardtack
+- Coffee, beans, biscuits, and stews
+
+## Resources and Links
+
+### Slang and lingo
+
+- https://www.legendsofamerica.com/we-slang/
+- https://www.legendsofamerica.com/we-slang/10/
+- https://www.northpolewest.com/Cowboy-Lingo-Dictionary_ep_71.html
+- https://petticoatsandpistols.com/2017/03/15/wild-west-words-outlaw-name/
+- https://rkcowles.wordpress.com/2014/07/05/old-west-slang-a-l/
+- https://www.insp.com/blog/old-west-cowboy-speak/
+- https://ridesouthdakota.com/rushmore-horseback-riding/cowboy-dictionary/
+- https://namingpower.com/cowboy-names/
+
+### Spanish terms
+
+- https://es.wikipedia.org/wiki/Salteador_de_caminos
+- https://es.wikipedia.org/wiki/Viejo_Oeste#Bandidos
+- https://es.wikipedia.org/wiki/Dick_Turpin
+
+### Plants
+
+- https://en.wikipedia.org/wiki/Justicia_carnea
+- https://en.wikipedia.org/wiki/Lilium
+- https://www.britannica.com/plant/lily
+- https://gardenerspath.com/plants/flowers/best-fuchsia-varieties/
+- Water lily (search keyword)
+
+### Food and drink
+
+- https://www.historyhit.com/what-did-cowboys-eat/
+- https://chipschweiger.medium.com/what-did-cowboys-eat-f09e7bbab5b0
+- https://www.cowboysindians.com/2020/10/cocktails-of-the-west/
+- https://www.nebraskapress.unl.edu/bison/9780803238480/
+- https://www.reddit.com/r/AskHistorians/comments/285y5g/what_else_did_people_drink_in_wild_west_saloons/
+
+### Saloons and saloon girls
+
+- https://www.hhhistory.com/2015/01/saloon-girls-of-wild-west.html
+- https://en.wikipedia.org/wiki/Fannie_Porter
+- https://en.wikipedia.org/wiki/Kitty_Leroy
+- https://books.google.fi/books/about/Legendary_Watering_Holes.html?id=tFKeV0Do3NsC&redir_esc=y
+
+### Firearms
+
+- http://histropedia.com/timeline/80cwtpg9bg0t/Colt-revolvers
+- https://en.wikipedia.org/wiki/Category:Colt_revolvers
+- Volcanic pistol (image reference)
+- https://crimefictionbook.com/2015/06/24/do-revolvers-use-clips/
+- https://tncourts.gov/sites/default/files/docs/firearmshandout_1.pdf
+- https://www.academy.com/expert-advice/parts-of-a-revolver
+- https://www.targetbarn.com/broad-side/parts-of-a-revolver/
+- https://en.wikipedia.org/wiki/Snap_cap
+
+### Landscape art references
+
+- https://www.freepik.com/premium-photo/american-wild-west-nature-landscape-sunset-panoramic-art-illustration_31903144.htm
+- https://www.freepik.com/premium-photo/american-wild-west-nature-landscape-sunset-spectacular-art-illustration_31903154.htm
+- https://www.pictorem.com/96940/%20%C2%A9Lou%20Freeman%20Wild%20West%20Landscapes%201020%20151.html
+- https://www.123rf.com/photo_16513787_red-desert-wild-west-landscape.html
+- https://www.pxfuel.com/en/desktop-wallpaper-adqor
+- https://www.freepik.com/free-photos-vectors/wild-west-background
+
+### Wildlife
+
+- https://a-z-animals.com/blog/the-dont-tread-on-me-rattlesnakes-surprising-history/
+- https://www.pbs.org/edens/canyonlands/canyonlands.htm
+- https://www.palomar.edu/users/scrouthamel/wildlife.htm
+
+### Miscellaneous
+
+- https://france-amerique.com/lucky-luke-a-cowboy-in-paris/
+

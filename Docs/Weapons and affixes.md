@@ -92,7 +92,7 @@ Winchester 37
 Winchester 69
 Winchester Henry
 Winchester Hotchkiss
-Winchester
+Winchester Wild West
 Winchester Under Barrel
 Winchester Trapper
 
