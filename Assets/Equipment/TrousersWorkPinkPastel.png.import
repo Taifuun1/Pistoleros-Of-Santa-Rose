@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7hqmtxdk6j05"
-path="res://.godot/imported/BootsIcon.png-108d64b8a825b840c1b81e123bc175c0.ctex"
+uid="uid://ch7foq17h4rju"
+path="res://.godot/imported/TrousersWorkPinkPastel.png-1cf48428931911e2463f725f1d3a889a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Equipment/BootsIcon.png"
-dest_files=["res://.godot/imported/BootsIcon.png-108d64b8a825b840c1b81e123bc175c0.ctex"]
+source_file="res://Assets/Equipment/TrousersWorkPinkPastel.png"
+dest_files=["res://.godot/imported/TrousersWorkPinkPastel.png-1cf48428931911e2463f725f1d3a889a.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cdqjtttr3enyv"
-path="res://.godot/imported/HatIcon.png-1347c459fbebd1245b42fbb28b7ab89c.ctex"
+uid="uid://b1wuxkpxcp4eu"
+path="res://.godot/imported/PonchoPinkBright.png-e18d355fdf22e24922d89a88e1a0fdd2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Equipment/HatIcon.png"
-dest_files=["res://.godot/imported/HatIcon.png-1347c459fbebd1245b42fbb28b7ab89c.ctex"]
+source_file="res://Assets/Equipment/PonchoPinkBright.png"
+dest_files=["res://.godot/imported/PonchoPinkBright.png-e18d355fdf22e24922d89a88e1a0fdd2.ctex"]
 
 [params]
 

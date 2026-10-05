@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hdgu0qmql6vu"
-path="res://.godot/imported/TrousersIcon.png-47170a2c90dd06af53b585c74a811a15.ctex"
+uid="uid://emh3ykf7imqf"
+path="res://.godot/imported/BootsSpursBrownPink.png-49c9c6d1eef3be8986b57bc8417335ae.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Equipment/TrousersIcon.png"
-dest_files=["res://.godot/imported/TrousersIcon.png-47170a2c90dd06af53b585c74a811a15.ctex"]
+source_file="res://Assets/Equipment/BootsSpursBrownPink.png"
+dest_files=["res://.godot/imported/BootsSpursBrownPink.png-49c9c6d1eef3be8986b57bc8417335ae.ctex"]
 
 [params]
 
