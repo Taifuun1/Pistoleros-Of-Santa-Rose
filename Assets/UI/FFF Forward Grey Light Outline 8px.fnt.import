@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://oretnnsvri1n"
+path="res://.godot/imported/FFF Forward Grey Light Outline 8px.fnt-d9ce79a248da2f976742336c8c855a0b.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFF Forward Grey Light Outline 8px.fnt"
+dest_files=["res://.godot/imported/FFF Forward Grey Light Outline 8px.fnt-d9ce79a248da2f976742336c8c855a0b.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

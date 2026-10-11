@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://cji2py7y06jnr"
+path="res://.godot/imported/FFF Forward White 12px.fnt-3898a62460f86282ea293a1fd3fedc8a.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFF Forward White 12px.fnt"
+dest_files=["res://.godot/imported/FFF Forward White 12px.fnt-3898a62460f86282ea293a1fd3fedc8a.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

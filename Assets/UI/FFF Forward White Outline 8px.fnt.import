@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://c1jah4br7blhu"
+path="res://.godot/imported/FFF Forward White Outline 8px.fnt-9cdea600fdf9c6cdcbe143c8fa35b97a.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFF Forward White Outline 8px.fnt"
+dest_files=["res://.godot/imported/FFF Forward White Outline 8px.fnt-9cdea600fdf9c6cdcbe143c8fa35b97a.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

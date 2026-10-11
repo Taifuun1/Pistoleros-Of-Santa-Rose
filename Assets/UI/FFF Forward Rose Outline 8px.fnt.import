@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://bnvqkwmng8gg2"
+path="res://.godot/imported/FFF Forward Rose Outline 8px.fnt-a384a1090b222a1152b34a7fd6956380.fontdata"
+
+[deps]
+
+source_file="res://Assets/UI/FFF Forward Rose Outline 8px.fnt"
+dest_files=["res://.godot/imported/FFF Forward Rose Outline 8px.fnt-a384a1090b222a1152b34a7fd6956380.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2
