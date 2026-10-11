@@ -344,7 +344,7 @@ var players = {
 	},
 	"player2": {
 		"name": "player2",
-		"money": 5,
+		"money": 100,
 		"playerType": "ai",
 		"personality": PLAYER_PERSONALITIES.Casual
 	},

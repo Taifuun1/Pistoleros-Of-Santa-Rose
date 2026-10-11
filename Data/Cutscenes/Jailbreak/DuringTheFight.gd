@@ -58,7 +58,7 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Wyatt Garrett", "text": "You're a good gunslinger, I'll give you that much. That saved your life today."}},
 		{"object": "dialog", "data": {"actor": "Wyatt Garrett", "text": "Once again, we must depart, Pistoleros of Santa Rose."}},
 		{"object": "dialog", "data": {"actor": "Wyatt Garrett", "text": "But mark my words:"}},
-		{"object": "dialog", "data": {"actor": "Wyatt Garrett", "text": "We will meet again."}},
+		{"object": "dialog", "data": {"actor": "Wyatt Garrett", "text": "We <i>will</i> - meet again."}},
 		{"object": "action", "data": {"description": "Wyatt Garrett runs away"}},
 		{"object": "dialog", "data": {"actor": "Walker Langley", "text": "Move your asses! This is our chance!"}}
 	]
