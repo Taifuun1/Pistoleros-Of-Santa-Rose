@@ -35,6 +35,8 @@ Cutscene="*res://Globals/Cutscene.gd"
 Poker="*res://Globals/Poker.gd"
 PokerMoney="*res://Globals/PokerMoney.gd"
 OverworldEvents="*uid://djd6u6g5vi3b4"
+Quests="*uid://svrthr53qbr0"
+ItemGeneration="*res://Globals/ItemGeneration.gd"
 
 [display]
 

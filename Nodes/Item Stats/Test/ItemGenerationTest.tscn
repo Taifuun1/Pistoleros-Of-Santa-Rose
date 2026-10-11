@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://cum1ism3n65av"]
+
+[ext_resource type="Script" uid="uid://32aq8t7uj5fu" path="res://Nodes/Item Stats/Test/ItemGenerationTest.gd" id="1_test"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_theme"]
+[ext_resource type="PackedScene" uid="uid://ceojgbrrj0q5f" path="res://Nodes/Item Stats/ItemStats.tscn" id="3_itemstats"]
+[ext_resource type="PackedScene" uid="uid://6cv348wwh588" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="4_label"]
+
+[node name="ItemGenerationTest" type="Control" unique_id=1189744328]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_test")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1158681859]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=994817107]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="DisplayScroll" type="ScrollContainer" parent="MarginContainer/HBoxContainer" unique_id=794365307]
+layout_mode = 2
+size_flags_horizontal = 0
+horizontal_scroll_mode = 0
+
+[node name="DisplayColumn" type="VBoxContainer" parent="MarginContainer/HBoxContainer/DisplayScroll" unique_id=794365308]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="ItemStats" parent="MarginContainer/HBoxContainer/DisplayScroll/DisplayColumn" unique_id=2142553104 instance=ExtResource("3_itemstats")]
+layout_mode = 2
+
+[node name="Info" parent="MarginContainer/HBoxContainer/DisplayScroll/DisplayColumn" unique_id=1249812735 instance=ExtResource("4_label")]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="ParametersColumn" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=767123618]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 10
+
+[node name="TypeLabel" type="Label" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=1673441484]
+layout_mode = 2
+text = "Item Type"
+
+[node name="TypeOption" type="OptionButton" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=550624580]
+layout_mode = 2
+
+[node name="RarityLabel" type="Label" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=409083190]
+layout_mode = 2
+text = "Rarity"
+
+[node name="RarityOption" type="OptionButton" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=187579044]
+layout_mode = 2
+
+[node name="FamilyLabel" type="Label" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=1538736365]
+layout_mode = 2
+text = "Weapon Family"
+
+[node name="FamilyOption" type="OptionButton" parent="MarginContainer/HBoxContainer/ParametersColumn" unique_id=220657423]
+layout_mode = 2
+
+[node name="ParametersColumn2" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=96110408]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 10
+
+[node name="ZoneLabel" type="Label" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=656111711]
+layout_mode = 2
+text = "Zone"
+
+[node name="ZoneOption" type="OptionButton" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=161008453]
+layout_mode = 2
+
+[node name="GenerateButton" type="Button" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=1184570562]
+layout_mode = 2
+text = " Generate Item "
+
+[node name="LegendaryLabel" type="Label" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=1508966774]
+layout_mode = 2
+text = "Legendary"
+
+[node name="LegendaryOption" type="OptionButton" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=288181672]
+layout_mode = 2
+
+[node name="GenerateLegendaryButton" type="Button" parent="MarginContainer/HBoxContainer/ParametersColumn2" unique_id=1930429507]
+layout_mode = 2
+text = " Generate Legendary "
