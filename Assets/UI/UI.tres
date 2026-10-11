@@ -1,20 +1,56 @@
 [gd_resource type="Theme" format=3 uid="uid://c40khsw7ty1da"]
 
+[ext_resource type="Texture2D" uid="uid://cm0u6twsskfjo" path="res://Assets/Icons/Unchecked.png" id="2_3lbhk"]
+[ext_resource type="FontFile" uid="uid://cji2py7y06jnr" path="res://Assets/UI/FFF Forward White 12px.fnt" id="2_7t46k"]
+[ext_resource type="Texture2D" uid="uid://c0tyiq7svf1t3" path="res://Assets/Icons/Arrow.png" id="2_u8erq"]
+[ext_resource type="Texture2D" uid="uid://s8hhi50vxciu" path="res://Assets/Icons/Checked.png" id="3_aqs7i"]
 [ext_resource type="FontFile" uid="uid://c8g6dpi2wrjjc" path="res://Assets/UI/FFF Forward Outline 12px.fnt" id="3_f0h75"]
+[ext_resource type="Texture2D" uid="uid://teh2275ylplo" path="res://Assets/Icons/CheckedRadio.png" id="5_xoxrv"]
+[ext_resource type="Texture2D" uid="uid://nkb3fvilijfa" path="res://Assets/Icons/UncheckedDisabledRadio.png" id="6_7t46k"]
+[ext_resource type="Texture2D" uid="uid://dgl1bveaxhs3n" path="res://Assets/Icons/UncheckedRadio.png" id="7_vl36l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y61ul"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 12.0
 bg_color = Color(0.95686275, 0.8627451, 0.6, 0.49803922)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0soan"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 12.0
 bg_color = Color(0.458824, 0.956863, 1, 0.498039)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b58mt"]
-bg_color = Color(0.93295527, 0.77938, 0.6095147, 1)
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 12.0
+bg_color = Color(0.93333334, 0.78039217, 0.60784316, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lqpfp"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 12.0
 bg_color = Color(0.95686275, 0.8627451, 0.6, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rjfyb"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 12.0
+bg_color = Color(0.972549, 0.83137256, 0.8039216, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f0h75"]
+bg_color = Color(0.93333334, 0.78039217, 0.60784316, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3lbhk"]
+bg_color = Color(0.95686275, 0.8627451, 0.6, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aqs7i"]
 bg_color = Color(0.972549, 0.83137256, 0.8039216, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7bk0n"]
@@ -25,9 +61,14 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.53227663, 0.23604882, 0.32117972, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u8erq"]
+bg_color = Color(0.44313726, 0.77254903, 0.8745098, 1)
+
 [resource]
 default_font = ExtResource("3_f0h75")
 default_font_size = 12
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/constants/align_to_largest_stylebox = 1
 Button/font_sizes/font_size = 12
 Button/fonts/font = ExtResource("3_f0h75")
 Button/styles/disabled = SubResource("StyleBoxFlat_y61ul")
@@ -36,7 +77,23 @@ Button/styles/hover = SubResource("StyleBoxFlat_b58mt")
 Button/styles/normal = SubResource("StyleBoxFlat_lqpfp")
 Button/styles/pressed = SubResource("StyleBoxFlat_rjfyb")
 GridContainer/constants/v_separation = 12
+Label/colors/font_color = Color(0.9294917, 0.91441005, 0.7355315, 1)
+Label/font_sizes/font_size = 12
+Label/fonts/font = ExtResource("2_7t46k")
+OptionButton/font_sizes/font_size = 8
+OptionButton/icons/arrow = ExtResource("2_u8erq")
+OptionButton/styles/hover = SubResource("StyleBoxFlat_f0h75")
+OptionButton/styles/normal = SubResource("StyleBoxFlat_3lbhk")
+OptionButton/styles/pressed = SubResource("StyleBoxFlat_aqs7i")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_7bk0n")
+PopupMenu/colors/font_color = Color(1, 1, 1, 1)
+PopupMenu/font_sizes/font_size = 12
+PopupMenu/icons/checked = ExtResource("3_aqs7i")
+PopupMenu/icons/checked_disabled = ExtResource("2_3lbhk")
+PopupMenu/icons/radio_checked = ExtResource("5_xoxrv")
+PopupMenu/icons/radio_checked_disabled = ExtResource("6_7t46k")
+PopupMenu/icons/radio_unchecked = ExtResource("7_vl36l")
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_u8erq")
 RichTextLabel/constants/line_separation = 1
 RichTextLabel/font_sizes/normal_font_size = 12
 RichTextLabel/fonts/normal_font = ExtResource("3_f0h75")
