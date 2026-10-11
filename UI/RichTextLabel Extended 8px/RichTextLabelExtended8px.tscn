@@ -1,31 +1,30 @@
 [gd_scene format=3 uid="uid://6cv348wwh588"]
 
-[ext_resource type="FontFile" uid="uid://bffl4006qdd4x" path="res://Assets/UI/FFF Forward Outline 8px.fnt" id="1_h812y"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_i5lj2"]
+[ext_resource type="FontFile" uid="uid://kll5quv5movw" path="res://Assets/UI/FFF Forward White 8px.fnt" id="2_1htga"]
 [ext_resource type="Script" uid="uid://3l46wuh7f8h7" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.gd" id="2_i5lj2"]
 
 [node name="RichTextLabelExtended8px" type="RichTextLabel" unique_id=1294598600]
 texture_filter = 1
-custom_minimum_size = Vector2(0, 18)
+custom_minimum_size = Vector2(0, 10)
 clip_contents = false
 offset_right = 48.0
-offset_bottom = 22.0
+offset_bottom = 14.0
 size_flags_horizontal = 3
 size_flags_vertical = 4
 offset_transform_enabled = true
-offset_transform_position = Vector2(2, 4)
+offset_transform_position = Vector2(1, 2)
 mouse_filter = 2
 theme = ExtResource("1_i5lj2")
-theme_override_constants/line_separation = 4
-theme_override_fonts/normal_font = ExtResource("1_h812y")
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("2_1htga")
 theme_override_font_sizes/normal_font_size = 8
-theme_override_font_sizes/bold_font_size = 12
-theme_override_font_sizes/bold_italics_font_size = 12
-theme_override_font_sizes/italics_font_size = 12
-theme_override_font_sizes/mono_font_size = 12
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
 bbcode_enabled = true
 text = "ABOBA!"
 fit_content = true
 scroll_active = false
-autowrap_mode = 0
 script = ExtResource("2_i5lj2")
