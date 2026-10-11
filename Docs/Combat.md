@@ -35,6 +35,7 @@ Base stats referenced in this doc (full definitions live in the stats doc, TBD):
 - Character moves
 	- Four moves to choose from max in Shootouts for any given character
 	- If a character has more than 4 total moves, they can be activated and deactivated outside of fights
+	- Class affects total moves, generally, the more belt space, the less total activated moves
 	- Move types depend on the character's class; unique named characters can have unique moves
 	- Move types
 		- Attacks
@@ -157,6 +158,7 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 		- Doesn't stack
 	- Damage piercing
 		- Increases a character's damage piercing against a defensive damage type
+		- Damage piercing can only pierce as much damage as is blocked, additional damage piercing doesn't increase damage
 		- Lasts for an amount of turns
 	- Damage decrease
 		- Decreases a character's damage against a defensive damage type
@@ -250,7 +252,7 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 	- Activated at the beginning or at the end of the fight
 	- Activated at the beginning or end of every Round
 	- Activated at the beginning or end of every character Turn
-- Decided by character class (how a Rodeo is chosen from the class list is TBD, see Open Questions)
+- Decided by character class
 	- Unique named characters can have unique Rodeos
 	- Higher level characters have higher values for the Rodeo (if applicable)
 
@@ -325,16 +327,17 @@ Weapon family summary:
 		- Most impactful moves
 	- Bandana
 		- Cosmetic, no stats
+		- Collectibles
 		- No moves
-		- Needed for some quests
-	- Jacket
+		- Needed for some quests as quest items
+	- Duster
 		- Highest resistances
 		- No moves
 	- Belt
 		- Low resistances
 		- Some impactful moves
 		- Affects belt space in Shootouts
-	- Pants
+	- Trousers
 		- Medium resistances
 		- No moves
 	- Justins
@@ -375,7 +378,7 @@ Weapon family summary:
 	- Half of all loot is lost
 	- If any quest is in progress, the party is thrown to the last checkpoint
 - Fleeing
-	- Possible after 10 turns in major fights, in minor fights instant
+	- Possible after 10 turns in Showdowns, in Dust-ups instant
 	- Lose a portion of MxHP when fleeing
 
 ## Rewards
@@ -400,17 +403,20 @@ Weapon family summary:
 
 ## Encounters
 
-Shootouts happen in three ways: in Overworld events, in Locations as ambushes, and during story quests. Each shootout can be a minor or a major shootout (needs more western naming).
+Shootouts happen in three ways: in Overworld events, in Locations as ambushes, and during story quests. Each shootout can be a Dust-up or a Showdown.
 
 - Overworld events can have multiple results based on chosen options
 - Ambushes are randomly spawned in Locations
 	- Could have a visible indicator of some sort, that is triggered if the player gets too close or interacts with it
 - Quest shootouts are scripted events that happen in prebuilt locations, with predefined party compositions
 	- Player chooses when they want to start the quest
-- Minor and major shootouts
+- Dust-ups and Showdowns
 	- Differentiates if the shootout is an attritional one or a difficult one
-	- Minor shootouts mainly happen in Locations, and are more numerous
-	- Major shootouts are quest fights and sometimes event results
+	- Dust-ups mainly happen in Locations, and are more numerous
+	- Showdowns are quest fights and sometimes event results, or Shooutouts in Locations that the player can choose to activate
+	- Dust-ups and Showdowns have flavor variation naming, that are used, for example, in Shootout start popup texts etc.
+	- Dust-up flavor variations: Scuffle, Ruckus, Hold-up, and Tussle
+	- Showdown flavor variations: Gunfight, Slingin', High Noon, Bangin'
 - Bosses
 	- Bosses are defined by higher stats than average, unique enemies, and game-warping Rodeos
 	- Boss fights can have different win conditions, defeat a character, survive for turns, defeat the party etc.
@@ -453,7 +459,7 @@ Shootouts happen in three ways: in Overworld events, in Locations as ambushes, a
 	- Item scarcity goals for belt space
 		- Low item classes like Pistolero should only have 0-1 slots
 		- Dust Whisperers can have up to 5 slots
-		- Other classes are in between 1-4
+		- Other classes are in between 1-3
 
 ## Open Questions
 
@@ -479,7 +485,8 @@ Shootouts happen in three ways: in Overworld events, in Locations as ambushes, a
 10. How is a character's Rodeo chosen from the class list (random at recruitment, player choice, unlocked by level)?
 	- The gang members have predefined Rodeos
 	- Exception is Walker, who'se Rodeo changes every quest completion
-	- Other characters with unique names their own unique Rodeos
+	- Other characters have their Rodeo change once during the story
+	- Other characters with unique names have their own unique Rodeos
 	- Generic enemies can also have Rodeos, but not all of them
 11. Taunt details: does it redirect multi-target attacks? What breaks it (caster death, displacement, cleanse)?
 	- Taunt redirects multi-target attacks for each protected position
