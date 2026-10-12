@@ -56,7 +56,7 @@ var stats = {
 var weapon = { "type": null, "weapon": null, "baseDamage": 0 }
 ```
 
-Defensive bases are derived from equipment + Taffyin' (Style) and equipment + class (Sand); until equipment data exists, actor data files carry explicit `defense` values and the derivation is a later pass (see `Docs/Combat.md` "Equipment").
+Defensive bases are derived from equipment + Taffyin' (Style) and equipment + class (Sand); the class contribution comes from the class data file in `Data/Shootout/Classes/` (decided — see [Cylinders](Cylinders.md)), and Explosive base damage likewise comes from the class. Until equipment data exists, actor data files carry explicit `defense` values and the derivation is a later pass (see `Docs/Combat.md` "Equipment").
 
 ### Damage calculation
 
