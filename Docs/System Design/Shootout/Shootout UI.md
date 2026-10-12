@@ -32,7 +32,7 @@ Once [Effects](Effects.md) lands: small icon rows above each actor (bleed drop, 
 
 ### Turn order display
 
-A strip showing the current Round's order (see Open Question 3 in [Turns and Initiative](Turns%20and%20Initiative.md) — if the design shows the full Round order, this strip is it; otherwise it shows only the current actor, which the highlight already does).
+Decided: a strip showing the **full Round order**, with the current actor highlighted (e.g. a frame/color on their portrait), portraits dropping off as turns are consumed. Data comes from `turnManager.turnOrder` (rebuilt each Round, see [Turns and Initiative](Turns%20and%20Initiative.md)).
 
 ### Acts panel improvements
 
@@ -81,7 +81,7 @@ UI is mostly verified by hand; headless-checkable parts:
 
 ## Open Questions
 
-1. Does the UI show the full Round order strip or only the current actor? (Tied to Turns and Initiative Open Question 3.)
+1. ~~Full Round order strip or current actor only?~~ — **decided**: full Round order strip with the current actor highlighted.
 2. Cylinder pips: icons per quality or numbers 0-3? (Icons proposed; needs art.)
 3. Where do fight backgrounds come from per encounter — encounter metadata (proposed, see Encounters) or the launching Location?
 4. Should the acts panel show damage estimates (min-max after defense/quality)? Helpful but reveals math; needs a design call.

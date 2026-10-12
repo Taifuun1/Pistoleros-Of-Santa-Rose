@@ -67,7 +67,7 @@ if turnManager.turnOrder.is_empty():
 
 ### Mid-round deaths
 
-`checkActorDead()` already erases the dead actor from `turnOrder` and `shootoutActors`. Actors that die before their Turn simply never act that Round — no reordering needed. Actors summoned mid-fight (none currently; see Open Questions) would be inserted into the current order by re-running the initiative roll for just that actor.
+`checkActorDead()` already erases the dead actor from `turnOrder` and `shootoutActors`. Actors that die before their Turn simply never act that Round — no reordering needed. There are no mid-fight reinforcements (decided); quest variety comes from win conditions instead.
 
 ## Files to modify
 
@@ -96,6 +96,6 @@ if turnManager.turnOrder.is_empty():
 
 ## Open Questions
 
-1. Exact size and shape of the random roll (flat 0-4 proposed; dice like 1d6 are an option) — needs a balance pass once [Damage and Stats](Damage%20and%20Stats.md) lands.
-2. Can reinforcements join mid-fight (ambush waves, boss phases)? If yes, define where in the order they are inserted.
-3. Does the player see the rolled order for the whole Round up front (Darkest Dungeon style), or only the current actor? Affects [Shootout UI](Shootout%20UI.md).
+1. Exact size and shape of the random roll (flat 0-4 proposed; dice like 1d6 are an option) — needs a balance pass once [Damage and Stats](Damage%20and%20Stats.md) lands. Any placeholder is fine for now (confirmed).
+2. ~~Can reinforcements join mid-fight?~~ — **decided**: no reinforcements; instead, quests can have different win conditions (survive N turns, get characters' MxHP below an amount, etc. — see [Encounters](Encounters.md)).
+3. ~~Does the player see the full Round order?~~ — **decided**: yes, a full Round order strip with the current actor highlighted (see [Shootout UI](Shootout%20UI.md)).

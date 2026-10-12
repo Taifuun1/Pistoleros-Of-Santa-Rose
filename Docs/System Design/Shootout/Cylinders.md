@@ -52,7 +52,7 @@ var cylinders = {}
 
 - `registerActor(actor)` — builds the final Cylinder: sum the three Magazines per slot, clamp to 0-3, apply special-Chamber overrides, then apply any cylinder effect modifier. Stores the source Magazines so effects can re-derive the Cylinder.
 - `currentChamber(actorName)` — returns the Chamber the actor's next weapon attack uses.
-- `advance(actorName)` — called by the action resolver **only after a weapon attack resolves**; wraps at the end.
+- `advance(actorName)` — called by the action resolver **only after a weapon attack or an attack ability resolves** (decided: all abilities that are attacks advance the Cylinder; items, Ducks and repositioning never do, and non-attack abilities don't use the Cylinder at all — see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)); wraps at the end.
 - `hitQuality(actorName)` — returns the clamped value for the current Chamber, or a special-Chamber id. Routes through the Rodeo manager's `set_hit_quality_floor` so Natural Gunslinger clamps Miss/Graze up to Hit.
 - `applyCylinderModifier(actorName, modifier)` / `clearCylinderModifier(actorName)` — implements the Cylinder effect type: `{ "chambers": "all" | [indices], "amount": int }`; re-sums and re-clamps. A new modifier replaces the previous one (per the stacking table in `Docs/Combat.md`).
 - `unregisterActor(actorName)` — called from `ShootoutTurnManager.checkActorDead()`.

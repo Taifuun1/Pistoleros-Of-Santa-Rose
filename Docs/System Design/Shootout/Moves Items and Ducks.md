@@ -61,7 +61,7 @@ var data = {
 ```
 
 - `category: "ability"` — utility; blocked by silence.
-- `category: "attack_ability"` — equipment-style damage abilities that also roll the weapon (decide per ability whether it advances the Cylinder; proposed: attack abilities that fire the weapon do advance it — see Open Questions).
+- `category: "attack_ability"` — equipment-style damage abilities that also fire the weapon. **Decided**: all abilities that are attacks advance the Cylinder exactly like basic attacks; items, Ducks and repositioning never do. Non-attack abilities don't interact with the Cylinder mechanic at all (no hit quality roll, no advance).
 - `category: "duck"` — defensive buffs for allies; `side: "player"`.
 
 The resolver dispatches: instant damage/heal as today, then every `effects` entry through `effectManager.applyEffect()`.
@@ -118,7 +118,7 @@ Rationale for not adding `ACT_TYPE_DUCKS`: the UI already has a Moves menu; Duck
 
 ## Open Questions
 
-1. Do attack_abilities that fire the weapon advance the Cylinder like basic attacks? (Proposed: yes; pure utility abilities do not.)
+1. ~~Do attack_abilities that fire the weapon advance the Cylinder?~~ — **decided**: yes, all attack abilities advance it; non-attack abilities don't use the Cylinder at all.
 2. Ducks in the Moves folder vs. a separate `Data/Shootout/Ducks` folder (proposed: same folder).
 3. Is the 4-move cap validated at data load (warn) or enforced silently (truncate)?
 4. Can a character bring duplicates of the same item (current hardcoded data suggests yes)?

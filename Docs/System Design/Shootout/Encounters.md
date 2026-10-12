@@ -17,7 +17,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 - `Shootout._ready()` hardcodes `EncounterData = preload("res://Data/Shootout/Encounters/RatAmbush.gd")` and calls `init(EncounterData.new().data)`.
 - The encounter format is `{ team: { actorType: { actorName: { positions: [int, ...] } } } }` — one position per copy; `Shootout.spawnActor()` handles party lookup (`Party.party`) vs. `Data/Actors/{type}/{name}.gd` loading.
-- `Data/Shootout/SqueekyRat.gd` holds an unused front/middle/back grid format (a legacy or location-spawn layout — superseded by the encounter format; see Open Questions).
+- `Data/Shootout/SqueekyRat.gd` holds an unused front/middle/back grid format — **decided**: it is not used anywhere and will be removed (the art assets in `Assets/` stay).
 - No metadata (Dust-up/Showdown, flavor name, region, loot table, win conditions); no launcher — nothing outside the Shootout scene can start a specific encounter.
 
 ## Design
@@ -64,8 +64,9 @@ The Shootout scene needs to receive its encounter instead of preloading one. Fol
 - `rout` — current behavior.
 - `defeat_actor { actorName }` — battle ends when that actor dies (regardless of other survivors).
 - `survive_rounds { rounds }` — player wins when `roundNumber` exceeds the count; checked at round rebuild in `Shootout._on_actor_done()`.
+- `hp_below { target: "party"|"enemy", fraction: 0.5 }` — quest-style condition (decided: quests can require getting characters' MxHP below an amount); checked in `finishTurn()` after damage resolves.
 
-The manager reads the win condition from the encounter metadata passed into `Shootout.init()`.
+The manager reads the win condition from the encounter metadata passed into `Shootout.init()`. Win conditions are how quests vary fights — there are no mid-fight reinforcements (decided).
 
 ### Bosses
 
@@ -89,9 +90,10 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 
 `Tests/TestEncounters.gd`:
 
-- Every encounter file loads, has valid teams/positions (1-4, max 4 per side, no duplicate columns per side) and known actor files.
+- Every encounter file loads, has valid teams/positions (1-4, max 4 per side, one actor per column per side) and known actor files.
 - Old-format encounters (no metadata) still init with defaults.
-- Win conditions: `defeat_actor` ends the battle on the right death; `survive_rounds` triggers at the right round.
+- Win conditions: `defeat_actor` ends the battle on the right death; `survive_rounds` triggers at the right round; `hp_below` triggers when the targeted side's total MxHP fraction drops below the threshold.
+- `Data/Shootout/SqueekyRat.gd` is removed and nothing references it.
 - `pendingEncounter` flow: set, launch, correct encounter inits; null falls back to the debug encounter.
 
 ## Implementation order
@@ -104,7 +106,7 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 
 ## Open Questions
 
-1. Is `Data/Shootout/SqueekyRat.gd`'s front/middle/back grid still used anywhere (Location spawning?), or should it be migrated to the encounter format and deleted?
+1. ~~Is `Data/Shootout/SqueekyRat.gd`'s grid still used?~~ — **decided**: no; remove the file, keep the assets.
 2. Do Location ambushes pick one encounter file per fight, or compose enemies from a pool at spawn time?
 3. Where do quest Shootout party compositions come from — the encounter file's `player team` block (current format supports it) or always the live `Party.party`?
 4. Do flavor names have any gameplay effect (e.g. Hold-up = enemies act first) or are they pure flavor?
