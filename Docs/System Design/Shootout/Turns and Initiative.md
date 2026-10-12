@@ -15,18 +15,18 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-`Shootout/ShootoutTurnManager.gd` implements:
+**Implemented** (steps 1-4 of the implementation order): per-Round re-roll with random roll and tie shuffle, plus Round/Turn counters shared with the Rodeo manager. `Shootout/ShootoutTurnManager.gd` implements:
 
 - `shootoutActors` registry (`{ team: { actorName: { actorPosition } } }`), filled by `registerActor()` from `Shootout.spawnActor()`.
-- `createTurnOrder()` collects every living actor's High Tailin' **through** `rodeoManager.getStatModifier()` (so always-on Rodeos already affect initiative) and sorts with `HelperFunctions.sortToTurnOrder`.
-- `advanceTurn()` / `currentActorName()` consume the order; `Shootout._on_actor_done()` rebuilds it when empty, firing `round_end` / `round_start` Rodeo triggers around the rebuild.
+- `createTurnOrder()` collects every living actor's modified High Tailin' **through** `rodeoManager.getStatModifier()` (so always-on Rodeos already affect initiative), adds a `randi_range(0, RANDOM_ROLL_MAX)` roll (placeholder constant 4), and sorts descending with a random tiebreak for equal initiative. It also increments `roundNumber` on every rebuild after the first.
+- `advanceTurn()` / `currentActorName()` consume the order; `advanceTurn()` increments `turnNumber` (monotonic for the whole fight). `Shootout._on_actor_done()` rebuilds the order when empty, firing `round_end` / `round_start` Rodeo triggers around the rebuild.
 - `checkActorDead()` removes dead actors from the order and registry, unregisters their Rodeo and emits `battleEnded` via `checkBattleEnd()`.
+- The Rodeo manager no longer keeps its own round counter: `ShootoutRodeoManager.getRoundNumber()` reads the turn manager's counter (`context["round"]` for Rodeo triggers comes from it).
+- Tests: `Tests/TestTurnOrder.gd` (headless) covers counters, tie randomness, stat gaps, Rodeo initiative modifiers and death handling; `Tests/TestRodeos.gd` covers the round delegation.
 
 Gaps vs. the design:
 
-1. **No random roll** — the sort is a pure High Tailin' sort; ties are deterministic and equal-stat actors always act in the same order.
-2. **No item modifiers** — only Rodeo modifiers feed initiative; there is no generic modifier source yet (see [Effects](Effects.md)).
-3. **Round counter is implicit** — `rodeoManager.roundNumber` tracks rounds for Rodeos, but the turn manager itself has no round concept (needed for fleeing-after-10-turns, see [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
+1. **No item/effect modifiers** — only Rodeo modifiers feed initiative; effect-based modifiers come with [Effects](Effects.md).
 
 ## Design
 
@@ -71,10 +71,10 @@ if turnManager.turnOrder.is_empty():
 
 ## Files to modify
 
-- `Shootout/ShootoutTurnManager.gd` — add `roundNumber`, `turnNumber`, the random roll and tie-breaking in `createTurnOrder()`, and the getters. Merge item/effect initiative modifiers when [Effects](Effects.md) lands.
+- `Shootout/ShootoutTurnManager.gd` — add `roundNumber`, `turnNumber`, the random roll and tie-breaking in `createTurnOrder()`, and the getters. Merge effect/item initiative modifiers when [Effects](Effects.md) lands. Also: local `TEAM_PLAYER`/`TEAM_ENEMY` consts (same values as the autoload) so the manager stays loadable in headless test runs.
 - `Shootout/Shootout.gd` — add the `effectManager` round hooks in `_on_actor_done()` (once Effects land); no other changes.
 - `Shootout/ShootoutRodeoManager.gd` — read `roundNumber` from the turn manager instead of its own counter.
-- `HelperFunctions.gd` — replace/extend `sortToTurnOrder` with an initiative-sort that shuffles ties.
+- `Tests/TestRodeos.gd` — round-tracking checks now verify delegation to the turn manager counter.
 
 ## Testing
 
@@ -88,11 +88,11 @@ if turnManager.turnOrder.is_empty():
 
 ## Implementation order
 
-1. Round/turn counters + getters (no behavior change).
-2. Random roll + tie shuffle in `createTurnOrder()`.
-3. Rodeo manager reads the shared round counter.
-4. Tests.
-5. Wire effect/item initiative modifiers when the Effects system lands.
+1. ✅ Round/turn counters + getters (no behavior change).
+2. ✅ Random roll + tie shuffle in `createTurnOrder()`.
+3. ✅ Rodeo manager reads the shared round counter.
+4. ✅ Tests (`Tests/TestTurnOrder.gd`, updated `Tests/TestRodeos.gd`).
+5. Wire effect/item initiative modifiers when the Effects system lands (pending).
 
 ## Open Questions
 

@@ -23,6 +23,9 @@ class FakeActor:
 class FakeTurnManager:
 	extends RefCounted
 	var shootoutActors = { "player team": {}, "enemy team": {} }
+	var roundNumber = 1
+	func getRoundNumber() -> int:
+		return roundNumber
 
 
 class FakeShootout:
@@ -168,9 +171,13 @@ func _run() -> void:
 	_check(manager.rodeos.has("Nobody1"), "known rodeo with unknown op should still register")
 
 	print("\n--- Round tracking ---")
+	# The turn manager owns the round counter; the Rodeo manager only reads it.
 	manager = makeManager()
+	_check(manager.getRoundNumber() == 1, "rodeo round should default to the turn manager round (1)")
+	manager.shootout.turnManager.roundNumber = 3
+	_check(manager.getRoundNumber() == 3, "rodeo round should follow the turn manager counter")
 	manager.trigger("round_end")
-	_check(manager.roundNumber == 2, "roundNumber should increment on round end")
+	_check(manager.getRoundNumber() == 3, "round_end trigger should no longer increment the round itself")
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

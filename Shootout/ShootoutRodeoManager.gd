@@ -33,7 +33,6 @@ var activeModifiers = []
 var directStatReverts = []
 var lootModifiers = { "money": 0, "resources": 0 }
 var lootMultipliers = { "money": 1.0, "resources": 1.0 }
-var roundNumber = 1
 
 
 func init(shootoutRoot) -> void:
@@ -98,8 +97,18 @@ func getRodeoDisplayName(actor) -> String:
 	return "-"
 
 
+# The round counter is owned by the turn manager (single source of truth);
+# the Rodeo manager only reads it.
+func getRoundNumber() -> int:
+	if shootout != null:
+		var turnManager = shootout.get("turnManager")
+		if turnManager != null and turnManager.has_method("getRoundNumber"):
+			return turnManager.getRoundNumber()
+	return 1
+
+
 func trigger(triggerName: String, context := {}) -> void:
-	context["round"] = roundNumber
+	context["round"] = getRoundNumber()
 	for actorName in rodeos:
 		var entry = rodeos[actorName]
 		if entry.data.get("trigger", "") != triggerName:
@@ -114,8 +123,6 @@ func trigger(triggerName: String, context := {}) -> void:
 		fireRodeo(actorName, entry, ownerActor)
 	if triggerName == TRIGGER_TURN_END and context.get("actor") != null:
 		tickModifiers(context.actor.name)
-	if triggerName == TRIGGER_ROUND_END:
-		roundNumber += 1
 	if triggerName == TRIGGER_FIGHT_END:
 		cleanupFightModifiers()
 
