@@ -738,6 +738,13 @@ stretch_mode = 5
 layout_mode = 2
 text = "00/00"
 
+[node name="RodeoContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HoveredRodeo" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/RodeoContainer" instance=ExtResource("7_3n0l5")]
+layout_mode = 2
+text = "-"
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=480547666]
 layout_mode = 2
 size_flags_vertical = 6

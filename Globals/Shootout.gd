@@ -8,6 +8,14 @@ const ACT_TYPE_ATTACK = "Attack"
 const ACT_TYPE_MOVES = "Moves"
 const ACT_TYPE_ITEMS = "Items"
 
+const RODEO_TRIGGER_FIGHT_START = "fight_start"
+const RODEO_TRIGGER_FIGHT_END = "fight_end"
+const RODEO_TRIGGER_ROUND_START = "round_start"
+const RODEO_TRIGGER_ROUND_END = "round_end"
+const RODEO_TRIGGER_TURN_START = "turn_start"
+const RODEO_TRIGGER_TURN_END = "turn_end"
+const RODEO_TRIGGER_ALWAYS = "always"
+
 var shootoutPositions = {
 	"player team": {
 		1: Vector2i(280, 252),
@@ -25,6 +33,7 @@ var shootoutPositions = {
 
 var movesData = {}
 var itemsData = {}
+var rodeosData = {}
 
 
 func _ready():
@@ -33,6 +42,7 @@ func _ready():
 func loadData() -> void:
 	movesData = loadDataFolder("res://Data/Shootout/Moves")
 	itemsData = loadDataFolder("res://Data/Shootout/Items")
+	rodeosData = loadDataFolder("res://Data/Shootout/Rodeos")
 
 func loadDataFolder(folderPath: String) -> Dictionary:
 	var data = {}

@@ -24,9 +24,10 @@ func createTurnOrder() -> void:
 	var actorsHighTailin = []
 	for actorSide in shootoutActors:
 		for actorName in shootoutActors[actorSide]:
+			var actor = shootout.getActor(actorName)
 			actorsHighTailin.append({
 				"actorName": actorName,
-				"highTailin": shootout.getActor(actorName).stats.highTailin
+				"highTailin": shootout.rodeoManager.getStatModifier(actor, "highTailin", actor.stats.highTailin)
 			})
 	actorsHighTailin.sort_custom(HelperFunctions.sortToTurnOrder)
 	turnOrder.clear()
@@ -57,6 +58,7 @@ func checkActorDead(actor) -> bool:
 	turnOrder.erase(actor.name)
 	for actorSide in shootoutActors:
 		shootoutActors[actorSide].erase(actor.name)
+	shootout.rodeoManager.unregisterActor(actor.name)
 	actor.queue_free()
 	checkBattleEnd()
 	return true

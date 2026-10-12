@@ -11,33 +11,31 @@ var playerHasControl = false
 
 
 func setHoveredActorStats(characterData, characterStats) -> void:
-	var panel = $VBoxContainer/GridContainer/PanelContainer3
+	var panel = $MarginContainer/VBoxContainer/GridContainer/PanelContainer3
 	panel.visible = true
-	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredName").text = characterData.Name
-	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredHPContainer/HoveredHP").text = str(characterData.HP)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer/HoveredSixShootin").text = str(characterStats.SixShootin)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer/HoveredHighTailin").text = str(characterStats.HighTailin)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer/HoveredTaffyin").text = str(characterStats.Taffyin)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer/HoveredRevolver").text = str(characterStats.Revolver)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer/HoveredRifle").text = str(characterStats.Rifle)
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer/HoveredShotgun").text = str(characterStats.Shotgun)
+	var content = panel.get_node("MarginContainer/VBoxContainer")
+	content.get_node("HBoxContainer/RichTextLabelExtended").setRichTextLabel(characterData.Name)
+	content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3").setRichTextLabel(str(characterData.HP))
+	content.get_node("RodeoContainer/HoveredRodeo").setRichTextLabel(characterData.get("Rodeo", "-"))
+	for stat in characterStats:
+		content.get_node("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(str(characterStats[stat]))
 
 func clearHoveredActorStats() -> void:
-	var panel = $VBoxContainer/GridContainer/PanelContainer3
-	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredName").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredData/HoveredHPContainer/HoveredHP").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredSixShootinContainer/HoveredSixShootin").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredHighTailinContainer/HoveredHighTailin").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredTaffyinContainer/HoveredTaffyin").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRevolverContainer/HoveredRevolver").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredRifleContainer/HoveredRifle").text = "-"
-	panel.get_node("MarginContainer/GridContainer/HoveredStats/HoveredShotgunContainer/HoveredShotgun").text = "-"
+	var panel = $MarginContainer/VBoxContainer/GridContainer/PanelContainer3
+	var content = panel.get_node("MarginContainer/VBoxContainer")
+	content.get_node("HBoxContainer/RichTextLabelExtended").setRichTextLabel("-")
+	content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3").setRichTextLabel("-")
+	content.get_node("RodeoContainer/HoveredRodeo").setRichTextLabel("-")
+	for stat in ["SixShootin", "HighTailin", "Taffyin", "Revolver", "Rifle", "Shotgun"]:
+		content.get_node("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel("-")
 
 func setPlayerCharacterStats(characterData, characterStats) -> void:
-	get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/NameContainer/Name").text = characterData.Name
-	get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Data/HPContainer/HP").setRichTextLabel(characterData.HP)
+	var content = get_node("MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer")
+	content.get_node("HBoxContainer/VBoxContainer/RichTextLabelExtended8px").setRichTextLabel(characterData.Name)
+	content.get_node("HBoxContainer/VBoxContainer/HBoxContainer/RichTextLabelExtended8px3").setRichTextLabel(characterData.get("Rodeo", "-"))
+	content.get_node("HBoxContainer/Data/HPContainer/HP").setRichTextLabel(str(characterData.HP))
 	for stat in characterStats:
-		get_node("VBoxContainer/GridContainer/PanelContainer/MarginContainer/GridContainer/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(characterStats[stat])
+		content.get_node("HBoxContainer2/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(str(characterStats[stat]))
 
 func setPlayerCharacterActs(acts: Array, actType: String) -> void:
 	var actNode = load("res://Shootout/UI/ShootoutAct.tscn")

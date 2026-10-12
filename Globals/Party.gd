@@ -1,6 +1,8 @@
 extends Node
 
 
+var level = 1
+
 var party = {
 	"Walker Langley": {
 		"actorName": "Walker Langley",

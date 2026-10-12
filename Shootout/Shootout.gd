@@ -12,6 +12,7 @@ const TargetingManagerScript = preload("res://Shootout/ShootoutTargetingManager.
 const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
 const AnimationSequencerScript = preload("res://Shootout/ShootoutAnimationSequencer.gd")
 const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
+const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -21,6 +22,7 @@ var targetingManager
 var actionResolver
 var animationSequencer
 var enemyAI
+var rodeoManager
 
 var selectedAct = null
 var selectedActor = ""
@@ -39,6 +41,8 @@ func _ready() -> void:
 	actionResolver = ActionResolverScript.new()
 	actionResolver.init(self)
 	enemyAI = EnemyAIScript.new()
+	rodeoManager = RodeoManagerScript.new()
+	rodeoManager.init(self)
 	animationSequencer = AnimationSequencerScript.new()
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
@@ -60,7 +64,9 @@ func init(actors: Dictionary) -> void:
 				for actorPosition in actors[actorSide][actorType][actorName].positions:
 					spawnActor(actorSide, actorType, actorName, actorPosition, index)
 					index += 1
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_START)
 	turnManager.createTurnOrder()
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
 	startCurrentTurn()
 
 func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, index: int) -> void:
@@ -80,6 +86,7 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats)
 	newShootoutActor.getAnimations().onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
 	turnManager.registerActor(actorSide, actorNameIndexed, actorPosition)
+	rodeoManager.registerActor(newShootoutActor, actorSide, actorPosition)
 
 func getActor(actorName: String) -> Node:
 	if actorName == "":
@@ -91,6 +98,7 @@ func startCurrentTurn() -> void:
 	var actor = getActor(actorName)
 	if actor == null:
 		return
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_START, { "actor": actor })
 	actor.actorTurn.emit()
 	if turnManager.isPlayerActing(actorName):
 		playerAction = true
@@ -161,6 +169,10 @@ func resolveActOnce() -> void:
 	finishTurn(targetActor)
 
 func finishTurn(targetActor) -> void:
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_END, {
+		"actor": getActor(turnManager.currentActorName()),
+		"target": targetActor
+	})
 	if targetActor != null:
 		turnManager.checkActorDead(targetActor)
 	turnManager.advanceTurn()
@@ -172,13 +184,17 @@ func _on_actor_done() -> void:
 	if battleOver:
 		return
 	if turnManager.turnOrder.is_empty():
+		rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_END)
 		turnManager.createTurnOrder()
+		rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
 	startCurrentTurn()
 
 func _on_battle_ended(winningSide: String) -> void:
 	battleOver = true
 	playerHasControl = false
 	ui.playerHasControl = false
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_END, { "winningSide": winningSide })
+	print("Rodeo loot modifiers: ", rodeoManager.consumeLootModifiers())
 	shootoutEnded.emit(winningSide)
 	print("Shootout ended. Winner: {winningSide}".format({ "winningSide": winningSide }))
 
@@ -187,11 +203,15 @@ func spawnDamageNumber(label, color: String, targetPosition: Vector2) -> void:
 	add_child(newDamageNumber)
 	newDamageNumber.init(label, color, targetPosition)
 
+func getPositionForColumn(actorSide: String, column) -> Vector2:
+	return Shootout.shootoutPositions.get(actorSide, {}).get(column, Vector2.ZERO)
+
 func actorStatsPayload(actor) -> Array:
 	return [
 		{
 			"Name": actor.actorName,
-			"HP": actor.hp
+			"HP": actor.hp,
+			"Rodeo": rodeoManager.getRodeoDisplayName(actor)
 		},
 		{
 			"SixShootin": actor.stats.sixShootin,

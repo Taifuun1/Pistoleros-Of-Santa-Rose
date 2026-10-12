@@ -15,7 +15,15 @@ func resolveAttack(actingActor, targetActor) -> void:
 	if actingActor.weapon.type == "melee":
 		damage = 2
 	else:
-		damage = actingActor.stats.damage[actingActor.weapon.type][actingActor.weapon.weapon]
+		var statPath = "damage.{type}.{weapon}".format({
+			"type": actingActor.weapon.type,
+			"weapon": actingActor.weapon.weapon
+		})
+		damage = shootout.rodeoManager.getStatModifier(
+			actingActor,
+			statPath,
+			actingActor.stats.damage[actingActor.weapon.type][actingActor.weapon.weapon]
+		)
 	applyDamage(targetActor, damage)
 
 func resolveMove(moveName: String, actingActor, targetActor) -> void:
