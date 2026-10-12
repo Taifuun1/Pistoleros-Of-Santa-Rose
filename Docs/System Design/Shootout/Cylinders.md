@@ -38,7 +38,7 @@ Magazines live on the data sources that already define a character:
 
 A Magazine is an Array of ints in -3..3, length 2-6. Special Chambers use string entries: `"reload"`, `"jammed"`. Special Chambers are never summed or clamped — a special Chamber in any Magazine overrides that slot in the final Cylinder (if multiple Magazines put special Chambers in the same slot, priority is weapon > class > character; see Open Questions).
 
-Class Magazines imply classes need a data home; the cleanest fit is a new `Data/Shootout/Classes/*.gd` folder (same `data` Dictionary convention) holding class name, class Magazine, class abilities list and belt space — also referenced by [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md).
+Class Magazines live in a dedicated `Data/Shootout/Classes/*.gd` folder (decided) — same `data` Dictionary convention as Moves/Items/Rodeos, loaded by the `Shootout` autoload into `Shootout.classesData`. Each class file holds the class name, class Magazine, class ability list, belt space and class-based stat bases (Sand defense, Explosive damage — see [Damage and Stats](Damage%20and%20Stats.md)). Actor data files reference the class by name via `"characterClass": "Gunslinger"`; unique named characters can carry their own overrides on top of the class data (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
 
 ### Runtime state
 
@@ -110,7 +110,7 @@ In `ShootoutActionResolver.resolveAttack()`:
 
 ## Open Questions
 
-1. Where does class data live — new `Data/Shootout/Classes` folder (proposed) or fields on actor data files?
+1. ~~Where does class data live~~ — **decided**: new `Data/Shootout/Classes/*.gd` folder; actor data references the class by name via `characterClass`.
 2. Special Chamber conflict priority when several Magazines put special Chambers in the same slot (weapon > class > character proposed).
 3. Exact Jammed outcome per weapon/class: is the buff/debuff defined on the weapon, the class, or globally?
 4. Do cylinder effects with `"chambers": [indices]` use absolute indices or indices relative to the current Chamber?

@@ -38,7 +38,7 @@ Actor data gains explicit loadout fields, replacing the hardcoded arrays on `Sho
 "characterClass": "Gunslinger",
 ```
 
-`ShootoutActor.init()` reads them with safe defaults. Belt space ultimately derives from the worn Belt equipment (`Docs/Combat.md` "Equipment"); until equipment data exists, actor data carries `beltSpace` directly. Out-of-combat move activation/deactivation and belt management are overworld/UI concerns outside this doc; the Shootout just receives the final loadout.
+`ShootoutActor.init()` reads them with safe defaults. Class ability lists and belt space come from the class data file in `Data/Shootout/Classes/` (decided — actors reference their class via `characterClass`; see [Cylinders](Cylinders.md)). The Shootout loadout is the class abilities intersected with the actor's activated `moves` (max 4) plus any equipment abilities; belt space is the class/equipment value capping `items`. Out-of-combat move activation/deactivation and belt management are overworld/UI concerns outside this doc; the Shootout just receives the final loadout.
 
 ### Move data, unified
 
@@ -94,8 +94,8 @@ Rationale for not adding `ACT_TYPE_DUCKS`: the UI already has a Moves menu; Duck
 - `Actors/BaseActor.gd` / `ShootoutActor.gd` — loadout fields from actor data instead of hardcoded arrays.
 - `Shootout/ShootoutActionResolver.gd` — effect dispatch, item consumption, category handling.
 - `Shootout/Shootout.gd` — silence filtering in `moveActsRequested`, act panel rebuild after item use.
-- `Globals/Shootout.gd` — category constants if needed.
-- Actor data files — `moves`, `items`, `beltSpace`, `characterClass`.
+- `Globals/Shootout.gd` — category constants if needed; load `Data/Shootout/Classes` into `classesData`.
+- Actor data files — `moves`, `items`, `characterClass`; class files in `Data/Shootout/Classes/` carry ability lists and belt space.
 
 ## Testing
 
