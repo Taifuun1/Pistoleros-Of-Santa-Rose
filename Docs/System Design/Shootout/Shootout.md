@@ -32,7 +32,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 
 | Doc | System | State |
 | --- | --- | --- |
-| [Turns and Initiative](Turns%20and%20Initiative.md) | Turn order, rounds, initiative rolls | Partial: order sorts once by High Tailin'; per-Round re-roll with random roll missing |
+| [Turns and Initiative](Turns%20and%20Initiative.md) | Turn order, rounds, initiative rolls | Implemented: per-Round re-roll with random roll, round/turn counters |
 | [Cylinders](Cylinders.md) | Cylinders, Magazines, Chambers, hit quality, special Chambers | Missing |
 | [Damage and Stats](Damage%20and%20Stats.md) | Stats, damage types, hit/damage pipeline, resistances | Partial: flat stat damage only; no hit quality, no Style/Sand, no resistances |
 | [Effects](Effects.md) | Bleed, poison, marks, taunt, silence, cylinder mods, piercing | Missing (Rodeo ops reserved) |
