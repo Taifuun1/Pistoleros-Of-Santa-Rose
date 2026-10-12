@@ -58,7 +58,7 @@ A new act type on the UI alongside Attack/Moves/Items: **Reposition** (per `Docs
 
 ### Occupancy and displacement
 
-`Docs/Combat.md` doesn't say whether two actors can share a position (see Open Questions). Proposed rule: a position holds at most one living actor per side; displacement (`move_position` effects, Leaders Duck) pushes through occupied spots by shifting the occupant one step in the same direction (recursively, clamped at the ends — if the end is blocked, the move fails). This keeps `move_position` deterministic and matches Darkest Dungeon shuffle semantics.
+Decided rule: a position holds **at most one** living actor per side — the character moving takes the spot. Displacement (`move_position` effects, Leaders Duck, repositioning into an occupied spot) pushes the displaced occupant one step in the same direction (recursively, clamped at the ends — if the end is blocked, the move fails). This keeps `move_position` deterministic and matches Darkest Dungeon shuffle semantics.
 
 ### Taunt redirect
 
@@ -99,7 +99,7 @@ With the effect system (see [Effects](Effects.md)):
 
 ## Open Questions
 
-1. Can two actors share a position? (Proposed: no, with push-through displacement.)
+1. ~~Can two actors share a position?~~ — **decided**: no; the moving character takes the spot, displaced occupants are pushed (see Occupancy and displacement).
 2. Can repositioning move more than one column if the actor spends multiple Moves, or is it strictly one column per Move? (Per `Docs/Combat.md`: "moving between adjacent positions costs a Move" — assumed one column per Move.)
 3. Do ranged weapon attacks have per-weapon position tables distinct from the class table, or is the class table the only source?
 4. When a multi-target act partially hits taunted positions, does the caster take all redirected hits (stacking damage) once or per protected position?

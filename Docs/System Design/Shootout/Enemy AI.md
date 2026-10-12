@@ -97,5 +97,5 @@ This deletes the special-cased enemy attack and routes everything through the an
 ## Open Questions
 
 1. How much should enemies "know"? (Proposed: full Cylinder and effect knowledge, since the player sees the same; HP thresholds only for their own side.)
-2. Should generic enemies ever flee or surrender, or is fleeing player-only (`Docs/Combat.md` implies player-only)?
+2. ~~Should generic enemies flee or surrender?~~ — **decided**: no, enemies never flee; quest variety comes from win conditions instead (survive N turns, get MxHP below an amount, etc. — see [Encounters](Encounters.md)).
 3. Difficulty knobs: should Dust-ups use dumber weights (more randomness) than Showdowns?

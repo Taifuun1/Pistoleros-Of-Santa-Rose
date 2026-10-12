@@ -7,7 +7,7 @@ This is a design doc: it describes the intended design, and the implementation m
 ## Requirements (from `Docs/Combat.md`)
 
 - **Levels**: the whole party shares a level; levels are gained on quest completion (level progression follows quest progression, not per-fight XP); levels increase character stats and Rodeo effectiveness and slightly increase Stagecoach speed.
-- **Loot**: different enemies have different loot tables, based on party name (see Open Questions); Rodeos can increase or decrease loot; no uniques from Shootouts unless it's a quest.
+- **Loot**: different enemies have different loot tables, keyed by the **enemy party** (decided — e.g. rats drop rat loot). Quest Shootouts are the exception: they either drop nothing or pay out only at the end of the quest (quest-side reward). Average loot scales with **quest progression** — the more main quests completed, the higher the average loot. Rodeos can increase or decrease loot; no uniques from Shootouts unless it's a quest.
 - Possible drops: weapons and equipment (with affixes and rarity, see `Docs/Weapons and affixes.md`), money (not too much — quests are the main money source), comestibles and consumables (similar to town vendors).
 - Vamoose (full party down) loses half of all loot (see [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
 
@@ -37,7 +37,8 @@ var data = {
 }
 ```
 
-- Encounter metadata points at a loot table (see [Encounters](Encounters.md)); fights without one drop money only.
+- Loot tables are keyed by enemy party; the encounter metadata points at the enemy party's table (see [Encounters](Encounters.md)). Fights without a table drop money only. Quest Shootouts have no drops, or their loot is paid at quest completion by the quest system — not by `generateLoot()`.
+- Average loot scales with main-quest progression: tables are authored per progression band (early/mid/late), and the encounter pool for a region picks the band matching completed main quests. Keep the band a data field on the table so scaling is authored, not coded.
 - Weapon/equipment entries hand off to the existing item generator with the allowed rarities; consumables reference `Data/Shootout/Items` ids.
 
 ### Loot generation
@@ -90,7 +91,7 @@ Called from `Shootout._on_battle_ended()` on player victory with `rodeoManager.c
 
 ## Open Questions
 
-1. "Loot tables based on party name" — is this the *enemy* party name (rats drop rat loot), the *player* gang name, or quest-scoped tables? Proposed: enemy-party/encounter tables.
+1. ~~"Loot tables based on party name"~~ — **decided**: enemy party; quest Shootouts drop nothing or pay out at quest end; average loot scales with main-quest progression (progression-band tables).
 2. Where does the party inventory live — `Globals/Party.gd` (proposed) or a separate inventory autoload?
-3. Should money scale with encounter difficulty (Dust-up vs Showdown) via the table or a global multiplier?
+3. Should money scale with encounter difficulty (Dust-up vs Showdown) via the table or a global multiplier? (Separate from the quest-progression scaling above.)
 4. Do bosses roll from unique tables with guaranteed drops (proposed: yes, quest loot handled by the quest, boss tables for the rest)?
