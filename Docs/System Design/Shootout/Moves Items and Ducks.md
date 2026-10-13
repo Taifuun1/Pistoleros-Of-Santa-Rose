@@ -19,10 +19,15 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-- Three act types exist: `ACT_TYPE_ATTACK`, `ACT_TYPE_MOVES`, `ACT_TYPE_ITEMS` (`Globals/Shootout.gd`), with UI buttons and an acts panel (`Shootout/UI/ShootoutUI.gd`).
-- Moves and Items are data-driven: `Data/Shootout/Moves/*.gd`, `Data/Shootout/Items/*.gd` with `data` Dictionaries (`name`, `baseAmount`, `statScaling`/`scalingStat`, `side`, `positions`, `animations`).
-- `ShootoutActionResolver.resolveMove()` applies `baseAmount + statScaling * scalingStat` as damage; `resolveItem()` heals; both warn-and-skip on unknown names.
-- `ShootoutActor` hardcodes `items = ["Paregoric", "Paregoric"]` and `moves = ["Sharp Shot"]` — no per-character loadout, no class abilities, no belt space, no item consumption (items are reusable!), no Ducks, no equipment abilities, no silence gating.
+**Implemented** (loadouts, belt space, item consumption, Duck mechanics and silence/position filtering; equipment abilities and the out-of-combat activation UI are outside this doc):
+
+- Character loadouts are data-driven: actor data and `Party.party` carry `moves` (final activated list, max 4) and `items` (belt contents); `ActorBase.applyLoadoutLimits(beltSpace)` enforces the 4-move cap and the class belt space with warn-and-truncate (belt space -1 = uncapped when class data is unknown). Class belt space comes from the class files in `Data/Shootout/Classes` (decided).
+- Move data carries `category`: `ability` (utility; blocked by silence), `attack_ability` (fires the weapon; advances the Cylinder — see [Cylinders](Cylinders.md)), `duck` (defensive buffs; effects only, no damage, never advances the Cylinder — decided).
+- Ducks live in `Data/Shootout/Moves/` with `category: "duck"` (decided) — first placeholders: Duck Down (self-taunt) and Hold Steady (heal over time).
+- Item use consumes exactly one instance from the belt at resolution time (unknown items are not consumed); the acts panel is rebuilt from the remaining list on open.
+- Effects can heal: `effect: "heal"` (instant) and `heal_over_time` (ticks at the actor's turn start for `turns`) in the effect manager; both are beneficial (never picked by random cleanses).
+- Filtering: `ShootoutTargetingManager.usableMoves()` drops moves unusable from the acting character's current column and (when silenced) everything except Ducks.
+- Tests: `Tests/TestActs.gd` covers loadout caps, item consumption, duck semantics, heal-over-time and the usable-move filter.
 
 ## Design
 
@@ -109,16 +114,16 @@ Rationale for not adding `ACT_TYPE_DUCKS`: the UI already has a Moves menu; Duck
 
 ## Implementation order
 
-1. Loadout fields on actor data; remove hardcoded arrays.
-2. Item consumption + panel rebuild.
-3. `category` field + effect dispatch in the resolver.
-4. Author the first Ducks (defense buff, taunt) once [Effects](Effects.md) lands.
-5. Silence filtering.
-6. Class ability lists + equipment abilities when class/equipment data lands (see [Cylinders](Cylinders.md) for class data).
+1. ✅ Loadout fields on actor data; hardcoded arrays removed.
+2. ✅ Item consumption + panel rebuild.
+3. ✅ `category` field + effect dispatch in the resolver.
+4. ✅ First Ducks (taunt, heal-over-time) on top of [Effects](Effects.md).
+5. ✅ Silence + position filtering.
+6. Class ability lists + equipment abilities when class/equipment data lands (pending; see [Cylinders](Cylinders.md) for class data).
 
 ## Open Questions
 
 1. ~~Do attack_abilities that fire the weapon advance the Cylinder?~~ — **decided**: yes, all attack abilities advance it; non-attack abilities don't use the Cylinder at all.
 2. Ducks in the Moves folder vs. a separate `Data/Shootout/Ducks` folder (proposed: same folder).
-3. Is the 4-move cap validated at data load (warn) or enforced silently (truncate)?
+3. Is the 4-move cap validated at data load (warn) or enforced silently (truncate)? (First pass: warn and truncate.)
 4. Can a character bring duplicates of the same item (current hardcoded data suggests yes)?

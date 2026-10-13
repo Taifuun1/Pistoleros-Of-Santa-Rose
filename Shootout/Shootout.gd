@@ -90,6 +90,8 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 			"actorName": actorName.capitalize().replace(" ", "")
 		})).new().data)
 	newShootoutActor.initShootoutActor(actorType, actorNameIndexed, actorPosition, actorSide)
+	var classData = cylinderManager.classesData.get(newShootoutActor.characterClass, {})
+	newShootoutActor.applyLoadoutLimits(int(classData.get("beltSpace", -1)))
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
 	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats)
@@ -140,8 +142,6 @@ func selectActor(actorName: String = "") -> void:
 		return
 	var actingActor = getActor(actingActorName)
 	selectedActor = actorName
-	if selectedAct.type == Shootout.ACT_TYPE_ITEMS:
-		actingActor.items.erase(selectedAct.name)
 	ui.hideActsPanel()
 	playerHasControl = false
 	ui.playerHasControl = false
@@ -310,22 +310,15 @@ func _on_shootout_ui_move_acts_requested() -> void:
 	if actor != null:
 		ui.setPlayerCharacterActs(filterUsableMoves(actor), Shootout.ACT_TYPE_MOVES)
 
-# Moves unusable from the current column are filtered out; silenced actors lose
-# abilities (category ability/attack_ability) but keep Ducks (decided).
+# Moves unusable from the current column or by silence are filtered out
+# (validation lives on the targeting manager so tests can reach it).
 func filterUsableMoves(actor) -> Array:
-	var usable = []
-	var column = turnManager.getActorPosition(actor.name)
-	var silenced = effectManager.isSilenced(actor.name)
-	for moveName in actor.moves:
-		var moveData = Shootout.movesData.get(moveName, {})
-		var category = moveData.get("category", "ability")
-		if silenced and category != "duck":
-			continue
-		var positions = moveData.get("positions", {})
-		if positions.has("actorUser") and !(column in positions.actorUser):
-			continue
-		usable.append(moveName)
-	return usable
+	return targetingManager.usableMoves(
+		actor.moves,
+		actor.name,
+		effectManager.isSilenced(actor.name),
+		Shootout.movesData
+	)
 
 # Repositioning costs the Move and never advances the Cylinder (decided).
 func _on_shootout_ui_reposition(direction: String) -> void:
