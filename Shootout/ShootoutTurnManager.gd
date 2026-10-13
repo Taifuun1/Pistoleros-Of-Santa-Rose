@@ -19,6 +19,10 @@ var shootoutActors = {
 }
 var turnOrder = []
 var battleOver = false
+# Win condition (Docs/System Design/Shootout/Encounters.md):
+# { "type": "rout" } (default) | { "type": "defeat_actor", "actorName" }
+# | { "type": "survive_rounds", "rounds" } | { "type": "hp_below", "target", ... }
+var winCondition = {}
 var roundNumber = 1
 var turnNumber = 0
 var firstOrderCreated = false
@@ -170,12 +174,56 @@ func checkActorDead(actor) -> bool:
 	checkBattleEnd()
 	return true
 
+func setWinCondition(condition) -> void:
+	winCondition = condition if condition is Dictionary else {}
+
+func endBattle(winningSide: String) -> void:
+	battleOver = true
+	battleEnded.emit(winningSide)
+
 func checkBattleEnd() -> void:
 	if battleOver:
 		return
 	if shootoutActors[TEAM_PLAYER].is_empty():
-		battleOver = true
-		battleEnded.emit(TEAM_ENEMY)
-	elif shootoutActors[TEAM_ENEMY].is_empty():
-		battleOver = true
-		battleEnded.emit(TEAM_PLAYER)
+		endBattle(TEAM_ENEMY)
+		return
+	if shootoutActors[TEAM_ENEMY].is_empty():
+		endBattle(TEAM_PLAYER)
+		return
+	match winCondition.get("type", "rout"):
+		"defeat_actor":
+			if !isBaseNameAlive(winCondition.get("actorName", "")):
+				endBattle(winCondition.get("winner", TEAM_PLAYER))
+		"survive_rounds":
+			if roundNumber > int(winCondition.get("rounds", 0)):
+				endBattle(winCondition.get("winner", TEAM_PLAYER))
+		"hp_below":
+			var targetSide = TEAM_PLAYER if winCondition.get("target", "enemy") == "party" else TEAM_ENEMY
+			if sideBelowThreshold(targetSide, winCondition):
+				endBattle(TEAM_ENEMY if targetSide == TEAM_PLAYER else TEAM_PLAYER)
+
+func isBaseNameAlive(baseName: String) -> bool:
+	for actorSide in shootoutActors:
+		for actorName in shootoutActors[actorSide]:
+			var actor = shootout.getActor(actorName)
+			if actor != null and actor.get("actorName") == baseName:
+				return true
+	return false
+
+## Side total of the chosen stat (default current HP) vs. its maxHp total:
+## below `fraction` of the total, or below an absolute `amount`.
+func sideBelowThreshold(actorSide: String, condition: Dictionary) -> bool:
+	var total = 0
+	var totalMax = 0
+	var useMax = condition.get("stat", "hp") == "maxHp"
+	for actorName in shootoutActors[actorSide]:
+		var actor = shootout.getActor(actorName)
+		if actor == null:
+			continue
+		totalMax += actor.maxHp
+		total += actor.maxHp if useMax else actor.hp
+	if totalMax == 0:
+		return true
+	if condition.has("amount"):
+		return total < int(condition.amount)
+	return float(total) / totalMax < float(condition.get("fraction", 0.5))

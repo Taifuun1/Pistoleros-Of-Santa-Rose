@@ -17,6 +17,15 @@ const RODEO_TRIGGER_TURN_START = "turn_start"
 const RODEO_TRIGGER_TURN_END = "turn_end"
 const RODEO_TRIGGER_ALWAYS = "always"
 
+# Encounter launcher (Docs/System Design/Shootout/Encounters.md): callers set a
+# res:// path here before switching to the Shootout scene; null falls back to
+# the debug encounter.
+var pendingEncounter = null
+
+# Flavor variation names for the Shootout start popup (Docs/Combat.md).
+const DUSTUP_FLAVORS = ["Scuffle", "Ruckus", "Hold-up", "Tussle"]
+const SHOWDOWN_FLAVORS = ["Gunfight", "Slingin'", "High Noon", "Bangin'"]
+
 var shootoutPositions = {
 	"player team": {
 		1: Vector2i(280, 252),

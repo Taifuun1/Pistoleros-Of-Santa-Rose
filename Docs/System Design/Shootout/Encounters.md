@@ -15,10 +15,13 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-- `Shootout._ready()` hardcodes `EncounterData = preload("res://Data/Shootout/Encounters/RatAmbush.gd")` and calls `init(EncounterData.new().data)`.
-- The encounter format is `{ team: { actorType: { actorName: { positions: [int, ...] } } } }` — one position per copy; `Shootout.spawnActor()` handles party lookup (`Party.party`) vs. `Data/Actors/{type}/{name}.gd` loading.
-- `Data/Shootout/SqueekyRat.gd` holds an unused front/middle/back grid format — **decided**: it is not used anywhere and will be removed (the art assets in `Assets/` stay).
-- No metadata (Dust-up/Showdown, flavor name, region, loot table, win conditions); no launcher — nothing outside the Shootout scene can start a specific encounter.
+**Implemented** (metadata, launcher and win conditions; region pools/ambush wiring is pending with the Location/Overworld systems):
+
+- Encounter metadata: `name`, `kind` (`dustup`/`showdown`), `flavor`, `background`, `lootTable`, `winCondition` and nested `teams`; the legacy flat format still resolves (`data.get("teams", data)`). `RatAmbush` is the default/debug encounter with full metadata.
+- Launcher: callers set `Shootout.pendingEncounter` (a `res://` path) on the autoload before switching to the Shootout scene; `_ready()` consumes it (falling back to `RatAmbush` when null) and clears it.
+- Win conditions in `ShootoutTurnManager`: `rout` (default), `defeat_actor { actorName }` (ends when the named character dies), `survive_rounds { rounds }` (checked at round rebuilds), and `hp_below { target: "party"|"enemy", fraction | amount, stat? }` (the target side loses when its side-total current HP — or `stat: "maxHp"` — drops below the fraction of its maxHp total, or below an absolute amount; checked after damage resolves). Optional `winner` overrides the default winning side.
+- Flavor names: `Shootout.DUSTUP_FLAVORS`/`SHOWDOWN_FLAVORS`; a missing `flavor` picks one at random by `kind`, and `encounterName`/`flavorName` live on the shootout root ready for the start popup (see [Shootout UI](Shootout%20UI.md)).
+- Tests: `Tests/TestEncounters.gd` validates every encounter file (sides, position ranges, one actor per column, max 4 copies, win condition shape), the metadata/legacy defaults and all four win-condition behaviors.
 
 ## Design
 
@@ -64,7 +67,7 @@ The Shootout scene needs to receive its encounter instead of preloading one. Fol
 - `rout` — current behavior.
 - `defeat_actor { actorName }` — battle ends when that actor dies (regardless of other survivors).
 - `survive_rounds { rounds }` — player wins when `roundNumber` exceeds the count; checked at round rebuild in `Shootout._on_actor_done()`.
-- `hp_below { target: "party"|"enemy", fraction: 0.5 }` — quest-style condition (decided: quests can require getting characters' MxHP below an amount); checked in `finishTurn()` after damage resolves.
+- `hp_below { target: "party"|"enemy", fraction: 0.5, stat?: "hp"|"maxHp" }` — quest-style condition (decided: quests can require getting characters' HP/MxHP below an amount); the target side loses when its side-total drops below `fraction` of its maxHp total (or below an absolute `amount`); checked in `finishTurn()` after damage resolves.
 
 The manager reads the win condition from the encounter metadata passed into `Shootout.init()`. Win conditions are how quests vary fights — there are no mid-fight reinforcements (decided).
 
@@ -98,15 +101,16 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 
 ## Implementation order
 
-1. Encounter metadata + `teams` nesting (backwards compatible).
-2. `pendingEncounter` launcher.
-3. Win conditions.
-4. Region pools + ambush wiring (with the Location/Overworld teams' systems).
-5. First boss encounter content.
+1. ✅ Encounter metadata + `teams` nesting (backwards compatible).
+2. ✅ `pendingEncounter` launcher.
+3. ✅ Win conditions.
+4. Region pools + ambush wiring (pending, with the Location/Overworld teams' systems).
+5. First boss encounter content (pending).
 
 ## Open Questions
 
 1. ~~Is `Data/Shootout/SqueekyRat.gd`'s grid still used?~~ — **decided**: no; remove the file, keep the assets.
 2. Do Location ambushes pick one encounter file per fight, or compose enemies from a pool at spawn time?
 3. Where do quest Shootout party compositions come from — the encounter file's `player team` block (current format supports it) or always the live `Party.party`?
-4. Do flavor names have any gameplay effect (e.g. Hold-up = enemies act first) or are they pure flavor?
+4. Do flavor names have any gameplay effect (e.g. Hold-up = enemies act first) or are they pure flavor? (First pass: pure flavor.)
+5. Should `hp_below` also support per-actor thresholds ("the boss under 25%") or is the side total enough? (First pass: side total only.)
