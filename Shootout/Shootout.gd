@@ -211,6 +211,15 @@ func spawnDamageNumber(label, color: String, targetPosition: Vector2) -> void:
 func getPositionForColumn(actorSide: String, column) -> Vector2:
 	return Shootout.shootoutPositions.get(actorSide, {}).get(column, Vector2.ZERO)
 
+## Single stat-read seam: every modifier source stacks here (Rodeos today,
+## effects once that system lands). Used by UI and future systems.
+func getModifiedStat(actor, statPath: String, baseValue):
+	var value = baseValue
+	value = rodeoManager.getStatModifier(actor, statPath, value)
+	if get("effectManager") != null and get("effectManager").has_method("getStatModifier"):
+		value = get("effectManager").getStatModifier(actor.name, statPath, value)
+	return value
+
 func actorStatsPayload(actor) -> Array:
 	return [
 		{
@@ -224,7 +233,9 @@ func actorStatsPayload(actor) -> Array:
 			"Taffyin": actor.stats.taffyin,
 			"Revolver": actor.stats.damage.lead.revolver,
 			"Rifle": actor.stats.damage.lead.rifle,
-			"Shotgun": actor.stats.damage.lead.shotgun
+			"Shotgun": actor.stats.damage.lead.shotgun,
+			"Style": actor.stats.get("defense", {}).get("style", 0),
+			"Sand": actor.stats.get("defense", {}).get("sand", 0)
 		}
 	]
 

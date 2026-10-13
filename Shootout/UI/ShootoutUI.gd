@@ -18,7 +18,9 @@ func setHoveredActorStats(characterData, characterStats) -> void:
 	content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3").setRichTextLabel(str(characterData.HP))
 	content.get_node("RodeoContainer/HoveredRodeo").setRichTextLabel(characterData.get("Rodeo", "-"))
 	for stat in characterStats:
-		content.get_node("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(str(characterStats[stat]))
+		var statNode = content.get_node_or_null("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat }))
+		if statNode != null:
+			statNode.setRichTextLabel(str(characterStats[stat]))
 
 func clearHoveredActorStats() -> void:
 	var panel = $MarginContainer/VBoxContainer/GridContainer/PanelContainer3
@@ -35,7 +37,9 @@ func setPlayerCharacterStats(characterData, characterStats) -> void:
 	content.get_node("HBoxContainer/VBoxContainer/HBoxContainer/RichTextLabelExtended8px3").setRichTextLabel(characterData.get("Rodeo", "-"))
 	content.get_node("HBoxContainer/Data/HPContainer/HP").setRichTextLabel(str(characterData.HP))
 	for stat in characterStats:
-		content.get_node("HBoxContainer2/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel(str(characterStats[stat]))
+		var statNode = content.get_node_or_null("HBoxContainer2/Stats/{stat}Container/{stat}".format({ "stat": stat }))
+		if statNode != null:
+			statNode.setRichTextLabel(str(characterStats[stat]))
 
 func setPlayerCharacterActs(acts: Array, actType: String) -> void:
 	var actNode = load("res://Shootout/UI/ShootoutAct.tscn")

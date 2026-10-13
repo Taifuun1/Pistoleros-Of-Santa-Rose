@@ -21,12 +21,15 @@ var data = {
 				"liquid": 1,
 				"shrapnel": 1
 			}
-		}
+		},
+		"defense": { "style": 0, "sand": 0 },
+		"resistances": { "bleed": 0.0, "poison": 0.0 }
 	},
 	"rodeo": null,
 	"magazine": [2, 1, 2, 0],
 	"weapon": {
 		"type": "melee",
-		"weapon": "scratch"
+		"weapon": "scratch",
+		"baseDamage": 2
 	}
 }

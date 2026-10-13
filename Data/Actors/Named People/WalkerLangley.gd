@@ -21,13 +21,16 @@ var data = {
 				"liquid": 1,
 				"shrapnel": 1
 			}
-		}
+		},
+		"defense": { "style": 2, "sand": 1 },
+		"resistances": { "bleed": 0.0, "poison": 0.0 }
 	},
 	"rodeo": "leaders duck",
 	"characterClass": "Gunslinger",
 	"magazine": [1, 0, 2],
 	"weapon": {
 		"type": "lead",
-		"weapon": "revolver"
+		"weapon": "revolver",
+		"baseDamage": 4
 	}
 }

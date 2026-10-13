@@ -32,9 +32,14 @@ Weapon family rules:
 
 ## Current state
 
-`Actors/BaseActor.gd` holds `stats`: `sixShootin`, `highTailin`, `taffyin` and `stats.damage.lead.{revolver,rifle,shotgun}` / `stats.damage.explosive.{gunpowder,liquid,shrapnel}`. There are **no defensive stats** (Style/Sand), **no lasso damage stats**, **no resistances**, and no weapon base damage on the actor (only `weapon.type` / `weapon.weapon` identifiers).
+**Implemented** (steps 1-4 of the implementation order; equipment-derived defense is pending with equipment data):
 
-`ShootoutActionResolver.resolveAttack()` deals `stats.damage[type][weapon]` routed through `rodeoManager.getStatModifier()` — no hit quality, no defense, no weapon base. Melee is a hardcoded 2.
+- `Actors/BaseActor.gd` — extended `stats` (`defense: {style, sand}`, `resistances: {bleed, poison}`, `damage.lasso`) and `weapon.baseDamage`; `init()` duplicates source data and fills safe defaults (defense 0/0, resistances 0.0, lasso 0, melee baseDamage 2) so Shootout-time mutation never touches source data.
+- `ShootoutActionResolver.calculateAttackDamage()` — the full pipeline: quality multiplier, weapon base + offensive stat, weapon family defense rules, then the effect hooks (`applyOutgoingModifiers`/`applyIncomingModifiers` — pass-through until [Effects](Effects.md) lands).
+- Offensive stats per family: Lead uses the Rodeo-modified `stats.damage.lead` entry; Explosive adds the class `explosiveBase` from the class data file; Lasso and melee contribute no stat (lassos are weapon base damage only — decided).
+- Weapon family rules: revolvers lose the higher of Style/Sand, rifles gain Style and lose Sand, shotguns gain Sand and lose Style; explosives/lassos/melee ignore defense. Attack abilities roll quality on their own amount but skip family rules (the ability amount isn't weapon damage).
+- `Shootout.getModifiedStat()` — single stat-read seam (Rodeos now, effects later); stat payloads carry Style/Sand, and the UI tolerates missing stat containers until the scene gains them.
+- Tests: `Tests/TestDamage.gd` covers the `Docs/Combat.md` worked example, family rules, lasso flatness, the damage floor, explosive class bases, melee, and Rodeo modifier routing.
 
 ## Design
 
@@ -118,11 +123,11 @@ This lives on the shootout root (`Shootout.getModifiedStat`) so turn manager (in
 
 ## Implementation order
 
-1. Stat model extension + data defaults (no behavior change).
-2. `calculateAttackDamage()` with quality multiplier (requires [Cylinders](Cylinders.md)).
-3. Weapon family defense rules.
-4. Modifier hooks (piercing/decrease/marks) once [Effects](Effects.md) lands.
-5. Equipment-derived defense once equipment data exists.
+1. ✅ Stat model extension + data defaults.
+2. ✅ `calculateAttackDamage()` with quality multiplier (on top of [Cylinders](Cylinders.md)).
+3. ✅ Weapon family defense rules.
+4. ✅ Modifier hooks (piercing/decrease/marks) — pass-through seams in place, wired when [Effects](Effects.md) lands.
+5. Equipment-derived defense once equipment data exists (pending).
 
 ## Open Questions
 
