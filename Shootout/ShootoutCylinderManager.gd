@@ -195,8 +195,10 @@ static func buildCylinder(weaponMagazine: Array, classMagazine: Array, character
 
 static func modifierAppliesTo(modifier: Dictionary, index: int) -> bool:
 	var chambers = modifier.get("chambers", "all")
-	if chambers == "all":
-		return true
 	if chambers is Array:
 		return index in chambers
+	# Compare same types only: mixed-type equality (e.g. Array == String) is a
+	# runtime error, so handle the "all" string case behind a type check.
+	if chambers is String:
+		return chambers == "all"
 	return false

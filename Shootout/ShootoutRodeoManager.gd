@@ -63,6 +63,15 @@ func registerActor(actor, actorSide: String, actorColumn) -> void:
 		"column": actorColumn,
 		"state": { "turnsElapsed": 0, "usedThisFight": false }
 	}
+	# Keep the shared position source in sync with the registration column so
+	# position conditions read the column the Rodeo was registered at. In a real
+	# fight the turn manager is registered first with the same column, so this
+	# is a no-op there.
+	var turnManager = shootout.get("turnManager")
+	if turnManager != null:
+		var registry = turnManager.get("shootoutActors")
+		if registry is Dictionary and registry.get(actorSide, {}).has(actor.name):
+			registry[actorSide][actor.name].actorPosition = actorColumn
 
 
 func unregisterActor(actorName: String) -> void:

@@ -12,7 +12,10 @@ const SPECIAL_COLOR = Color(0.4, 0.7, 1.0)
 
 func setCylinder(cylinder: Array, chamberIndex: int) -> void:
 	for child in get_children():
+		# Queue while still parented (safe deletion) and detach immediately so
+		# the row rebuilds within the same frame instead of keeping stale pips.
 		child.queue_free()
+		remove_child(child)
 	for i in cylinder.size():
 		var chamber = cylinder[i]
 		var pip = Label.new()

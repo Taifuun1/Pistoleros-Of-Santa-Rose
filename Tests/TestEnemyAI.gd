@@ -87,7 +87,7 @@ func makeFight() -> Dictionary:
 	fake.actionResolver = actionResolver
 	var enemyAI = EnemyAIScript.new()
 	enemyAI.init(fake)
-	return { "fake": fake, "turnManager": turnManager, "enemyAI": enemyAI }
+	return { "fake": fake, "turnManager": turnManager, "enemyAI": enemyAI, "effectManager": effectManager }
 
 
 func addActor(ctx: Dictionary, actorName: String, side: String, column: int, weaponId := "revolver") -> FakeActor:
