@@ -15,6 +15,7 @@ const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
+const LootGeneratorScript = preload("res://Globals/ItemGeneration.gd")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -37,6 +38,9 @@ var pendingResolution = false
 var encounterName = ""
 var flavorName = ""
 var fled = false
+var lootTableName = ""
+var encounterLootEnabled = true
+var lootGenerator
 # baseName -> { hp, injuryDamage, downed } for dead party members this fight.
 var partyFightState = {}
 
@@ -57,6 +61,7 @@ func _ready() -> void:
 	cylinderManager.init(self)
 	effectManager = EffectManagerScript.new()
 	effectManager.init(self)
+	lootGenerator = LootGeneratorScript.new()
 	animationSequencer = AnimationSequencerScript.new()
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
@@ -80,6 +85,8 @@ func init(encounterData: Dictionary) -> void:
 	var teams = encounterData.get("teams", encounterData)
 	turnManager.setWinCondition(encounterData.get("winCondition", {}))
 	turnManager.setEncounterKind(encounterData.get("kind", "dustup"))
+	lootTableName = encounterData.get("lootTable", "")
+	encounterLootEnabled = encounterData.get("loot", true)
 	encounterName = encounterData.get("name", "Shootout")
 	flavorName = encounterData.get("flavor", pickFlavorName(encounterData.get("kind", "dustup")))
 	print("{flavor}! ({name})".format({ "flavor": flavorName, "name": encounterName }))
@@ -283,11 +290,27 @@ func _on_battle_ended(winningSide: String) -> void:
 		"party": buildPartyFightState(),
 		"rodeoLoot": rodeoManager.consumeLootModifiers()
 	}
+	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
 	Party.applyFightResults(results)
 	shootoutEnded.emit(winningSide, results)
 	print("Shootout ended. Winner: {winningSide}, outcome: {outcome}".format({
 		"winningSide": winningSide, "outcome": results.outcome
 	}))
+
+## Loot (Docs/System Design/Shootout/Rewards.md): victory only, skipped for
+## quest fights that pay out at quest end (encounter "loot": false).
+func generateLootForFight(rodeoLoot, winningSide: String) -> Dictionary:
+	var empty = { "money": 0, "items": [] }
+	if winningSide != Shootout.TEAM_PLAYER or fled or !encounterLootEnabled or lootTableName == "":
+		return empty
+	var table = null
+	var globals = get_node_or_null("/root/Shootout")
+	if globals != null:
+		table = globals.lootTablesData.get(lootTableName, null)
+	if !(table is Dictionary):
+		push_warning("Shootout: unknown loot table {table}".format({ "table": lootTableName }))
+		return empty
+	return lootGenerator.generateLoot(table, rodeoLoot)
 
 func fightOutcome(winningSide: String) -> String:
 	if fled:
