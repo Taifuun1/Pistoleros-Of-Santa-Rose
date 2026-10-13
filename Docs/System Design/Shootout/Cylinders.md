@@ -17,7 +17,15 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-Nothing is implemented. `ShootoutActionResolver.resolveAttack()` uses flat weapon/stat damage with no hit quality. Actor data (`Actors/BaseActor.gd`) has no magazine fields. The Rodeo `Natural Gunslinger` exists in `Data/Shootout/Rodeos` but its `set_hit_quality_floor` op is a reserved no-op in `ShootoutRodeoManager`.
+**Implemented** (steps 1-5 of the implementation order; UI display is pending with [Shootout UI](Shootout%20UI.md)):
+
+- `Shootout/ShootoutCylinderManager.gd` — builds Cylinders from character/class/weapon Magazines (special-Chamber priority weapon > class > character, numeric sum clamped 0-3, all-Hit default when no data exists), tracks `chamberIndex`, `advance()`, `hitQuality()` (with Rodeo floor), and single-modifier `applyCylinderModifier()` / `clearCylinderModifier()` that re-derives from sources.
+- Chamber constants and `CHAMBER_DAMAGE_MULT` live on `ShootoutCylinderManager` (not the `Shootout` autoload) so the resolver and headless tests can use them without autoloads.
+- `ShootoutActionResolver` — `resolveAttack()` rolls hit quality: Miss/Graze/Hit/Crit multiply damage (0/50/100/150%) with per-quality damage-number colors; Reload spends the Move without attacking; Jammed fails the attack; both advance the Cylinder. `resolveMove()` applies quality and advances only for `category: "attack_ability"` moves (decided); non-attack abilities bypass the Cylinder entirely.
+- Class data in `Data/Shootout/Classes/*.gd` (decided) with class Magazines, ability lists, belt space and class stat bases; loaded into `Shootout.classesData`. Weapon Magazines live in `Data/Items/WeaponData.gd` (`magazines`, keyed by weapon id). Actor data and `Party.party` carry `characterClass` and `magazine`.
+- `ShootoutRodeoManager.getHitQualityFloor()` implements the `set_hit_quality_floor` op for always-on Rodeos (Natural Gunslinger floors at 2).
+- Registration in `Shootout.spawnActor()`; unregistration in `ShootoutTurnManager.checkActorDead()` (guarded, headless-safe).
+- Tests: `Tests/TestCylinders.gd` covers summing/clamping, defaults, wrap-around, special priority, modifier replace semantics, the Rodeo floor, the resolver quality pipeline and attack-ability advancement.
 
 ## Design
 
@@ -75,13 +83,13 @@ In `ShootoutActionResolver.resolveAttack()`:
 
 **Create**
 
-- `Shootout/ShootoutCylinderManager.gd` — the manager.
-- `Data/Shootout/Classes/*.gd` — class data incl. class Magazines (shared with [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
-- `Tests/TestCylinders.gd`.
+- `Shootout/ShootoutCylinderManager.gd` — the manager (done).
+- `Data/Shootout/Classes/*.gd` — class data incl. class Magazines, shared with [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md) (done: 5 class files).
+- `Tests/TestCylinders.gd` (done).
 
 **Modify**
 
-- `Globals/Shootout.gd` — load `Data/Shootout/Classes`; add Chamber quality constants (`CHAMBER_MISS` etc.) and the damage multiplier table.
+- `Globals/Shootout.gd` — load `Data/Shootout/Classes` into `classesData` (done; Chamber constants live on the manager instead of the autoload for headless testability).
 - `Shootout/Shootout.gd` — instantiate the manager; `registerActor` in `spawnActor()`.
 - `Shootout/ShootoutActionResolver.gd` — hit quality lookup, special Chambers, multiplier, `advance()`.
 - `Shootout/ShootoutTurnManager.gd` — `unregisterActor` on death.
@@ -101,12 +109,12 @@ In `ShootoutActionResolver.resolveAttack()`:
 
 ## Implementation order
 
-1. Manager + summing/clamping + actor registration (no gameplay effect yet).
-2. `resolveAttack` integration: quality multiplier + advance.
-3. Special Chambers (Reload, Jammed).
-4. Cylinder modifiers + Rodeo floor op.
-5. Class data files and Magazine authoring.
-6. UI display (see [Shootout UI](Shootout%20UI.md)).
+1. ✅ Manager + summing/clamping + actor registration.
+2. ✅ `resolveAttack` integration: quality multiplier + advance.
+3. ✅ Special Chambers (Reload, Jammed).
+4. ✅ Cylinder modifiers + Rodeo floor op.
+5. ✅ Class data files and Magazine authoring (placeholders).
+6. UI display (pending, see [Shootout UI](Shootout%20UI.md)).
 
 ## Open Questions
 

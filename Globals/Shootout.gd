@@ -34,6 +34,7 @@ var shootoutPositions = {
 var movesData = {}
 var itemsData = {}
 var rodeosData = {}
+var classesData = {}
 
 
 func _ready():
@@ -43,6 +44,7 @@ func loadData() -> void:
 	movesData = loadDataFolder("res://Data/Shootout/Moves")
 	itemsData = loadDataFolder("res://Data/Shootout/Items")
 	rodeosData = loadDataFolder("res://Data/Shootout/Rodeos")
+	classesData = loadDataFolder("res://Data/Shootout/Classes")
 
 func loadDataFolder(folderPath: String) -> Dictionary:
 	var data = {}

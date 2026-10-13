@@ -24,6 +24,8 @@ var data = {
 		}
 	},
 	"rodeo": "leaders duck",
+	"characterClass": "Gunslinger",
+	"magazine": [1, 0, 2],
 	"weapon": {
 		"type": "lead",
 		"weapon": "revolver"

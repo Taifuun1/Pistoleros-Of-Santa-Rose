@@ -24,6 +24,7 @@ var data = {
 		}
 	},
 	"rodeo": null,
+	"magazine": [2, 1, 2, 0],
 	"weapon": {
 		"type": "melee",
 		"weapon": "scratch"

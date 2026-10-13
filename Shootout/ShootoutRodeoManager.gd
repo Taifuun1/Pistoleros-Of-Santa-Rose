@@ -107,6 +107,23 @@ func getRoundNumber() -> int:
 	return 1
 
 
+## Hit quality floor from always-on Rodeos (reserved op
+## "set_hit_quality_floor"); the cylinder manager clamps Miss/Graze up to this.
+func getHitQualityFloor(actor) -> int:
+	if actor == null or !rodeos.has(actor.name):
+		return 0
+	var entry = rodeos[actor.name]
+	if entry.data.get("trigger", "") != TRIGGER_ALWAYS:
+		return 0
+	if !passesConditions(entry, actor, {}):
+		return 0
+	var floor = 0
+	for effect in entry.data.get("effects", []):
+		if effect.get("op", "") == "set_hit_quality_floor":
+			floor = maxi(floor, int(effect.get("value", 0)))
+	return floor
+
+
 func trigger(triggerName: String, context := {}) -> void:
 	context["round"] = getRoundNumber()
 	for actorName in rodeos:

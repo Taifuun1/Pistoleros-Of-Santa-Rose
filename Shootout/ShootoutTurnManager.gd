@@ -93,6 +93,9 @@ func checkActorDead(actor) -> bool:
 	for actorSide in shootoutActors:
 		shootoutActors[actorSide].erase(actor.name)
 	shootout.rodeoManager.unregisterActor(actor.name)
+	var cylinderManager = shootout.get("cylinderManager")
+	if cylinderManager != null and cylinderManager.has_method("unregisterActor"):
+		cylinderManager.unregisterActor(actor.name)
 	actor.queue_free()
 	checkBattleEnd()
 	return true
