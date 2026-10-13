@@ -238,6 +238,13 @@ func applyEffect(effect: Dictionary, targets: Array, sourceName: String) -> void
 			applyHeal(effect, targets)
 		"modify_loot":
 			applyModifyLoot(effect)
+		"apply_effect", "cleanse_effect", "modify_cylinder":
+			var effectManager = shootout.get("effectManager")
+			if effectManager != null and effectManager.has_method("applyEffect"):
+				for targetName in targets:
+					effectManager.applyEffect(targetName, effect, sourceName)
+			else:
+				push_warning("ShootoutRodeoManager: effect op '{op}' needs the effect manager".format({ "op": effect.get("op", "") }))
 		_:
 			push_warning("ShootoutRodeoManager: unknown or unimplemented rodeo op '{op}'".format({
 				"op": effect.get("op", "")

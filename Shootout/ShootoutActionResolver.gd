@@ -61,8 +61,9 @@ func resolveMove(moveName: String, actingActor, targetActor) -> void:
 	else:
 		# Non-attack abilities don't interact with the Cylinder at all (decided).
 		applyDamage(targetActor, amount)
+	applyActEffects(moveData.get("effects", []), targetActor, actingActor.name)
 
-func resolveItem(itemName: String, _actingActor, targetActor) -> void:
+func resolveItem(itemName: String, actingActor, targetActor) -> void:
 	var itemData = getDataSet("itemsData").get(itemName, null)
 	if itemData == null:
 		push_warning("ShootoutActionResolver: unknown item '{itemName}'".format({ "itemName": itemName }))
@@ -70,16 +71,18 @@ func resolveItem(itemName: String, _actingActor, targetActor) -> void:
 	var amount = itemData.baseAmount
 	targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
 	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
+	applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)
 
 ## The full damage pipeline (Docs/System Design/Shootout/Damage and Stats.md):
 ## quality multiplier, weapon + offensive stat base, weapon family defense
 ## rules, then piercing/marks hooks (no-ops until the Effects system lands).
 func calculateAttackDamage(actingActor, targetActor, quality: int) -> int:
 	var base = float(actingActor.weapon.get("baseDamage", 0)) + offensiveStat(actingActor)
-	var damage = base * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]
-	damage = applyWeaponFamilyRule(damage, actingActor.weapon, targetDefense(targetActor))
-	damage = applyOutgoingModifiers(actingActor, damage)
-	damage = applyIncomingModifiers(targetActor, damage)
+	var preDefense = base * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]
+	var damage = applyWeaponFamilyRule(preDefense, actingActor.weapon, targetDefense(targetActor))
+	var blocked = maxf(0.0, preDefense - damage)
+	damage = applyOutgoingModifiers(actingActor, damage, blocked)
+	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""))
 	return maxi(0, roundi(damage))
 
 # The relevant offensive stat per weapon family:
@@ -129,19 +132,30 @@ func applyWeaponFamilyRule(damage: float, weapon: Dictionary, defense: Dictionar
 		_:
 			return damage
 
-# Effect hooks: damage piercing/decrease (outgoing) and marks/flat modifiers
-# (incoming). The Effects system implements these; until then they pass through.
-func applyOutgoingModifiers(actingActor, damage: float) -> float:
+# Effect hooks: damage piercing/decrease (outgoing; piercing can only reclaim
+# the amount actually blocked by defense) and marks/flat modifiers (incoming).
+# The Effects system implements these; the guards keep plain fakes working.
+func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float:
 	var effectManager = shootout.get("effectManager")
 	if effectManager != null and effectManager.has_method("applyOutgoingModifiers"):
-		return effectManager.applyOutgoingModifiers(actingActor, damage)
+		return effectManager.applyOutgoingModifiers(actingActor, damage, blocked)
 	return damage
 
-func applyIncomingModifiers(targetActor, damage: float) -> float:
+func applyIncomingModifiers(targetActor, damage: float, damageType := "") -> float:
 	var effectManager = shootout.get("effectManager")
 	if effectManager != null and effectManager.has_method("applyIncomingModifiers"):
-		return effectManager.applyIncomingModifiers(targetActor, damage)
+		return effectManager.applyIncomingModifiers(targetActor, damage, damageType)
 	return damage
+
+# Instant damage/healing resolves first, then the act's effect list is applied.
+func applyActEffects(effectList, targetActor, sourceName: String) -> void:
+	if !(effectList is Array) or targetActor == null:
+		return
+	var effectManager = shootout.get("effectManager")
+	if effectManager == null or !effectManager.has_method("applyEffect"):
+		return
+	for effect in effectList:
+		effectManager.applyEffect(targetActor.name, effect, sourceName)
 
 func getHitQuality(actingActor):
 	var cylinderManager = shootout.get("cylinderManager")

@@ -14,6 +14,7 @@ const AnimationSequencerScript = preload("res://Shootout/ShootoutAnimationSequen
 const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
+const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -25,6 +26,7 @@ var animationSequencer
 var enemyAI
 var rodeoManager
 var cylinderManager
+var effectManager
 
 var selectedAct = null
 var selectedActor = ""
@@ -47,6 +49,8 @@ func _ready() -> void:
 	rodeoManager.init(self)
 	cylinderManager = CylinderManagerScript.new()
 	cylinderManager.init(self)
+	effectManager = EffectManagerScript.new()
+	effectManager.init(self)
 	animationSequencer = AnimationSequencerScript.new()
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
@@ -103,6 +107,13 @@ func startCurrentTurn() -> void:
 	var actor = getActor(actorName)
 	if actor == null:
 		return
+	effectManager.onTurnStart(actorName)
+	if actor.hp <= 0:
+		# Bleed killed the actor before their turn; move on without them.
+		turnManager.checkActorDead(actor)
+		if !battleOver:
+			actorDone.emit()
+		return
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_START, { "actor": actor })
 	actor.actorTurn.emit()
 	if turnManager.isPlayerActing(actorName):
@@ -154,6 +165,10 @@ func resolveActOnce() -> void:
 		return
 	var targetActor
 	if playerAction:
+		if selectedAct.type == Shootout.ACT_TYPE_ATTACK:
+			var redirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), selectedActor)
+			if redirect != "":
+				selectedActor = redirect
 		targetActor = getActor(selectedActor)
 		if targetActor == null:
 			finishTurn(null)
@@ -166,7 +181,11 @@ func resolveActOnce() -> void:
 			Shootout.ACT_TYPE_ITEMS:
 				actionResolver.resolveItem(selectedAct.name, actingActor, targetActor)
 	else:
-		targetActor = getActor(enemyAI.chooseTarget(turnManager.shootoutActors))
+		var enemyTargetName = enemyAI.chooseTarget(turnManager.shootoutActors)
+		var enemyRedirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), enemyTargetName)
+		if enemyRedirect != "":
+			enemyTargetName = enemyRedirect
+		targetActor = getActor(enemyTargetName)
 		if targetActor == null:
 			return
 		actingActor.actorTurn.emit()
@@ -174,6 +193,7 @@ func resolveActOnce() -> void:
 	finishTurn(targetActor)
 
 func finishTurn(targetActor) -> void:
+	effectManager.onTurnEnd(turnManager.currentActorName())
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_END, {
 		"actor": getActor(turnManager.currentActorName()),
 		"target": targetActor
@@ -190,9 +210,22 @@ func _on_actor_done() -> void:
 		return
 	if turnManager.turnOrder.is_empty():
 		rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_END)
+		effectManager.onRoundEnd()
 		turnManager.createTurnOrder()
 		rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
+		effectManager.onRoundStart()
+		# Poison ticks at round start can kill; clear the dead before acting.
+		checkForEffectDeaths()
+	if battleOver:
+		return
 	startCurrentTurn()
+
+func checkForEffectDeaths() -> void:
+	for actorSide in turnManager.shootoutActors.keys():
+		for actorName in turnManager.shootoutActors[actorSide].keys():
+			var actor = getActor(actorName)
+			if actor != null and actor.hp <= 0:
+				turnManager.checkActorDead(actor)
 
 func _on_battle_ended(winningSide: String) -> void:
 	battleOver = true
