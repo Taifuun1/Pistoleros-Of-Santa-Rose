@@ -41,7 +41,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 | [Enemy AI](Enemy%20AI.md) | Enemy decision making | Implemented: scored act choice, archetypes, boss scripts (content pending) |
 | [Encounters](Encounters.md) | Encounter data, Dust-ups vs Showdowns, bosses, spawn sources | Implemented: metadata, launcher, win conditions (region pools pending) |
 | [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md) | Injury, knockout, Vamoose, fleeing | Implemented: party persistence, injuries, knockouts, Vamoose, fleeing |
-| [Rewards](Rewards.md) | Levels, loot tables, Rodeo loot modifiers | Partial: loot modifier accumulator exists, nothing consumes it |
+| [Rewards](Rewards.md) | Levels, loot tables, Rodeo loot modifiers | Implemented: loot tables, generation, Rodeo modifiers, party handoff |
 | [Shootout UI](Shootout%20UI.md) | Act menus, stat panels, cylinder display, damage numbers | Partial: menus and panels exist; cylinder display missing |
 | [Rodeos](../Rodeos.md) | Passive abilities | Implemented (first pass) |
 
