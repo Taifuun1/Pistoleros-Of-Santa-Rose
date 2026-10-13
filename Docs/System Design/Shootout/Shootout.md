@@ -38,7 +38,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 | [Effects](Effects.md) | Bleed, poison, marks, taunt, silence, cylinder mods, piercing | Implemented: manager + lifecycle + damage hooks (UI icons pending) |
 | [Positions and Targeting](Positions%20and%20Targeting.md) | 4-position ranks, move ranges, repositioning, displacement, taunt redirects | Implemented: occupancy moves, range validation, reposition act (UI polish pending) |
 | [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md) | Act types, move/ability/item data, Ducks, belt space | Implemented: loadouts, belt space, item consumption, Ducks (equipment abilities pending) |
-| [Enemy AI](Enemy%20AI.md) | Enemy decision making | Stub: random target, attacks only |
+| [Enemy AI](Enemy%20AI.md) | Enemy decision making | Implemented: scored act choice, archetypes, boss scripts (content pending) |
 | [Encounters](Encounters.md) | Encounter data, Dust-ups vs Showdowns, bosses, spawn sources | Partial: one hardcoded encounter (`RatAmbush`) |
 | [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md) | Injury, knockout, Vamoose, fleeing | Missing |
 | [Rewards](Rewards.md) | Levels, loot tables, Rodeo loot modifiers | Partial: loot modifier accumulator exists, nothing consumes it |

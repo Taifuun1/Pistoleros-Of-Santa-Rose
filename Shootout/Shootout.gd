@@ -45,6 +45,7 @@ func _ready() -> void:
 	actionResolver = ActionResolverScript.new()
 	actionResolver.init(self)
 	enemyAI = EnemyAIScript.new()
+	enemyAI.init(self)
 	rodeoManager = RodeoManagerScript.new()
 	rodeoManager.init(self)
 	cylinderManager = CylinderManagerScript.new()
@@ -182,15 +183,34 @@ func resolveActOnce() -> void:
 			Shootout.ACT_TYPE_ITEMS:
 				actionResolver.resolveItem(selectedAct.name, actingActor, targetActor)
 	else:
-		var enemyTargetName = enemyAI.chooseTarget(turnManager.shootoutActors)
-		var enemyRedirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), enemyTargetName)
-		if enemyRedirect != "":
-			enemyTargetName = enemyRedirect
+		# Enemy acts route through the same resolution path as player acts.
+		var enemyAct = enemyAI.chooseAct(turnManager.currentActorName())
+		if enemyAct.is_empty():
+			actingActor.actorTurn.emit()
+			finishTurn(null)
+			return
+		if enemyAct.type == Shootout.ACT_TYPE_REPOSITION:
+			var delta = -1 if enemyAct.direction == "forward" else 1
+			turnManager.setActorPosition(actingActor.name, turnManager.getActorPosition(actingActor.name) + delta)
+			actingActor.actorTurn.emit()
+			finishTurn(null)
+			return
+		var enemyTargetName = enemyAct.get("targetName", "")
+		if enemyAct.type == Shootout.ACT_TYPE_ATTACK:
+			var enemyRedirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), enemyTargetName)
+			if enemyRedirect != "":
+				enemyTargetName = enemyRedirect
 		targetActor = getActor(enemyTargetName)
 		if targetActor == null:
 			return
 		actingActor.actorTurn.emit()
-		actionResolver.resolveAttack(actingActor, targetActor)
+		match enemyAct.type:
+			Shootout.ACT_TYPE_ATTACK:
+				actionResolver.resolveAttack(actingActor, targetActor)
+			Shootout.ACT_TYPE_MOVES:
+				actionResolver.resolveMove(enemyAct.name, actingActor, targetActor)
+			Shootout.ACT_TYPE_ITEMS:
+				actionResolver.resolveItem(enemyAct.name, actingActor, targetActor)
 	finishTurn(targetActor)
 
 func finishTurn(targetActor) -> void:

@@ -81,14 +81,22 @@ func resolveItem(itemName: String, actingActor, targetActor) -> void:
 ## The full damage pipeline (Docs/System Design/Shootout/Damage and Stats.md):
 ## quality multiplier, weapon + offensive stat base, weapon family defense
 ## rules, then piercing/marks hooks (no-ops until the Effects system lands).
-func calculateAttackDamage(actingActor, targetActor, quality: int) -> int:
+func calculateAttackDamage(actingActor, targetActor, quality: int, consumeEffects := true) -> int:
 	var base = float(actingActor.weapon.get("baseDamage", 0)) + offensiveStat(actingActor)
 	var preDefense = base * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]
 	var damage = applyWeaponFamilyRule(preDefense, actingActor.weapon, targetDefense(targetActor))
 	var blocked = maxf(0.0, preDefense - damage)
 	damage = applyOutgoingModifiers(actingActor, damage, blocked)
-	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""))
+	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""), consumeEffects)
 	return maxi(0, roundi(damage))
+
+## Side-effect-free estimate for the enemy AI: same pipeline, but marks are not
+## consumed. Returns 0 for special Chambers (Reload/Jammed).
+func estimateAttackDamage(actingActor, targetActor) -> int:
+	var quality = getHitQuality(actingActor)
+	if quality is String:
+		return 0
+	return calculateAttackDamage(actingActor, targetActor, quality, false)
 
 # The relevant offensive stat per weapon family:
 # - Lead: the matching stats.damage.lead entry, Rodeo-modified.
@@ -146,10 +154,10 @@ func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float
 		return effectManager.applyOutgoingModifiers(actingActor, damage, blocked)
 	return damage
 
-func applyIncomingModifiers(targetActor, damage: float, damageType := "") -> float:
+func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true) -> float:
 	var effectManager = shootout.get("effectManager")
 	if effectManager != null and effectManager.has_method("applyIncomingModifiers"):
-		return effectManager.applyIncomingModifiers(targetActor, damage, damageType)
+		return effectManager.applyIncomingModifiers(targetActor, damage, damageType, consume)
 	return damage
 
 # Instant damage/healing resolves first, then the act's effect list is applied.

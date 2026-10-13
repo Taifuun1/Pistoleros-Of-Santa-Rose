@@ -14,7 +14,14 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-`Shootout/ShootoutEnemyAI.gd` is a stub: `chooseTarget()` picks a uniformly random living player actor, and `Shootout.startCurrentTurn()` always resolves a basic `resolveAttack()` for enemies — enemies never use moves, items, Ducks or repositioning, and never consider positions or effects.
+**Implemented** (the decision pipeline, archetypes and boss scripts; content authoring of `ai` blocks and boss scripts is ongoing):
+
+- `Shootout/ShootoutEnemyAI.gd` replaces the random-target stub with `chooseAct()`: `gatherLegalActs()` uses the exact same validation as the player (targeting manager ranges, silence, usable-move filtering, `canMoveActor` for repositioning), `scoreActs()` grades every act/target pair, and `pickFromTop()` chooses randomly among the 2 best.
+- Scoring (placeholder weights): attacks score expected damage via a side-effect-free `estimateAttackDamage()` (full pipeline minus mark consumption, current Chamber aware) plus a kill bonus; attack abilities and damage moves score their amount; affliction effects score on unafflicted targets; heals score on wounded allies; Ducks score with wounded allies (bonus for the tank archetype); items heal-score by missing HP; repositioning scores only when useful (preferred-column bonus).
+- Archetype weights via the optional `ai` block on actor data (`archetype`, `preferredColumns`, `aggression`, `script`); missing blocks fall back to the damage archetype defaults.
+- Boss scripts: `Data/Shootout/AI/*.gd` (`rules` list of `{ when: { hpBelow/hpAbove }, act: { type, name, targetName } }` with `self`/`lowestHpAlly`/`lowestHpEnemy` targets), loaded into `Shootout.aiData`; the first passing rule beats all scoring.
+- Enemy turns route through the same resolution path as player acts (`resolveActOnce` handles attacks, moves, items and repositioning uniformly), with taunt redirect on basic attacks.
+- Tests: `Tests/TestEnemyAI.gd` covers gathering/validation parity, silence, lethal-target preference, support healing, reposition fallback and boss-script priority.
 
 ## Design
 
@@ -88,14 +95,14 @@ This deletes the special-cased enemy attack and routes everything through the an
 
 ## Implementation order
 
-1. `chooseAct()` with attacks only + standard resolution path (removes the special case; behavior equal to today plus range awareness).
-2. Scoring + archetypes + randomness.
-3. Move/item/Duck usage once [Effects](Effects.md) and [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md) land.
-4. Repositioning once [Positions and Targeting](Positions%20and%20Targeting.md) lands.
-5. Boss scripts with the first boss encounter.
+1. ✅ `chooseAct()` + standard resolution path (special case removed).
+2. ✅ Scoring + archetypes + randomness.
+3. ✅ Move/item/Duck usage (with [Effects](Effects.md) and [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
+4. ✅ Repositioning (with [Positions and Targeting](Positions%20and%20Targeting.md)).
+5. Boss scripts: machinery ✅; first boss script content pending with [Encounters](Encounters.md).
 
 ## Open Questions
 
-1. How much should enemies "know"? (Proposed: full Cylinder and effect knowledge, since the player sees the same; HP thresholds only for their own side.)
+1. How much should enemies "know"? (Proposed: full Cylinder and effect knowledge, since the player sees the same; HP thresholds only for their own side. First pass uses full knowledge.)
 2. ~~Should generic enemies flee or surrender?~~ — **decided**: no, enemies never flee; quest variety comes from win conditions instead (survive N turns, get MxHP below an amount, etc. — see [Encounters](Encounters.md)).
-3. Difficulty knobs: should Dust-ups use dumber weights (more randomness) than Showdowns?
+3. Difficulty knobs: should Dust-ups use dumber weights (more randomness) than Showdowns? (First pass: `PICK_FROM_TOP = 2` for everything; the knob exists on the AI.)
