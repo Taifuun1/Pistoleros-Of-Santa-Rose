@@ -51,20 +51,32 @@ func getDataSet(dataSet: String) -> Dictionary:
 			return globals.get(dataSet)
 	return {}
 
-## Filter a move list to what can be used right now: usable from the acting
-## character's current column, and silenced actors lose abilities (category
-## ability/attack_ability) but keep Ducks (decided).
-func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Array:
-	var usable = []
+## Per-move usability with reasons (for greyed-out act buttons):
+## usable from the acting character's current column, and silenced actors lose
+## abilities (category ability/attack_ability) but keep Ducks (decided).
+## Returns { moveName: { "usable": bool, "reason": String } }.
+func moveUsability(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Dictionary:
+	var usability = {}
 	for moveName in moveNames:
 		var moveData = dataSet.get(moveName, {})
 		var category = moveData.get("category", "ability")
 		if silenced and category != "duck":
+			usability[moveName] = { "usable": false, "reason": "Silenced" }
 			continue
 		var positions = moveData.get("positions", {})
 		if positions.has("actorUser") and !(getActorColumn(actingActorName) in positions.actorUser):
+			usability[moveName] = { "usable": false, "reason": "Needs position {columns}".format({ "columns": positions.actorUser }) }
 			continue
-		usable.append(moveName)
+		usability[moveName] = { "usable": true, "reason": "" }
+	return usability
+
+## The usable subset (used by the enemy AI).
+func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Array:
+	var usable = []
+	var usability = moveUsability(moveNames, actingActorName, silenced, dataSet)
+	for moveName in usability:
+		if usability[moveName].usable:
+			usable.append(moveName)
 	return usable
 
 func getActSide(dataSet: Dictionary, actName: String) -> String:

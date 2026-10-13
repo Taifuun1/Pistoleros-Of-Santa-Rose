@@ -385,3 +385,17 @@ func dealEffectDamage(actorName: String, damage: int) -> void:
 	if actor.get("injuryDamage") != null:
 		actor.injuryDamage += damage
 	shootout.spawnDamageNumber(damage, "red", actor.position + DAMAGE_NUMBER_OFFSET)
+
+
+## Display list for the UI: one summary line per active effect type.
+func displayEffects(actorName: String) -> Array:
+	var lines = []
+	for effectType in effects.get(actorName, {}):
+		var stacks = effects[actorName][effectType]
+		if stacks.is_empty():
+			continue
+		if stacks.size() > 1:
+			lines.append("{type} x{count}".format({ "type": effectType, "count": stacks.size() }))
+		else:
+			lines.append(effectType)
+	return lines

@@ -14,7 +14,16 @@ This is a design doc: it describes the intended design, and the implementation m
 - Damage numbers via `Shootout.spawnDamageNumber()` (`Nodes/Damage Number/DamageNumber.tscn`); Rodeo popups reuse it in yellow.
 - Animations: the animation sequencer plays per-act `animations` steps from move/item data (target effect scenes + acting-actor animations), emitting `frameHit` so damage lands on the impact frame.
 
-Gaps: no Cylinder display, no effect icons, no turn order display, no Reposition or Flee buttons, no fight start/end screens, no multi-target selection, and acts don't show costs/ranges/descriptions.
+**Implemented** (display building blocks, act tooltips/grey-out, banners; world-space effect icons, multi-target selection and final art are pending):
+
+- **Cylinder display**: Shootout/UI/CylinderRow.gd renders Chamber pips (letters + colors per quality, Reload/Jammed specials, current Chamber marked); shown in both the player and hovered-actor stat panels from the Cylinder/ChamberIndex payload fields. Letters are placeholders until pip art exists.
+- **Effect summary**: effectManager.displayEffects() feeds an Effects line in both stat panels (stack counts per effect type). World-space icon rows above actors remain pending art.
+- **Turn order strip**: Shootout/UI/TurnOrderStrip.gd shows the full Round order with the current actor highlighted (decided), rebuilt every turn from turnManager.turnOrder.
+- **Acts panel**: entries carry tooltips (description, usable-from positions, usability reason) and unusable moves are greyed out with the reason instead of vanishing (ShootoutTargetingManager.moveUsability); Ducks stay in the Moves list (decided). Reposition (Forward/Backward picker) and Flee buttons exist (see the Positions and Death docs).
+- **Fight flow**: showBanner() displays the flavor-name start popup (auto-fade); showEndScreen() shows the outcome and loot summary from the shootoutEnded results payload. Hit quality feedback uses per-quality damage-number colors and the Miss label.
+- Tests: Tests/TestShootoutUI.gd covers the pip row, the turn strip and the usability reasons.
+
+Gaps: world-space effect icons, multi-target highlight/confirm flow, and final art/layout pass.
 
 ## Design
 

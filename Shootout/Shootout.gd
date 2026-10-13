@@ -90,6 +90,7 @@ func init(encounterData: Dictionary) -> void:
 	encounterName = encounterData.get("name", "Shootout")
 	flavorName = encounterData.get("flavor", pickFlavorName(encounterData.get("kind", "dustup")))
 	print("{flavor}! ({name})".format({ "flavor": flavorName, "name": encounterName }))
+	ui.showBanner("{flavor}!".format({ "flavor": flavorName }))
 	for actorSide in teams:
 		for actorType in teams[actorSide]:
 			for actorName in teams[actorSide][actorType]:
@@ -145,6 +146,7 @@ func startCurrentTurn() -> void:
 		if !battleOver:
 			actorDone.emit()
 		return
+	ui.setTurnOrder(turnManager.turnOrder)
 	ui.setFleeEnabled(turnManager.canFlee())
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_START, { "actor": actor })
 	actor.actorTurn.emit()
@@ -293,6 +295,7 @@ func _on_battle_ended(winningSide: String) -> void:
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
 	Party.applyFightResults(results)
 	shootoutEnded.emit(winningSide, results)
+	ui.showEndScreen(results)
 	print("Shootout ended. Winner: {winningSide}, outcome: {outcome}".format({
 		"winningSide": winningSide, "outcome": results.outcome
 	}))
@@ -373,7 +376,10 @@ func actorStatsPayload(actor) -> Array:
 		{
 			"Name": actor.actorName,
 			"HP": actor.hp,
-			"Rodeo": rodeoManager.getRodeoDisplayName(actor)
+			"Rodeo": rodeoManager.getRodeoDisplayName(actor),
+			"Effects": effectManager.displayEffects(actor.name),
+			"Cylinder": cylinderManager.getCylinder(actor.name),
+			"ChamberIndex": cylinderManager.getChamberIndex(actor.name)
 		},
 		{
 			"SixShootin": actor.stats.sixShootin,
@@ -422,19 +428,8 @@ func _on_shootout_ui_item(itemName: String) -> void:
 func _on_shootout_ui_move_acts_requested() -> void:
 	var actor = getActor(turnManager.currentActorName())
 	if actor != null:
-		ui.setPlayerCharacterActs(filterUsableMoves(actor), Shootout.ACT_TYPE_MOVES)
+		ui.setPlayerCharacterActs(actor.moves, Shootout.ACT_TYPE_MOVES, targetingManager.moveUsability(actor.moves, actor.name, effectManager.isSilenced(actor.name), Shootout.movesData))
 
-# Moves unusable from the current column or by silence are filtered out
-# (validation lives on the targeting manager so tests can reach it).
-func filterUsableMoves(actor) -> Array:
-	return targetingManager.usableMoves(
-		actor.moves,
-		actor.name,
-		effectManager.isSilenced(actor.name),
-		Shootout.movesData
-	)
-
-# Repositioning costs the Move and never advances the Cylinder (decided).
 # Fleeing is instant in Dust-ups and unlocks after 10 turns in Showdowns
 # (decided: enemies never flee). Costs every survivor a portion of MxHp.
 func _on_shootout_ui_flee() -> void:
@@ -443,6 +438,7 @@ func _on_shootout_ui_flee() -> void:
 	fled = true
 	turnManager.endBattle(Shootout.TEAM_ENEMY)
 
+# Repositioning costs the Move and never advances the Cylinder (decided).
 func _on_shootout_ui_reposition(direction: String) -> void:
 	if !playerHasControl or !playerAction:
 		return
