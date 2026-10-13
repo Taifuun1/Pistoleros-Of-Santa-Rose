@@ -44,7 +44,7 @@ func resolveMove(moveName: String, actingActor, targetActor) -> void:
 	if moveData == null:
 		push_warning("ShootoutActionResolver: unknown move '{moveName}'".format({ "moveName": moveName }))
 		return
-	var amount = moveData.baseAmount
+	var amount = int(moveData.get("baseAmount", 0))
 	if moveData.has("scalingStat"):
 		amount += int(moveData.statScaling * actingActor.stats[moveData.scalingStat])
 	if moveData.get("category", "") == ATTACK_ABILITY_CATEGORY:
@@ -58,6 +58,9 @@ func resolveMove(moveName: String, actingActor, targetActor) -> void:
 		var abilityDamage = maxi(0, roundi(amount * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]))
 		applyHitDamage(targetActor, abilityDamage, quality)
 		advanceCylinder(actingActor)
+	elif moveData.get("category", "") == "duck":
+		# Ducks are defensive buffs: effects only, no damage (decided).
+		pass
 	else:
 		# Non-attack abilities don't interact with the Cylinder at all (decided).
 		applyDamage(targetActor, amount)
@@ -68,7 +71,9 @@ func resolveItem(itemName: String, actingActor, targetActor) -> void:
 	if itemData == null:
 		push_warning("ShootoutActionResolver: unknown item '{itemName}'".format({ "itemName": itemName }))
 		return
-	var amount = itemData.baseAmount
+	# Using an item consumes one instance from the belt (decided).
+	actingActor.items.erase(itemName)
+	var amount = int(itemData.get("baseAmount", 0))
 	targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
 	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
 	applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)

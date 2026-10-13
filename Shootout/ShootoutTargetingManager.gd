@@ -51,6 +51,22 @@ func getDataSet(dataSet: String) -> Dictionary:
 			return globals.get(dataSet)
 	return {}
 
+## Filter a move list to what can be used right now: usable from the acting
+## character's current column, and silenced actors lose abilities (category
+## ability/attack_ability) but keep Ducks (decided).
+func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Array:
+	var usable = []
+	for moveName in moveNames:
+		var moveData = dataSet.get(moveName, {})
+		var category = moveData.get("category", "ability")
+		if silenced and category != "duck":
+			continue
+		var positions = moveData.get("positions", {})
+		if positions.has("actorUser") and !(getActorColumn(actingActorName) in positions.actorUser):
+			continue
+		usable.append(moveName)
+	return usable
+
 func getActSide(dataSet: Dictionary, actName: String) -> String:
 	var actData = dataSet.get(actName, null)
 	if actData == null:

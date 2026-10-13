@@ -7,8 +7,6 @@ signal actorTurn
 signal actorHovered
 signal actorUnhovered
 
-var items = ["Paregoric", "Paregoric"]
-var moves = ["Sharp Shot"]
 
 
 func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> void:

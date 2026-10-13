@@ -15,6 +15,9 @@ const POISON_WEAR_OFF = 0.65
 const MARK_EXPIRY_ROUNDS = 2
 
 const AFFLICTIONS = ["bleed", "poison", "mark", "damage_type_mark", "piercing", "decrease", "silence", "taunt"]
+# Beneficial effect types: heal instantly or over time (never picked by
+# random cleanses).
+const BENEFICIALS = ["heal", "heal_over_time"]
 
 var shootout
 
@@ -60,7 +63,10 @@ func applyEffect(targetName: String, effect: Dictionary, sourceName := "") -> vo
 
 func applyAffliction(targetName: String, effect: Dictionary, sourceName: String) -> void:
 	var effectType = effect.get("effect", "")
-	if !AFFLICTIONS.has(effectType) and effectType != "cylinder":
+	if effectType == "heal":
+		healActor(targetName, int(effect.get("amount", 0)))
+		return
+	if !AFFLICTIONS.has(effectType) and !BENEFICIALS.has(effectType) and effectType != "cylinder":
 		push_warning("ShootoutEffectManager: unknown effect type '{effectType}'".format({ "effectType": effectType }))
 		return
 	if effectType == "cylinder":
@@ -104,6 +110,12 @@ func applyAffliction(targetName: String, effect: Dictionary, sourceName: String)
 				})
 		"silence":
 			list["silence"] = [{ "turnsLeft": int(effect.get("turns", 1)), "source": sourceName }]
+		"heal_over_time":
+			ensureList(list, "heal_over_time").append({
+				"amount": int(effect.get("amount", 0)),
+				"turnsLeft": int(effect.get("turns", 1)),
+				"source": sourceName
+			})
 		"taunt":
 			list["taunt"] = [{
 				"casterName": targetName,
@@ -164,9 +176,17 @@ func isSilenced(actorName: String) -> bool:
 	return !getEffects(actorName, "silence").is_empty()
 
 
-## Bleed ticks at the start of the afflicted character's Turn (highest stack
-## only; potency reduced by bleed resistance).
+## Heal-over-time and bleed tick at the start of the actor's Turn (bleed: only
+## the highest stack; potency reduced by bleed resistance).
 func onTurnStart(actorName: String) -> void:
+	var keptHoT = []
+	for hot in getEffects(actorName, "heal_over_time"):
+		healActor(actorName, hot.amount)
+		hot.turnsLeft -= 1
+		if hot.turnsLeft > 0:
+			keptHoT.append(hot)
+	if effects.has(actorName):
+		effects[actorName]["heal_over_time"] = keptHoT
 	var bleeds = getEffects(actorName, "bleed")
 	if bleeds.is_empty():
 		return
@@ -340,6 +360,16 @@ func resistance(actorName: String, effectType: String) -> float:
 	if !(resistances is Dictionary):
 		return 0.0
 	return clampf(float(resistances.get("resistances", {}).get(effectType, 0.0)), 0.0, 1.0)
+
+
+func healActor(actorName: String, amount: int) -> void:
+	if amount <= 0:
+		return
+	var actor = shootout.getActor(actorName) if shootout.has_method("getActor") else null
+	if actor == null:
+		return
+	actor.hp = mini(actor.hp + amount, actor.maxHp)
+	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", actor.position + DAMAGE_NUMBER_OFFSET)
 
 
 func dealEffectDamage(actorName: String, damage: int) -> void:

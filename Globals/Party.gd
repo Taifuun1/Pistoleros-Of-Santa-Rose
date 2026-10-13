@@ -30,6 +30,8 @@ var party = {
 		},
 		"rodeo": "leaders duck",
 		"characterClass": "Gunslinger",
+		"moves": ["Sharp Shot", "Hold Steady"],
+		"items": ["Paregoric", "Paregoric"],
 		"magazine": [1, 0, 2],
 		#"weapon": {
 			#"type": "lead",

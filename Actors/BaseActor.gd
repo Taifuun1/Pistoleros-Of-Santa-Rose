@@ -37,6 +37,11 @@ var rodeo = null
 var characterClass = null
 var characterMagazine = null
 
+# Fight loadout (Docs/System Design/Shootout/Moves Items and Ducks.md):
+# activated moves (max 4) and the belt contents (capped by belt space).
+var moves = []
+var items = []
+
 var weapon = {
 	"type": null,
 	"weapon": null,
@@ -68,8 +73,24 @@ func init(actorData: Dictionary):
 	rodeo = actorData.rodeo
 	characterClass = actorData.get("characterClass", null)
 	characterMagazine = actorData.get("magazine", null)
+	moves = actorData.get("moves", []).duplicate()
+	items = actorData.get("items", []).duplicate()
 	
 	weapon = actorData.weapon.duplicate()
 	if !weapon.has("baseDamage"):
 		weapon["baseDamage"] = 2 if weapon.get("type") == "melee" else 0
+
+## Enforces the 4-move cap and the belt space cap on the loadout. Belt space -1
+## means no belt limit (class data unknown). Warns and truncates.
+func applyLoadoutLimits(beltSpace := -1, moveCap := 4) -> void:
+	if moves.size() > moveCap:
+		push_warning("BaseActor: '{actorName}' has {count} moves, capping at {moveCap}".format({
+			"actorName": actorName, "count": moves.size(), "moveCap": moveCap
+		}))
+		moves = moves.slice(0, moveCap)
+	if beltSpace >= 0 and items.size() > beltSpace:
+		push_warning("BaseActor: '{actorName}' has {count} items but only {beltSpace} belt space".format({
+			"actorName": actorName, "count": items.size(), "beltSpace": beltSpace
+		}))
+		items = items.slice(0, beltSpace)
 	#equipment = actorData.equipment
