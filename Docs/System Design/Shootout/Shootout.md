@@ -35,7 +35,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 | [Turns and Initiative](Turns%20and%20Initiative.md) | Turn order, rounds, initiative rolls | Implemented: per-Round re-roll with random roll, round/turn counters |
 | [Cylinders](Cylinders.md) | Cylinders, Magazines, Chambers, hit quality, special Chambers | Implemented: manager + resolver integration (UI display pending) |
 | [Damage and Stats](Damage%20and%20Stats.md) | Stats, damage types, hit/damage pipeline, resistances | Implemented: full pipeline with quality and family defense rules (equipment-derived defense pending) |
-| [Effects](Effects.md) | Bleed, poison, marks, taunt, silence, cylinder mods, piercing | Missing (Rodeo ops reserved) |
+| [Effects](Effects.md) | Bleed, poison, marks, taunt, silence, cylinder mods, piercing | Implemented: manager + lifecycle + damage hooks (UI icons pending) |
 | [Positions and Targeting](Positions%20and%20Targeting.md) | 4-position ranks, move ranges, repositioning, displacement, taunt redirects | Partial: columns exist; no range validation, no repositioning Move |
 | [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md) | Act types, move/ability/item data, Ducks, belt space | Partial: attacks/moves/items work; Ducks and belt space missing |
 | [Enemy AI](Enemy%20AI.md) | Enemy decision making | Stub: random target, attacks only |
