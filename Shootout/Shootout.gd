@@ -2,7 +2,7 @@ extends Node2D
 
 
 signal actorDone
-signal shootoutEnded(winningSide)
+signal shootoutEnded(winningSide, results)
 
 const ShootoutActorScene = preload("res://Actors/Shootout/ShootoutActor.tscn")
 const DamageNumberScene = preload("res://Nodes/Damage Number/DamageNumber.tscn")
@@ -36,6 +36,9 @@ var battleOver = false
 var pendingResolution = false
 var encounterName = ""
 var flavorName = ""
+var fled = false
+# baseName -> { hp, injuryDamage, downed } for dead party members this fight.
+var partyFightState = {}
 
 
 func _ready() -> void:
@@ -64,6 +67,7 @@ func _ready() -> void:
 	ui.moveActsRequested.connect(_on_shootout_ui_move_acts_requested)
 	ui.itemActsRequested.connect(_on_shootout_ui_item_acts_requested)
 	ui.reposition.connect(_on_shootout_ui_reposition)
+	ui.flee.connect(_on_shootout_ui_flee)
 	actorDone.connect(_on_actor_done)
 	var encounterScript = DefaultEncounter
 	if Shootout.pendingEncounter != null:
@@ -75,6 +79,7 @@ func _ready() -> void:
 func init(encounterData: Dictionary) -> void:
 	var teams = encounterData.get("teams", encounterData)
 	turnManager.setWinCondition(encounterData.get("winCondition", {}))
+	turnManager.setEncounterKind(encounterData.get("kind", "dustup"))
 	encounterName = encounterData.get("name", "Shootout")
 	flavorName = encounterData.get("flavor", pickFlavorName(encounterData.get("kind", "dustup")))
 	print("{flavor}! ({name})".format({ "flavor": flavorName, "name": encounterName }))
@@ -99,7 +104,7 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index })
 	actorsRoot.add_child(newShootoutActor)
 	if Party.party.has(actorName):
-		newShootoutActor.init(Party.party[actorName])
+		newShootoutActor.init(Party.getFightData(actorName))
 	else:
 		newShootoutActor.init(load("res://Data/Actors/{actorType}/{actorName}.gd".format({
 			"actorType": actorType,
@@ -133,6 +138,7 @@ func startCurrentTurn() -> void:
 		if !battleOver:
 			actorDone.emit()
 		return
+	ui.setFleeEnabled(turnManager.canFlee())
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_START, { "actor": actor })
 	actor.actorTurn.emit()
 	if turnManager.isPlayerActing(actorName):
@@ -270,9 +276,57 @@ func _on_battle_ended(winningSide: String) -> void:
 	playerHasControl = false
 	ui.playerHasControl = false
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_END, { "winningSide": winningSide })
-	print("Rodeo loot modifiers: ", rodeoManager.consumeLootModifiers())
-	shootoutEnded.emit(winningSide)
-	print("Shootout ended. Winner: {winningSide}".format({ "winningSide": winningSide }))
+	var results = {
+		"winningSide": winningSide,
+		"fled": fled,
+		"outcome": fightOutcome(winningSide),
+		"party": buildPartyFightState(),
+		"rodeoLoot": rodeoManager.consumeLootModifiers()
+	}
+	Party.applyFightResults(results)
+	shootoutEnded.emit(winningSide, results)
+	print("Shootout ended. Winner: {winningSide}, outcome: {outcome}".format({
+		"winningSide": winningSide, "outcome": results.outcome
+	}))
+
+func fightOutcome(winningSide: String) -> String:
+	if fled:
+		return "fled"
+	if winningSide == Shootout.TEAM_PLAYER:
+		return "victory"
+	return "vamoose" if isPartyWiped() else "defeat"
+
+func isPartyWiped() -> bool:
+	var state = buildPartyFightState()
+	if state.is_empty():
+		return false
+	for actorName in state:
+		if !state[actorName].downed:
+			return false
+	return true
+
+# Death snapshots so freed actors still report their final state.
+func recordActorDeath(actor) -> void:
+	if actor != null and Party.party.has(actor.actorName):
+		partyFightState[actor.actorName] = {
+			"hp": 0,
+			"injuryDamage": actor.get("injuryDamage", 0),
+			"downed": true
+		}
+
+func buildPartyFightState() -> Dictionary:
+	var state = partyFightState.duplicate(true)
+	for actorSide in turnManager.shootoutActors:
+		for actorName in turnManager.shootoutActors[actorSide]:
+			var actor = getActor(actorName)
+			if actor == null or !Party.party.has(actor.actorName) or state.has(actor.actorName):
+				continue
+			state[actor.actorName] = {
+				"hp": actor.hp,
+				"injuryDamage": actor.get("injuryDamage", 0),
+				"downed": actor.hp <= 0
+			}
+	return state
 
 func spawnDamageNumber(label, color: String, targetPosition: Vector2) -> void:
 	var newDamageNumber = DamageNumberScene.instantiate()
@@ -358,6 +412,14 @@ func filterUsableMoves(actor) -> Array:
 	)
 
 # Repositioning costs the Move and never advances the Cylinder (decided).
+# Fleeing is instant in Dust-ups and unlocks after 10 turns in Showdowns
+# (decided: enemies never flee). Costs every survivor a portion of MxHp.
+func _on_shootout_ui_flee() -> void:
+	if !playerHasControl or !playerAction or battleOver or !turnManager.canFlee():
+		return
+	fled = true
+	turnManager.endBattle(Shootout.TEAM_ENEMY)
+
 func _on_shootout_ui_reposition(direction: String) -> void:
 	if !playerHasControl or !playerAction:
 		return

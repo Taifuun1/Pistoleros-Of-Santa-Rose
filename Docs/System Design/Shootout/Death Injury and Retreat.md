@@ -13,8 +13,16 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-- In-fight death exists: `ShootoutTurnManager.checkActorDead()` frees the actor node, erases them from the registry and ends the battle when a side empties. Party HP does **not** persist — `Party.party` data is read at spawn but never written back, so every fight starts at full HP and there are no injuries, knockouts, Vamoose or fleeing.
-- `shootoutEnded(winningSide)` is emitted but nothing consumes it yet (see [Encounters](Encounters.md) for the launcher flow).
+**Implemented** (party persistence, injuries, knockouts, Vamoose and fleeing; the Scene Manager town/checkpoint handoff is pending with the launcher integration):
+
+- `Globals/Party.gd` owns the persistent state: per-member `hp`, `baseMaxHp`, `injuryDamage`, `injuryRate`, `knockoutDebuffs` and `downed`, plus `money` and `questInProgress`. `effectiveMaxHp()` derives MxHp from journey injuries (floor 1); `getFightData()` hands the fight prepared member data (capped HP, debuffed stats on a duplicate).
+- Injuries: all damage (attacks, abilities, bleed/poison) accumulates on the actor node (`injuryDamage`) and is written back to the party at fight end.
+- Post-fight flow: `Shootout._on_battle_ended()` builds a results payload (`winningSide`, `outcome`, `fled`, per-member `party` state with death snapshots, `rodeoLoot`) and calls `Party.applyFightResults()`; the `shootoutEnded` signal now carries `(winningSide, results)`.
+- Knockouts: members at 0 HP at fight end are `downed` and gain the placeholder debuff package (High Tailin' -2, Six Shootin' -1) for 3 Shootouts (decided: winning fights with casualties still knock survivors out); debuffs tick down one per fight and feed fight stats through `getFightData()`.
+- Vamoose: an enemy win with the whole party downed yields outcome `vamoose`; `Party.vamoose()` halves the money pouch (loot hook lands with [Rewards](Rewards.md)) and returns the destination (`town`, or `quest_checkpoint` when `questInProgress`).
+- Fleeing: a Flee button (UI) enabled via `turnManager.canFlee()` — instant in Dust-ups, turn 10+ in Showdowns (`FLEE_TURN_THRESHOLD`); fleeing yields outcome `fled` (party keeps remaining loot and is not thrown to town) and `Party.applyFleeCost()` models the MxHp loss as injury (placeholder 20% of base MxHp x injury rate). Enemies never flee (decided).
+- `resetInjury()` (town entry) and `reduceInjury()` (camp items) are ready for the overworld systems.
+- Tests: `Tests/TestInjury.gd` covers injury math and the MxHp floor, fight data preparation, write-back, knockout debuff duration, town/camp resets, flee cost, flee enablement, Vamoose and damage accumulation.
 
 ## Design
 
@@ -80,11 +88,11 @@ Enemy death is permanent for the fight only; named story characters are downed r
 
 ## Implementation order
 
-1. Party write-back of surviving HP (persistence foundation).
-2. Injury accumulation + effective MxHP.
-3. Knockout debuffs.
-4. Flee button + turn-gating.
-5. Vamoose + Scene Manager handoff.
+1. ✅ Party write-back of surviving HP.
+2. ✅ Injury accumulation + effective MxHp.
+3. ✅ Knockout debuffs.
+4. ✅ Flee button + turn-gating.
+5. ✅ Vamoose; Scene Manager handoff (pending with the launcher integration).
 
 ## Open Questions
 

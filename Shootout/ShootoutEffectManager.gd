@@ -382,4 +382,6 @@ func dealEffectDamage(actorName: String, damage: int) -> void:
 	if actor == null:
 		return
 	actor.hp -= damage
+	if actor.get("injuryDamage") != null:
+		actor.injuryDamage += damage
 	shootout.spawnDamageNumber(damage, "red", actor.position + DAMAGE_NUMBER_OFFSET)

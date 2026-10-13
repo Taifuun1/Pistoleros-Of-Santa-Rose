@@ -13,6 +13,10 @@ const TEAM_ENEMY = "enemy team"
 # Docs/System Design/Shootout/Turns and Initiative.md).
 const RANDOM_ROLL_MAX = 4
 
+# Fleeing unlocks after this many turns in Showdowns; instant in Dust-ups
+# (Docs/System Design/Shootout/Death Injury and Retreat.md).
+const FLEE_TURN_THRESHOLD = 10
+
 var shootoutActors = {
 	TEAM_PLAYER: {},
 	TEAM_ENEMY: {}
@@ -23,6 +27,8 @@ var battleOver = false
 # { "type": "rout" } (default) | { "type": "defeat_actor", "actorName" }
 # | { "type": "survive_rounds", "rounds" } | { "type": "hp_below", "target", ... }
 var winCondition = {}
+# Encounter kind (dustup/showdown) from the encounter metadata.
+var encounterKind = "dustup"
 var roundNumber = 1
 var turnNumber = 0
 var firstOrderCreated = false
@@ -164,6 +170,8 @@ func checkActorDead(actor) -> bool:
 	for actorSide in shootoutActors:
 		shootoutActors[actorSide].erase(actor.name)
 	shootout.rodeoManager.unregisterActor(actor.name)
+	if shootout.has_method("recordActorDeath"):
+		shootout.recordActorDeath(actor)
 	var cylinderManager = shootout.get("cylinderManager")
 	if cylinderManager != null and cylinderManager.has_method("unregisterActor"):
 		cylinderManager.unregisterActor(actor.name)
@@ -176,6 +184,12 @@ func checkActorDead(actor) -> bool:
 
 func setWinCondition(condition) -> void:
 	winCondition = condition if condition is Dictionary else {}
+
+func setEncounterKind(kind: String) -> void:
+	encounterKind = kind
+
+func canFlee() -> bool:
+	return encounterKind != "showdown" or turnNumber >= FLEE_TURN_THRESHOLD
 
 func endBattle(winningSide: String) -> void:
 	battleOver = true
