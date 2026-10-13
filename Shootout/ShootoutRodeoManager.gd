@@ -154,7 +154,7 @@ func passesConditions(entry: Dictionary, ownerActor, context: Dictionary) -> boo
 			return false
 	if conditions.has("oncePerFight") and entry.state.usedThisFight:
 		return false
-	if conditions.has("position") and !(entry.column in conditions.position):
+	if conditions.has("position") and !(getActorColumn(ownerActor.name, entry.side) in conditions.position):
 		return false
 	if conditions.has("hpBelow") and float(ownerActor.hp) / ownerActor.maxHp >= conditions.hpBelow:
 		return false
@@ -165,7 +165,8 @@ func passesConditions(entry: Dictionary, ownerActor, context: Dictionary) -> boo
 
 func fireRodeo(actorName: String, entry: Dictionary, ownerActor) -> void:
 	var conditions = entry.data.get("conditions", {})
-	var targets = resolveTargets(conditions.get("target", "self"), actorName, entry)
+	var ownerEntry = { "side": entry.side, "column": getActorColumn(actorName, entry.side) }
+	var targets = resolveTargets(conditions.get("target", "self"), actorName, ownerEntry)
 	for effect in entry.data.get("effects", []):
 		applyEffect(effect, targets, actorName)
 	if conditions.has("oncePerFight"):
@@ -217,15 +218,24 @@ func getActorSide(actorName: String) -> String:
 
 
 func getActorColumn(actorName: String, actorSide: String):
+	var turnManager = shootout.get("turnManager")
+	if turnManager != null and turnManager.has_method("getActorPosition"):
+		return turnManager.getActorPosition(actorName)
+	if turnManager != null and turnManager.shootoutActors.get(actorSide, {}).has(actorName):
+		return turnManager.shootoutActors[actorSide][actorName].actorPosition
 	if rodeos.has(actorName):
 		return rodeos[actorName].column
-	return shootout.turnManager.shootoutActors[actorSide][actorName].actorPosition
+	return -1
 
 
 func setActorColumn(actorName: String, actorSide: String, column) -> void:
 	if rodeos.has(actorName):
 		rodeos[actorName].column = column
-	shootout.turnManager.shootoutActors[actorSide][actorName].actorPosition = column
+	var turnManager = shootout.get("turnManager")
+	if turnManager != null and turnManager.has_method("placeActor"):
+		turnManager.placeActor(actorName, actorSide, column)
+	else:
+		shootout.turnManager.shootoutActors[actorSide][actorName].actorPosition = column
 
 
 func applyEffect(effect: Dictionary, targets: Array, sourceName: String) -> void:
@@ -283,10 +293,18 @@ func applyMovePosition(effect: Dictionary, targets: Array) -> void:
 		var newColumn = clampi(column + direction * int(effect.get("amount", 1)), 1, 4)
 		if newColumn == column:
 			continue
-		setActorColumn(targetName, actorSide, newColumn)
-		var actorNode = shootout.getActor(targetName)
-		if actorNode != null:
-			actorNode.position = shootout.getPositionForColumn(actorSide, newColumn)
+		var turnManager = shootout.get("turnManager")
+		if turnManager != null and turnManager.has_method("setActorPosition"):
+			# Occupancy-aware: displaced occupants get pushed (see Positions doc).
+			if !turnManager.setActorPosition(targetName, newColumn):
+				continue
+		else:
+			setActorColumn(targetName, actorSide, newColumn)
+			var actorNode = shootout.getActor(targetName)
+			if actorNode != null:
+				actorNode.position = shootout.getPositionForColumn(actorSide, newColumn)
+		if rodeos.has(targetName):
+			rodeos[targetName].column = newColumn
 
 
 func applyHeal(effect: Dictionary, targets: Array) -> void:

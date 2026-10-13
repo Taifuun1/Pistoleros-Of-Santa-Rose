@@ -77,6 +77,55 @@ func advanceTurn() -> void:
 		turnOrder.pop_front()
 		turnNumber += 1
 
+## Position ownership (Docs/System Design/Shootout/Positions and Targeting.md):
+## the turn manager is the single source of truth for actor positions.
+func getActorPosition(actorName: String) -> int:
+	for actorSide in shootoutActors:
+		if shootoutActors[actorSide].has(actorName):
+			return int(shootoutActors[actorSide][actorName].actorPosition)
+	return -1
+
+func actorAtPosition(actorSide: String, column: int) -> String:
+	for actorName in shootoutActors[actorSide]:
+		if int(shootoutActors[actorSide][actorName].actorPosition) == column:
+			return actorName
+	return ""
+
+## Raw placement: updates the registry and the actor node.
+func placeActor(actorName: String, actorSide: String, column: int) -> void:
+	shootoutActors[actorSide][actorName].actorPosition = column
+	var actor = shootout.getActor(actorName)
+	if actor != null:
+		actor.position = shootout.getPositionForColumn(actorSide, column)
+
+## Occupancy-aware move (decided): one actor per position, the moving character
+## takes the spot and displaced occupants are pushed one step in the same
+## direction (recursively). Fails when the push chain would run past the end of
+## the row. Returns true when the move happened.
+func setActorPosition(actorName: String, column) -> bool:
+	var actorSide = sideOfActor(actorName)
+	if actorSide == "":
+		return false
+	column = clampi(int(column), 1, 4)
+	var current = getActorPosition(actorName)
+	if column == current:
+		return false
+	var direction = 1 if column > current else -1
+	var chain = []
+	var probe = column
+	while probe >= 1 and probe <= 4:
+		var occupant = actorAtPosition(actorSide, probe)
+		if occupant == "":
+			break
+		chain.append(occupant)
+		probe += direction
+	if probe < 1 or probe > 4:
+		return false
+	for i in range(chain.size() - 1, -1, -1):
+		placeActor(chain[i], actorSide, column + direction * (i + 1))
+	placeActor(actorName, actorSide, column)
+	return true
+
 func sideOfActor(actorName: String) -> String:
 	for actorSide in shootoutActors:
 		if shootoutActors[actorSide].has(actorName):

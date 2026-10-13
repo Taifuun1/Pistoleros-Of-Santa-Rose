@@ -15,10 +15,16 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
+**Implemented** (steps 1-5 of the implementation order, minus UI grey-out polish and multi-target acts):
+
 - `Globals/Shootout.gd` `shootoutPositions` maps each team's columns 1-4 to screen coordinates; `Shootout.getPositionForColumn()` resolves them.
-- `ShootoutTurnManager.registerActor()` stores `actorPosition` per actor; `ShootoutRodeoManager` tracks a parallel column per actor for position-conditional Rodeos (Happy Shot) and implements `move_position` (Leaders Duck) with clamping to 1-4.
-- Move/Item data already declares position rules: `positions.actorUser` (usable-from columns), `positions.targets.columns` (targetable columns), `positions.type` (`single`/`multi`) and `positions.shape` (e.g. `column` for Multi Heal).
-- **None of it is enforced**: `ShootoutTargetingManager.isValidTarget()` only checks the act's side. There is no repositioning Move, no displacement outside Leaders Duck, no taunt redirect, and duplicate actors spawn on top of each other when an encounter lists the same position twice (encounter data gives each actor a list of positions, one per copy — see [Encounters](Encounters.md)).
+- The turn manager is the single source of truth for positions: `getActorPosition()`, `placeActor()` (raw set + node move) and the occupancy-aware `setActorPosition()` — one actor per position (decided), the mover takes the spot, displaced occupants push one step in the same direction recursively, and the move fails when the push chain would run past the end of the row.
+- `ShootoutTargetingManager.isValidTarget()` enforces ranges: moves/abilities use their data's `positions.actorUser` / `positions.targets.columns`; basic attacks use weapon ranges from `Data/Items/WeaponData.gd` (`ranges`, placeholders derived from the class table; weapons without entries fire from anywhere); items stay permissive (any ally position — decided).
+- **Reposition act** (`Shootout.ACT_TYPE_REPOSITION`): a Reposition button in `ShootoutUI.tscn` opens a Forward/Backward picker in the acts panel; the Move costs the turn, never advances the Cylinder (decided), and fails without spending the Move when the target spot's push chain is blocked.
+- Move acts are filtered to those usable from the acting character's current column; silenced actors lose abilities but keep Ducks (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
+- The Rodeo manager reads positions live through the turn manager: position-conditional Rodeos (Happy Shot) track repositioning, adjacency targeting (Camaradería) uses live columns, and `move_position` (Leaders Duck) routes through the occupancy-aware mover.
+- Taunt redirect is handled at resolution in `Shootout.resolveActOnce()` (see [Effects](Effects.md)); tests cover it there.
+- Tests: `Tests/TestTargeting.gd` covers occupancy pushes, blocked ends, bounds, move/weapon ranges, item permissiveness and position-conditional Rodeos.
 
 ## Design
 
@@ -91,15 +97,16 @@ With the effect system (see [Effects](Effects.md)):
 
 ## Implementation order
 
-1. Position ownership consolidation (`get/setActorPosition`).
-2. Range validation in the targeting manager + act-list filtering.
-3. Reposition act (UI + flow).
-4. Occupancy/displacement rules in `setActorPosition()`; route Leaders Duck through it.
-5. Taunt redirect (after [Effects](Effects.md)).
+1. ✅ Position ownership consolidation (`get/setActorPosition`).
+2. ✅ Range validation in the targeting manager + act-list filtering.
+3. ✅ Reposition act (UI + flow).
+4. ✅ Occupancy/displacement rules in `setActorPosition()`; Leaders Duck routes through it.
+5. ✅ Taunt redirect (with [Effects](Effects.md)).
+6. UI polish: greyed-out unusable moves with reasons (pending, see [Shootout UI](Shootout%20UI.md)); multi-target acts follow with the acts overhaul.
 
 ## Open Questions
 
 1. ~~Can two actors share a position?~~ — **decided**: no; the moving character takes the spot, displaced occupants are pushed (see Occupancy and displacement).
 2. Can repositioning move more than one column if the actor spends multiple Moves, or is it strictly one column per Move? (Per `Docs/Combat.md`: "moving between adjacent positions costs a Move" — assumed one column per Move.)
-3. Do ranged weapon attacks have per-weapon position tables distinct from the class table, or is the class table the only source?
+3. Do ranged weapon attacks have per-weapon position tables distinct from the class table, or is the class table the only source? (First pass: per-weapon `ranges` in `WeaponData.gd` with placeholder values derived from the class table; weapons without entries are unrestricted.)
 4. When a multi-target act partially hits taunted positions, does the caster take all redirected hits (stacking damage) once or per protected position?

@@ -7,6 +7,18 @@ var magazines = {
 	"scratch": [0, 0, 0],
 }
 
+# Position ranges per weapon id (Docs/System Design/Shootout/Positions and
+# Targeting.md): columns the weapon can fire from and at. Placeholders derived
+# from the class table in Docs/Combat.md; weapons without entries can fire from
+# anywhere.
+var ranges = {
+	"revolver": { "actorUser": [1, 2, 3], "targets": [1, 2, 3, 4] },
+	"rifle": { "actorUser": [3, 4], "targets": [1, 2, 3, 4] },
+	"shotgun": { "actorUser": [1, 2, 3], "targets": [1, 2, 3] },
+	"lasso": { "actorUser": [2, 3], "targets": [1, 2, 3] },
+	"scratch": { "actorUser": [1, 2], "targets": [1, 2] },
+}
+
 var weaponFamilies = {
 	"revolver": [
 		{"name": "Colt Paterson", "sprites": ["res://Assets/Weapons/ColtPatersonRevolver.png"]},
