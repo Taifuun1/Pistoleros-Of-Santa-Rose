@@ -6,7 +6,7 @@ signal shootoutEnded(winningSide)
 
 const ShootoutActorScene = preload("res://Actors/Shootout/ShootoutActor.tscn")
 const DamageNumberScene = preload("res://Nodes/Damage Number/DamageNumber.tscn")
-const EncounterData = preload("res://Data/Shootout/Encounters/RatAmbush.gd")
+const DefaultEncounter = preload("res://Data/Shootout/Encounters/RatAmbush.gd")
 const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
 const TargetingManagerScript = preload("res://Shootout/ShootoutTargetingManager.gd")
 const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
@@ -34,6 +34,8 @@ var playerHasControl = false
 var playerAction = false
 var battleOver = false
 var pendingResolution = false
+var encounterName = ""
+var flavorName = ""
 
 
 func _ready() -> void:
@@ -63,21 +65,34 @@ func _ready() -> void:
 	ui.itemActsRequested.connect(_on_shootout_ui_item_acts_requested)
 	ui.reposition.connect(_on_shootout_ui_reposition)
 	actorDone.connect(_on_actor_done)
-	init(EncounterData.new().data)
+	var encounterScript = DefaultEncounter
+	if Shootout.pendingEncounter != null:
+		encounterScript = load(Shootout.pendingEncounter)
+		Shootout.pendingEncounter = null
+	init(encounterScript.new().data)
 
 
-func init(actors: Dictionary) -> void:
-	for actorSide in actors:
-		for actorType in actors[actorSide]:
-			for actorName in actors[actorSide][actorType]:
+func init(encounterData: Dictionary) -> void:
+	var teams = encounterData.get("teams", encounterData)
+	turnManager.setWinCondition(encounterData.get("winCondition", {}))
+	encounterName = encounterData.get("name", "Shootout")
+	flavorName = encounterData.get("flavor", pickFlavorName(encounterData.get("kind", "dustup")))
+	print("{flavor}! ({name})".format({ "flavor": flavorName, "name": encounterName }))
+	for actorSide in teams:
+		for actorType in teams[actorSide]:
+			for actorName in teams[actorSide][actorType]:
 				var index = 0
-				for actorPosition in actors[actorSide][actorType][actorName].positions:
+				for actorPosition in teams[actorSide][actorType][actorName].positions:
 					spawnActor(actorSide, actorType, actorName, actorPosition, index)
 					index += 1
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_START)
 	turnManager.createTurnOrder()
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
 	startCurrentTurn()
+
+func pickFlavorName(kind: String) -> String:
+	var flavors = Shootout.SHOWDOWN_FLAVORS if kind == "showdown" else Shootout.DUSTUP_FLAVORS
+	return flavors[randi() % flavors.size()]
 
 func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, index: int) -> void:
 	var newShootoutActor = ShootoutActorScene.instantiate()
@@ -221,6 +236,7 @@ func finishTurn(targetActor) -> void:
 	})
 	if targetActor != null:
 		turnManager.checkActorDead(targetActor)
+	turnManager.checkBattleEnd()
 	turnManager.advanceTurn()
 	selectedAct = null
 	selectedActor = ""
@@ -237,6 +253,7 @@ func _on_actor_done() -> void:
 		effectManager.onRoundStart()
 		# Poison ticks at round start can kill; clear the dead before acting.
 		checkForEffectDeaths()
+		turnManager.checkBattleEnd()
 	if battleOver:
 		return
 	startCurrentTurn()
