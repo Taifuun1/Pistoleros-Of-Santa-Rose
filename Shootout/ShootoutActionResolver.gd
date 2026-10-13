@@ -35,8 +35,8 @@ func resolveAttack(actingActor, targetActor) -> void:
 	if quality is String:
 		resolveSpecialChamber(quality, actingActor)
 		return
-	var base = attackBaseDamage(actingActor)
-	applyHitDamage(targetActor, base, quality)
+	var damage = calculateAttackDamage(actingActor, targetActor, quality)
+	applyHitDamage(targetActor, damage, quality)
 	advanceCylinder(actingActor)
 
 func resolveMove(moveName: String, actingActor, targetActor) -> void:
@@ -53,7 +53,10 @@ func resolveMove(moveName: String, actingActor, targetActor) -> void:
 		if quality is String:
 			resolveSpecialChamber(quality, actingActor)
 			return
-		applyHitDamage(targetActor, amount, quality)
+		# Attack abilities roll quality on their own amount; weapon family
+		# defense rules don't apply (the ability amount isn't weapon damage).
+		var abilityDamage = maxi(0, roundi(amount * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]))
+		applyHitDamage(targetActor, abilityDamage, quality)
 		advanceCylinder(actingActor)
 	else:
 		# Non-attack abilities don't interact with the Cylinder at all (decided).
@@ -68,18 +71,77 @@ func resolveItem(itemName: String, _actingActor, targetActor) -> void:
 	targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
 	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
 
-func attackBaseDamage(actingActor) -> float:
-	if actingActor.weapon.type == "melee":
-		return 2.0
+## The full damage pipeline (Docs/System Design/Shootout/Damage and Stats.md):
+## quality multiplier, weapon + offensive stat base, weapon family defense
+## rules, then piercing/marks hooks (no-ops until the Effects system lands).
+func calculateAttackDamage(actingActor, targetActor, quality: int) -> int:
+	var base = float(actingActor.weapon.get("baseDamage", 0)) + offensiveStat(actingActor)
+	var damage = base * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]
+	damage = applyWeaponFamilyRule(damage, actingActor.weapon, targetDefense(targetActor))
+	damage = applyOutgoingModifiers(actingActor, damage)
+	damage = applyIncomingModifiers(targetActor, damage)
+	return maxi(0, roundi(damage))
+
+# The relevant offensive stat per weapon family:
+# - Lead: the matching stats.damage.lead entry, Rodeo-modified.
+# - Explosive: the stats entry plus the class explosive base.
+# - Lasso/melee: none — lassos are weapon base damage only (decided).
+func offensiveStat(actingActor) -> float:
+	if actingActor.weapon.type == "lasso" or actingActor.weapon.type == "melee":
+		return 0.0
+	var base = float(actingActor.stats.damage[actingActor.weapon.type][actingActor.weapon.weapon])
+	if actingActor.weapon.type == "explosive":
+		return base + classExplosiveBase(actingActor)
 	var statPath = "damage.{type}.{weapon}".format({
 		"type": actingActor.weapon.type,
 		"weapon": actingActor.weapon.weapon
 	})
-	return shootout.rodeoManager.getStatModifier(
-		actingActor,
-		statPath,
-		actingActor.stats.damage[actingActor.weapon.type][actingActor.weapon.weapon]
-	)
+	return shootout.rodeoManager.getStatModifier(actingActor, statPath, base)
+
+func classExplosiveBase(actingActor) -> int:
+	var cylinderManager = shootout.get("cylinderManager")
+	if cylinderManager == null:
+		return 0
+	var characterClass = actingActor.get("characterClass")
+	if characterClass == null or !cylinderManager.classesData.has(characterClass):
+		return 0
+	return int(cylinderManager.classesData[characterClass].get("explosiveBase", 0))
+
+func targetDefense(targetActor) -> Dictionary:
+	var stats = targetActor.get("stats")
+	if stats is Dictionary:
+		return stats.get("defense", { "style": 0, "sand": 0 })
+	return { "style": 0, "sand": 0 }
+
+# Weapon family rules (Docs/Combat.md): revolvers lose the higher of Style/Sand,
+# rifles gain Style but lose Sand, shotguns gain Sand but lose Style;
+# explosives, lassos and melee don't interact with defense.
+func applyWeaponFamilyRule(damage: float, weapon: Dictionary, defense: Dictionary) -> float:
+	var style = int(defense.get("style", 0))
+	var sand = int(defense.get("sand", 0))
+	match weapon.get("weapon", ""):
+		"revolver":
+			return damage - maxi(style, sand)
+		"rifle":
+			return damage + style - sand
+		"shotgun":
+			return damage + sand - style
+		_:
+			return damage
+
+# Effect hooks: damage piercing/decrease (outgoing) and marks/flat modifiers
+# (incoming). The Effects system implements these; until then they pass through.
+func applyOutgoingModifiers(actingActor, damage: float) -> float:
+	var effectManager = shootout.get("effectManager")
+	if effectManager != null and effectManager.has_method("applyOutgoingModifiers"):
+		return effectManager.applyOutgoingModifiers(actingActor, damage)
+	return damage
+
+func applyIncomingModifiers(targetActor, damage: float) -> float:
+	var effectManager = shootout.get("effectManager")
+	if effectManager != null and effectManager.has_method("applyIncomingModifiers"):
+		return effectManager.applyIncomingModifiers(targetActor, damage)
+	return damage
 
 func getHitQuality(actingActor):
 	var cylinderManager = shootout.get("cylinderManager")
@@ -104,9 +166,7 @@ func resolveSpecialChamber(quality: String, actingActor) -> void:
 			push_warning("ShootoutActionResolver: unknown special chamber '{quality}'".format({ "quality": quality }))
 	advanceCylinder(actingActor)
 
-func applyHitDamage(targetActor, baseDamage, quality: int) -> void:
-	var mult = CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]
-	var damage = maxi(0, roundi(baseDamage * mult))
+func applyHitDamage(targetActor, damage: int, quality: int) -> void:
 	var label = "Miss" if quality == CylinderManagerScript.CHAMBER_MISS else str(damage)
 	targetActor.hp -= damage
 	shootout.spawnDamageNumber(label, CHAMBER_COLORS[quality], targetActor.position + DAMAGE_NUMBER_OFFSET)

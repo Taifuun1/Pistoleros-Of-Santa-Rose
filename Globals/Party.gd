@@ -24,7 +24,9 @@ var party = {
 					"liquid": 1,
 					"shrapnel": 1
 				}
-			}
+			},
+			"defense": { "style": 2, "sand": 1 },
+			"resistances": { "bleed": 0.0, "poison": 0.0 }
 		},
 		"rodeo": "leaders duck",
 		"characterClass": "Gunslinger",
@@ -35,7 +37,8 @@ var party = {
 		#}
 		"weapon": {
 			"type": "lead",
-			"weapon": "rifle"
+			"weapon": "rifle",
+			"baseDamage": 4
 		}
 	}
 }
