@@ -17,6 +17,8 @@ This is a design doc: it describes the intended design, and the implementation m
 | Damage decrease | Decreases damage against a defensive damage type | Yes, to a limit | Amount of turns | Expiry |
 | Taunt | Caster taunts the friendly positions allies stand on; attacks targeting a taunted position redirect to the caster; caster gains defensive buffs | - | Amount of Rounds; not broken by anything else (Open Question 11) | Expiry |
 | Silence | Silenced character cannot use Abilities (Open Question 14, answered: Abilities only) | - | Amount of turns | Expiry |
+| Heal | Instantly restores HP (beneficial; never picked by random cleanses) | n/a | Instant | n/a |
+| Heal over time | Restores HP at the start of the actor's Turn (beneficial) | Yes | `turns` | Expiry |
 
 - Resistances are a percentage reduction of effect potency and apply to bleed and poison (Open Question 7, answered).
 - Marks can be cleansed with items or abilities; cleanses exist for bleed and poison too.
