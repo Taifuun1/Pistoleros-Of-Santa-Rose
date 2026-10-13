@@ -42,6 +42,9 @@ var characterMagazine = null
 var moves = []
 var items = []
 
+# Damage taken this fight; written back as journey injury at fight end.
+var injuryDamage = 0
+
 var weapon = {
 	"type": null,
 	"weapon": null,

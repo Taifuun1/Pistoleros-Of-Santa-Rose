@@ -102,6 +102,13 @@ func estimateAttackDamage(actingActor, targetActor) -> int:
 # - Lead: the matching stats.damage.lead entry, Rodeo-modified.
 # - Explosive: the stats entry plus the class explosive base.
 # - Lasso/melee: none — lassos are weapon base damage only (decided).
+## Journey injuries (Docs/System Design/Shootout/Death Injury and Retreat.md):
+## all damage accumulates on the actor node; the shootout root writes it back
+## to the party at fight end. Only nodes with the field are tracked.
+func recordInjury(targetActor, damage: int) -> void:
+	if targetActor.get("injuryDamage") != null:
+		targetActor.injuryDamage += damage
+
 func offensiveStat(actingActor) -> float:
 	if actingActor.weapon.type == "lasso" or actingActor.weapon.type == "melee":
 		return 0.0
@@ -196,8 +203,10 @@ func resolveSpecialChamber(quality: String, actingActor) -> void:
 func applyHitDamage(targetActor, damage: int, quality: int) -> void:
 	var label = "Miss" if quality == CylinderManagerScript.CHAMBER_MISS else str(damage)
 	targetActor.hp -= damage
+	recordInjury(targetActor, damage)
 	shootout.spawnDamageNumber(label, CHAMBER_COLORS[quality], targetActor.position + DAMAGE_NUMBER_OFFSET)
 
 func applyDamage(targetActor, damage) -> void:
 	targetActor.hp -= damage
+	recordInjury(targetActor, damage)
 	shootout.spawnDamageNumber(damage, "red", targetActor.position + DAMAGE_NUMBER_OFFSET)

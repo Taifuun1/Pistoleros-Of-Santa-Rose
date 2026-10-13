@@ -4,6 +4,7 @@ signal attack
 signal move
 signal item
 signal reposition(direction)
+signal flee
 signal moveActsRequested
 signal itemActsRequested
 
@@ -90,6 +91,15 @@ func _on_item_button_pressed() -> void:
 func _on_move_button_pressed() -> void:
 	manageActMenus("move")
 	moveActsRequested.emit()
+
+func setFleeEnabled(enabled: bool) -> void:
+	var fleeButton = get_node_or_null("MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/FleeButton")
+	if fleeButton != null:
+		fleeButton.disabled = !enabled
+
+func _on_flee_button_pressed() -> void:
+	manageActMenus("shootout")
+	flee.emit()
 
 func _on_reposition_button_pressed() -> void:
 	manageActMenus("reposition")
