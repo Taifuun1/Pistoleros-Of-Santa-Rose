@@ -111,20 +111,38 @@ func setActorPosition(actorName: String, column) -> bool:
 	if column == current:
 		return false
 	var direction = 1 if column > current else -1
-	var chain = []
-	var probe = column
-	while probe >= 1 and probe <= 4:
-		var occupant = actorAtPosition(actorSide, probe)
-		if occupant == "":
-			break
-		chain.append(occupant)
-		probe += direction
-	if probe < 1 or probe > 4:
+	var chain = pushChain(actorSide, column, direction)
+	if chain == null:
 		return false
 	for i in range(chain.size() - 1, -1, -1):
 		placeActor(chain[i], actorSide, column + direction * (i + 1))
 	placeActor(actorName, actorSide, column)
 	return true
+
+## Read-only feasibility check (used by the enemy AI).
+func canMoveActor(actorName: String, column) -> bool:
+	var actorSide = sideOfActor(actorName)
+	if actorSide == "":
+		return false
+	column = clampi(int(column), 1, 4)
+	var current = getActorPosition(actorName)
+	if column == current:
+		return false
+	var direction = 1 if column > current else -1
+	return pushChain(actorSide, column, direction) != null
+
+## Occupants that would be pushed from `column` outward, or null when the chain
+## would run past the end of the row.
+func pushChain(actorSide: String, column: int, direction: int):
+	var chain = []
+	var probe = column
+	while probe >= 1 and probe <= 4:
+		var occupant = actorAtPosition(actorSide, probe)
+		if occupant == "":
+			return chain
+		chain.append(occupant)
+		probe += direction
+	return null
 
 func sideOfActor(actorName: String) -> String:
 	for actorSide in shootoutActors:

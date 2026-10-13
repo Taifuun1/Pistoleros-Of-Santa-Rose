@@ -284,12 +284,15 @@ func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float
 ## Incoming damage hook: active marks deal extra damage and apply their effects,
 ## consuming the mark; damage-type marks add extra damage for matching attacks
 ## and last the Round.
-func applyIncomingModifiers(targetActor, damage: float, damageType := "") -> float:
+func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true) -> float:
 	var result = damage
 	for mark in getEffects(targetActor.name, "mark"):
 		if mark.state != "active":
 			continue
 		result += mark.extraDamage
+		if !consume:
+			# Dry run (enemy AI estimates): count the bonus, keep the mark.
+			break
 		mark["expired"] = true
 		for followUp in mark.get("effects", []):
 			applyEffect(targetActor.name, followUp, mark.get("source", ""))
