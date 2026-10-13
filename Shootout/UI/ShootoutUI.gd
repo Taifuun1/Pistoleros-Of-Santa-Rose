@@ -3,6 +3,7 @@ extends Control
 signal attack
 signal move
 signal item
+signal reposition(direction)
 signal moveActsRequested
 signal itemActsRequested
 
@@ -54,6 +55,8 @@ func setPlayerCharacterActs(acts: Array, actType: String) -> void:
 				item.emit(actName)
 			elif actType == "Moves":
 				move.emit(actName)
+			elif actType == "Reposition":
+				reposition.emit(actName.to_lower())
 		)
 
 func hideActsPanel() -> void:
@@ -61,16 +64,18 @@ func hideActsPanel() -> void:
 
 func manageActMenus(act: String):
 	if playerHasControl:
+		var panel = $VBoxContainer/CenterContainer
 		if act == "shootout":
 			hideActsPanel()
-		elif !(
-			(actOpen == "item" and act == "move") or
-			(actOpen == "move" and act == "item")
-		):
-			$VBoxContainer/CenterContainer.visible = !$VBoxContainer/CenterContainer.visible
-		if act == actOpen or act == "shootout":
 			actOpen = null
 			return
+		if act == actOpen and panel.visible:
+			# Same menu open: toggle it closed.
+			panel.visible = false
+			actOpen = null
+			return
+		# Opening or switching menus: keep the panel open and swap contents.
+		panel.visible = true
 		actOpen = act
 
 
@@ -85,3 +90,8 @@ func _on_item_button_pressed() -> void:
 func _on_move_button_pressed() -> void:
 	manageActMenus("move")
 	moveActsRequested.emit()
+
+func _on_reposition_button_pressed() -> void:
+	manageActMenus("reposition")
+	if actOpen == "reposition":
+		setPlayerCharacterActs(["Forward", "Backward"], "Reposition")

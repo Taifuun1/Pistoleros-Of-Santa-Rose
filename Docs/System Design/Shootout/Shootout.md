@@ -36,7 +36,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 | [Cylinders](Cylinders.md) | Cylinders, Magazines, Chambers, hit quality, special Chambers | Implemented: manager + resolver integration (UI display pending) |
 | [Damage and Stats](Damage%20and%20Stats.md) | Stats, damage types, hit/damage pipeline, resistances | Implemented: full pipeline with quality and family defense rules (equipment-derived defense pending) |
 | [Effects](Effects.md) | Bleed, poison, marks, taunt, silence, cylinder mods, piercing | Implemented: manager + lifecycle + damage hooks (UI icons pending) |
-| [Positions and Targeting](Positions%20and%20Targeting.md) | 4-position ranks, move ranges, repositioning, displacement, taunt redirects | Partial: columns exist; no range validation, no repositioning Move |
+| [Positions and Targeting](Positions%20and%20Targeting.md) | 4-position ranks, move ranges, repositioning, displacement, taunt redirects | Implemented: occupancy moves, range validation, reposition act (UI polish pending) |
 | [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md) | Act types, move/ability/item data, Ducks, belt space | Partial: attacks/moves/items work; Ducks and belt space missing |
 | [Enemy AI](Enemy%20AI.md) | Enemy decision making | Stub: random target, attacks only |
 | [Encounters](Encounters.md) | Encounter data, Dust-ups vs Showdowns, bosses, spawn sources | Partial: one hardcoded encounter (`RatAmbush`) |

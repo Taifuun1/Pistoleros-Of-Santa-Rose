@@ -60,6 +60,7 @@ func _ready() -> void:
 	ui.item.connect(_on_shootout_ui_item)
 	ui.moveActsRequested.connect(_on_shootout_ui_move_acts_requested)
 	ui.itemActsRequested.connect(_on_shootout_ui_item_acts_requested)
+	ui.reposition.connect(_on_shootout_ui_reposition)
 	actorDone.connect(_on_actor_done)
 	init(EncounterData.new().data)
 
@@ -307,7 +308,41 @@ func _on_shootout_ui_item(itemName: String) -> void:
 func _on_shootout_ui_move_acts_requested() -> void:
 	var actor = getActor(turnManager.currentActorName())
 	if actor != null:
-		ui.setPlayerCharacterActs(actor.moves, Shootout.ACT_TYPE_MOVES)
+		ui.setPlayerCharacterActs(filterUsableMoves(actor), Shootout.ACT_TYPE_MOVES)
+
+# Moves unusable from the current column are filtered out; silenced actors lose
+# abilities (category ability/attack_ability) but keep Ducks (decided).
+func filterUsableMoves(actor) -> Array:
+	var usable = []
+	var column = turnManager.getActorPosition(actor.name)
+	var silenced = effectManager.isSilenced(actor.name)
+	for moveName in actor.moves:
+		var moveData = Shootout.movesData.get(moveName, {})
+		var category = moveData.get("category", "ability")
+		if silenced and category != "duck":
+			continue
+		var positions = moveData.get("positions", {})
+		if positions.has("actorUser") and !(column in positions.actorUser):
+			continue
+		usable.append(moveName)
+	return usable
+
+# Repositioning costs the Move and never advances the Cylinder (decided).
+func _on_shootout_ui_reposition(direction: String) -> void:
+	if !playerHasControl or !playerAction:
+		return
+	var actorName = turnManager.currentActorName()
+	var actor = getActor(actorName)
+	if actor == null:
+		return
+	var delta = -1 if direction == "forward" else 1
+	if !turnManager.setActorPosition(actorName, turnManager.getActorPosition(actorName) + delta):
+		return
+	ui.hideActsPanel()
+	playerHasControl = false
+	ui.playerHasControl = false
+	actor.actorTurn.emit()
+	finishTurn(null)
 
 func _on_shootout_ui_item_acts_requested() -> void:
 	var actor = getActor(turnManager.currentActorName())

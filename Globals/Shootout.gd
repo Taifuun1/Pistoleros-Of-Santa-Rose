@@ -7,6 +7,7 @@ const TEAM_ENEMY = "enemy team"
 const ACT_TYPE_ATTACK = "Attack"
 const ACT_TYPE_MOVES = "Moves"
 const ACT_TYPE_ITEMS = "Items"
+const ACT_TYPE_REPOSITION = "Reposition"
 
 const RODEO_TRIGGER_FIGHT_START = "fight_start"
 const RODEO_TRIGGER_FIGHT_END = "fight_end"

@@ -196,6 +196,14 @@ size_flags_vertical = 3
 text = "Duck
 "
 
+[node name="RepositionButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=313370001 instance=ExtResource("1_drfjl")]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Reposition"
+
 [node name="PanelContainer7" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=396288265]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
@@ -1163,6 +1171,7 @@ stretch_mode = 4
 [connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AttackButton" to="." method="_on_shootout_button_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/MoveButton" to="." method="_on_move_button_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ItemButton" to="." method="_on_item_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/RepositionButton" to="." method="_on_reposition_button_pressed"]
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
 [connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" method="_on_mouse_entered" binds= ["Endurance", "Endurance amount"]]

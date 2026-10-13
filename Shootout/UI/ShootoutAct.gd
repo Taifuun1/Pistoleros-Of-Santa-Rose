@@ -9,7 +9,9 @@ var actType
 func init(newActName: String, newActType: String) -> void:
 	actName = newActName
 	actType = newActType
-	texture = load("res://Assets/{actType}/{actName}.png".format({ "actType": actType, "actName": actName.replace(" ", "") }))
+	var iconPath = "res://Assets/{actType}/{actName}.png".format({ "actType": actType, "actName": actName.replace(" ", "") })
+	if ResourceLoader.exists(iconPath):
+		texture = load(iconPath)
 
 
 func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
