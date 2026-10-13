@@ -13,9 +13,15 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
+**Implemented** (loot tables, generation and the handoff; authoring tables per enemy type is content work, and quest-end payouts stay with the quest system):
+
 - `Party.gd` has `level` (read by the Rodeo manager for level scaling). Quest-completion leveling is an overworld/quest concern — the Shootout only reads the level.
-- The Rodeo manager accumulates loot modifiers: `modify_loot` effects fill `lootModifiers` / `lootMultipliers`, emitted at `fight_end` via `consumeLootModifiers()` — currently just printed (`Shootout._on_battle_ended`). Nothing generates loot, and no loot tables exist.
-- Item generation with affixes and rarity exists outside combat (`Tests/TestItemGeneration.gd` covers it).
+- Loot tables in `Data/Shootout/LootTables/*.gd` (same `data` convention), keyed by enemy party (decided): `band` (quest-progression band: early/mid/late), `money {min, max, chance}`, `rolls`, and weighted `entries` of kind `consumable` (Data/Shootout/Items id), `weapon`/`equipment` (handed to `ItemGeneration.generateItem` with a rarity pool) or `resources` (material amounts).
+- `ItemGeneration.generateLoot(table, modifiers)` rolls money and entries and applies Rodeo loot modifiers — flat amounts first, multipliers after; flat money applies even when the money roll misses. Backed by `rollWeightedEntry()`.
+- Victory-only generation in `Shootout.generateLootForFight()`: skipped for losses, flights and quest fights (`encounterData.loot: false` for shootouts that pay at quest end — decided); the result lands in the `shootoutEnded` results payload as `loot` and is applied to the party via `Party.applyLoot()` (money to the pouch, item instances to `inventory`).
+- Average loot scales with quest progression via `band` on the table: band selection when picking encounters is the [Encounters](Encounters.md) pool's concern (pending); `generateLoot` itself is band-agnostic.
+- `RatAmbush` points at the `Rats` table; `Shootout.lootTablesData` loads the folder.
+- Tests: `Tests/TestLoot.gd` validates every table file, the modifier composition, money ranges, weight distribution, rarity pools and empty-table behavior.
 
 ## Design
 
@@ -84,14 +90,14 @@ Called from `Shootout._on_battle_ended()` on player victory with `rodeoManager.c
 
 ## Implementation order
 
-1. Loot table data format + loader + validation test.
-2. `generateLoot()` + victory hook + `shootoutEnded` payload.
-3. Party inventory/money handoff in the launcher.
-4. Author tables per enemy type as encounters are authored.
+1. ✅ Loot table data format + loader + validation test.
+2. ✅ `generateLoot()` + victory hook + `shootoutEnded` payload.
+3. ✅ Party inventory/money handoff (`Party.applyLoot`).
+4. Author tables per enemy type as encounters are authored (pending).
 
 ## Open Questions
 
 1. ~~"Loot tables based on party name"~~ — **decided**: enemy party; quest Shootouts drop nothing or pay out at quest end; average loot scales with main-quest progression (progression-band tables).
-2. Where does the party inventory live — `Globals/Party.gd` (proposed) or a separate inventory autoload?
+2. ~~Where does the party inventory live?~~ — **decided**: `Globals/Party.gd` (`inventory` list + `money` pouch).
 3. Should money scale with encounter difficulty (Dust-up vs Showdown) via the table or a global multiplier? (Separate from the quest-progression scaling above.)
 4. Do bosses roll from unique tables with guaranteed drops (proposed: yes, quest loot handled by the quest, boss tables for the rest)?
