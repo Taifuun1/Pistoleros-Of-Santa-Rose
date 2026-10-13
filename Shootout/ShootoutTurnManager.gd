@@ -166,18 +166,21 @@ func isPlayerActing(actorName: String) -> bool:
 func checkActorDead(actor) -> bool:
 	if actor == null or actor.hp > 0:
 		return false
-	turnOrder.erase(actor.name)
+	# Node names are StringNames while roster and turn-order entries are
+	# Strings; normalize so Array.erase (type-strict in Godot 4.7) matches.
+	var actorName = str(actor.name)
+	turnOrder.erase(actorName)
 	for actorSide in shootoutActors:
-		shootoutActors[actorSide].erase(actor.name)
-	shootout.rodeoManager.unregisterActor(actor.name)
+		shootoutActors[actorSide].erase(actorName)
+	shootout.rodeoManager.unregisterActor(actorName)
 	if shootout.has_method("recordActorDeath"):
 		shootout.recordActorDeath(actor)
 	var cylinderManager = shootout.get("cylinderManager")
 	if cylinderManager != null and cylinderManager.has_method("unregisterActor"):
-		cylinderManager.unregisterActor(actor.name)
+		cylinderManager.unregisterActor(actorName)
 	var effectManager = shootout.get("effectManager")
 	if effectManager != null and effectManager.has_method("unregisterActor"):
-		effectManager.unregisterActor(actor.name)
+		effectManager.unregisterActor(actorName)
 	actor.queue_free()
 	checkBattleEnd()
 	return true

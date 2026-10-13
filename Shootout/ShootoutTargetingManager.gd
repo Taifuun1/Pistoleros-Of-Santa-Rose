@@ -114,8 +114,21 @@ func positionBlockAllows(positions: Dictionary, actingActorName: String, targetA
 		return false
 	if positions.has("actorUser") and !(actingColumn in positions.actorUser):
 		return false
-	if positions.has("targets") and positions.targets.has("columns") and !(targetColumn in positions.targets.columns):
+	if positions.has("targets") and !targetColumnsAllowed(positions.targets, targetColumn):
 		return false
+	return true
+
+
+## Targets come in two shapes: a nested { "columns": [...] } block (moves and
+## abilities) or a flat column array (weapon ranges in Data/Items/WeaponData.gd).
+## Anything unrecognised stays unrestricted.
+func targetColumnsAllowed(targets, targetColumn: int) -> bool:
+	if targets is Dictionary:
+		if targets.has("columns"):
+			return targetColumn in targets.columns
+		return true
+	if targets is Array:
+		return targetColumn in targets
 	return true
 
 func getActorColumn(actorName: String) -> int:

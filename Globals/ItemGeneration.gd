@@ -136,9 +136,19 @@ func getZoneKeys() -> Array:
 ## progression rarity (Docs/Weapons and affixes.md). Falls back to "common"
 ## when the Quests autoload is unavailable (e.g. headless test runs).
 func rollRarity() -> String:
-	if Quests != null:
-		return Quests.currentMainQuestLevel.rarity
+	var quests = _questsAutoload()
+	if quests != null:
+		return quests.currentMainQuestLevel.rarity
 	return "common"
+
+## Resolved through the tree instead of the Quests autoload identifier (same
+## pattern as the Shootout managers) so the script compiles when a headless
+## test preloads it before the autoloads register.
+func _questsAutoload():
+	var mainLoop = Engine.get_main_loop()
+	if mainLoop is SceneTree and mainLoop.root != null:
+		return mainLoop.root.get_node_or_null("Quests")
+	return null
 
 func _rollRarityAndAffixes(item: Dictionary, options: Dictionary) -> void:
 	var rarityKey = options.get("rarity", "")

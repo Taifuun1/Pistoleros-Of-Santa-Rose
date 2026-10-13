@@ -334,9 +334,10 @@ func isPartyWiped() -> bool:
 # Death snapshots so freed actors still report their final state.
 func recordActorDeath(actor) -> void:
 	if actor != null and Party.party.has(actor.actorName):
+		var injury = actor.get("injuryDamage")
 		partyFightState[actor.actorName] = {
 			"hp": 0,
-			"injuryDamage": actor.get("injuryDamage", 0),
+			"injuryDamage": injury if injury != null else 0,
 			"downed": true
 		}
 
@@ -347,9 +348,10 @@ func buildPartyFightState() -> Dictionary:
 			var actor = getActor(actorName)
 			if actor == null or !Party.party.has(actor.actorName) or state.has(actor.actorName):
 				continue
+			var injury = actor.get("injuryDamage")
 			state[actor.actorName] = {
 				"hp": actor.hp,
-				"injuryDamage": actor.get("injuryDamage", 0),
+				"injuryDamage": injury if injury != null else 0,
 				"downed": actor.hp <= 0
 			}
 	return state

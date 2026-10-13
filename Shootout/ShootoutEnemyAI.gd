@@ -52,7 +52,7 @@ func chooseScriptedAct(actorName: String) -> Dictionary:
 	return {}
 
 func rulePasses(when: Dictionary, actingActor) -> bool:
-\tif when.has("hpBelow") and float(actingActor.hp) / actingActor.maxHp >= float(when.hpBelow):
+	if when.has("hpBelow") and float(actingActor.hp) / actingActor.maxHp >= float(when.hpBelow):
 		return false
 	if when.has("hpAbove") and float(actingActor.hp) / actingActor.maxHp <= float(when.hpAbove):
 		return false
@@ -86,12 +86,12 @@ func gatherLegalActs(actorName: String) -> Array:
 			legal.append({ "type": "Attack", "targetName": targetName })
 	# Moves (silence and column filtering included).
 	var silenced = isSilenced(actorName)
-	for moveName in targetingManager.usableMoves(actingActor.get("moves", []), actorName, silenced, dataSet("movesData")):
+	for moveName in targetingManager.usableMoves(actorList(actingActor, "moves"), actorName, silenced, dataSet("movesData")):
 		for targetName in livingActors():
 			if targetingManager.isValidTarget({ "type": "Moves", "name": moveName }, targetName, actorName):
 				legal.append({ "type": "Moves", "name": moveName, "targetName": targetName })
 	# Items.
-	for itemName in actingActor.get("items", []):
+	for itemName in actorList(actingActor, "items"):
 		for targetName in livingActors():
 			if targetingManager.isValidTarget({ "type": "Items", "name": itemName }, targetName, actorName):
 				legal.append({ "type": "Items", "name": itemName, "targetName": targetName })
@@ -171,7 +171,10 @@ func scoreItem(act: Dictionary, actingActor) -> float:
 	var score = 0.0
 	var amount = int(itemData.get("baseAmount", 0))
 	if amount > 0 and isAllied(actingActor.name, act.targetName):
-		score = float(mini(amount, target.maxHp - target.hp))
+		# Heal-score by missing HP (design doc), so the support prefers the
+		# most wounded ally instead of tying every wounded target at the item
+		# amount.
+		score = float(target.maxHp - target.hp)
 	for effect in itemData.get("effects", []):
 		score += effectScore(effect, actingActor, target)
 	return score
@@ -249,6 +252,12 @@ func aiValue(actingActor, key: String, fallback):
 	if aiBlock is Dictionary:
 		return aiBlock.get(key, fallback)
 	return fallback
+
+## Object.get() takes a single argument (default values are a Dictionary-only
+## feature), so actor list properties are read defensively.
+func actorList(actingActor, key: String) -> Array:
+	var value = actingActor.get(key)
+	return value if value is Array else []
 
 func getActor(actorName: String):
 	return shootout.getActor(actorName) if shootout != null and shootout.has_method("getActor") else null

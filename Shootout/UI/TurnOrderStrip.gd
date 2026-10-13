@@ -9,7 +9,10 @@ const OTHER_COLOR = Color(0.8, 0.8, 0.8)
 
 func setTurnOrder(actorNames: Array) -> void:
 	for child in get_children():
+		# Queue while still parented (safe deletion) and detach immediately so
+		# the strip rebuilds within the same frame instead of keeping stale labels.
 		child.queue_free()
+		remove_child(child)
 	for i in actorNames.size():
 		var label = Label.new()
 		label.name = "Turn{index}".format({ "index": i })
