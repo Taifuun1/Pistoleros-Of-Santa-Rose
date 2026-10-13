@@ -28,6 +28,8 @@ var stats = {
 }
 
 var rodeo = null
+var characterClass = null
+var characterMagazine = null
 
 var weapon = {
 	"type": null,
@@ -52,6 +54,8 @@ func init(actorData: Dictionary):
 	
 	stats = actorData.stats
 	rodeo = actorData.rodeo
+	characterClass = actorData.get("characterClass", null)
+	characterMagazine = actorData.get("magazine", null)
 	
 	weapon = actorData.weapon
 	#equipment = actorData.equipment

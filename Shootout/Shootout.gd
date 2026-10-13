@@ -13,6 +13,7 @@ const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
 const AnimationSequencerScript = preload("res://Shootout/ShootoutAnimationSequencer.gd")
 const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
+const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -23,6 +24,7 @@ var actionResolver
 var animationSequencer
 var enemyAI
 var rodeoManager
+var cylinderManager
 
 var selectedAct = null
 var selectedActor = ""
@@ -43,6 +45,8 @@ func _ready() -> void:
 	enemyAI = EnemyAIScript.new()
 	rodeoManager = RodeoManagerScript.new()
 	rodeoManager.init(self)
+	cylinderManager = CylinderManagerScript.new()
+	cylinderManager.init(self)
 	animationSequencer = AnimationSequencerScript.new()
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
@@ -87,6 +91,7 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	newShootoutActor.getAnimations().onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
 	turnManager.registerActor(actorSide, actorNameIndexed, actorPosition)
 	rodeoManager.registerActor(newShootoutActor, actorSide, actorPosition)
+	cylinderManager.registerActor(newShootoutActor)
 
 func getActor(actorName: String) -> Node:
 	if actorName == "":

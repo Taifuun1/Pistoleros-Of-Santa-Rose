@@ -3,6 +3,7 @@ extends Node
 
 var data = {
 	"name": "Sharp Shot",
+	"category": "attack_ability",
 	"baseAmount": 5,
 	"statScaling": 0.25,
 	"scalingStat": "sixShootin",

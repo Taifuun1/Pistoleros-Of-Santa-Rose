@@ -1,3 +1,12 @@
+# Cylinder Magazine contributed by each weapon id (see
+# Docs/System Design/Shootout/Cylinders.md). Placeholders for balancing.
+var magazines = {
+	"revolver": [1, -1, 0],
+	"rifle": [0, 1, -1],
+	"shotgun": [-1, 0, 1],
+	"scratch": [0, 0, 0],
+}
+
 var weaponFamilies = {
 	"revolver": [
 		{"name": "Colt Paterson", "sprites": ["res://Assets/Weapons/ColtPatersonRevolver.png"]},
