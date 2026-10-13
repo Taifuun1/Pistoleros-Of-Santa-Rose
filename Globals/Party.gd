@@ -20,6 +20,7 @@ const KNOCKOUT_DEBUFFS = [
 
 var level = 1
 var money = 0
+var inventory = []
 var questInProgress = false
 
 var party = {
@@ -101,6 +102,8 @@ func applyFightResults(results: Dictionary) -> void:
 			if debuff.shootoutsLeft > 0:
 				debuffs.append(debuff)
 		member["knockoutDebuffs"] = debuffs
+	if results.has("loot"):
+		applyLoot(results.loot)
 	for actorName in results.get("party", {}):
 		if !party.has(actorName):
 			continue
@@ -113,6 +116,14 @@ func applyFightResults(results: Dictionary) -> void:
 			member["knockoutDebuffs"] = makeKnockoutDebuffs()
 		if results.get("fled", false) and !member.downed:
 			applyFleeCost(actorName)
+
+
+## Loot from a won fight (Docs/System Design/Shootout/Rewards.md): money goes
+## to the pouch, item instances to the inventory.
+func applyLoot(loot: Dictionary) -> void:
+	money += int(loot.get("money", 0))
+	for item in loot.get("items", []):
+		inventory.append(item)
 
 
 func makeKnockoutDebuffs() -> Array:

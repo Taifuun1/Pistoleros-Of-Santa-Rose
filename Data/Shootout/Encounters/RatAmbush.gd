@@ -7,6 +7,7 @@ var data = {
 	"kind": "dustup",
 	"flavor": "Hold-up",
 	"background": "res://Assets/Shootout Backgrounds/GrassLandsShootoutBackground.png",
+	"lootTable": "Rats",
 	"winCondition": { "type": "rout" },
 	"teams": {
 		"player team": {

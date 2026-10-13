@@ -46,6 +46,7 @@ var itemsData = {}
 var rodeosData = {}
 var classesData = {}
 var aiData = {}
+var lootTablesData = {}
 
 
 func _ready():
@@ -58,6 +59,7 @@ func loadData() -> void:
 	classesData = loadDataFolder("res://Data/Shootout/Classes")
 	if DirAccess.dir_exists_absolute("res://Data/Shootout/AI"):
 		aiData = loadDataFolder("res://Data/Shootout/AI")
+	lootTablesData = loadDataFolder("res://Data/Shootout/LootTables")
 
 func loadDataFolder(folderPath: String) -> Dictionary:
 	var data = {}

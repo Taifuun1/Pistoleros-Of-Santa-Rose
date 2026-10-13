@@ -194,3 +194,52 @@ func _rollSprite(spritePool: Array) -> String:
 	if spritePool.is_empty():
 		return ""
 	return spritePool[randi() % spritePool.size()]
+
+
+## Loot generation (Docs/System Design/Shootout/Rewards.md): rolls money and
+## weighted entries from a loot table, then applies Rodeo loot modifiers
+## (flat amounts first, multipliers after).
+func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
+	var loot = { "money": 0, "items": [] }
+	var amounts = modifiers.get("amounts", {})
+	var multipliers = modifiers.get("multipliers", {})
+	var moneyData = table.get("money", {})
+	if !moneyData.is_empty() and randf() < float(moneyData.get("chance", 1.0)):
+		var money = randi_range(int(moneyData.get("min", 0)), int(moneyData.get("max", 0)))
+		money += int(amounts.get("money", 0))
+		loot.money = maxi(0, int(round(money * float(multipliers.get("money", 1.0)))))
+	else:
+		loot.money = maxi(0, int(round(int(amounts.get("money", 0)) * float(multipliers.get("money", 1.0)))))
+	for i in int(table.get("rolls", 0)):
+		var entry = rollWeightedEntry(table.get("entries", []))
+		if entry == null:
+			continue
+		match entry.get("kind", ""):
+			"consumable":
+				loot.items.append({ "itemType": "consumable", "id": entry.get("id", ""), "name": entry.get("id", "") })
+			"weapon", "equipment":
+				var options = { "itemType": entry.kind }
+				var rarityPool = entry.get("rarity", [])
+				if !rarityPool.is_empty():
+					options["rarity"] = rarityPool[randi() % rarityPool.size()]
+				loot.items.append(generateItem(options))
+			"resources":
+				var amount = int(entry.get("amount", 0)) + int(amounts.get("resources", 0))
+				loot.items.append({ "itemType": "resources", "amount": maxi(0, int(round(amount * float(multipliers.get("resources", 1.0))))) })
+			_:
+				push_warning("ItemGeneration: unknown loot entry kind '{kind}'".format({ "kind": entry.get("kind", "") }))
+	return loot
+
+
+func rollWeightedEntry(entries: Array):
+	var total = 0
+	for entry in entries:
+		total += maxi(0, int(entry.get("weight", 0)))
+	if total == 0:
+		return null
+	var pick = randi() % total
+	for entry in entries:
+		pick -= maxi(0, int(entry.get("weight", 0)))
+		if pick < 0:
+			return entry
+	return null
