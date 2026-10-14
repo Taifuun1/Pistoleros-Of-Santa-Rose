@@ -108,7 +108,6 @@ A "Yeah, I'll finish this game."<br>
 G "She's gonna play for at least an hour..."
 
 ## After the poker cheaters win three poker hands
-
 PP "Insane luck..."<br>
 A "That ain't right! You're a cheater!"<br>
 TH "Good madam! That is quite an accusation! We are quite new to the game!"<br>

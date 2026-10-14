@@ -251,7 +251,7 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 	- Always active
 	- Activated at the beginning or at the end of the fight
 	- Activated at the beginning or end of every Round
-	- Activated at the beginning or end of every character Turn
+	- Activated at the beginning or end of the characters Turn
 - Decided by character class
 	- Unique named characters can have unique Rodeos
 	- Higher level characters have higher values for the Rodeo (if applicable)

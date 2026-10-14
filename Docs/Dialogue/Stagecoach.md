@@ -47,7 +47,7 @@ G "You think you could handle the explosives, Morrison?"<br>
 MO "...No. It's not that. It's just..."<br>
 G "What?"<br>
 MO "...I was thinking, doesn't the train have gold bars in it? Like, tons of them, even?"<br>
-G "That's what everyone always says. The story is always the same."<br>
+G "That's how the story goes."<br>
 G "The Continental Train brings the wealthiest folk to the West coast."<br>
 G "They travel the whole way in luxury. Draped in fancy jewellery, and fancier dresses."<br>
 G "And then everyone talks about the gold that is carried with them."<br>
@@ -334,7 +334,7 @@ Traveler tips hat
 EG "We'll be leaving the oxen for you, as promised. Good luck on your endeavors, friend."<br>
 G "Safe trails."<br>
 Traveler walks out of saloon<br>
-G "That's the end that trip. We've got the oxen, for free."<br>
+G "That's the end of that trip. We've got the oxen, for free."<br>
 G "But now there's a bigger problem. We can't go through the mountain pass again."<br>
 G "The Charokees are hostile to us now. There's no chance we can pass back through Pillrose Pass."<br>
 MA "I sweettalked the <i>nativos</i> to pretty dreams! They we're in <i>paraíso!</i>"<br>
