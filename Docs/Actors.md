@@ -66,7 +66,7 @@ Gain additional High Tailin' in the first column
 
 Manuel Cárdenas
 Camaradería
-Main party members in the same column as Manuel gain additional MxHp or other buffs
+Main party members in front of Manuel gain additional MxHp or other buffs
 
 Morrison Branson
 Camp caretaker
