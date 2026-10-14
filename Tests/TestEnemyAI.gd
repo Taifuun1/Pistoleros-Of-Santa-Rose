@@ -110,7 +110,7 @@ func _run() -> void:
 	ctx.fake.movesData = {
 		"Snipe": { "name": "Snipe", "category": "ability", "side": "enemy", "baseAmount": 3,
 			"positions": { "actorUser": [3, 4], "targets": { "columns": [1, 2] } } },
-		"Duck Down": { "name": "Duck Down", "category": "duck", "side": "enemy",
+		"Duck Down": { "name": "Duck Down", "category": "duck", "side": "player",
 			"positions": { "targets": { "columns": [1, 2, 3, 4] } }, "effects": [] }
 	}
 	var hunter = addActor(ctx, "Hunter", "enemy team", 1)
@@ -139,7 +139,7 @@ func _run() -> void:
 
 	print("\n--- Support archetype heals a wounded ally over attacking ---")
 	ctx = makeFight()
-	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "enemy", "baseAmount": 5 } }
+	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "player", "baseAmount": 5 } }
 	var medic = addActor(ctx, "Medic", "enemy team", 1)
 	medic.items = ["Paregoric"]
 	medic.ai = { "archetype": "support", "aggression": 0.2 }
@@ -161,7 +161,7 @@ func _run() -> void:
 
 	print("\n--- Boss scripts beat scoring ---")
 	ctx = makeFight()
-	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "enemy", "baseAmount": 5 } }
+	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "player", "baseAmount": 5 } }
 	ctx.fake.aiData = { "Rat King": { "name": "Rat King", "rules": [
 		{ "when": { "hpBelow": 0.5 }, "act": { "type": "Items", "name": "Paregoric", "targetName": "self" } }
 	] } }

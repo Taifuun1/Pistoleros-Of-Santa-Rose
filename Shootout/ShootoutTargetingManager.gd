@@ -32,10 +32,10 @@ func isValidTarget(act: Dictionary, targetActorName: String, actingActorName: St
 			return actingSide != targetSide and weaponRangeCheck(actingActorName, targetActorName)
 		ACT_TYPE_MOVES:
 			var moveData = getDataSet("movesData")
-			return targetSide == getActSide(moveData, act.get("name", "")) and actRangeCheck(act, actingActorName, targetActorName, moveData)
+			return targetSide == getActSide(moveData, act.get("name", ""), actingActorName) and actRangeCheck(act, actingActorName, targetActorName, moveData)
 		ACT_TYPE_ITEMS:
 			# Items can target allies in any position (decided): no range check.
-			return targetSide == getActSide(getDataSet("itemsData"), act.get("name", ""))
+			return targetSide == getActSide(getDataSet("itemsData"), act.get("name", ""), actingActorName)
 	return false
 
 # Data lookups resolve the Shootout autoload through the tree (matching the
@@ -79,13 +79,18 @@ func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, data
 			usable.append(moveName)
 	return usable
 
-func getActSide(dataSet: Dictionary, actName: String) -> String:
+## Act data `side` is relative to the acting actor (Docs/System Design/Shootout/
+## Moves Items and Ducks.md): "enemy" is the caster's opposing side, "player"
+## the caster's own side (allies). Resolving the values to fixed teams made
+## enemies target their own side with hostile acts.
+func getActSide(dataSet: Dictionary, actName: String, actingActorName: String) -> String:
 	var actData = dataSet.get(actName, null)
 	if actData == null:
 		return ""
-	if actData.get("side", "") == "player":
-		return TEAM_PLAYER
-	return TEAM_ENEMY
+	var actingSide = turnManager.sideOfActor(actingActorName)
+	if actData.get("side", "") == "enemy":
+		return TEAM_ENEMY if actingSide == TEAM_PLAYER else TEAM_PLAYER
+	return actingSide
 
 ## Moves/abilities use the `positions` block on their data: `actorUser` lists
 ## the columns they can be used from, `targets.columns` the targetable columns.

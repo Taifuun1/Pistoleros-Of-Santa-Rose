@@ -50,7 +50,7 @@ Actors in a Shootout are `Actors/Shootout/ShootoutActor.tscn` instances (`Shooto
 - **Data-driven content**: every Move, Item, Rodeo and Encounter is a `Data/Shootout/**.gd` file exposing a single `data` Dictionary; the `Shootout` autoload loads whole folders. New systems should follow the same pattern (e.g. `Data/Shootout/Ducks`, `Data/Shootout/Encounters`).
 - **Warn and skip**: managers tolerate missing data and unimplemented ops with `push_warning`, so systems can land incrementally (see the Rodeo manager's reserved ops).
 - **Headless-testable**: managers resolve autoloads via `get_node_or_null("/root/...")` so tests like `Tests/TestRodeos.gd` can run without the full game. Each system doc includes a matching test plan.
-- **Indexed actor names**: spawned actors get `"{name}{index}"` names (e.g. `Squeky rat0`) so duplicate enemies are addressable; `turnManager.shootoutActors` is the registry of living actors.
+- **Indexed actor names**: spawned actors get `"{name}{index}"` names (e.g. `Squeky rat0`) so duplicate enemies are addressable; the index continues across the whole encounter (`Shootout.actorSpawnPlan`), so the same actor name on both teams never collides — Godot silently rejects a colliding name assignment, which would break the per-actor node paths (hover outline, `getActor`). `turnManager.shootoutActors` is the registry of living actors.
 
 ## Build order
 

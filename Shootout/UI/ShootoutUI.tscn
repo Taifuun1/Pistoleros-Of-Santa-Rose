@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bc7rpjuhb524c"]
 
 [ext_resource type="Script" uid="uid://dxuuu0o12w3q3" path="res://Shootout/UI/ShootoutUI.gd" id="1_2qgxu"]
-[ext_resource type="PackedScene" uid="uid://biv2pthnfytk4" path="res://Shootout/UI/ShootoutButton.tscn" id="1_drfjl"]
 [ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="1_w5ldf"]
+[ext_resource type="Script" uid="uid://iymwtqg007to" path="res://Shootout/UI/TurnOrderStrip.gd" id="2_ordst"]
 [ext_resource type="Texture2D" uid="uid://din58ef8od4fn" path="res://Assets/Shootout Backgrounds/GrassLandsShootoutBackground.png" id="3_3n0l5"]
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
 [ext_resource type="Texture2D" uid="uid://cjocgotg0hgx5" path="res://Assets/Icons/SixShootinIcon.png" id="4_8ob0s"]
@@ -32,9 +32,12 @@
 [ext_resource type="Texture2D" uid="uid://byidakxtgjfki" path="res://Assets/Icons/BeltIconGrey.png" id="27_4uxyg"]
 [ext_resource type="Texture2D" uid="uid://oi1ky4jjmynp" path="res://Assets/Stats/Style.png" id="27_32rvh"]
 [ext_resource type="Texture2D" uid="uid://cbc2e05nxkxoh" path="res://Assets/Moves/HandShot.png" id="30_p0scf"]
+[ext_resource type="Texture2D" uid="uid://b1e7gwfxs0sks" path="res://Assets/Stats/CylinderLine.png" id="34_cylline"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g4v7s"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3s1hn"]
-bg_color = Color(0.8918874, 0.47035939, 0.1614792, 1)
+bg_color = Color(0.8901961, 0.47058824, 0.16078432, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -43,7 +46,15 @@ corner_radius_top_left = 4
 corner_radius_bottom_right = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yf5fn"]
-bg_color = Color(0.91974264, 0.4910543, 0.93530285, 1)
+bg_color = Color(0.43020093, 0.7685864, 0.5671854, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85731065, 0.8036649, 0.5690886, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60wve"]
+bg_color = Color(0.8901961, 0.47058824, 0.16078432, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -75,6 +86,7 @@ theme = ExtResource("1_w5ldf")
 script = ExtResource("1_2qgxu")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=753712354]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -84,6 +96,7 @@ grow_vertical = 2
 texture = ExtResource("3_3n0l5")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=712509608]
+custom_maximum_size = Vector2(640, 360)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,17 +112,20 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 alignment = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer" unique_id=1663316958]
-visible = false
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=228585487]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/CenterContainer" unique_id=2102060427]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/MarginContainer" unique_id=1257443379]
+custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
-mouse_filter = 2
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_g4v7s")
 
-[node name="Acts" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/PanelContainer" unique_id=196508921]
+[node name="Turn Order" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/PanelContainer" unique_id=196508921]
 layout_mode = 2
-alignment = 1
+theme_override_constants/separation = 8
+script = ExtResource("2_ordst")
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=1357400511]
 layout_mode = 2
@@ -131,118 +147,41 @@ theme_override_constants/margin_bottom = 3
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2000955173]
+[node name="Acts" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2000955173]
+custom_maximum_size = Vector2(-1, 26)
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1411309040]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts" unique_id=1411309040]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_3s1hn")
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer" unique_id=994450716]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts/PanelContainer" unique_id=994450716]
 layout_mode = 2
 texture = ExtResource("18_uoiiw")
 
-[node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1675274788]
+[node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts" unique_id=1675274788]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
 
-[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer6" unique_id=779842888]
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts/PanelContainer6" unique_id=779842888]
 layout_mode = 2
 texture = ExtResource("5_d8xx0")
 
-[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=334558390]
+[node name="Moves" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts"]
 layout_mode = 2
-icon = ExtResource("4_23rvq")
+theme_override_constants/separation = 2
 
-[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=445226995]
+[node name="PanelContainer7" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts" unique_id=396288265]
 layout_mode = 2
-icon = ExtResource("4_r3ka0")
+theme_override_styles/panel = SubResource("StyleBoxFlat_60wve")
 
-[node name="Button3" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=529659850]
-layout_mode = 2
-icon = ExtResource("8_60wve")
-
-[node name="AttackButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1597423866 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Attack"
-
-[node name="MoveButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=728386076 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Move
-"
-
-[node name="ItemButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1266723861 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Item"
-
-[node name="DuckButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=624912918 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Duck
-"
-
-[node name="RepositionButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=313370001 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Reposition"
-
-[node name="FleeButton" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=313370002 instance=ExtResource("1_drfjl")]
-visible = false
-custom_minimum_size = Vector2(0, 12)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-text = "Flee"
-
-[node name="PanelContainer7" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=396288265]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
-
-[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer7" unique_id=444982822]
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts/PanelContainer7" unique_id=444982822]
 layout_mode = 2
 texture = ExtResource("9_p0scf")
 
-[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1869279048]
+[node name="Items" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
-
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2" unique_id=1282333892]
-layout_mode = 2
-texture = ExtResource("4_23rvq")
-
-[node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=996340548]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
-
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer3" unique_id=1766777220]
-layout_mode = 2
-texture = ExtResource("4_23rvq")
-
-[node name="PanelContainer4" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=910015207]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
-
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer4" unique_id=1943158542]
-layout_mode = 2
-texture = ExtResource("4_23rvq")
+theme_override_constants/separation = 2
 
 [node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1369607485]
 custom_minimum_size = Vector2(0, 1)
@@ -251,6 +190,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_57qmd")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1838559291]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=616587270]
 layout_mode = 2
@@ -262,6 +202,7 @@ size_flags_horizontal = 3
 [node name="RichTextLabelExtended8px" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1294598600 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "Walker Langley"
+autowrap_mode = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1681174447]
 layout_mode = 2
@@ -269,82 +210,100 @@ layout_mode = 2
 [node name="RichTextLabelExtended8px2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=696762 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "Pistolero"
+autowrap_mode = 0
 
 [node name="RichTextLabelExtended8px3" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=575415204 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "Rodeo"
+autowrap_mode = 0
 
-[node name="Data" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=2027492489]
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=2027492489]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 2
 size_flags_vertical = 3
 
-[node name="HPContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data" unique_id=90227123]
+[node name="HPContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4" unique_id=90227123]
 layout_mode = 2
+size_flags_horizontal = 0
 alignment = 1
 script = ExtResource("4_8sf7b")
 
-[node name="HPIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=916868905]
+[node name="HPIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" unique_id=916868905]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("4_vga8u")
+expand_mode = 2
 stretch_mode = 5
 
-[node name="HP" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=1671721679 instance=ExtResource("7_3n0l5")]
+[node name="HP" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" unique_id=1671721679 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "00/00"
+autowrap_mode = 0
 
-[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" unique_id=348959617 instance=ExtResource("5_5ysdm")]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" unique_id=348959617 instance=ExtResource("5_5ysdm")]
 
-[node name="EnduranceContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data" unique_id=296699381]
+[node name="EnduranceContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4" unique_id=296699381]
 layout_mode = 2
+size_flags_horizontal = 0
 script = ExtResource("4_8sf7b")
 
-[node name="EnduranceIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=83820805]
+[node name="EnduranceIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" unique_id=83820805]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("9_splkh")
+expand_mode = 2
 stretch_mode = 5
 
-[node name="Endurance" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=621143703 instance=ExtResource("7_3n0l5")]
+[node name="Endurance" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" unique_id=621143703 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "00/00"
+autowrap_mode = 0
 
-[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" unique_id=1716909041 instance=ExtResource("5_5ysdm")]
+[node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" unique_id=1716909041 instance=ExtResource("5_5ysdm")]
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1309542305]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 2
 
 [node name="SandContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=2038102741]
 layout_mode = 2
+size_flags_horizontal = 0
 script = ExtResource("4_8sf7b")
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1594476288]
 layout_mode = 2
 texture = ExtResource("26_m6353")
+expand_mode = 2
 stretch_mode = 5
 
 [node name="RichTextLabelExtended8px2" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1888791404 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "00"
+autowrap_mode = 0
 
 [node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" unique_id=1558058711 instance=ExtResource("5_5ysdm")]
 
 [node name="StyleContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1584868530]
 layout_mode = 2
+size_flags_horizontal = 0
 script = ExtResource("4_8sf7b")
 
 [node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=1428024332]
 layout_mode = 2
 texture = ExtResource("27_32rvh")
+expand_mode = 2
 stretch_mode = 5
 
 [node name="RichTextLabelExtended8px4" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=131679672 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "00"
+autowrap_mode = 0
 
 [node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" unique_id=968512137 instance=ExtResource("5_5ysdm")]
+
+[node name="Effects" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1059317074]
+layout_mode = 2
+size_flags_horizontal = 2
 
 [node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=2023299423]
 custom_minimum_size = Vector2(0, 1)
@@ -353,6 +312,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_57qmd")
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" unique_id=23333215]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Stats" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=87362554]
 layout_mode = 2
@@ -374,7 +334,7 @@ texture = ExtResource("4_8ob0s")
 stretch_mode = 5
 
 [node name="SixShootin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/SixShootinContainer" unique_id=1200918949 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 text = "00"
 visible_characters = 2
@@ -407,7 +367,7 @@ texture = ExtResource("5_docnv")
 stretch_mode = 5
 
 [node name="HighTailin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/HighTailinContainer" unique_id=59873499 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 text = "00"
 visible_characters = 2
@@ -440,7 +400,7 @@ texture = ExtResource("6_0he6b")
 stretch_mode = 5
 
 [node name="Taffyin" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/TaffyinContainer" unique_id=12000496 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 text = "00"
 visible_characters = 2
@@ -473,7 +433,7 @@ texture = ExtResource("7_gux81")
 stretch_mode = 5
 
 [node name="Revolver" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RevolverContainer" unique_id=197586396 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 text = "00"
 visible_characters = 2
@@ -506,7 +466,7 @@ texture = ExtResource("8_caqsy")
 stretch_mode = 5
 
 [node name="Rifle" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/RifleContainer" unique_id=1583513789 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
+custom_minimum_size = Vector2(15, 10)
 layout_mode = 2
 text = "00"
 visible_characters = 2
@@ -539,14 +499,13 @@ texture = ExtResource("12_hg5u7")
 stretch_mode = 5
 
 [node name="Shotgun" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=124923013 instance=ExtResource("7_3n0l5")]
-custom_minimum_size = Vector2(15, 18)
 layout_mode = 2
 text = "00"
 visible_characters = 2
 
 [node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Stats/ShotgunContainer" unique_id=694923031 instance=ExtResource("5_5ysdm")]
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1963777971]
+[node name="MagazineContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1963777971]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 3
@@ -554,77 +513,113 @@ theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 2
 
-[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer" unique_id=1659631199]
+[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer" unique_id=1659631199]
 layout_mode = 2
 size_flags_horizontal = 2
 alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=304519948]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=304519948]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer" unique_id=1132037402]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer" unique_id=1132037402]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 offset_transform_enabled = true
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=754159496]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer" unique_id=290145440]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=754159496]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer2" unique_id=79281846]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer2" unique_id=79281846]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=341862877]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer2" unique_id=1529316949]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=341862877]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer3" unique_id=763309980]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer3" unique_id=763309980]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=354940357]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer3" unique_id=831404844]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=354940357]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer4" unique_id=1247313684]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer4" unique_id=1247313684]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=941441536]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer4" unique_id=2119602439]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=941441536]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer5" unique_id=1589282554]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer5" unique_id=1589282554]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine" unique_id=294878642]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer5" unique_id=1044294859]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine" unique_id=294878642]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MarginContainer/Magazine/VBoxContainer6" unique_id=2047074068]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer6" unique_id=2047074068]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
+
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/MagazineContainer/Magazine/VBoxContainer6" unique_id=1633023260]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
 
 [node name="Equipment" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2" unique_id=378459354]
 layout_mode = 2
@@ -643,8 +638,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 modulate = Color(1, 1, 1, 0.49803922)
 layout_mode = 2
 texture = ExtResource("24_4uxyg")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1476777415]
 custom_minimum_size = Vector2(26, 26)
@@ -657,8 +652,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 modulate = Color(1, 1, 1, 0.49803922)
 layout_mode = 2
 texture = ExtResource("24_p0scf")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=285847855]
 custom_minimum_size = Vector2(25, 25)
@@ -671,8 +666,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 modulate = Color(1, 1, 1, 0.49803922)
 layout_mode = 2
 texture = ExtResource("25_4uxyg")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer6" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1363536015]
 custom_minimum_size = Vector2(25, 25)
@@ -684,8 +679,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 [node name="TextureRect6" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment/PanelContainer6" unique_id=358595699]
 layout_mode = 2
 texture = ExtResource("27_4uxyg")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer4" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=1592694311]
 custom_minimum_size = Vector2(25, 25)
@@ -698,8 +693,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 modulate = Color(1, 1, 1, 0.49803922)
 layout_mode = 2
 texture = ExtResource("26_60wve")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer5" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2/Equipment" unique_id=340262394]
 custom_minimum_size = Vector2(25, 25)
@@ -712,8 +707,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
 modulate = Color(1, 1, 1, 0.49803922)
 layout_mode = 2
 texture = ExtResource("22_k6mq4")
-expand_mode = 2
-stretch_mode = 4
+expand_mode = 4
+stretch_mode = 5
 
 [node name="PanelContainer3" type="PanelContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=59106041]
 layout_mode = 2
@@ -754,10 +749,14 @@ stretch_mode = 5
 layout_mode = 2
 text = "00/00"
 
-[node name="RodeoContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer"]
+[node name="Effects" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1567204398]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="RodeoContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer" unique_id=1948532040]
 layout_mode = 2
 
-[node name="HoveredRodeo" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/RodeoContainer" instance=ExtResource("7_3n0l5")]
+[node name="HoveredRodeo" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/RodeoContainer" unique_id=335216899 instance=ExtResource("7_3n0l5")]
 layout_mode = 2
 text = "-"
 
@@ -1012,7 +1011,7 @@ visible_characters = 2
 
 [node name="Tooltip" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/Stats/ShotgunContainer" unique_id=1294468844 instance=ExtResource("5_5ysdm")]
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=823402391]
+[node name="MagazineContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=823402391]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 3
@@ -1020,77 +1019,113 @@ theme_override_constants/margin_top = 1
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 2
 
-[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer" unique_id=187506558]
+[node name="Magazine" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer" unique_id=187506558]
 layout_mode = 2
 size_flags_horizontal = 6
 alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=58044263]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=58044263]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer" unique_id=1211518767]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer" unique_id=1211518767]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 offset_transform_enabled = true
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1666704888]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer" unique_id=279233734]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=1666704888]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer2" unique_id=1238426982]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer2" unique_id=1238426982]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=602640048]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer2" unique_id=1416968179]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=602640048]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer3" unique_id=369290960]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer3" unique_id=369290960]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=82960973]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer3" unique_id=339275441]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=82960973]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer4" unique_id=1453379797]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer4" unique_id=1453379797]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1862212931]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer4" unique_id=1198242352]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=1862212931]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer5" unique_id=468283696]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer5" unique_id=468283696]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
 
-[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine" unique_id=1953518678]
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer5" unique_id=276083409]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
+
+[node name="VBoxContainer6" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine" unique_id=1953518678]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MarginContainer/Magazine/VBoxContainer6" unique_id=983241671]
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer6" unique_id=983241671]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("16_bfb8p")
+
+[node name="CylinderLine" type="TextureRect" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3/MagazineContainer/Magazine/VBoxContainer6" unique_id=1756288148]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+texture = ExtResource("34_cylline")
+expand_mode = 1
 
 [node name="Moves" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1948791486]
 layout_mode = 2
@@ -1176,15 +1211,11 @@ texture = ExtResource("30_p0scf")
 expand_mode = 2
 stretch_mode = 4
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AttackButton" to="." method="_on_shootout_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/MoveButton" to="." method="_on_move_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ItemButton" to="." method="_on_item_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/RepositionButton" to="." method="_on_reposition_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/FleeButton" to="." method="_on_flee_button_pressed"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/HPContainer" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" method="_on_mouse_entered" binds= ["Endurance", "Endurance amount"]]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/Data/EnduranceContainer" method="_on_mouse_exited"]
+[node name="Tooltip" parent="." instance=ExtResource("5_5ysdm")]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" method="_on_mouse_entered" binds= ["Endurance", "Endurance amount"]]
+[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" method="_on_mouse_entered" binds= ["Sand", "Sand amount"]]
 [connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SandContainer" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/StyleContainer" method="_on_mouse_entered" binds= ["Style", "Style amount"]]

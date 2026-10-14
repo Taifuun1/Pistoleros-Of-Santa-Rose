@@ -8,6 +8,7 @@ const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
 const SIDES = ["player team", "enemy team"]
 
 var failures = 0
+var shootoutScript: GDScript = null
 
 
 class FakeActor:
@@ -74,9 +75,19 @@ func validateEncounter(data: Dictionary, fileName: String) -> void:
 					_check(position >= 1 and position <= 4, "%s: %s position %d out of range" % [fileName, actorName, position])
 					_check(!columns.has(position), "%s: two actors on %s position %d" % [fileName, side, position])
 					columns[position] = true
+	# Colliding node names are silently rejected by Godot, which breaks the
+	# per-actor node paths (hover outline, getActor), so the spawn plan must
+	# produce unique indexed names even when both teams use the same actor.
+	var seen = {}
+	for actor in shootoutScript.actorSpawnPlan(teams):
+		_check(!seen.has(actor.indexedName), "%s: duplicate indexed actor name %s" % [fileName, actor.indexedName])
+		seen[actor.indexedName] = true
 
 
 func _run() -> void:
+	# Loaded at runtime: Shootout.gd references autoloads, which are not
+	# registered while the --script main loop compiles its preloads.
+	shootoutScript = load("res://Shootout/Shootout.gd")
 	print("--- Encounter files are valid ---")
 	var fileCount = 0
 	for fileName in DirAccess.get_files_at("res://Data/Shootout/Encounters"):
@@ -96,6 +107,17 @@ func _run() -> void:
 	_check(legacyTeams.has("player team") and legacyTeams.has("enemy team"), "teams extraction works for the new format")
 	var legacy = { "player team": {}, "enemy team": {} }
 	_check(legacy.get("teams", legacy) == legacy, "legacy format (teams at root) still resolves")
+
+	print("\n--- Same actor name on both teams stays unique ---")
+	var plan = shootoutScript.actorSpawnPlan({
+		"player team": { "Named People": { "Walker Langley": { "positions": [1, 2] } } },
+		"enemy team": { "Named People": { "Walker Langley": { "positions": [1, 2] } } }
+	})
+	_check(plan.size() == 4, "one plan entry per actor copy, got %d" % plan.size())
+	var names = []
+	for actor in plan:
+		names.append(actor.indexedName)
+	_check(names == ["Walker Langley0", "Walker Langley1", "Walker Langley2", "Walker Langley3"], "the index continues across teams so names never collide, got %s" % [names])
 
 	print("\n--- Win condition: defeat_actor ---")
 	var ctx = makeManager()
