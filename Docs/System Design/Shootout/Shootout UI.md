@@ -1,6 +1,6 @@
 # Shootout UI
 
-The Shootout interface: act menus, stat panels, Cylinder display, effect icons, damage numbers, animations and fight-level flow (start popup, flee, end screen). Game-design rules live in `Docs/Combat.md` (Open Question 5: both own and enemy Cylinders are visible).
+The Shootout interface: act icons, stat panels, Cylinder display, effect icons, damage numbers, animations and fight-level flow (start popup, flee, end screen). Game-design rules live in `Docs/Combat.md` (Open Question 5: both own and enemy Cylinders are visible).
 
 This is a design doc: it describes the intended design, and the implementation may lag behind it. Undecided design points are collected in [Open Questions](#open-questions).
 
@@ -8,7 +8,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 `Shootout/UI/ShootoutUI.tscn` + `ShootoutUI.gd` provide:
 
-- Three act buttons (Attack/Shootout button, Move, Item) with a toggleable acts panel populated via `setPlayerCharacterActs()`; `ShootoutAct.tscn`/`ShootoutButton.tscn` are the list entries.
+- Act icon groups in the player panel's Acts row (moves after the Moves icon, belt items after the Belt icon) populated via `setPlayerCharacterActs()`; `ShootoutAct.tscn` is the icon entry, the Move/Flee utility icons render last in the row.
 - Player character panel (name, Rodeo, HP, Six Shootin'/High Tailin'/Taffyin', revolver/rifle/shotgun damage) and a hovered-actor panel with the same stats.
 - Hover outline on actors (`Shaders/Outline.tres`), click-to-select targets, turn highlight (`Highlight2` toggled by `actorTurn`).
 - Damage numbers via `Shootout.spawnDamageNumber()` (`Nodes/Damage Number/DamageNumber.tscn`); Rodeo popups reuse it in yellow.
@@ -16,12 +16,12 @@ This is a design doc: it describes the intended design, and the implementation m
 
 **Implemented** (display building blocks, act tooltips/grey-out, banners; world-space effect icons, multi-target selection and final art are pending):
 
-- **Cylinder display**: Shootout/UI/CylinderRow.gd renders Chamber pips (letters + colors per quality, Reload/Jammed specials, current Chamber marked); shown in both the player and hovered-actor stat panels from the Cylinder/ChamberIndex payload fields. Letters are placeholders until pip art exists.
-- **Effect summary**: effectManager.displayEffects() feeds an Effects line in both stat panels (stack counts per effect type). World-space icon rows above actors remain pending art.
-- **Turn order strip**: Shootout/UI/TurnOrderStrip.gd shows the full Round order with the current actor highlighted (decided), rebuilt every turn from turnManager.turnOrder.
-- **Acts panel**: entries carry tooltips (description, usable-from positions, usability reason) and unusable moves are greyed out with the reason instead of vanishing (ShootoutTargetingManager.moveUsability); Ducks stay in the Moves list (decided). Reposition (Forward/Backward picker) and Flee buttons exist (see the Positions and Death docs).
+- **Cylinder display**: the stats panels' pre-existing `MagazineContainer/Magazine` rows render the Cylinder from the Cylinder/ChamberIndex payload fields — one Chamber icon per slot (Miss/Graze/Hit/Critical Hit icons from `Assets/Stats`), the current Chamber marked with the `CylinderLine` underline, unused slots hidden; Reload/Jammed specials have no icons yet (tooltip only).
+- **Effect summary**: effectManager.displayEffects() renders one icon per effect type (bleed/poison/mark/damage-type mark/silence/taunt icons from `Assets/Effects`, placeholder fallback for types without art) into the Effects box of both stat panels, with stack counts (`x2`) next to the icon and the full summary line as tooltip. World-space icon rows above actors remain pending art.
+- **Turn order strip**: Shootout/UI/TurnOrderStrip.gd shows the full Round order as portrait icons (character icon from `Assets/Icons` derived from the actor name, placeholder fallback, actor name as tooltip) with the current actor highlighted via modulate; rebuilt every turn from turnManager.turnOrder. The row is never used for anything else — act icons live in the Acts row (decided: no act menu).
+- **Acts row**: the player panel's Acts row shows the acting character's available acts as `ShootoutAct` icons — moves (incl. Ducks) in the `Moves` group after the Moves icon, belt items in the `Items` group after the Belt icon — populated from Shootout.gd when the player's turn starts, and cleared when the turn ends (`hideActsPanel()`). There is no act menu (decided): every act is directly clickable. There are no basic attacks (decided): the player attacks through their moves. Entries carry tooltips (description, usable-from positions, usability reason) and unusable moves are greyed out with the reason instead of vanishing (ShootoutTargetingManager.moveUsability). The Move icon (toggles the Forward/Backward reposition picker into the Moves group) and the Flee icon render last in the row as utility icons; Flee grey-out rules per [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md).
 - **Fight flow**: showBanner() displays the flavor-name start popup (auto-fade); showEndScreen() shows the outcome and loot summary from the shootoutEnded results payload. Hit quality feedback uses per-quality damage-number colors and the Miss label.
-- Tests: Tests/TestShootoutUI.gd covers the pip row, the turn strip and the usability reasons.
+- Tests: Tests/TestShootoutUI.gd covers the Magazine cylinder icons, the turn strip, the usability reasons and the scene wiring (Turn Order row, Acts row icon groups, Effects boxes).
 
 Gaps: world-space effect icons, multi-target highlight/confirm flow, and final art/layout pass.
 
@@ -43,12 +43,16 @@ Once [Effects](Effects.md) lands: small icon rows above each actor (bleed drop, 
 
 Decided: a strip showing the **full Round order**, with the current actor highlighted (e.g. a frame/color on their portrait), portraits dropping off as turns are consumed. Data comes from `turnManager.turnOrder` (rebuilt each Round, see [Turns and Initiative](Turns%20and%20Initiative.md)).
 
-### Acts panel improvements
+### Acts row icons
 
-- Entries show description, range (`actorUser`/target columns) and effect summary from the data Dictionary, as a tooltip or a details line.
+The Acts row of the player panel shows everything the acting character can do this turn — there is no act menu:
+
+- Moves (incl. Ducks) render as `ShootoutAct` icons in the `Moves` group, right after the Moves icon; belt items render in the `Items` group, right after the Belt icon. Shootout.gd populates both when the player's turn starts and clears them when the turn ends.
+- Entries take clicks directly as Control input (`gui_input`): the act row sits on panel Controls that consume the mouse, so physics picking (`Area2D`) would never receive the click.
+- Entries show description, range (`actorUser`/target columns) and effect summary from the data Dictionary as a tooltip, and load their icon from `Assets/{actType}/{actName}.png`.
 - Unusable moves (wrong column, silenced) show greyed out with the reason rather than disappearing (see [Positions and Targeting](Positions%20and%20Targeting.md), [Effects](Effects.md)).
-- New buttons: **Reposition** (forward/backward picker, see Positions doc) and **Flee** (enable rules per [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
-- Ducks live in the Moves list with a distinct color/icon (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
+- Ducks live in the Moves group with a distinct color/icon (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
+- The Reposition direction picker (Forward/Backward) renders into the Moves group, toggled by the Move icon; there are no basic attacks (decided), and Flee is a utility icon (enable rules per [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
 
 ### Multi-target and ally targeting
 
@@ -64,7 +68,7 @@ Decided: a strip showing the **full Round order**, with the current actor highli
 
 **Create**
 
-- Cylinder pip row scene (e.g. `Shootout/UI/CylinderRow.tscn`) + effect icon row scene.
+- Effect icon row scene.
 - Start popup and end screen scenes.
 
 **Modify**

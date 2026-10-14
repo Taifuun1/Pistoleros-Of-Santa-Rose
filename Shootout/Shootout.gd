@@ -66,11 +66,8 @@ func _ready() -> void:
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
 	animationSequencer.sequenceDone.connect(resolveActOnce)
-	ui.attack.connect(_on_shootout_ui_attack)
 	ui.move.connect(_on_shootout_ui_move)
 	ui.item.connect(_on_shootout_ui_item)
-	ui.moveActsRequested.connect(_on_shootout_ui_move_acts_requested)
-	ui.itemActsRequested.connect(_on_shootout_ui_item_acts_requested)
 	ui.reposition.connect(_on_shootout_ui_reposition)
 	ui.flee.connect(_on_shootout_ui_flee)
 	actorDone.connect(_on_actor_done)
@@ -91,13 +88,8 @@ func init(encounterData: Dictionary) -> void:
 	flavorName = encounterData.get("flavor", pickFlavorName(encounterData.get("kind", "dustup")))
 	print("{flavor}! ({name})".format({ "flavor": flavorName, "name": encounterName }))
 	ui.showBanner("{flavor}!".format({ "flavor": flavorName }))
-	for actorSide in teams:
-		for actorType in teams[actorSide]:
-			for actorName in teams[actorSide][actorType]:
-				var index = 0
-				for actorPosition in teams[actorSide][actorType][actorName].positions:
-					spawnActor(actorSide, actorType, actorName, actorPosition, index)
-					index += 1
+	for actor in actorSpawnPlan(teams):
+		spawnActor(actor.side, actor.type, actor.name, actor.position, actor.indexedName)
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_START)
 	turnManager.createTurnOrder()
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
@@ -107,9 +99,36 @@ func pickFlavorName(kind: String) -> String:
 	var flavors = Shootout.SHOWDOWN_FLAVORS if kind == "showdown" else Shootout.DUSTUP_FLAVORS
 	return flavors[randi() % flavors.size()]
 
-func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, index: int) -> void:
+
+## One entry per spawned actor: side, type, name, position and the unique
+## indexed actor name. The index continues across the whole encounter — the
+## same actor name on both teams must never produce colliding node names,
+## because Godot silently rejects a colliding name assignment (the node keeps
+## an auto-generated name) and per-actor node paths like
+## "{name}/AnimationSprite" break.
+static func actorSpawnPlan(teams: Dictionary) -> Array:
+	var plan = []
+	var indexes = {}
+	for actorSide in teams:
+		for actorType in teams[actorSide]:
+			for actorName in teams[actorSide][actorType]:
+				var index = int(indexes.get(actorName, 0))
+				for actorPosition in teams[actorSide][actorType][actorName].positions:
+					plan.append({
+						"side": actorSide,
+						"type": actorType,
+						"name": actorName,
+						"position": actorPosition,
+						"indexedName": "{actorName}{index}".format({ "actorName": actorName, "index": index }),
+					})
+					index += 1
+				indexes[actorName] = index
+	return plan
+
+## The index continues across the whole encounter (see actorSpawnPlan) so the
+## same actor name on both teams never produces colliding node names.
+func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, actorNameIndexed: String) -> void:
 	var newShootoutActor = ShootoutActorScene.instantiate()
-	var actorNameIndexed = "{actorName}{index}".format({ "actorName": actorName, "index": index })
 	actorsRoot.add_child(newShootoutActor)
 	if Party.party.has(actorName):
 		newShootoutActor.init(Party.getFightData(actorName))
@@ -124,7 +143,9 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
 	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats)
-	newShootoutActor.getAnimations().onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
+	var animations = newShootoutActor.getAnimations()
+	if animations != null:
+		animations.onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
 	turnManager.registerActor(actorSide, actorNameIndexed, actorPosition)
 	rodeoManager.registerActor(newShootoutActor, actorSide, actorPosition)
 	cylinderManager.registerActor(newShootoutActor)
@@ -155,6 +176,10 @@ func startCurrentTurn() -> void:
 		playerHasControl = true
 		ui.playerHasControl = true
 		setActorCharacterStats(actorName)
+		# No act menu: the available moves and belt items render as icons in
+		# the Acts row for the whole turn (Docs/System Design/Shootout/Shootout UI.md).
+		ui.setPlayerCharacterActs(actor.moves, Shootout.ACT_TYPE_MOVES, targetingManager.moveUsability(actor.moves, actor.name, effectManager.isSilenced(actor.name), Shootout.movesData))
+		ui.setPlayerCharacterActs(actor.items, Shootout.ACT_TYPE_ITEMS)
 	else:
 		playerAction = false
 		playerHasControl = false
@@ -412,11 +437,6 @@ func setActorCharacterStats(actorName: String) -> void:
 	var payload = actorStatsPayload(actor)
 	ui.setPlayerCharacterStats(payload[0], payload[1])
 
-func _on_shootout_ui_attack() -> void:
-	if !playerHasControl:
-		return
-	selectedAct = { "type": Shootout.ACT_TYPE_ATTACK }
-
 func _on_shootout_ui_move(moveName: String) -> void:
 	if !playerHasControl:
 		return
@@ -426,11 +446,6 @@ func _on_shootout_ui_item(itemName: String) -> void:
 	if !playerHasControl:
 		return
 	selectedAct = { "name": itemName, "type": Shootout.ACT_TYPE_ITEMS }
-
-func _on_shootout_ui_move_acts_requested() -> void:
-	var actor = getActor(turnManager.currentActorName())
-	if actor != null:
-		ui.setPlayerCharacterActs(actor.moves, Shootout.ACT_TYPE_MOVES, targetingManager.moveUsability(actor.moves, actor.name, effectManager.isSilenced(actor.name), Shootout.movesData))
 
 # Fleeing is instant in Dust-ups and unlocks after 10 turns in Showdowns
 # (decided: enemies never flee). Costs every survivor a portion of MxHp.

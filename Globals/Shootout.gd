@@ -28,16 +28,16 @@ const SHOWDOWN_FLAVORS = ["Gunfight", "Slingin'", "High Noon", "Bangin'"]
 
 var shootoutPositions = {
 	"player team": {
-		1: Vector2i(280, 252),
-		2: Vector2i(250, 252),
-		3: Vector2i(220, 252),
-		4: Vector2i(190, 252)
+		1: Vector2i(270, 222),
+		2: Vector2i(240, 222),
+		3: Vector2i(210, 222),
+		4: Vector2i(180, 222)
 	},
 	"enemy team": {
-		1: Vector2i(340, 252),
-		2: Vector2i(370, 252),
-		3: Vector2i(400, 252),
-		4: Vector2i(430, 252)
+		1: Vector2i(350, 222),
+		2: Vector2i(380, 222),
+		3: Vector2i(410, 222),
+		4: Vector2i(440, 222)
 	}
 }
 

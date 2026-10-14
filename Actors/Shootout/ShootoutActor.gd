@@ -37,7 +37,8 @@ func toggleActorTurn() -> void:
 	$Highlight2.hide()
 
 func getAnimations() -> Node:
-	return get_node(str(name))
+	var node = get_node_or_null(str(name))
+	return node
 
 
 func _on_area_2d_input_event(_viewport, event, _shape_idx):
@@ -49,9 +50,15 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 		actorSelected.emit()
 
 func _on_area_2d_mouse_entered() -> void:
-	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = outlineShader
+	# Null-safe: a misnamed animations child must not crash the hover (the
+	# outline is cosmetic; the hover payload still updates the stat panel).
+	var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
+	if sprite != null:
+		sprite.material = outlineShader
 	actorHovered.emit()
 
 func _on_area_2d_mouse_exited() -> void:
-	get_node("{actorName}/AnimationSprite".format({ "actorName": name })).material = null
+	var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
+	if sprite != null:
+		sprite.material = null
 	actorUnhovered.emit()

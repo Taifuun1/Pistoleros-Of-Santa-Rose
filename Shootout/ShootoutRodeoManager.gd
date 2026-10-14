@@ -383,4 +383,3 @@ func consumeLootModifiers() -> Dictionary:
 func showRodeoPopup(rodeoName: String, ownerActor) -> void:
 	if shootout.has_method("spawnDamageNumber"):
 		shootout.spawnDamageNumber(rodeoName, RODEO_POPUP_COLOR, ownerActor.position + RODEO_POPUP_OFFSET)
-

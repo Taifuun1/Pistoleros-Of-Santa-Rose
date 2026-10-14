@@ -6,19 +6,22 @@ var actName
 var actType
 
 
-func init(newActName: String, newActType: String, enabled := true, tooltip := "") -> void:
+func init(newActName: String, newActType: String, enabled := true) -> void:
 	actName = newActName
 	actType = newActType
 	var iconPath = "res://Assets/{actType}/{actName}.png".format({ "actType": actType, "actName": actName.replace(" ", "") })
 	if ResourceLoader.exists(iconPath):
 		texture = load(iconPath)
-	# Unusable acts are greyed out with the reason (Docs/System Design/Shootout/Shootout UI.md).
+	# Unusable acts are greyed out with the reason (Docs/System Design/Shootout/Shootout UI.md);
+	# the tooltip is attached by ShootoutUI through the shared Tooltip node.
 	if !enabled:
 		modulate = Color(0.5, 0.5, 0.5, 0.7)
-	tooltip_text = tooltip
 
 
-func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+# Clicks are handled as Control GUI input (gui_input), not physics picking:
+# the act row sits on Controls that consume the mouse, which would keep an
+# Area2D from ever receiving input_event.
+func _on_gui_input(event: InputEvent) -> void:
 	if modulate.r < 1.0:
 		return
 	if(
@@ -28,8 +31,8 @@ func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int
 	):
 		actClicked.emit()
 
-func _on_area_2d_mouse_entered() -> void:
+func _on_mouse_entered() -> void:
 	$Highlight.show()
 
-func _on_area_2d_mouse_exited() -> void:
+func _on_mouse_exited() -> void:
 	$Highlight.hide()

@@ -127,6 +127,24 @@ func _run() -> void:
 	_check(ctx.targeting.isValidTarget(heal, "Hurt", "Healer"), "item usable on an ally at any position")
 	_check(!ctx.targeting.isValidTarget(heal, "Enemy", "Healer"), "unknown actors are never valid targets")
 
+	print("\n--- Act sides are relative to the caster ---")
+	ctx = makeFight()
+	ctx.fake.movesData = { "Sharp Shot": {
+		"name": "Sharp Shot", "side": "enemy",
+		"positions": { "type": "single", "actorUser": [1, 2, 3, 4], "targets": { "columns": [1, 2, 3, 4] } }
+	} }
+	addActor(ctx, "Enemy Shooter", "enemy team", 1)
+	addActor(ctx, "Enemy Friend", "enemy team", 2)
+	addActor(ctx, "Player Target", "player team", 2)
+	var enemyShot = { "type": "Moves", "name": "Sharp Shot" }
+	_check(ctx.targeting.isValidTarget(enemyShot, "Player Target", "Enemy Shooter"), "a hostile move cast by an enemy targets the player side")
+	_check(!ctx.targeting.isValidTarget(enemyShot, "Enemy Friend", "Enemy Shooter"), "a hostile move cast by an enemy cannot target its own side")
+	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "player", "positions": { "type": "single", "targets": { "columns": [1, 2, 3, 4] } } } }
+	addActor(ctx, "Enemy Healer", "enemy team", 3)
+	var enemyHeal = { "type": "Items", "name": "Paregoric" }
+	_check(ctx.targeting.isValidTarget(enemyHeal, "Enemy Friend", "Enemy Healer"), "a friendly item cast by an enemy targets its own side")
+	_check(!ctx.targeting.isValidTarget(enemyHeal, "Player Target", "Enemy Healer"), "a friendly item cast by an enemy cannot target the player side")
+
 	print("\n--- Position-conditional Rodeos follow repositioning ---")
 	ctx = makeFight()
 	var fake = ctx.fake

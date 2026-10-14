@@ -1,5 +1,0 @@
-[gd_scene format=3 uid="uid://biv2pthnfytk4"]
-
-[node name="ShootoutButton" type="Button" unique_id=1544747168]
-offset_right = 8.0
-offset_bottom = 8.0
