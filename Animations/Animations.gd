@@ -19,6 +19,13 @@ func playAnimation(animation, isOneshotAnimation = false, lookForFrameHit = fals
 	frameHit = lookForFrameHit
 	nextAnimation = assignNextAnimation
 	$AnimationSprite.animation = animation
+	# AnimationPlayer.play() silently continues an already-playing animation,
+	# so an actor acting on back-to-back turns (closing one round and opening
+	# the next) never reached the frame hit again and the turn hung forever.
+	# Stop + play forces a restart; the explicit frame reset mirrors what
+	# changing the animation property does for a different animation.
+	$AnimationSprite.frame = 0
+	$AnimationPlayer.stop()
 	$AnimationPlayer.play(animation)
 
 func flipAnimation():
