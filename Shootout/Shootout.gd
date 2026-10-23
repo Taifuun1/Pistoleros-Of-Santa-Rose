@@ -167,6 +167,12 @@ func startCurrentTurn() -> void:
 	var actorName = turnManager.currentActorName()
 	var actor = getActor(actorName)
 	if actor == null:
+		# The front of the turn order does not resolve to a living actor: drop
+		# them and keep the fight moving instead of waiting forever (createTurn
+		# Order skips unresolvable names on the rebuild, so this can't loop).
+		if !battleOver:
+			turnManager.turnOrder.erase(actorName)
+			actorDone.emit()
 		return
 	effectManager.onTurnStart(actorName)
 	if actor.hp <= 0:
@@ -232,6 +238,9 @@ func resolveActOnce() -> void:
 	pendingResolution = false
 	var actingActor = getActor(turnManager.currentActorName())
 	if actingActor == null:
+		# The acting actor vanished mid-turn (freed or unregistered): pass the
+		# turn instead of leaving the shootout waiting on them forever.
+		finishTurn(null)
 		return
 	var targetActor
 	if playerAction:
@@ -270,6 +279,10 @@ func resolveActOnce() -> void:
 				enemyTargetName = enemyRedirect
 		targetActor = getActor(enemyTargetName)
 		if targetActor == null:
+			# Invalid enemy target (e.g., a scripted act naming a missing
+			# actor): pass the turn instead of hanging the fight forever.
+			actingActor.actorTurn.emit()
+			finishTurn(null)
 			return
 		actingActor.actorTurn.emit()
 		match enemyAct.type:
