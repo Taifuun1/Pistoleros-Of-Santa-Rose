@@ -1,14 +1,21 @@
 extends OverworldActorBase
 
 
-func initOverworldActor(actorName, actorType, actorPosition):
-	var animations = load("res://Animations/Overworld/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
+func initOverworldActor(actorName, actorType, actorPosition) -> bool:
+	var animationsPath = "res://Animations/Overworld/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })
+	# New actor types without an animations scene aborted the spawn with
+	# load() returning null; skip the actor with a warning instead.
+	if !ResourceLoader.exists(animationsPath):
+		push_warning("OverworldActor: no animations scene at '{animationsPath}' for '{actorName}'".format({ "animationsPath": animationsPath, "actorName": actorName }))
+		return false
+	var animations = load(animationsPath).instantiate()
 	name = actorName + str(Overworld.overworldActorIdCount)
 	animations.name = actorName
 	animations.playAnimation("Idle")
 	add_child(animations)
 	
 	position = actorPosition
+	return true
 
 
 # Called by OverworldEventPopup when the player selects a choice.
