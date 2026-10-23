@@ -1,5 +1,7 @@
 extends ActorBase
 
+const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
+
 var outlineShader = load("res://Shaders/Outline.tres")
 
 signal actorSelected
@@ -25,6 +27,8 @@ func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> vo
 		animations.flipAnimation()
 	animations.playAnimation(idleAnimation)
 	add_child(animations)
+	# Drop shadow under the fighter (see Nodes/Actor Shadow/ActorShadow.gd).
+	ShadowScript.attachTo(animations)
 	# Input/hover collision follows the animation sprite: the default feet-only
 	# 16x12 rectangle made clicks and hover miss the character's body. The box
 	# is centered on the sprite's drawn rect — AnimatedSprite2D offsets put the

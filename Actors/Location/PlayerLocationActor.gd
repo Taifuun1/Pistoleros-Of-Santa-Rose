@@ -1,10 +1,17 @@
 extends CharacterBody2D
 
+const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
+
 @export var speed = 125
 
 var transparentShader = load("res://Shaders/Transparent.tres")
 
 var paused = false
+
+
+func _ready():
+	# Drop shadow under the player (see Nodes/Actor Shadow/ActorShadow.gd).
+	ShadowScript.attachTo(self)
 
 
 func get_input():

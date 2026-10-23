@@ -1,5 +1,7 @@
 extends OverworldActorBase
 
+const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
+
 
 func initOverworldActor(actorName, actorType, actorPosition) -> bool:
 	var animationsPath = "res://Animations/Overworld/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })
@@ -13,6 +15,8 @@ func initOverworldActor(actorName, actorType, actorPosition) -> bool:
 	animations.name = actorName
 	animations.playAnimation("Idle")
 	add_child(animations)
+	# Drop shadow under the wanderer (see Nodes/Actor Shadow/ActorShadow.gd).
+	ShadowScript.attachTo(animations)
 	
 	position = actorPosition
 	return true

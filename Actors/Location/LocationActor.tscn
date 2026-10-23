@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://b5cua2845tcsx"]
+[gd_scene load_steps=6 format=3 uid="uid://b5cua2845tcsx"]
 
 [ext_resource type="Script" uid="uid://ct0e026q7u5rr" path="res://Actors/AI.gd" id="1_3skn0"]
 [ext_resource type="Texture2D" uid="uid://c8xl7wuvuiv01" path="res://Assets/Comestibles/ApplePie.png" id="2_dyk53"]
+[ext_resource type="Script" path="res://Nodes/Actor Shadow/ActorShadow.gd" id="4_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_eanew"]
 radius = 2.0
@@ -24,6 +25,9 @@ wall_min_slide_angle = 0.0
 
 [node name="AI" type="Node2D" parent="."]
 script = ExtResource("1_3skn0")
+
+[node name="Shadow" type="Node2D" parent="."]
+script = ExtResource("4_shadow")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_eanew")
