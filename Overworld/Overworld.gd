@@ -18,6 +18,8 @@ func _process(_delta):
 		currentlyLoadedChunks = newCurrentlyLoadedChunks
 		removeFarawayObjects()
 		removeNodes()
+		# Zone change check after entering the new chunk.
+		MusicPlayer.on_overworld_chunk(currentChunk)
 		loadingChunk = false
 
 func init() -> void:
@@ -29,6 +31,9 @@ func init() -> void:
 	removeNodes()
 	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(Overworld.spawnChunk) - $OverworldTileChunkTemplate.map_to_local(HelperVariables.overworldChunkSize / 2) + $OverworldTileChunkTemplate.map_to_local(Overworld.spawnTile))
 	loadingChunk = false
+	# Zone music for the chunk the player spawns in (MusicPlayer decides by
+	# the zone bands in Data/Music/MusicData.gd; only zone changes restart).
+	MusicPlayer.on_overworld_chunk(currentChunk)
 
 
 #######################

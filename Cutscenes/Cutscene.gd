@@ -17,6 +17,9 @@ func _ready():
 
 func initCutscene(cutsceneArc: String = "Pistoleros Regroup", cutsceneName: String = "Finch Pond") -> void:
 	cutscene = load("res://Data/Cutscenes/{cutsceneArc}/{cutsceneName}.gd".format({ "cutsceneArc": cutsceneArc, "cutsceneName": cutsceneName.capitalize().replace(" ", "") })).new().data
+	# Cutscenes manage their own songs (MusicPlayer): the data "music" field
+	# starts one, and "music" shots switch tracks mid-cutscene.
+	MusicPlayer.on_cutscene_started(cutscene)
 	$Setting.add_child(load("res://Location/Locations/{cutsceneArc}/{cutsceneName}/{cutsceneNameNoWhitespace}.tscn".format({ "cutsceneArc": cutsceneArc, "cutsceneName": cutsceneName, "cutsceneNameNoWhitespace": cutsceneName.capitalize().replace(" ", "") })).instantiate())
 	$Setting.get_children()[$Setting.get_child_count() - 1].get_node("Fade/CanvasLayer/ColorRect").visible = false
 	for actorData in cutscene.actors:
@@ -80,6 +83,12 @@ func advanceScene() -> void:
 
 			"move":
 				_playMoveShot(scene.data)
+
+			"music":
+				# Non-blocking song switch (Docs/System Design/Music player.md):
+				# { "object": "music", "data": { "name": "<MusicPlayer track id>" } };
+				# an empty name fades the music out.
+				MusicPlayer.on_cutscene_music_shot(scene.data)
 
 # ── Animation shot ────────────────────────────────────────────────────────────
 

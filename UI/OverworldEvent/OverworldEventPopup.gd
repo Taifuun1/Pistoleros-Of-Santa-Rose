@@ -15,6 +15,8 @@ const FALLBACK_IMAGE_PATH: String = "res://Assets/Icons/RevolverIcon.png"
 
 # Reference to the player actor — set when the popup is shown.
 var _player_actor: Node = null
+# Whether this popup pushed its own music (restored on close).
+var _music_pushed := false
 
 func _ready() -> void:
 	OverworldEvents.event_triggered.connect(show_event)
@@ -24,6 +26,13 @@ func show_event(event_name: String, event_data: Dictionary) -> void:
 	var overworld = get_tree().current_scene
 	if overworld and overworld.has_node("Actors/PlayerOverworldActor"):
 		_player_actor = overworld.get_node("Actors/PlayerOverworldActor")
+
+	# Event/shop popup music (Docs/System Design/Music player.md): an event
+	# with a "music" field pushes that track, restored when the popup closes.
+	var popup_music := str(event_data.get("music", ""))
+	if popup_music != "":
+		MusicPlayer.push_music(popup_music)
+		_music_pushed = true
 
 	# Set header text.
 	$PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/Header.setRichTextLabel(event_name)
@@ -64,6 +73,7 @@ func show_event(event_name: String, event_data: Dictionary) -> void:
 
 
 func _on_choice_pressed(result: String) -> void:
+	_closePopup()
 	if _player_actor and _player_actor.has_method("process_event_result"):
 		_player_actor.process_event_result(result)
 	OverworldEvents.on_event_closed()
@@ -72,5 +82,13 @@ func _on_choice_pressed(result: String) -> void:
 
 func _on_close_button_pressed() -> void:
 	# Closing without a choice counts as dismissing — still unblocks events.
+	_closePopup()
 	OverworldEvents.on_event_closed()
 	hide()
+
+
+# Restores the music that was playing before this popup pushed its own.
+func _closePopup() -> void:
+	if _music_pushed:
+		_music_pushed = false
+		MusicPlayer.pop_music()

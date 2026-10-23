@@ -86,6 +86,9 @@ func init(encounterData: Dictionary) -> void:
 	var teams = encounterData.get("teams", encounterData)
 	turnManager.setWinCondition(encounterData.get("winCondition", {}))
 	turnManager.setEncounterKind(encounterData.get("kind", "dustup"))
+	# Encounter music (MusicPlayer resolves it from the encounter data, the
+	# MusicData encounter registry or the zone, with a default fight list).
+	MusicPlayer.on_shootout_started(encounterData)
 	lootTableName = encounterData.get("lootTable", "")
 	encounterLootEnabled = encounterData.get("loot", true)
 	encounterName = encounterData.get("name", "Shootout")
@@ -345,6 +348,9 @@ func _on_battle_ended(winningSide: String) -> void:
 	}
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
 	Party.applyFightResults(results)
+	# Outcome stinger for the end screen (MusicPlayer; the fight track stops
+	# and the scene change after the results brings the next scene's music).
+	MusicPlayer.on_shootout_ended(results)
 	shootoutEnded.emit(winningSide, results)
 	ui.showEndScreen(results)
 	print("Shootout ended. Winner: {winningSide}, outcome: {outcome}".format({
