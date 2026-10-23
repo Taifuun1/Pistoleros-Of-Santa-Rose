@@ -20,21 +20,54 @@ func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> vo
 	else:
 		idleAnimation = "Idle"
 	animations.initAnimations(idleAnimation, frameHit)
-	name = actorNameInit
 	animations.name = actorNameInit
 	if actorSide == "enemy team":
 		animations.flipAnimation()
 	animations.playAnimation(idleAnimation)
 	add_child(animations)
-	
+	# Input/hover collision follows the animation sprite: the default feet-only
+	# 16x12 rectangle made clicks and hover miss the character's body. The box
+	# is centered on the sprite's drawn rect — AnimatedSprite2D offsets put the
+	# drawn body above the actor origin (Walker Langley's sprite center sits
+	# 15px up), so a shape centered at the origin missed the head. The width is
+	# capped at the column spacing so side-by-side actors' boxes never overlap
+	# (columns sit 30px apart while sprites are 40px wide).
+	var frameSize = Vector2(16, 12)
+	var frameCenter = Vector2.ZERO
+	var animationSprite = animations.get_node_or_null("AnimationSprite")
+	if animationSprite != null and animationSprite.sprite_frames != null:
+		var frameTexture = animationSprite.sprite_frames.get_frame_texture(idleAnimation, 0)
+		if frameTexture != null:
+			frameSize = frameTexture.get_size()
+			frameCenter = animations.position + animationSprite.position + animationSprite.offset
+			if !animationSprite.centered:
+				frameCenter += frameSize / 2.0
+	var spriteShape = RectangleShape2D.new()
+	spriteShape.size = Vector2(minf(frameSize.x, _minColumnSpacing(actorSide)), frameSize.y)
+	$Area2D/CollisionShape2D.position = frameCenter
+	$Area2D/CollisionShape2D.shape = spriteShape
+	name = actorNameInit
 	position = Shootout.shootoutPositions[actorSide][actorPosition]
-	actorTurn.connect(toggleActorTurn)
+	actorTurn.connect(showActorTurn)
 
-func toggleActorTurn() -> void:
-	if !$Highlight2.visible:
-		$Highlight2.show()
-		return
-	$Highlight2.hide()
+## Smallest horizontal gap between the side's columns: actors stand in the
+## same row, so the gap is also the closest two actors' bodies can get.
+func _minColumnSpacing(actorSide: String) -> float:
+	var columns = Shootout.shootoutPositions.get(actorSide, {})
+	var xs = []
+	for column in columns:
+		xs.append(float(columns[column].x))
+	var spacing = INF
+	for i in xs.size():
+		for j in range(i + 1, xs.size()):
+			spacing = minf(spacing, abs(xs[i] - xs[j]))
+	return spacing
+
+## The turn highlight shows only (Shootout hides every other actor's marker
+## before the current actor's turn starts; the old toggle left previous actors
+## highlighted and hid the marker on an actor's second turn).
+func showActorTurn() -> void:
+	$Highlight2.show()
 
 func getAnimations() -> Node:
 	var node = get_node_or_null(str(name))

@@ -7,8 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="3_f1det"]
 [ext_resource type="Texture2D" uid="uid://cjocgotg0hgx5" path="res://Assets/Icons/SixShootinIcon.png" id="4_8ob0s"]
 [ext_resource type="Script" uid="uid://b88mfmepglnl" path="res://UI/Miscellaneous/AddTooltip.gd" id="4_8sf7b"]
-[ext_resource type="Texture2D" uid="uid://bx2o2lew5k8bn" path="res://Assets/Moves/ShootHat.png" id="4_23rvq"]
-[ext_resource type="Texture2D" uid="uid://dy1ihgkqslhts" path="res://Assets/Moves/CowboyUp.png" id="4_r3ka0"]
 [ext_resource type="Texture2D" uid="uid://6gju4eo6vq5g" path="res://Assets/Icons/HP.png" id="4_vga8u"]
 [ext_resource type="PackedScene" uid="uid://dm8v87vsh2qow" path="res://UI/Tooltip/Tooltip.tscn" id="5_5ysdm"]
 [ext_resource type="Texture2D" uid="uid://b806g7ql2crji" path="res://Assets/Icons/Moves.png" id="5_d8xx0"]
@@ -16,7 +14,6 @@
 [ext_resource type="Texture2D" uid="uid://0ubbng08j00g" path="res://Assets/Icons/TaffyinIcon.png" id="6_0he6b"]
 [ext_resource type="PackedScene" uid="uid://6cv348wwh588" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="7_3n0l5"]
 [ext_resource type="Texture2D" uid="uid://7lfh3mc1k4yr" path="res://Assets/Icons/RevolverIcon.png" id="7_gux81"]
-[ext_resource type="Texture2D" uid="uid://co66mkmd2bwki" path="res://Assets/Moves/CoralHerd.png" id="8_60wve"]
 [ext_resource type="Texture2D" uid="uid://d4bch7qystpkq" path="res://Assets/Icons/RifleIcon.png" id="8_caqsy"]
 [ext_resource type="Texture2D" uid="uid://c8lsl42lt5pw7" path="res://Assets/Icons/BeltIcon.png" id="9_p0scf"]
 [ext_resource type="Texture2D" uid="uid://c8yfhq3nsj0qj" path="res://Assets/Icons/END.png" id="9_splkh"]
@@ -85,14 +82,17 @@ mouse_filter = 2
 theme = ExtResource("1_w5ldf")
 script = ExtResource("1_2qgxu")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=753712354]
-visible = false
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Background" type="TextureRect" parent="BackgroundLayer" unique_id=753712354]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("3_3n0l5")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=712509608]
@@ -167,7 +167,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_yf5fn")
 layout_mode = 2
 texture = ExtResource("5_d8xx0")
 
-[node name="Moves" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts"]
+[node name="Moves" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts" unique_id=1852865575]
 layout_mode = 2
 theme_override_constants/separation = 2
 
@@ -179,7 +179,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_60wve")
 layout_mode = 2
 texture = ExtResource("9_p0scf")
 
-[node name="Items" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts"]
+[node name="Items" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts" unique_id=1962644979]
 layout_mode = 2
 theme_override_constants/separation = 2
 
@@ -1211,7 +1211,8 @@ texture = ExtResource("30_p0scf")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Tooltip" parent="." instance=ExtResource("5_5ysdm")]
+[node name="Tooltip" parent="." unique_id=410103494 instance=ExtResource("5_5ysdm")]
+
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" method="_on_mouse_entered" binds= ["HP", "HP amount"]]
 [connection signal="mouse_exited" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/HPContainer" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" to="MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer4/EnduranceContainer" method="_on_mouse_entered" binds= ["Endurance", "Endurance amount"]]

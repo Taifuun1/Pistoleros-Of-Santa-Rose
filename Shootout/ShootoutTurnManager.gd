@@ -4,17 +4,11 @@ extends RefCounted
 
 signal battleEnded(winningSide)
 
-# Local copies of the team names (same values as the Shootout autoload constants)
-# so the manager stays loadable in headless test runs, where autoloads don't exist.
 const TEAM_PLAYER = "player team"
 const TEAM_ENEMY = "enemy team"
 
-# Placeholder initiative roll size; confirmed as a balance placeholder (see
-# Docs/System Design/Shootout/Turns and Initiative.md).
 const RANDOM_ROLL_MAX = 4
 
-# Fleeing unlocks after this many turns in Showdowns; instant in Dust-ups
-# (Docs/System Design/Shootout/Death Injury and Retreat.md).
 const FLEE_TURN_THRESHOLD = 10
 
 var shootoutActors = {
@@ -23,11 +17,7 @@ var shootoutActors = {
 }
 var turnOrder = []
 var battleOver = false
-# Win condition (Docs/System Design/Shootout/Encounters.md):
-# { "type": "rout" } (default) | { "type": "defeat_actor", "actorName" }
-# | { "type": "survive_rounds", "rounds" } | { "type": "hp_below", "target", ... }
 var winCondition = {}
-# Encounter kind (dustup/showdown) from the encounter metadata.
 var encounterKind = "dustup"
 var roundNumber = 1
 var turnNumber = 0
@@ -64,18 +54,10 @@ func createTurnOrder() -> void:
 	for entry in initiatives:
 		turnOrder.append(entry.actorName)
 
-# Descending initiative; equal initiative is broken by a random tiebreak so
-# even stats produce a random order ("On even stats, turn order is random").
 static func sortByInitiative(a, b) -> bool:
 	if int(a.initiative) == int(b.initiative):
 		return float(a.tiebreak) < float(b.tiebreak)
 	return int(a.initiative) > int(b.initiative)
-
-func getRoundNumber() -> int:
-	return roundNumber
-
-func getTurnNumber() -> int:
-	return turnNumber
 
 func currentActorName() -> String:
 	if turnOrder.is_empty():
@@ -87,8 +69,12 @@ func advanceTurn() -> void:
 		turnOrder.pop_front()
 		turnNumber += 1
 
-## Position ownership (Docs/System Design/Shootout/Positions and Targeting.md):
-## the turn manager is the single source of truth for actor positions.
+func getRoundNumber() -> int:
+	return roundNumber
+
+func getTurnNumber() -> int:
+	return turnNumber
+
 func getActorPosition(actorName: String) -> int:
 	for actorSide in shootoutActors:
 		if shootoutActors[actorSide].has(actorName):
@@ -101,17 +87,12 @@ func actorAtPosition(actorSide: String, column: int) -> String:
 			return actorName
 	return ""
 
-## Raw placement: updates the registry and the actor node.
 func placeActor(actorName: String, actorSide: String, column: int) -> void:
 	shootoutActors[actorSide][actorName].actorPosition = column
 	var actor = shootout.getActor(actorName)
 	if actor != null:
 		actor.position = shootout.getPositionForColumn(actorSide, column)
 
-## Occupancy-aware move (decided): one actor per position, the moving character
-## takes the spot and displaced occupants are pushed one step in the same
-## direction (recursively). Fails when the push chain would run past the end of
-## the row. Returns true when the move happened.
 func setActorPosition(actorName: String, column) -> bool:
 	var actorSide = sideOfActor(actorName)
 	if actorSide == "":
@@ -129,7 +110,6 @@ func setActorPosition(actorName: String, column) -> bool:
 	placeActor(actorName, actorSide, column)
 	return true
 
-## Read-only feasibility check (used by the enemy AI).
 func canMoveActor(actorName: String, column) -> bool:
 	var actorSide = sideOfActor(actorName)
 	if actorSide == "":
@@ -141,8 +121,6 @@ func canMoveActor(actorName: String, column) -> bool:
 	var direction = 1 if column > current else -1
 	return pushChain(actorSide, column, direction) != null
 
-## Occupants that would be pushed from `column` outward, or null when the chain
-## would run past the end of the row.
 func pushChain(actorSide: String, column: int, direction: int):
 	var chain = []
 	var probe = column
@@ -166,8 +144,6 @@ func isPlayerActing(actorName: String) -> bool:
 func checkActorDead(actor) -> bool:
 	if actor == null or actor.hp > 0:
 		return false
-	# Node names are StringNames while roster and turn-order entries are
-	# Strings; normalize so Array.erase (type-strict in Godot 4.7) matches.
 	var actorName = str(actor.name)
 	turnOrder.erase(actorName)
 	for actorSide in shootoutActors:
@@ -227,8 +203,6 @@ func isBaseNameAlive(baseName: String) -> bool:
 				return true
 	return false
 
-## Side total of the chosen stat (default current HP) vs. its maxHp total:
-## below `fraction` of the total, or below an absolute `amount`.
 func sideBelowThreshold(actorSide: String, condition: Dictionary) -> bool:
 	var total = 0
 	var totalMax = 0

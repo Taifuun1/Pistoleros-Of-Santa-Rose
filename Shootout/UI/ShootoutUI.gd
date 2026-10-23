@@ -267,12 +267,21 @@ func showCylinder(content: Node, cylinder: Array, chamberIndex: int, magazinePat
 ## Effect icons in the pre-existing Effects box of a stats panel: one icon per
 ## effect type from effectManager.displayEffects() (stack counts next to the
 ## icon and in the tooltip; Docs/System Design/Shootout/Shootout UI.md).
+##
+## The box keeps a fixed minimum size (icon entry at its widest/ tallest):
+## letting the minimum shrink to the empty "-" label and grow back per entry
+## trips a Godot layout oscillation (known engine bug: non-converging fit_content
+## container relayout) that overflows the deferred-call queue and hard-crashes
+## the engine ("Object was deleted while awaiting a callback" spam + segfault).
+const EFFECTS_BOX_MIN_SIZE = Vector2(44, 24)
+
 func showEffects(content: Node, effectLines: Array) -> void:
 	if content == null:
 		return
 	var effects = content.get_node_or_null("HBoxContainer/Effects")
 	if effects == null:
 		return
+	effects.custom_minimum_size = EFFECTS_BOX_MIN_SIZE
 	for child in effects.get_children():
 		# Detach immediately so the box rebuilds within the same frame.
 		child.queue_free()

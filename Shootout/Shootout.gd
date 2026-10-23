@@ -16,6 +16,7 @@ const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 const LootGeneratorScript = preload("res://Globals/ItemGeneration.gd")
+const HPIndicatorScene = preload("res://Nodes/HP Indicator/HPIndicator.tscn")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -31,6 +32,9 @@ var effectManager
 
 var selectedAct = null
 var selectedActor = ""
+# Currently hovered actor (indexed name); stale mouse_exited events from a
+# previously hovered actor are ignored against it (see clearHoveredActorStats).
+var hoveredActorName = ""
 var playerHasControl = false
 var playerAction = false
 var battleOver = false
@@ -138,11 +142,15 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 			"actorName": actorName.capitalize().replace(" ", "")
 		})).new().data)
 	newShootoutActor.initShootoutActor(actorType, actorNameIndexed, actorPosition, actorSide)
+	# World-space HP bar below the actor (Docs/System Design/Shootout/Shootout UI.md).
+	var hpIndicator = HPIndicatorScene.instantiate()
+	newShootoutActor.add_child(hpIndicator)
+	hpIndicator.init(newShootoutActor)
 	var classData = cylinderManager.classesData.get(newShootoutActor.characterClass, {})
 	newShootoutActor.applyLoadoutLimits(int(classData.get("beltSpace", -1)))
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
-	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats)
+	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats.bind(actorNameIndexed))
 	var animations = newShootoutActor.getAnimations()
 	if animations != null:
 		animations.onAnimationFrameHit.connect(animationSequencer._on_acting_frame_hit)
@@ -170,6 +178,11 @@ func startCurrentTurn() -> void:
 	ui.setTurnOrder(turnManager.turnOrder)
 	ui.setFleeEnabled(turnManager.canFlee())
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_START, { "actor": actor })
+	# Only the current actor carries the turn highlight: the old toggle left
+	# previous actors highlighted and hid it on an actor's second turn (the
+	# "highlight doesn't always show" bug; Docs/System Design/Shootout/Shootout UI.md).
+	for otherActor in actorsRoot.get_children():
+		otherActor.get_node("Highlight2").hide()
 	actor.actorTurn.emit()
 	if turnManager.isPlayerActing(actorName):
 		playerAction = true
@@ -421,13 +434,22 @@ func actorStatsPayload(actor) -> Array:
 	]
 
 func showHoveredActorStats(actorName: String) -> void:
+	hoveredActorName = actorName
 	var actor = getActor(actorName)
 	if actor == null:
 		return
 	var payload = actorStatsPayload(actor)
 	ui.setHoveredActorStats(payload[0], payload[1])
 
-func clearHoveredActorStats() -> void:
+## Stale-exit guard: Godot emits the previous actor's mouse_exited AFTER the
+## new actor's mouse_entered when the mouse crosses between touching collision
+## boxes in one physics frame (known Viewport._process_picking behavior), so
+## an unguarded clear wiped the freshly hovered actor's panel. Only the exit
+## of the currently hovered actor clears the panel.
+func clearHoveredActorStats(actorName: String = "") -> void:
+	if actorName != "" and hoveredActorName != actorName:
+		return
+	hoveredActorName = ""
 	ui.clearHoveredActorStats()
 
 func setActorCharacterStats(actorName: String) -> void:
