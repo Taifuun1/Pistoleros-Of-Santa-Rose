@@ -1,11 +1,15 @@
 extends OverworldActorBase
 
+const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
+
 var _previous_position: Vector2 = Vector2.ZERO
 
 
 func _ready():
 	speed = 350
 	_previous_position = position
+	# Drop shadow under the player (see Nodes/Actor Shadow/ActorShadow.gd).
+	ShadowScript.attachTo(self)
 
 
 func get_input():
