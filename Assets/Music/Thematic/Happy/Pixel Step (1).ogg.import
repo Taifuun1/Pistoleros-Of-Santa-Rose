@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://sbxyi3hqw86k"
+path="res://.godot/imported/Pixel Step (1).ogg-1ca0ffe3898873a64c3fad23ada5303d.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Happy/Pixel Step (1).ogg"
+dest_files=["res://.godot/imported/Pixel Step (1).ogg-1ca0ffe3898873a64c3fad23ada5303d.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b4w8lsdy62qtu"
+path="res://.godot/imported/Dust On My Spurs.ogg-79426e4be0709133c15c40cc3febe40c.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Dust On My Spurs.ogg"
+dest_files=["res://.godot/imported/Dust On My Spurs.ogg-79426e4be0709133c15c40cc3febe40c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

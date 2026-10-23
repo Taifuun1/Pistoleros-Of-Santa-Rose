@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dmlmwqe8p0rwi"
+path="res://.godot/imported/Red Banner Pulse.ogg-66b77e01dbe60860544f689bf98d2adc.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Fastpaced/Red Banner Pulse.ogg"
+dest_files=["res://.godot/imported/Red Banner Pulse.ogg-66b77e01dbe60860544f689bf98d2adc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b3dy57xp7ne37"
+path="res://.godot/imported/Boss at B Mixolydian.ogg-dcfa2b8e4aeff93dea075e1e0de80da3.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Boss at B Mixolydian.ogg"
+dest_files=["res://.godot/imported/Boss at B Mixolydian.ogg-dcfa2b8e4aeff93dea075e1e0de80da3.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

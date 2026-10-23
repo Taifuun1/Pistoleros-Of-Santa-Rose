@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dysm7qaxavjss"
+path="res://.godot/imported/Twin Creek.ogg-fd2178210ef585591e0b549512892e2f.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Town/Twin Creek.ogg"
+dest_files=["res://.godot/imported/Twin Creek.ogg-fd2178210ef585591e0b549512892e2f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

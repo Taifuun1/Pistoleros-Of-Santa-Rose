@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bbwpvvucpl6n4"
+path="res://.godot/imported/Dust at Sundown.ogg-7ef6672c9054a3e04e3de93e67b2134e.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Happy/Dust at Sundown.ogg"
+dest_files=["res://.godot/imported/Dust at Sundown.ogg-7ef6672c9054a3e04e3de93e67b2134e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

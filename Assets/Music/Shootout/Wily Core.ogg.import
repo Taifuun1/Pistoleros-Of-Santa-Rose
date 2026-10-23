@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://der517dx20r05"
+path="res://.godot/imported/Wily Core.ogg-f27c3efdf288785fbc3119351fb88c2a.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Wily Core.ogg"
+dest_files=["res://.godot/imported/Wily Core.ogg-f27c3efdf288785fbc3119351fb88c2a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

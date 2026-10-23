@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ckldwv0hxgaaq"
+path="res://.godot/imported/Dust on the Mesa.ogg-f2f00ae8b74d704a94067761132614aa.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Title Screen etc/Dust on the Mesa.ogg"
+dest_files=["res://.godot/imported/Dust on the Mesa.ogg-f2f00ae8b74d704a94067761132614aa.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

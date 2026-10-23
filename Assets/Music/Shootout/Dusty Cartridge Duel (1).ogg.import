@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bod2msnffjys4"
+path="res://.godot/imported/Dusty Cartridge Duel (1).ogg-b3aef577a6c3edd98bd0a7b94f5beebc.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Dusty Cartridge Duel (1).ogg"
+dest_files=["res://.godot/imported/Dusty Cartridge Duel (1).ogg-b3aef577a6c3edd98bd0a7b94f5beebc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

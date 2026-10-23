@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cgx608aad4ine"
+path="res://.godot/imported/Dusty Save File.ogg-b79939199c10509998cb08ccf7bb6eac.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Sad/Dusty Save File.ogg"
+dest_files=["res://.godot/imported/Dusty Save File.ogg-b79939199c10509998cb08ccf7bb6eac.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

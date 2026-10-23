@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ew23potj8d8f"
+path="res://.godot/imported/Final Boss Battle (6).ogg-2c4cfcdd9444274641b0c122fc815e8f.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Final Boss Battle (6).ogg"
+dest_files=["res://.godot/imported/Final Boss Battle (6).ogg-2c4cfcdd9444274641b0c122fc815e8f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

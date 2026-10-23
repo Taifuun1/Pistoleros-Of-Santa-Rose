@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b8abgwc5v86ls"
+path="res://.godot/imported/Dust On The Cartridge1.ogg-0cf677160c47c6a40ec77852ad0b9a6a.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Title Screen etc/Dust On The Cartridge1.ogg"
+dest_files=["res://.godot/imported/Dust On The Cartridge1.ogg-0cf677160c47c6a40ec77852ad0b9a6a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

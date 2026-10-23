@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://boevik8iv2umc"
+path="res://.godot/imported/Rockside Echo (1).ogg-26bf53103b4bb9499b9cd5fb509237f2.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Rockside Echo (1).ogg"
+dest_files=["res://.godot/imported/Rockside Echo (1).ogg-26bf53103b4bb9499b9cd5fb509237f2.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dppaq8eio2j8u"
+path="res://.godot/imported/Boss Room Pulse.ogg-aa7ef1e1e73c2c879a08b7ae7bb7eac3.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Banger/Boss Room Pulse.ogg"
+dest_files=["res://.godot/imported/Boss Room Pulse.ogg-aa7ef1e1e73c2c879a08b7ae7bb7eac3.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

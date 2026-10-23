@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d1oahi62kmv6h"
+path="res://.godot/imported/Glitched Honor (1).ogg-d5ff73f3f06250654a3ddc33a992216b.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Generic/Glitched Honor (1).ogg"
+dest_files=["res://.godot/imported/Glitched Honor (1).ogg-d5ff73f3f06250654a3ddc33a992216b.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

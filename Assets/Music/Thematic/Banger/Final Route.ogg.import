@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ct1mpixeqepwq"
+path="res://.godot/imported/Final Route.ogg-340bea7e1ffabc3b4c51094a796a88f8.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Banger/Final Route.ogg"
+dest_files=["res://.godot/imported/Final Route.ogg-340bea7e1ffabc3b4c51094a796a88f8.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

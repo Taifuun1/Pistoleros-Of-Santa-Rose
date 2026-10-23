@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c7gg61xe11a66"
+path="res://.godot/imported/Last Bend West (1).ogg-12f0ed48d56b9edea18f04877cd91fc4.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Last Bend West (1).ogg"
+dest_files=["res://.godot/imported/Last Bend West (1).ogg-12f0ed48d56b9edea18f04877cd91fc4.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cpedirxr41fv6"
+path="res://.godot/imported/Rain Over Sagebrush.ogg-16ae3a57cb2463a94dbee94cf0938494.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Rain Over Sagebrush.ogg"
+dest_files=["res://.godot/imported/Rain Over Sagebrush.ogg-16ae3a57cb2463a94dbee94cf0938494.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

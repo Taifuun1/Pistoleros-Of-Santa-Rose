@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://275fdxy77yu3"
+path="res://.godot/imported/C64 8-bit chiptune (3).ogg-ea9d92acce952aee5f9f5ebd452311ae.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Tunes/C64 8-bit chiptune (3).ogg"
+dest_files=["res://.godot/imported/C64 8-bit chiptune (3).ogg-ea9d92acce952aee5f9f5ebd452311ae.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

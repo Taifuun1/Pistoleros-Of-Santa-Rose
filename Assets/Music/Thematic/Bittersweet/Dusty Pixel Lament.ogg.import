@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ddhwhary66ed2"
+path="res://.godot/imported/Dusty Pixel Lament.ogg-f23672aff674d1da780565b531b4a9ea.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Dusty Pixel Lament.ogg"
+dest_files=["res://.godot/imported/Dusty Pixel Lament.ogg-f23672aff674d1da780565b531b4a9ea.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

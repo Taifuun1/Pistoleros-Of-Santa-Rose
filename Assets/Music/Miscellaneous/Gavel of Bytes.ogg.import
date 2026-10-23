@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cme26h56htm1h"
+path="res://.godot/imported/Gavel of Bytes.ogg-07f7805cc126f5ddadb78fa4a0aa6490.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Miscellaneous/Gavel of Bytes.ogg"
+dest_files=["res://.godot/imported/Gavel of Bytes.ogg-07f7805cc126f5ddadb78fa4a0aa6490.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

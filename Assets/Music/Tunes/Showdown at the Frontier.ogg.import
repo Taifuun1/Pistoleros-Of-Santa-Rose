@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bkycfwoa1gwyd"
+path="res://.godot/imported/Showdown at the Frontier.ogg-a5da2516f0ad917e45ed9ca24331700e.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Tunes/Showdown at the Frontier.ogg"
+dest_files=["res://.godot/imported/Showdown at the Frontier.ogg-a5da2516f0ad917e45ed9ca24331700e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

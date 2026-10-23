@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dib2a3friht8e"
+path="res://.godot/imported/Dusty Starfall.ogg-920ec47205b15798d293f98c9d75efeb.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Miscellaneous/Dusty Starfall.ogg"
+dest_files=["res://.godot/imported/Dusty Starfall.ogg-920ec47205b15798d293f98c9d75efeb.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

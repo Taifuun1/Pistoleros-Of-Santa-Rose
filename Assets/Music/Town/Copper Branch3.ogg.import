@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://sdcar21b58dk"
+path="res://.godot/imported/Copper Branch3.ogg-7163a47a392d974155430042a786458a.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Town/Copper Branch3.ogg"
+dest_files=["res://.godot/imported/Copper Branch3.ogg-7163a47a392d974155430042a786458a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
