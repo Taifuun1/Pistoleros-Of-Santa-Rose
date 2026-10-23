@@ -7,19 +7,19 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ejeyy"]
 size = Vector2(16, 12)
 
-[node name="ShootoutActor" type="Node2D"]
+[node name="ShootoutActor" type="Node2D" unique_id=842070929]
 script = ExtResource("1_3o4kd")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=1891328378]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=387541294]
 shape = SubResource("RectangleShape2D_ejeyy")
 
-[node name="Highlight" type="Sprite2D" parent="."]
+[node name="Highlight" type="Sprite2D" parent="." unique_id=968924990]
 visible = false
 texture = ExtResource("2_u6u06")
 
-[node name="Highlight2" type="Sprite2D" parent="."]
+[node name="Highlight2" type="Sprite2D" parent="." unique_id=138356500]
 visible = false
 texture = ExtResource("3_8gi8m")
 

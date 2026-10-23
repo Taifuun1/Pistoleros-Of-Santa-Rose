@@ -4,8 +4,6 @@ extends RefCounted
 
 const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 
-# Local copies of the Shootout autoload constants (same values) so the manager
-# stays loadable in headless test runs, where autoloads don't exist.
 const TEAM_PLAYER = "player team"
 const TEAM_ENEMY = "enemy team"
 const ACT_TYPE_ATTACK = "Attack"
@@ -38,8 +36,6 @@ func isValidTarget(act: Dictionary, targetActorName: String, actingActorName: St
 			return targetSide == getActSide(getDataSet("itemsData"), act.get("name", ""), actingActorName)
 	return false
 
-# Data lookups resolve the Shootout autoload through the tree (matching the
-# other managers) so headless test fakes can inject dictionaries instead.
 func getDataSet(dataSet: String) -> Dictionary:
 	var shootout = getActorShootout()
 	if shootout != null:
@@ -51,10 +47,6 @@ func getDataSet(dataSet: String) -> Dictionary:
 			return globals.get(dataSet)
 	return {}
 
-## Per-move usability with reasons (for greyed-out act buttons):
-## usable from the acting character's current column, and silenced actors lose
-## abilities (category ability/attack_ability) but keep Ducks (decided).
-## Returns { moveName: { "usable": bool, "reason": String } }.
 func moveUsability(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Dictionary:
 	var usability = {}
 	for moveName in moveNames:
@@ -70,7 +62,6 @@ func moveUsability(moveNames: Array, actingActorName: String, silenced: bool, da
 		usability[moveName] = { "usable": true, "reason": "" }
 	return usability
 
-## The usable subset (used by the enemy AI).
 func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Array:
 	var usable = []
 	var usability = moveUsability(moveNames, actingActorName, silenced, dataSet)
@@ -79,10 +70,6 @@ func usableMoves(moveNames: Array, actingActorName: String, silenced: bool, data
 			usable.append(moveName)
 	return usable
 
-## Act data `side` is relative to the acting actor (Docs/System Design/Shootout/
-## Moves Items and Ducks.md): "enemy" is the caster's opposing side, "player"
-## the caster's own side (allies). Resolving the values to fixed teams made
-## enemies target their own side with hostile acts.
 func getActSide(dataSet: Dictionary, actName: String, actingActorName: String) -> String:
 	var actData = dataSet.get(actName, null)
 	if actData == null:
@@ -92,16 +79,12 @@ func getActSide(dataSet: Dictionary, actName: String, actingActorName: String) -
 		return TEAM_ENEMY if actingSide == TEAM_PLAYER else TEAM_PLAYER
 	return actingSide
 
-## Moves/abilities use the `positions` block on their data: `actorUser` lists
-## the columns they can be used from, `targets.columns` the targetable columns.
 func actRangeCheck(act: Dictionary, actingActorName: String, targetActorName: String, dataSet: Dictionary) -> bool:
 	var actData = dataSet.get(act.get("name", ""), null)
 	if actData == null:
 		return true
 	return positionBlockAllows(actData.get("positions", {}), actingActorName, targetActorName)
 
-## Basic attacks use the weapon's range data (placeholders in WeaponData.gd);
-## weapons without range data can fire from and at anywhere.
 func weaponRangeCheck(actingActorName: String, targetActorName: String) -> bool:
 	var actingActor = getActor(actingActorName)
 	if actingActor == null:
@@ -122,7 +105,6 @@ func positionBlockAllows(positions: Dictionary, actingActorName: String, targetA
 	if positions.has("targets") and !targetColumnsAllowed(positions.targets, targetColumn):
 		return false
 	return true
-
 
 ## Targets come in two shapes: a nested { "columns": [...] } block (moves and
 ## abilities) or a flat column array (weapon ranges in Data/Items/WeaponData.gd).

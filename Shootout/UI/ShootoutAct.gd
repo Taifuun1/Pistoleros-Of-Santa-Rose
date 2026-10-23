@@ -31,8 +31,17 @@ func _on_gui_input(event: InputEvent) -> void:
 	):
 		actClicked.emit()
 
+# Hover feedback brightens the icon (greyed-out icons stay greyed). The old
+# Highlight2 sprite showed the same art as the actor turn highlight, which
+# looked like the turn marker appearing on the ability icons.
+var hoverModulate = null
+
+
 func _on_mouse_entered() -> void:
-	$Highlight.show()
+	hoverModulate = modulate
+	modulate = modulate.lightened(0.3)
 
 func _on_mouse_exited() -> void:
-	$Highlight.hide()
+	if hoverModulate != null:
+		modulate = hoverModulate
+		hoverModulate = null

@@ -16,6 +16,12 @@ var tooltip = null
 func _ready() -> void:
 	if owner != null:
 		tooltip = owner.get_node_or_null("Tooltip/Tooltip")
+	# The strip reserves the widest possible row (8 portraits) so rebuilding
+	# per turn (the order shrinks as actors act) never changes the container's
+	# minimum size: shrinking minimums + the stat panels' label churn trip a
+	# Godot layout oscillation that overflows the message queue and hard-crashes
+	# the engine (see ShootoutUI.showEffects for the same pattern).
+	custom_minimum_size = Vector2(248, 26)
 
 
 func setTurnOrder(actorNames: Array) -> void:
