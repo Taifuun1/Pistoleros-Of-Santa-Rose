@@ -8,6 +8,10 @@ var data = {
 	"flavor": "Test",
 	"background": "res://Assets/Shootout Backgrounds/GrassLandsShootoutBackground.png",
 	"lootTable": "Rats",
+	# Per-encounter music override (Docs/System Design/Music player.md):
+	# a MusicPlayer track id. Omit to fall back to the MusicData encounter
+	# registry / zone / default shootout list.
+	"music": "Shootout/Shootout1",
 	"winCondition": { "type": "rout" },
 	"teams": {
 		"player team": {

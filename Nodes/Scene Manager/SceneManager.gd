@@ -121,6 +121,9 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	if oldScene != null:
 		oldScene.queue_free()
 	_applyContext(newScene, context)
+	# Scene music starts while the new scene fades in. The overworld, shootouts
+	# and cutscenes drive their own music (see Globals/MusicPlayer.gd).
+	MusicPlayer.on_scene_changed(sceneKey)
 	currentSceneKey = sceneKey
 
 
