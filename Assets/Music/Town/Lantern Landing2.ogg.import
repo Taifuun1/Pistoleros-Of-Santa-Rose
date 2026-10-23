@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://lwev854lurbt"
+path="res://.godot/imported/Lantern Landing2.ogg-9b5cb308b230289eb082ae4551803ad8.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Town/Lantern Landing2.ogg"
+dest_files=["res://.godot/imported/Lantern Landing2.ogg-9b5cb308b230289eb082ae4551803ad8.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

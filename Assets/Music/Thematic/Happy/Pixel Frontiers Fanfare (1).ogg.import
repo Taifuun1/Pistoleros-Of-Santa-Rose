@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bxljmlevgc5u7"
+path="res://.godot/imported/Pixel Frontiers Fanfare (1).ogg-b426c0e6d00d2df33a28ce6bd527f036.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Happy/Pixel Frontiers Fanfare (1).ogg"
+dest_files=["res://.godot/imported/Pixel Frontiers Fanfare (1).ogg-b426c0e6d00d2df33a28ce6bd527f036.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

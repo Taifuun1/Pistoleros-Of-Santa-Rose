@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://clahcxnt0fmlp"
+path="res://.godot/imported/Dusty Star Trail (1).ogg-87492120d5b03cc11debeff016aaed88.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Warm/Dusty Star Trail (1).ogg"
+dest_files=["res://.godot/imported/Dusty Star Trail (1).ogg-87492120d5b03cc11debeff016aaed88.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

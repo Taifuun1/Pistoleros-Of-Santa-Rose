@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://coco8qqd5rwuk"
+path="res://.godot/imported/Mesa After Credits.ogg-89f291981835009c5fe497dfa5654c53.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Mesa After Credits.ogg"
+dest_files=["res://.godot/imported/Mesa After Credits.ogg-89f291981835009c5fe497dfa5654c53.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

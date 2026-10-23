@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c6eo52yqkqvrh"
+path="res://.godot/imported/Skyline Cartridge.ogg-90ae40dc7fd56c84643c0a691b9f2d4b.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Generic/Skyline Cartridge.ogg"
+dest_files=["res://.godot/imported/Skyline Cartridge.ogg-90ae40dc7fd56c84643c0a691b9f2d4b.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

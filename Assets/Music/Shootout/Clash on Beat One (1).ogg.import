@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://tltkatjttxtf"
+path="res://.godot/imported/Clash on Beat One (1).ogg-9dfcccd8c2678fdcd087f047b4694385.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Clash on Beat One (1).ogg"
+dest_files=["res://.godot/imported/Clash on Beat One (1).ogg-9dfcccd8c2678fdcd087f047b4694385.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

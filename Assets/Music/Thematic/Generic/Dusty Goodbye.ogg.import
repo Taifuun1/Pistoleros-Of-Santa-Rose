@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d3xyrn8ky4unk"
+path="res://.godot/imported/Dusty Goodbye.ogg-497bdc8de30e4ccf6b7def2271406dca.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Generic/Dusty Goodbye.ogg"
+dest_files=["res://.godot/imported/Dusty Goodbye.ogg-497bdc8de30e4ccf6b7def2271406dca.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

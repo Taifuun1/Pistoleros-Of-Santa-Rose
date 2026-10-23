@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bmh5hixhwp4p3"
+path="res://.godot/imported/Birdsong Window.ogg-6456297b1868aa9a8bdfa0017576d11a.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Chill/Birdsong Window.ogg"
+dest_files=["res://.godot/imported/Birdsong Window.ogg-6456297b1868aa9a8bdfa0017576d11a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

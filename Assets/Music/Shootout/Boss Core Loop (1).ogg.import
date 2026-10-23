@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://busr81v26ru25"
+path="res://.godot/imported/Boss Core Loop (1).ogg-cee752b854c39304c6cdfe94f303363c.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Shootout/Boss Core Loop (1).ogg"
+dest_files=["res://.godot/imported/Boss Core Loop (1).ogg-cee752b854c39304c6cdfe94f303363c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

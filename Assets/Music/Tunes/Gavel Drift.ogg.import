@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bd81rol3eg8ma"
+path="res://.godot/imported/Gavel Drift.ogg-6406ddf551b6cbe7902451d8706ff37c.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Tunes/Gavel Drift.ogg"
+dest_files=["res://.godot/imported/Gavel Drift.ogg-6406ddf551b6cbe7902451d8706ff37c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

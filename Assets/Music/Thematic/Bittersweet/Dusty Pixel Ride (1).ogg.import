@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b1js4q0nferl5"
+path="res://.godot/imported/Dusty Pixel Ride (1).ogg-4a74d6329d327c869bd4cdb103444320.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Dusty Pixel Ride (1).ogg"
+dest_files=["res://.godot/imported/Dusty Pixel Ride (1).ogg-4a74d6329d327c869bd4cdb103444320.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

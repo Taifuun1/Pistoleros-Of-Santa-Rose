@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://rnp1b7x4kvgx"
+path="res://.godot/imported/Last Train Saloon (1).ogg-cdbd58dbcef71e59b9eedc93fdfbb813.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Last Train Saloon (1).ogg"
+dest_files=["res://.godot/imported/Last Train Saloon (1).ogg-cdbd58dbcef71e59b9eedc93fdfbb813.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

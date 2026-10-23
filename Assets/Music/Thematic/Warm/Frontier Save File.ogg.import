@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cwjdh26nb4go7"
+path="res://.godot/imported/Frontier Save File.ogg-6e019d9dd185b164795d40c291a56d7a.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Warm/Frontier Save File.ogg"
+dest_files=["res://.godot/imported/Frontier Save File.ogg-6e019d9dd185b164795d40c291a56d7a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

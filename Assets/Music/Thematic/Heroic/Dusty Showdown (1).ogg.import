@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bn7l2yajntrp0"
+path="res://.godot/imported/Dusty Showdown (1).ogg-023fb21091c6361cec487984c748b81b.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Heroic/Dusty Showdown (1).ogg"
+dest_files=["res://.godot/imported/Dusty Showdown (1).ogg-023fb21091c6361cec487984c748b81b.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

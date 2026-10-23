@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bjlci0pj4mc3n"
+path="res://.godot/imported/Porchside Benchmark.ogg-2160885810c1df650d8091a8baa04c44.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Happy/Porchside Benchmark.ogg"
+dest_files=["res://.godot/imported/Porchside Benchmark.ogg-2160885810c1df650d8091a8baa04c44.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

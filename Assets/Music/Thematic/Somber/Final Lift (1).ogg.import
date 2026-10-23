@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://5doqsm2rkfng"
+path="res://.godot/imported/Final Lift (1).ogg-8278d2d5d475c38776852117ea604bfe.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Final Lift (1).ogg"
+dest_files=["res://.godot/imported/Final Lift (1).ogg-8278d2d5d475c38776852117ea604bfe.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://310yi4csccq8"
+path="res://.godot/imported/Dusty Cartridge Ride (1).ogg-285f55cdaacee78e3b1c36614d634085.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Dusty Cartridge Ride (1).ogg"
+dest_files=["res://.godot/imported/Dusty Cartridge Ride (1).ogg-285f55cdaacee78e3b1c36614d634085.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

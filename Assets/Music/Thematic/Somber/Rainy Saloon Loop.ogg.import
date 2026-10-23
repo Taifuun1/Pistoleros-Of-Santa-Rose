@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://diqhpgakxatwd"
+path="res://.godot/imported/Rainy Saloon Loop.ogg-7d09e4b8e4edad71698dabb895243de8.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Rainy Saloon Loop.ogg"
+dest_files=["res://.godot/imported/Rainy Saloon Loop.ogg-7d09e4b8e4edad71698dabb895243de8.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

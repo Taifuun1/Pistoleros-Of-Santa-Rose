@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dv0ew4hjeufry"
+path="res://.godot/imported/Dust at Dawn.ogg-c9448bd4402592b33d0421c96729f90c.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Mysterious/Dust at Dawn.ogg"
+dest_files=["res://.godot/imported/Dust at Dawn.ogg-c9448bd4402592b33d0421c96729f90c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

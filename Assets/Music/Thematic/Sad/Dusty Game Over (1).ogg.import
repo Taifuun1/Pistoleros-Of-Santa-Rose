@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cnwxe7agciojf"
+path="res://.godot/imported/Dusty Game Over (1).ogg-302bd9a9d1d8d4629eb49b8f40f8237d.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Sad/Dusty Game Over (1).ogg"
+dest_files=["res://.godot/imported/Dusty Game Over (1).ogg-302bd9a9d1d8d4629eb49b8f40f8237d.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

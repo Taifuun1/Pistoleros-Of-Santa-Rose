@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cx5g0q0aa42c6"
+path="res://.godot/imported/Fading Lead Note (1).ogg-b18b6fe14f640c3e95ba20aaf8efc868.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Somber/Fading Lead Note (1).ogg"
+dest_files=["res://.godot/imported/Fading Lead Note (1).ogg-b18b6fe14f640c3e95ba20aaf8efc868.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

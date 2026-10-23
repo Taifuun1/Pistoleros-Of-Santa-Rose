@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ivwes1whxwau"
+path="res://.godot/imported/Pixel Frontier.ogg-af29b011cddbc8de2dde05e5b190ee69.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Banger/Pixel Frontier.ogg"
+dest_files=["res://.godot/imported/Pixel Frontier.ogg-af29b011cddbc8de2dde05e5b190ee69.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

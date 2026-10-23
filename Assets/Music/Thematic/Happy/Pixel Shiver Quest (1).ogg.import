@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c8o1syy2fktya"
+path="res://.godot/imported/Pixel Shiver Quest (1).ogg-1a0948d37fcf08cee40e11d18985e2fd.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Happy/Pixel Shiver Quest (1).ogg"
+dest_files=["res://.godot/imported/Pixel Shiver Quest (1).ogg-1a0948d37fcf08cee40e11d18985e2fd.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

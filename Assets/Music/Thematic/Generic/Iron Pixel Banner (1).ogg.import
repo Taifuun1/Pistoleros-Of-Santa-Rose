@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://65tjfybfxrgm"
+path="res://.godot/imported/Iron Pixel Banner (1).ogg-b3870781185c5b06a798a84d75c8506e.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Generic/Iron Pixel Banner (1).ogg"
+dest_files=["res://.godot/imported/Iron Pixel Banner (1).ogg-b3870781185c5b06a798a84d75c8506e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b5474dryj0hyg"
+path="res://.godot/imported/Copper Branch4.ogg-674df0834efde8a0eeae11721e5849d0.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Town/Copper Branch4.ogg"
+dest_files=["res://.godot/imported/Copper Branch4.ogg-674df0834efde8a0eeae11721e5849d0.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

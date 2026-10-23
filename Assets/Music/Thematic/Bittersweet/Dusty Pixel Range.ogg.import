@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://doh2w13bbd4e3"
+path="res://.godot/imported/Dusty Pixel Range.ogg-79060560e07f89af224b8c6cf52f5cb8.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Bittersweet/Dusty Pixel Range.ogg"
+dest_files=["res://.godot/imported/Dusty Pixel Range.ogg-79060560e07f89af224b8c6cf52f5cb8.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

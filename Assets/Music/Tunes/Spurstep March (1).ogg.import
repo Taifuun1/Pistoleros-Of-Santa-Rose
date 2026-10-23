@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dxof2vjbq2r"
+path="res://.godot/imported/Spurstep March (1).ogg-55ffbb59f1def4679b7be477dab6d2e7.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Tunes/Spurstep March (1).ogg"
+dest_files=["res://.godot/imported/Spurstep March (1).ogg-55ffbb59f1def4679b7be477dab6d2e7.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bk22jy753gkko"
+path="res://.godot/imported/Dust on the Cartridge (1).ogg-2169f5c990b4f30d7100fe09b0c3fbd7.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Music/Thematic/Mysterious/Dust on the Cartridge (1).ogg"
+dest_files=["res://.godot/imported/Dust on the Cartridge (1).ogg-2169f5c990b4f30d7100fe09b0c3fbd7.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
