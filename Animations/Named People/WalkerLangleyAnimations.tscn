@@ -184,38 +184,6 @@ region = Rect2(280, 0, 40, 40)
 atlas = ExtResource("6_yilng")
 region = Rect2(320, 0, 40, 40)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xlkjm"]
-atlas = ExtResource("6_yilng")
-region = Rect2(360, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ukpuy"]
-atlas = ExtResource("6_yilng")
-region = Rect2(400, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_du8ni"]
-atlas = ExtResource("6_yilng")
-region = Rect2(440, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5ovyo"]
-atlas = ExtResource("6_yilng")
-region = Rect2(480, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_e6aw0"]
-atlas = ExtResource("6_yilng")
-region = Rect2(520, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_umodm"]
-atlas = ExtResource("6_yilng")
-region = Rect2(560, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3r43y"]
-atlas = ExtResource("6_yilng")
-region = Rect2(600, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_th3oh"]
-atlas = ExtResource("6_yilng")
-region = Rect2(640, 0, 40, 40)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_x16p8"]
 atlas = ExtResource("4_7ir45")
 region = Rect2(0, 0, 40, 40)
@@ -396,7 +364,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_27r53")
 }],
-"loop": 0,
+"loop": 1,
 "name": &"Shoot Revolver",
 "speed": 5.0
 }, {
@@ -429,28 +397,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_0ehsa")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_xlkjm")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ukpuy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_du8ni")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5ovyo")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_e6aw0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_umodm")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3r43y")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_th3oh")
+"texture": SubResource("AtlasTexture_uw4n2")
 }],
 "loop": 1,
 "name": &"Shoot Rifle",
@@ -586,7 +533,6 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_a26p4"]
 resource_name = "Shoot Rifle"
-length = 1.8
 step = 0.025
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -595,10 +541,10 @@ tracks/0/path = NodePath("AnimationSprite:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.075, 0.15, 0.225, 0.3, 0.375, 0.45, 0.525, 0.925, 1.025, 1.125, 1.375, 1.45, 1.525, 1.6, 1.675, 1.75, 1.8),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.65, 0.7, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0]
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
 
 [sub_resource type="Animation" id="Animation_71pi1"]
