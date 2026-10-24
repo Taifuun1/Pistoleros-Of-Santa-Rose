@@ -87,6 +87,7 @@ func _run() -> void:
 	await _test_play_and_tail_loop(music, trackChanges)
 	await _test_playlist_transitions(music)
 	await _test_crossfade_switch(music)
+	await _test_play_from_silence_starts_at_full_volume(music)
 	await _test_push_pop_stack(music)
 	_test_same_playlist_guard(music)
 	_test_zone_decisions(music)
@@ -232,6 +233,28 @@ func _test_cutscene_decisions(music) -> void:
 	_check(music.currentTrackId == "boss", "music shots switch songs mid-cutscene")
 	music.on_cutscene_music_shot({ "name": "" })
 	_check(music.currentTrackId == "", "an empty music name fades the music out")
+
+
+## Starting from silence (first launch, a scene transition where nothing plays
+## yet, after stop_music): the track begins at full volume instead of fading in
+## (Docs/Features and Issues.md) — a fade only blends an audible song.
+func _test_play_from_silence_starts_at_full_volume(music) -> void:
+	music.stop_music(0.0)
+	music.play_music("loop", 1.0)
+	var player = music.players[music.activePlayerIndex]
+	_check(player.playing and absf(player.volume_db) < 0.001, "a track begun from silence plays at full volume immediately (got %f db)" % player.volume_db)
+	await create_timer(0.2).timeout
+	_check(music.players[music.activePlayerIndex].playing and absf(music.players[music.activePlayerIndex].volume_db) < 0.001, "no fade-in runs while nothing was audible before")
+	# A switch while a song IS audible still crossfades the two tracks.
+	music.play_music("b", 0.1)
+	var newPlayer = music.players[music.activePlayerIndex]
+	var oldPlayer = music.players[1 - music.activePlayerIndex]
+	_check(newPlayer.volume_db <= music.SILENT_VOLUME_DB, "a switch from an audible song still fades the new track in (got %f db)" % newPlayer.volume_db)
+	_check(oldPlayer.playing, "the audible song keeps playing under the crossfade")
+	await create_timer(0.4).timeout
+	_check(absf(newPlayer.volume_db) < 0.001, "the crossfaded track reaches full volume")
+	_check(!oldPlayer.playing, "the old song stops once faded out")
+	music.stop_music(0.0)
 
 
 func _check(condition: bool, message: String) -> void:

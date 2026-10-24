@@ -4,10 +4,11 @@ extends Node
 ## an autoload so music keeps playing across scene changes. Track ids are the
 ## paths under Assets/Music without extension ("Overworld/Grasslands1"); the
 ## what-to-play decisions come from Data/Music/MusicData.gd (zones, locations,
-## encounters, menus). Every switch crossfades, and each song fades out
-## shortly before its end, blending into the next song of the playlist or back
-## to the beginning of the loop. Volume controls arrive with the Settings
-## implementation; everything plays on the Master bus.
+## encounters, menus). Every switch crossfades (a switch from a silent state
+## begins the new song at full volume instead of fading in), and each song
+## fades out shortly before its end, blending into the next song of the
+## playlist or back to the beginning of the loop. Volume controls arrive with
+## the Settings implementation; everything plays on the Master bus.
 
 signal track_changed(trackId)
 
@@ -154,15 +155,24 @@ func _startPlaylist(list: Array, startIndex: int, fadeSeconds: float) -> void:
 
 
 ## Two players fading into each other; the previous song keeps playing while
-## the new one fades in (or swaps instantly at fade 0).
+## the new one fades in (or swaps instantly at fade 0). A fade-in only blends
+## an actually audible song: when nothing is playing at volume (a scene
+## transition, the first launch of the game, a stop_music just before this
+## call), the new track starts at full volume instead of fading in from
+## silence (Docs/Features and Issues.md).
 func _crossfadeTo(stream: AudioStream, fadeSeconds: float) -> void:
 	var nextIndex = 1 - activePlayerIndex
 	var nextPlayer = players[nextIndex]
 	var previousPlayer = players[activePlayerIndex]
 	nextPlayer.stream = stream
-	nextPlayer.volume_db = SILENT_VOLUME_DB if fadeSeconds > 0.0 else 0.0
+	# Anything at (or below) the silent volume fades together with nothing;
+	# treat it as silence so the new song begins at full strength.
+	var previousIsAudible = previousPlayer.playing and previousPlayer.volume_db > SILENT_VOLUME_DB
+	var fadeIn = fadeSeconds > 0.0 and previousIsAudible
+	nextPlayer.volume_db = SILENT_VOLUME_DB if fadeIn else 0.0
 	nextPlayer.play()
-	_tweenVolume(nextPlayer, 0.0, fadeSeconds)
+	if fadeIn:
+		_tweenVolume(nextPlayer, 0.0, fadeSeconds)
 	_fadeOutPlayer(previousPlayer, fadeSeconds)
 	activePlayerIndex = nextIndex
 
