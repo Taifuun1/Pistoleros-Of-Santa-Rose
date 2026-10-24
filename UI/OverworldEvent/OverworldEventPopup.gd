@@ -69,7 +69,6 @@ func show_event(event_name: String, event_data: Dictionary) -> void:
 		content_box.add_child(btn)
 
 	show()
-	print("showed")
 
 
 func _on_choice_pressed(result: String) -> void:

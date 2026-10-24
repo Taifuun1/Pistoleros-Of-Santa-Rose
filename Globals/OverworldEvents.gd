@@ -63,7 +63,6 @@ func get_biome_for_chunk(chunk: Vector2i) -> String:
 
 
 func _trigger_random_event() -> void:
-	print("evented")
 	var current_chunk: Vector2i = Overworld.spawnChunk  # fallback
 	var overworld_node = get_tree().current_scene
 	if overworld_node and overworld_node.has_node("Actors/PlayerOverworldActor"):
