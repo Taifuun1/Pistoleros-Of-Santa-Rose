@@ -66,6 +66,36 @@ var actOpen = null
 var playerHasControl = false
 var turnOrderNames = []
 
+## The fight background (CanvasLayer below the world) defocuses while an act
+## plays so the zoomed-in fighters read clearly — the Darkest-Dungeon style act
+## focus (Docs/System Design/Shootout/Shootout UI.md). The material is a
+## duplicate of Shaders/Blur.tres: the focus manager tweens its parameters, and
+## tweening the cached resource would leak the blur into every other user of it.
+const BACKGROUND_PATH = "BackgroundLayer/Background"
+const BlurMaterial = preload("res://Shaders/Blur.tres")
+
+var backgroundBlur = null
+
+
+func _ready() -> void:
+	var background = get_node_or_null(BACKGROUND_PATH)
+	if background == null:
+		return
+	backgroundBlur = BlurMaterial.duplicate()
+	background.material = backgroundBlur
+
+## Blur/dim strength of the fight background: 0.0 is the untouched image.
+func setBackgroundFocus(amount: float) -> void:
+	if backgroundBlur == null:
+		return
+	backgroundBlur.set_shader_parameter("amount", amount)
+	backgroundBlur.set_shader_parameter("dim", amount * 0.16)
+
+func getBackgroundFocus() -> float:
+	if backgroundBlur == null:
+		return 0.0
+	return float(backgroundBlur.get_shader_parameter("amount"))
+
 
 ## The Round order renders into the scene's Turn Order container (the
 ## TurnOrderStrip script is attached to that node in ShootoutUI.tscn).

@@ -10,6 +10,9 @@ extends SceneTree
 ##    (unreachable hit-frame index) through sequenceDone instead of hanging.
 ## 3. The sequencer completes an acting step for a missing animation instead
 ##    of arming a hit that can never fire.
+## 4. Target effect sprites (Paregoric and friends) spawn above the target's
+##    drawn body — not at the actor origin (the character's feet) and not
+##    centered on the body (covering the character).
 ## Run with: godot --headless --script res://Tests/TestAnimationSequencer.gd
 
 const AnimationsScript = preload("res://Animations/Animations.gd")
@@ -55,6 +58,7 @@ func _run() -> void:
 	await _test_back_to_back_restarts_reach_the_hit_again()
 	await _test_unreachable_hit_frame_completes_via_sequence_done()
 	await _test_missing_animation_completes_immediately()
+	await _test_target_effect_spawns_above_the_character()
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
@@ -170,6 +174,51 @@ func _test_missing_animation_completes_immediately() -> void:
 	_check(done.count == 1, "a missing attack animation completes the sequence immediately instead of hanging (done=%d)" % done.count)
 	sequencer.free()
 	actor.free()
+
+
+## A target effect scene must float above the target's drawn body: its scene
+## root sits at the actor origin (the feet) by default, and anchoring it
+## centered on the body covers the character (Docs/Features and Issues.md)
+## — the sequencer places it with its bottom on the body's top line instead.
+func _test_target_effect_spawns_above_the_character() -> void:
+	var acting = FakeActingActor.new()
+	root.add_child(acting)
+	var target = FakeActingActor.new()
+	# Animation layout like the real actor scenes: an Animations node holding
+	# an AnimationSprite whose offset draws the body above the actor origin.
+	# No frames here, so the drawn rect degenerates to the offset point.
+	var animations = Node2D.new()
+	animations.position = Vector2(2, 0)
+	var sprite = AnimatedSprite2D.new()
+	sprite.name = "AnimationSprite"
+	sprite.offset = Vector2(0, -15)
+	sprite.centered = true
+	animations.add_child(sprite)
+	target.animationsNode = animations
+	root.add_child(target)
+	target.add_child(animations)
+	var sequencer = SequencerScript.new()
+	root.add_child(sequencer)
+	var done = Counter.new()
+	sequencer.sequenceDone.connect(done.bump)
+	sequencer.play([{ "target": "selectedActor", "path": "res://Animations/Shootout/Items/Paregoric.tscn" }], acting, target)
+	var effect = null
+	for child in target.get_children():
+		if child.name == "Paregoric":
+			effect = child
+	_check(effect != null, "the target effect instantiates on the target actor")
+	if effect != null:
+		# Paregoric frames are 12px tall, so with the feet at the origin and
+		# the drawn rect's top at y = -15, the effect's bottom must sit on
+		# that top line: center 6px above it.
+		_check(effect.position.is_equal_approx(Vector2(2, -21)), "the effect floats above the character's drawn body (got %s)" % effect.position)
+	# The Effect animation frees the scene; the sequence completes through the
+	# tree_exited hook.
+	await create_timer(1.2).timeout
+	_check(done.count == 1, "the freed effect completes the sequence (done=%d)" % done.count)
+	sequencer.free()
+	target.free()
+	acting.free()
 
 
 func _check(condition: bool, message: String) -> void:

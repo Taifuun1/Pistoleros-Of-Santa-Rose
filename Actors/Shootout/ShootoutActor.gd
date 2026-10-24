@@ -9,6 +9,8 @@ signal actorTurn
 signal actorHovered
 signal actorUnhovered
 
+var characterUIHidden = false
+
 
 
 func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
@@ -71,6 +73,8 @@ func _minColumnSpacing(actorSide: String) -> float:
 ## before the current actor's turn starts; the old toggle left previous actors
 ## highlighted and hid the marker on an actor's second turn).
 func showActorTurn() -> void:
+	if characterUIHidden:
+		return
 	$Highlight2.show()
 
 func getAnimations() -> Node:
@@ -89,9 +93,10 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 func _on_area_2d_mouse_entered() -> void:
 	# Null-safe: a misnamed animations child must not crash the hover (the
 	# outline is cosmetic; the hover payload still updates the stat panel).
-	var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
-	if sprite != null:
-		sprite.material = outlineShader
+	if !characterUIHidden:
+		var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
+		if sprite != null:
+			sprite.material = outlineShader
 	actorHovered.emit()
 
 func _on_area_2d_mouse_exited() -> void:

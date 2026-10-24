@@ -11,12 +11,20 @@ const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
 const TargetingManagerScript = preload("res://Shootout/ShootoutTargetingManager.gd")
 const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
 const AnimationSequencerScript = preload("res://Shootout/ShootoutAnimationSequencer.gd")
+const FocusManagerScript = preload("res://Shootout/ShootoutFocusManager.gd")
 const EnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 const LootGeneratorScript = preload("res://Globals/ItemGeneration.gd")
 const HPIndicatorScene = preload("res://Nodes/HP Indicator/HPIndicator.tscn")
+
+# Let the act presentation settle before the next fighter moves.
+const BETWEEN_ACTS_PAUSE = 0.4
+# Visual walk between repositioning columns (Docs/Features and Issues.md: the
+# Move move needs an animation). Must stay under BETWEEN_ACTS_PAUSE so the
+# next act can never capture a mid-slide actor position as its rest anchor.
+const REPOSITION_SLIDE_TIME = 0.3
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -25,6 +33,7 @@ var turnManager
 var targetingManager
 var actionResolver
 var animationSequencer
+var focusManager
 var enemyAI
 var rodeoManager
 var cylinderManager
@@ -32,6 +41,10 @@ var effectManager
 
 var selectedAct = null
 var selectedActor = ""
+# The enemy's act is chosen when their turn starts (not at the impact frame) so
+# the act focus can frame attacker and target together and so the decision
+# can't change mid-animation; resolveActOnce reuses it.
+var pendingEnemyAct = {}
 # Currently hovered actor (indexed name); stale mouse_exited events from a
 # previously hovered actor are ignored against it (see clearHoveredActorStats).
 var hoveredActorName = ""
@@ -70,6 +83,16 @@ func _ready() -> void:
 	add_child(animationSequencer)
 	animationSequencer.frameHit.connect(resolveActOnce)
 	animationSequencer.sequenceDone.connect(resolveActOnce)
+	# Darkest-Dungeon style act presentation (Docs/System Design/Shootout/
+	# Shootout UI.md): only the fighters an act affects zoom, the background
+	# defocuses and the fighters lunge/recoil while it plays. The
+	# release hangs off finishTurn rather than sequenceDone: the turn advances on
+	# the acting animation's hit frame, so the next act can already have taken the
+	# camera by the time the previous sequence ends, and releasing there would
+	# undo the new act's focus.
+	focusManager = FocusManagerScript.new()
+	add_child(focusManager)
+	focusManager.init(self, get_node_or_null("Camera2D"), ui)
 	ui.move.connect(_on_shootout_ui_move)
 	ui.item.connect(_on_shootout_ui_item)
 	ui.reposition.connect(_on_shootout_ui_reposition)
@@ -210,7 +233,21 @@ func startCurrentTurn() -> void:
 
 func executeEnemyTurn(actor) -> void:
 	pendingResolution = true
-	animationSequencer.play([{ "target": "actingActor" }], actor)
+	# The act is picked when the turn starts (see pendingEnemyAct): the act
+	# focus needs the target to frame attacker and target together, and the
+	# enemy's move/item animation steps play the same way the player's do.
+	pendingEnemyAct = enemyAI.chooseAct(actor.name)
+	var enemyTarget = getActor(pendingEnemyAct.get("targetName", ""))
+	playAct(actSteps(pendingEnemyAct.get("type", ""), pendingEnemyAct.get("name", "")), actor, enemyTarget)
+
+## Single seam that starts an act. The focus (fighter zoom, background defocus,
+## lunge) only runs when the sequence has something to show: an act with no
+## animation steps resolves on the same frame it starts, so focusing it would
+## just flicker the presentation in and out.
+func playAct(steps: Array, actingActor, targetActor) -> void:
+	if !steps.is_empty() and focusManager != null:
+		focusManager.beginAct(actingActor, targetActor)
+	animationSequencer.play(steps, actingActor, targetActor)
 
 func selectActor(actorName: String = "") -> void:
 	if !playerHasControl or !playerAction or selectedAct == null:
@@ -225,15 +262,35 @@ func selectActor(actorName: String = "") -> void:
 	ui.playerHasControl = false
 	actingActor.actorTurn.emit()
 	pendingResolution = true
-	animationSequencer.play(buildActSteps(), actingActor, getActor(selectedActor))
+	playAct(buildActSteps(), actingActor, getActor(selectedActor))
 
 func buildActSteps() -> Array:
-	match selectedAct.type:
+	return actSteps(selectedAct.type, selectedAct.get("name", ""))
+
+## The data-driven animation steps for a move or item; every other act type
+## plays the acting actor's weapon animation.
+func actSteps(actType: String, actName: String) -> Array:
+	match actType:
 		Shootout.ACT_TYPE_MOVES:
-			return Shootout.movesData[selectedAct.name].get("animations", [])
+			return Shootout.movesData.get(actName, {}).get("animations", [])
 		Shootout.ACT_TYPE_ITEMS:
-			return Shootout.itemsData[selectedAct.name].get("animations", [])
+			return Shootout.itemsData.get(actName, {}).get("animations", [])
 	return [{ "target": "actingActor" }]
+
+## Applies the act and reports to the focus manager whether the target actually
+## lost HP, so only a landed hit recoils (a Miss or a Reload/Jammed chamber
+## leaves the target standing still).
+func resolveWithFocus(actingActor, targetActor, actType: String, actName: String) -> void:
+	var hpBefore = int(targetActor.hp) if targetActor != null else 0
+	match actType:
+		Shootout.ACT_TYPE_ATTACK:
+			actionResolver.resolveAttack(actingActor, targetActor)
+		Shootout.ACT_TYPE_MOVES:
+			actionResolver.resolveMove(actName, actingActor, targetActor)
+		Shootout.ACT_TYPE_ITEMS:
+			actionResolver.resolveItem(actName, actingActor, targetActor)
+	if focusManager != null:
+		focusManager.onActResolved(actingActor, targetActor, targetActor != null and int(targetActor.hp) < hpBefore)
 
 func resolveActOnce() -> void:
 	if !pendingResolution or battleOver:
@@ -255,23 +312,22 @@ func resolveActOnce() -> void:
 		if targetActor == null:
 			finishTurn(null)
 			return
-		match selectedAct.type:
-			Shootout.ACT_TYPE_ATTACK:
-				actionResolver.resolveAttack(actingActor, targetActor)
-			Shootout.ACT_TYPE_MOVES:
-				actionResolver.resolveMove(selectedAct.name, actingActor, targetActor)
-			Shootout.ACT_TYPE_ITEMS:
-				actionResolver.resolveItem(selectedAct.name, actingActor, targetActor)
+		resolveWithFocus(actingActor, targetActor, selectedAct.type, selectedAct.get("name", ""))
 	else:
-		# Enemy acts route through the same resolution path as player acts.
-		var enemyAct = enemyAI.chooseAct(turnManager.currentActorName())
+		# Enemy acts route through the same resolution path as player acts. The
+		# act was chosen when the turn started (so the focus could frame it);
+		# choosing again here only happens when nothing was cached.
+		var enemyAct = pendingEnemyAct
+		if enemyAct.is_empty():
+			enemyAct = enemyAI.chooseAct(turnManager.currentActorName())
 		if enemyAct.is_empty():
 			actingActor.actorTurn.emit()
 			finishTurn(null)
 			return
 		if enemyAct.type == Shootout.ACT_TYPE_REPOSITION:
 			var delta = -1 if enemyAct.direction == "forward" else 1
-			turnManager.setActorPosition(actingActor.name, turnManager.getActorPosition(actingActor.name) + delta)
+			# Same Move animation as the UI picker: slide to the new column.
+			repositionActor(actingActor, turnManager.getActorPosition(actingActor.name) + delta)
 			actingActor.actorTurn.emit()
 			finishTurn(null)
 			return
@@ -288,16 +344,13 @@ func resolveActOnce() -> void:
 			finishTurn(null)
 			return
 		actingActor.actorTurn.emit()
-		match enemyAct.type:
-			Shootout.ACT_TYPE_ATTACK:
-				actionResolver.resolveAttack(actingActor, targetActor)
-			Shootout.ACT_TYPE_MOVES:
-				actionResolver.resolveMove(enemyAct.name, actingActor, targetActor)
-			Shootout.ACT_TYPE_ITEMS:
-				actionResolver.resolveItem(enemyAct.name, actingActor, targetActor)
+		resolveWithFocus(actingActor, targetActor, enemyAct.type, enemyAct.get("name", ""))
 	finishTurn(targetActor)
 
 func finishTurn(targetActor) -> void:
+	var waitingForAnimation = animationSequencer != null and animationSequencer.running
+	if !waitingForAnimation and focusManager != null:
+		focusManager.endAct()
 	effectManager.onTurnEnd(turnManager.currentActorName())
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_END, {
 		"actor": getActor(turnManager.currentActorName()),
@@ -309,6 +362,18 @@ func finishTurn(targetActor) -> void:
 	turnManager.advanceTurn()
 	selectedAct = null
 	selectedActor = ""
+	pendingEnemyAct = {}
+	if waitingForAnimation:
+		if focusManager != null:
+			focusManager.syncRestPositionsFromTurnManager()
+		if !battleOver and animationSequencer != null and animationSequencer.running:
+			await animationSequencer.sequenceDone
+		if focusManager != null:
+			focusManager.endAct()
+	# Turn effects, deaths and victory resolve immediately; only the hand-off to
+	# the next actor waits, giving the focus/recoil a brief moment to settle.
+	if !battleOver:
+		await get_tree().create_timer(BETWEEN_ACTS_PAUSE).timeout
 	actorDone.emit()
 
 func _on_actor_done() -> void:
@@ -338,6 +403,10 @@ func _on_battle_ended(winningSide: String) -> void:
 	battleOver = true
 	playerHasControl = false
 	ui.playerHasControl = false
+	# An act may still be mid-animation when the last fighter drops: release the
+	# act focus so the end screen shows the whole street, not a zoomed-in corner.
+	if focusManager != null:
+		focusManager.endAct()
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_END, { "winningSide": winningSide })
 	var results = {
 		"winningSide": winningSide,
@@ -505,13 +574,55 @@ func _on_shootout_ui_reposition(direction: String) -> void:
 	if actor == null:
 		return
 	var delta = -1 if direction == "forward" else 1
-	if !turnManager.setActorPosition(actorName, turnManager.getActorPosition(actorName) + delta):
+	# Blocked push chains must not spend the Move or close the picker.
+	if !turnManager.canMoveActor(actorName, turnManager.getActorPosition(actorName) + delta):
 		return
 	ui.hideActsPanel()
 	playerHasControl = false
 	ui.playerHasControl = false
+	repositionActor(actor, turnManager.getActorPosition(actorName) + delta)
 	actor.actorTurn.emit()
 	finishTurn(null)
+
+
+## Reposition act shared by the UI picker and the enemy AI: the turn manager
+## commits the squeeze repositioning instantly (positions in the registry are
+## the truth), then every fighter the move touched — the mover sliding to the
+## new column, the displaced occupants sliding toward the vacated spot —
+## travels as a short walk instead of a teleport (Docs/Features and Issues.md).
+func repositionActor(actor, column: int) -> bool:
+	if actor == null:
+		return false
+	# Snapshot the whole side: squeeze repositioning also moves everyone
+	# between the mover's old and new columns.
+	var actorSide = turnManager.sideOfActor(str(actor.name))
+	var previousPositions = {}
+	for otherName in turnManager.shootoutActors.get(actorSide, {}):
+		var other = getActor(otherName)
+		if other != null:
+			previousPositions[other] = other.position
+	if !turnManager.setActorPosition(str(actor.name), column):
+		return false
+	# playRepositionSlide no-ops on unchanged fighters, so everyone can go
+	# through the same path as the mover.
+	for other in previousPositions:
+		playRepositionSlide(other, previousPositions[other])
+	return true
+
+
+## Short walk tween between the two column spots of the repositioning fighter.
+## Purely visual: mechanics resolved already in repositionActor.
+func playRepositionSlide(actor, fromPosition: Vector2) -> void:
+	if actor == null or !is_instance_valid(actor):
+		return
+	var toPosition = actor.position
+	if toPosition == fromPosition:
+		return
+	actor.position = fromPosition
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(actor, "position", toPosition, REPOSITION_SLIDE_TIME)
 
 func _on_shootout_ui_item_acts_requested() -> void:
 	var actor = getActor(turnManager.currentActorName())
