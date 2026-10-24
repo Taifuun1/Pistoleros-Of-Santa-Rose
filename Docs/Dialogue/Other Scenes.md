@@ -75,7 +75,7 @@ G "It was for just 5 bucks."<br>
 A "How did you manage that? All this, for 5 bucks. You're like a New York investor!"<br>
 MA "Our sharp <i>señorita</i>, counting our <i>dolares</i> like <i>magnate de los trenes!</i>"<br>
 G "It's nothing big. I just know the prices in Santa Rose for every commodity."<br>
-G "We got to keep our expenses in order. That way we'll have money for things like this one."<br>
+G "We got to keep our expenses in order. That way we'll have money for things that we really need."<br>
 MA "Aiyana! Ready to fill your soul with big <i>cigarro?</i>"<br>
 A "I'll try it..."<br>
 Aiyana takes a huff of the havannah<br>
@@ -84,6 +84,9 @@ MA "It is <i>cigarro</i> cleaning your soul! Take more! Is good for you!"<br>
 A "Oh dear..."
 
 ## Morrison cares for a little creature
+
+A "What do you have there, Morrison?"<br>
+
 
 ## Manuel makes friends at the saloon
 
@@ -119,7 +122,7 @@ W "Sure. I'm wager."<br>
 LL "Be warned, I draw faster than my shadow."<br>
 W "Huh? That ain't possible."<br>
 LL "You think? Ha ha! Let me show you!"<br>
-Lucky Luke shoots the fence faster than his shadow
+Lucky Luke shoots the fence faster than his shadow<br>
 W "What the..."<br>
 LL "Ha hah! Hope you don't get cold feet!"<br>
 W "Yeah, I'm good."
