@@ -14,5 +14,9 @@ func _on_continue_pressed() -> void:
 	pass # Save/load not implemented yet.
 
 
+func _on_settings_pressed() -> void:
+	pass # Settings not implemented yet.
+
+
 func _on_quit_pressed() -> void:
 	get_tree().quit()
