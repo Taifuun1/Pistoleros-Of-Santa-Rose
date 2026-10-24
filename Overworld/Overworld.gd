@@ -6,10 +6,39 @@ var currentChunk = null
 var currentlyLoadedChunks = []
 var loadingChunk = true
 
+# Parsed chunk scenes cached by chunk location (see getChunkScene(); null
+# entries are chunks that have no scene file).
+var chunkScenes = {}
+# Chunk scene paths currently parsing on a background thread (path -> chunk).
+var pendingChunkPaths = {}
+# Chunk tile cells in shared template-grid coordinates (the same cells the
+# old per-cell copy wrote), decoded once from each chunk scene's baked
+# tile_data and cached flat as [cellX, cellY, sourceId, atlasX, atlasY,
+# alternative] per cell. Writing them straight into the one merged
+# TileMapLayer keeps the old rendering exactly; the writes/erases are
+# spread across frames (see processCellOps()) so chunk crossings don't
+# stall a single frame.
+var chunkCellDataCache = {}
+# Chunk locations handled: cells in $MergedTiles or no scene file.
+var loadedChunkCells = {}
+# Chunk locations whose cells are present in $MergedTiles once the queued
+# cell operations have run.
+var presentChunkCells = {}
+# Chunks that became needed while their scene was still parsing on the
+# background thread; retried every frame until the parse finishes.
+var pendingChunkLoads = []
+# Queued cell operations: { "chunk": location, "data": PackedInt32Array,
+# "offset": int, "write": bool }, processed up to cellOpBudget cells a frame.
+var cellOpQueue = []
+const cellOpBudget = 8192
+
 
 func _process(_delta):
 	if currentChunk == null:
 		init()
+	pollChunkScenes()
+	processPendingChunkLoads()
+	processCellOps()
 	if !loadingChunk and local_to_map(to_local($Actors/PlayerOverworldActor.position)) != currentChunk:
 		loadingChunk = true
 		currentChunk = local_to_map($Actors/PlayerOverworldActor.position)
@@ -17,62 +46,86 @@ func _process(_delta):
 		setAdjacentChunks(newCurrentlyLoadedChunks)
 		currentlyLoadedChunks = newCurrentlyLoadedChunks
 		removeFarawayObjects()
-		removeNodes()
 		# Zone change check after entering the new chunk.
 		MusicPlayer.on_overworld_chunk(currentChunk)
+		# Parse the chunk scenes the next crossing will need on a background
+		# thread.
+		preloadChunkScenes()
 		loadingChunk = false
 
 func init() -> void:
 	currentChunk = Overworld.spawnChunk
-	setChunk()
+	if !setChunk() and !pendingChunkLoads.has(currentChunk):
+		pendingChunkLoads.append(currentChunk)
 	var newCurrentlyLoadedChunks = getAdjacentChunks()
 	setAdjacentChunks(newCurrentlyLoadedChunks)
 	currentlyLoadedChunks = newCurrentlyLoadedChunks
-	removeNodes()
 	$Actors/PlayerOverworldActor.position = Vector2i(map_to_local(Overworld.spawnChunk) - $OverworldTileChunkTemplate.map_to_local(HelperVariables.overworldChunkSize / 2) + $OverworldTileChunkTemplate.map_to_local(Overworld.spawnTile))
 	loadingChunk = false
 	# Zone music for the chunk the player spawns in (MusicPlayer decides by
 	# the zone bands in Data/Music/MusicData.gd; only zone changes restart).
 	MusicPlayer.on_overworld_chunk(currentChunk)
+	# Parse nearby chunk scenes ahead of time on a background thread.
+	preloadChunkScenes()
 
 
 #######################
 ### Chunk functions ###
 #######################
 
-func setChunk(chunkLocation: Vector2i = currentChunk) -> void:
-	var chunk = load("res://Overworld/Overworld Chunks/#{x}#{y}.tscn".format({ "x": chunkLocation.x, "y": chunkLocation.y }))
-	if chunk == null:
+func setChunk(chunkLocation: Vector2i = currentChunk) -> bool:
+	# Returns false when the chunk scene is still parsing on the background
+	# loader; the caller retries later (see pendingChunkLoads).
+	if !isChunkSceneReady(chunkLocation):
+		return false
+	var chunkScene = getChunkScene(chunkLocation)
+	if chunkScene == null:
 		push_warning("No chunk for x: {x}, y: {y}".format({ "x": chunkLocation.x, "y": chunkLocation.y }))
-		return
-	$Chunks.add_child(chunk.instantiate())
-	setTiles(chunkLocation, getChunkTiles($Chunks.get_children()[$Chunks.get_child_count() - 1]))
-	if "locations" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
-		var locations = $Chunks.get_children()[$Chunks.get_child_count() - 1].locations
-		for location in locations:
-			if !isOverworldObjectLoaded(location, "Locations"):
-				createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
-	if "spawnPoints" in $Chunks.get_children()[$Chunks.get_child_count() - 1]:
-		var spawnPoints = $Chunks.get_children()[$Chunks.get_child_count() - 1].spawnPoints
-		for actorName in spawnPoints:
-			if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
-				createSpawnPoint(
-					actorName,
-					spawnPoints[actorName].type,
-					Vector2i(map_to_local(chunkLocation) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(spawnPoints[actorName].tiles[0])),
-					spawnPoints[actorName].chance,
-					spawnPoints[actorName].maximum
-				)
+		# Mark missing chunks as handled so they are not retried every frame.
+		loadedChunkCells[chunkLocation] = true
+		return true
+	var cellData = getChunkCellData(chunkLocation)
+	loadedChunkCells[chunkLocation] = true
+	if !presentChunkCells.has(chunkLocation):
+		queueCellOp(chunkLocation, cellData, true)
+	# Per-chunk data scripts (locations / spawnPoints) run on a bare script
+	# instance; the scene itself is never added to the tree.
+	var chunkScript = getChunkScript(chunkScene)
+	if chunkScript != null:
+		var chunkData = chunkScript.new()
+		if "locations" in chunkData:
+			var locations = chunkData.locations
+			for location in locations:
+				if !isOverworldObjectLoaded(location, "Locations"):
+					createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
+		if "spawnPoints" in chunkData:
+			var spawnPoints = chunkData.spawnPoints
+			for actorName in spawnPoints:
+				if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
+					createSpawnPoint(
+						actorName,
+						spawnPoints[actorName].type,
+						Vector2i(map_to_local(chunkLocation) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(spawnPoints[actorName].tiles[0])),
+						spawnPoints[actorName].chance,
+						spawnPoints[actorName].maximum
+					)
+		chunkData.free()
+	return true
 
 func setAdjacentChunks(newAdjacentChunks: Array) -> void:
-	for previousAdjacentChunk in currentlyLoadedChunks:
-		if !newAdjacentChunks.has(previousAdjacentChunk) and previousAdjacentChunk != currentChunk:
-			unloadChunk(previousAdjacentChunk)
+	# Erase every merged chunk that is neither the player's chunk nor one of
+	# its neighbours (also covers chunks left over from earlier positions,
+	# e.g. the spawn chunk).
+	for loadedChunkLocation in loadedChunkCells.keys():
+		if loadedChunkLocation != currentChunk and !newAdjacentChunks.has(loadedChunkLocation):
+			unloadChunk(loadedChunkLocation)
 	for currentAdjacentChunk in newAdjacentChunks:
-		if currentlyLoadedChunks.has(currentAdjacentChunk):
+		if loadedChunkCells.has(currentAdjacentChunk):
 			continue
-		else:
-			setChunk(currentAdjacentChunk)
+		# Chunks whose scene is still parsing load on a later frame instead
+		# of blocking this one.
+		if !setChunk(currentAdjacentChunk) and !pendingChunkLoads.has(currentAdjacentChunk):
+			pendingChunkLoads.append(currentAdjacentChunk)
 
 func getAdjacentChunks() -> Array:
 	var adjacentChunks = []
@@ -81,39 +134,197 @@ func getAdjacentChunks() -> Array:
 		adjacentChunks.append(adjacentChunkLocation)
 	return adjacentChunks
 
-func getChunkTiles(node: Node2D) -> Dictionary:
-	var tiles = {}
-	for x in range(HelperVariables.overworldChunkSize.x):
-		for y in range(HelperVariables.overworldChunkSize.y):
-			tiles[Vector2i(x, y)] = {
-				"id": node.get_node("OverworldTileChunkTemplate").get_cell_source_id(0, Vector2i(x,y)),
-				"coords": node.get_node("OverworldTileChunkTemplate").get_cell_atlas_coords(0, Vector2i(x,y)),
-				"alternative": node.get_node("OverworldTileChunkTemplate").get_cell_alternative_tile(0, Vector2i(x,y))
-			}
-	return tiles
+# The chunk's first cell on the shared template grid (the old setTiles()
+# formula's base offset for the chunk's local keys).
+func getChunkBaseCell(chunkLocation: Vector2i) -> Vector2i:
+	var origin = Vector2i(map_to_local(chunkLocation).x - (32 * 24), map_to_local(chunkLocation).y - (32 * 6))
+	return $OverworldTileChunkTemplate.local_to_map(origin)
 
-func setTiles(chunk: Vector2i, tiles: Dictionary) -> void:
-	for key in tiles:
-		$OverworldTileChunkTemplate.set_cell(0, Vector2i(
-			$OverworldTileChunkTemplate.local_to_map(
-				Vector2i(
-					map_to_local(chunk).x - (32 * 24),
-					map_to_local(chunk).y - (32 * 6)
+# The chunk's tiles as shared template-grid cells (exactly the cells the
+# old setTiles() copy used to write), decoded once from the scene's baked
+# tile_data and cached. Chunks without a scene decode to an empty array.
+func getChunkCellData(chunkLocation: Vector2i) -> PackedInt32Array:
+	if chunkCellDataCache.has(chunkLocation):
+		return chunkCellDataCache[chunkLocation]
+	var cellData = PackedInt32Array()
+	if chunkScenes.has(chunkLocation) and chunkScenes[chunkLocation] != null:
+		var baseCell = getChunkBaseCell(chunkLocation)
+		var state = chunkScenes[chunkLocation].get_state()
+		for n in range(state.get_node_count()):
+			for p in range(state.get_node_property_count(n)):
+				if state.get_node_property_name(n, p) != "layer_0/tile_data":
+					continue
+				var data: PackedInt32Array = state.get_node_property_value(n, p)
+				for i in range(0, data.size() - 2, 3):
+					var packedCoords = data[i]
+					var packedTile = data[i + 1]
+					var packedAtlas = data[i + 2]
+					var cell = baseCell + Vector2i(
+						_s16(packedCoords & 0xFFFF),
+						_s16((packedCoords >> 16) & 0xFFFF)
+					) - Vector2i(1, 1)
+					cellData.append(cell.x)
+					cellData.append(cell.y)
+					cellData.append(_s16(packedTile & 0xFFFF))
+					cellData.append(_s16((packedTile >> 16) & 0xFFFF))
+					cellData.append(_s16(packedAtlas & 0xFFFF))
+					cellData.append(_s16((packedAtlas >> 16) & 0xFFFF))
+	chunkCellDataCache[chunkLocation] = cellData
+	return cellData
+
+# Sign-extends a 16-bit packed component of the baked tile_data format.
+func _s16(v: int) -> int:
+	if v >= 0x8000:
+		return v - 0x10000
+	return v
+
+# Queues a write/erase of the chunk's cells, processed a slice per frame by
+# processCellOps(). Any already queued op for the same chunk is replaced (a
+# fully rewritten chunk is harmless; erasing absent cells is a no-op).
+func queueCellOp(chunkLocation: Vector2i, cellData: PackedInt32Array, write: bool) -> void:
+	for i in range(cellOpQueue.size() - 1, -1, -1):
+		if cellOpQueue[i]["chunk"] == chunkLocation:
+			cellOpQueue.remove_at(i)
+	if write:
+		presentChunkCells[chunkLocation] = true
+	else:
+		presentChunkCells.erase(chunkLocation)
+	cellOpQueue.append({ "chunk": chunkLocation, "data": cellData, "offset": 0, "write": write })
+
+# Runs queued cell writes/erases, at most cellOpBudget cells per frame, so a
+# chunk transition's work spreads over a few frames instead of stalling one.
+func processCellOps() -> void:
+	if cellOpQueue.is_empty():
+		return
+	var mergedTiles = $MergedTiles
+	var remaining = cellOpBudget
+	while remaining > 0 and !cellOpQueue.is_empty():
+		var op = cellOpQueue[0]
+		var data: PackedInt32Array = op["data"]
+		var offset: int = op["offset"]
+		var end: int = min(offset + remaining * 6, data.size())
+		if op["write"]:
+			var i = offset
+			while i < end:
+				mergedTiles.set_cell(
+					Vector2i(data[i], data[i + 1]),
+					data[i + 2],
+					Vector2i(data[i + 3], data[i + 4]),
+					data[i + 5]
 				)
-			)
-		) + key - Vector2i(1, 1), tiles[key].id, tiles[key].coords, tiles[key].alternative)
+				i += 6
+		else:
+			var i = offset
+			while i < end:
+				mergedTiles.erase_cell(Vector2i(data[i], data[i + 1]))
+				i += 6
+		remaining -= (end - offset) / 6
+		if end >= data.size():
+			cellOpQueue.pop_front()
+		else:
+			op["offset"] = end
+
+
+###################################
+### Chunk scene loading (async) ###
+###################################
+
+func getChunkPath(chunkLocation: Vector2i) -> String:
+	return "res://Overworld/Overworld Chunks/#{x}#{y}.tscn".format({ "x": chunkLocation.x, "y": chunkLocation.y })
+
+# Parses a chunk scene on a background thread before it is needed, so
+# first-time chunk loads don't stall a frame on disk I/O and scene parsing.
+func requestChunkScene(chunkLocation: Vector2i) -> void:
+	if chunkScenes.has(chunkLocation):
+		return
+	var path = getChunkPath(chunkLocation)
+	if pendingChunkPaths.has(path):
+		return
+	if !ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path):
+		pendingChunkPaths[path] = chunkLocation
+
+# Moves finished background parses into the chunk scene cache.
+func pollChunkScenes() -> void:
+	for path in pendingChunkPaths.keys():
+		var status = ResourceLoader.load_threaded_get_status(path)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			chunkScenes[pendingChunkPaths[path]] = ResourceLoader.load_threaded_get(path)
+			pendingChunkPaths.erase(path)
+		elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			chunkScenes[pendingChunkPaths[path]] = null
+			pendingChunkPaths.erase(path)
+
+# True when getChunkScene() can return the chunk's scene right away: cached
+# (loaded or missing), not requested, or its background parse is finished.
+func isChunkSceneReady(chunkLocation: Vector2i) -> bool:
+	if chunkScenes.has(chunkLocation):
+		return true
+	var path = getChunkPath(chunkLocation)
+	if !pendingChunkPaths.has(path):
+		return true
+	return ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_LOADED
+
+# Returns the PackedScene for a chunk (from the cache, a finished background
+# parse, or a direct load), or null when there is no chunk scene file. Call
+# isChunkSceneReady() first: a still-parsing path would wait for the whole
+# loader queue here.
+func getChunkScene(chunkLocation: Vector2i):
+	var path = getChunkPath(chunkLocation)
+	if chunkScenes.has(chunkLocation):
+		return chunkScenes[chunkLocation]
+	if pendingChunkPaths.has(path):
+		chunkScenes[chunkLocation] = ResourceLoader.load_threaded_get(path)
+		pendingChunkPaths.erase(path)
+		return chunkScenes[chunkLocation]
+	if !ResourceLoader.exists(path):
+		return null
+	chunkScenes[chunkLocation] = load(path)
+	return chunkScenes[chunkLocation]
+
+# The per-chunk data script (locations / spawnPoints), if the chunk scene's
+# root node has one.
+func getChunkScript(chunkScene):
+	var state = chunkScene.get_state()
+	for n in range(state.get_node_count()):
+		for p in range(state.get_node_property_count(n)):
+			if state.get_node_property_name(n, p) == "script":
+				return state.get_node_property_value(n, p)
+	return null
+
+# Loads chunks whose background parse finished after they were needed.
+func processPendingChunkLoads() -> void:
+	if pendingChunkLoads.is_empty():
+		return
+	# Drop chunks the player has moved away from.
+	var adjacentChunks = getAdjacentChunks()
+	var stillWanted = []
+	for chunkLocation in pendingChunkLoads:
+		if adjacentChunks.has(chunkLocation) or chunkLocation == currentChunk:
+			stillWanted.append(chunkLocation)
+	pendingChunkLoads = stillWanted
+	for chunkLocation in pendingChunkLoads.duplicate():
+		if loadedChunkCells.has(chunkLocation):
+			pendingChunkLoads.erase(chunkLocation)
+			continue
+		if setChunk(chunkLocation):
+			pendingChunkLoads.erase(chunkLocation)
+
+# Preloads every chunk scene within two chunks of the player, nearest first,
+# so the chunks needed on the next boundary crossing are already parsed.
+func preloadChunkScenes() -> void:
+	for radius in [1, 2]:
+		for x in range(currentChunk.x - radius, currentChunk.x + radius + 1):
+			for y in range(currentChunk.y - radius, currentChunk.y + radius + 1):
+				requestChunkScene(Vector2i(x, y))
 
 func unloadChunk(chunk: Vector2i) -> void:
-	for x in range(64):
-		for y in range(64):
-			$OverworldTileChunkTemplate.erase_cell(0, Vector2i(
-				$OverworldTileChunkTemplate.local_to_map(
-					Vector2i(
-						map_to_local(chunk).x - (32 * 24),
-						map_to_local(chunk).y - (32 * 6)
-					)
-				)
-			) + Vector2i(x ,y) - Vector2i(1, 1))
+	# Unload by erasing the chunk's cached cells from the merged layer
+	# (queued; processed a slice per frame).
+	if loadedChunkCells.has(chunk):
+		loadedChunkCells.erase(chunk)
+		queueCellOp(chunk, chunkCellDataCache.get(chunk, PackedInt32Array()), false)
 	
 
 ##########################
@@ -191,11 +402,6 @@ func createCollisionWithPosition(collisionPosition: Vector2i, chunkPosition: Vec
 	areaShape.z_index = 1
 	
 	return areaShape
-
-func removeNodes() -> void:
-	for _node in $Chunks.get_children():
-		_node.queue_free()
-
 
 #######################
 ### Timer functions ###
