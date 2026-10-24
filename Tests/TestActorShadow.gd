@@ -32,7 +32,7 @@ func _init() -> void:
 func _run() -> void:
 	print("\n--- Actor shadows ---")
 	_test_attached_shadow_geometry()
-	_test_scene_created_shadow_auto_finds_sprite()
+	await _test_scene_created_shadow_auto_finds_sprite()
 	_test_sprite2d_hframes_geometry()
 	_test_location_actor_scenes_get_shadows()
 
@@ -61,12 +61,14 @@ func _test_attached_shadow_geometry() -> void:
 	root.add_child(actor)
 	ShadowScript.attachTo(actor)
 	var shadow = _findShadow(actor)
-	_check(shadow != null, "attachTo creates a shadow below the sprite's parent")
+	_check(shadow != null, "attachTo creates a shadow behind the sprite")
 	if shadow == null:
 		return
+	_check(shadow.get_parent() == sprite, "the shadow parents under the sprite (got %s)" % shadow.get_parent())
+	_check(shadow.show_behind_parent, "the shadow draws behind its sprite")
+	_check(shadow.z_index == 0, "the shadow stays in the sprite's z context (no negative z_index that sinks under ground tilemaps)")
 	_check(shadow.position.is_equal_approx(Vector2(0, expectedFeetY(-15, IDLE_SIZE))), "the shadow sits on the sprite's drawn bottom line (got %s)" % shadow.position)
 	_check(is_equal_approx(shadow.shadowSize.x, expectedWidth(IDLE_SIZE)), "the ellipse width follows the frame width (got %f)" % shadow.shadowSize.x)
-	_check(shadow.z_index == -1, "the shadow draws behind the sprite")
 	# Switching to a wider animation re-measures through animation_changed.
 	sprite.animation = "Big"
 	_check(shadow.position.is_equal_approx(Vector2(0, expectedFeetY(-15, IDLE_SIZE))), "the shadow keeps the feet line on the wider animation (got %s)" % shadow.position)
@@ -75,7 +77,7 @@ func _test_attached_shadow_geometry() -> void:
 
 
 ## A plain ActorShadow node created from a scene picks up its sprite sibling
-## in _ready without any explicit init.
+## in _ready without any explicit init, then re-parents under the sprite.
 func _test_scene_created_shadow_auto_finds_sprite() -> void:
 	var actor = Node2D.new()
 	var sprite = AnimatedSprite2D.new()
@@ -89,7 +91,12 @@ func _test_scene_created_shadow_auto_finds_sprite() -> void:
 	var shadow = ShadowScript.new()
 	actor.add_child(shadow)
 	root.add_child(actor)
+	# The re-parent under the sprite runs deferred in _attach (it cannot run
+	# while the parent is mid-add_child), so give it the end of the frame.
+	await create_timer(0.02).timeout
 	_check(shadow.attached, "a scene-created shadow auto-finds its sprite sibling")
+	_check(shadow.get_parent() == sprite, "the auto-found shadow re-parents under the sprite")
+	_check(shadow.show_behind_parent, "the re-parented shadow draws behind its sprite")
 	_check(shadow.position.is_equal_approx(Vector2(0, expectedFeetY(-10, IDLE_SIZE))), "the auto-found shadow still measures the feet (got %s)" % shadow.position)
 	actor.free()
 
@@ -125,7 +132,12 @@ func _test_location_actor_scenes_get_shadows() -> void:
 
 
 func _findShadow(actor: Node) -> Node:
-	for child in actor.get_children():
+	# The shadow is parented directly under the sprite (it must never sit in a
+	# lower z_index than the character; see the _attach comments).
+	var sprite = ShadowScript.findSprite(actor)
+	if sprite == null:
+		return null
+	for child in sprite.get_children():
 		if child.get_script() == ShadowScript:
 			return child
 	return null

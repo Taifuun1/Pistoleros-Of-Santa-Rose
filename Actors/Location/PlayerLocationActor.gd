@@ -4,8 +4,6 @@ const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 @export var speed = 125
 
-var transparentShader = load("res://Shaders/Transparent.tres")
-
 var paused = false
 
 
@@ -36,12 +34,3 @@ func _physics_process(_delta):
 	if !paused:
 		get_input()
 		move_and_slide()
-
-
-func _on_area_2d_body_entered(body):
-	if body.has_node("Sprite2D"):
-		body.get_node("Sprite2D").material = null
-
-func _on_area_2d_body_exited(body):
-	if body.has_node("Sprite2D"):
-		body.get_node("Sprite2D").material = null
