@@ -60,29 +60,64 @@ func addActor(ctx: Dictionary, actorName: String, side: String, column: int, wea
 
 
 func _run() -> void:
-	print("--- Occupancy: the moving character takes the spot, occupants push ---")
+	print("--- Occupancy: the mover takes the spot, displaced occupants shift toward the vacated spot ---")
 	var ctx = makeFight()
 	addActor(ctx, "A", "player team", 1)
 	addActor(ctx, "B", "player team", 2)
 	addActor(ctx, "C", "player team", 3)
-	_check(ctx.turnManager.setActorPosition("A", 2), "move into an occupied spot should succeed with push")
+	# Example 1 from Docs/Features and Issues.md: moving 1 -> 2 swaps the
+	# two, leaving 2, 1, 3.
+	_check(ctx.turnManager.setActorPosition("A", 2), "a one-column move into an occupied spot succeeds as a swap")
 	_check(ctx.turnManager.getActorPosition("A") == 2, "mover takes the spot")
-	_check(ctx.turnManager.getActorPosition("B") == 3, "occupant B pushed one step")
-	_check(ctx.turnManager.getActorPosition("C") == 4, "occupant C pushed one step")
-	_check(ctx.fake.actors["B"].position == Vector2(30, 0), "pushed actor node moved")
+	_check(ctx.turnManager.getActorPosition("B") == 1, "the target's occupant takes the mover's vacated spot")
+	_check(ctx.turnManager.getActorPosition("C") == 3, "fighters beyond the swap stay put")
 	_check(ctx.fake.actors["A"].position == Vector2(20, 0), "mover node moved")
+	_check(ctx.fake.actors["B"].position == Vector2(10, 0), "swapped actor node moved into the vacated spot")
 
-	print("\n--- Blocked end: the move fails ---")
+	print("\n--- Multi-column move shuffles the line (example 2: 4 -> 2, end 1, 4, 2, 3) ---")
 	ctx = makeFight()
 	addActor(ctx, "A", "player team", 1)
 	addActor(ctx, "B", "player team", 2)
 	addActor(ctx, "C", "player team", 3)
 	addActor(ctx, "D", "player team", 4)
-	_check(!ctx.turnManager.setActorPosition("A", 2), "push chain running past the end fails")
-	_check(ctx.turnManager.getActorPosition("A") == 1, "failed move changes nothing (A)")
-	_check(ctx.turnManager.getActorPosition("D") == 4, "failed move changes nothing (D)")
+	_check(ctx.turnManager.setActorPosition("D", 2), "a multi-column move into the line succeeds")
+	_check(ctx.turnManager.getActorPosition("D") == 2, "the mover lands on the target column")
+	_check(ctx.turnManager.getActorPosition("B") == 3, "the target's occupant shifts toward the vacated spot")
+	_check(ctx.turnManager.getActorPosition("C") == 4, "the in-between occupant fills the vacated spot")
+	_check(ctx.turnManager.getActorPosition("A") == 1, "fighters before the target stay put")
+
+	print("\n--- Forward moves work in an occupied row ---")
+	ctx = makeFight()
+	addActor(ctx, "B", "player team", 1)
+	addActor(ctx, "A", "player team", 2)
+	addActor(ctx, "C", "player team", 3)
+	# Forward from position 2 into the occupied front used to fail (the old
+	# push chain ran past the front of the row); with squeeze repositioning
+	# it is a swap.
+	_check(ctx.turnManager.canMoveActor("A", 1), "forward into an occupied column is legal under squeeze repositioning")
+	_check(ctx.turnManager.setActorPosition("A", 1), "the forward move resolves in a full row")
+	_check(ctx.turnManager.getActorPosition("A") == 1, "the mover takes the front spot")
+	_check(ctx.turnManager.getActorPosition("B") == 2, "the front blocker swaps into the vacated spot")
+	_check(ctx.turnManager.getActorPosition("C") == 3, "the fighter behind stays put")
+
+	print("\n--- A full row never blocks repositioning ---")
+	ctx = makeFight()
+	addActor(ctx, "A", "player team", 1)
+	addActor(ctx, "B", "player team", 2)
+	addActor(ctx, "C", "player team", 3)
+	addActor(ctx, "D", "player team", 4)
+	_check(ctx.turnManager.setActorPosition("A", 2), "the row being full cannot fail a move: the chain fills the vacated span")
+	_check(
+		ctx.turnManager.getActorPosition("B") == 1 and
+		ctx.turnManager.getActorPosition("C") == 3 and
+		ctx.turnManager.getActorPosition("D") == 4,
+		"only the swapped pair moved"
+	)
 
 	print("\n--- Bounds and no-op moves ---")
+	ctx = makeFight()
+	addActor(ctx, "A", "player team", 1)
+	addActor(ctx, "D", "player team", 4)
 	_check(!ctx.turnManager.setActorPosition("A", 0), "below position 1 is clamped to a no-op")
 	_check(!ctx.turnManager.setActorPosition("D", 5), "past position 4 is clamped to a no-op")
 	_check(ctx.turnManager.getActorPosition("A") == 1, "no-op leaves positions alone")

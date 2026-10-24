@@ -93,6 +93,15 @@ func placeActor(actorName: String, actorSide: String, column: int) -> void:
 	if actor != null:
 		actor.position = shootout.getPositionForColumn(actorSide, column)
 
+## Squeeze repositioning (Docs/Features and Issues.md): the mover takes the
+## target column, and the occupant of the target plus everyone between the
+## target and the mover's old spot shift one column toward the vacated spot.
+## A one-column move swaps the two fighters (1 -> 2 leaves 2, 1, 3); a
+## multi-column move shuffles the line (from 4 -> 2: 2 -> 3, 3 -> 4, mover
+## -> 2, leaving 1, 4, 2, 3). The displaced chain fills exactly the vacated
+## span, so the move only fails for unregistered actors, out-of-row targets
+## clamped to a no-op — never because the row is full (the old push-past-the-
+## end rule is what broke forward moves).
 func setActorPosition(actorName: String, column) -> bool:
 	var actorSide = sideOfActor(actorName)
 	if actorSide == "":
@@ -101,36 +110,30 @@ func setActorPosition(actorName: String, column) -> bool:
 	var current = getActorPosition(actorName)
 	if column == current:
 		return false
-	var direction = 1 if column > current else -1
-	var chain = pushChain(actorSide, column, direction)
-	if chain == null:
-		return false
-	for i in range(chain.size() - 1, -1, -1):
-		placeActor(chain[i], actorSide, column + direction * (i + 1))
+	# Direction from the target toward the mover's vacated spot: every
+	# displaced character slides one column along it, the one nearest the
+	# vacated spot first so each place lands on an already-freed column.
+	var towardVacated = 1 if current > column else -1
+	var toShift = []
+	var probe = column
+	while probe != current:
+		var occupant = actorAtPosition(actorSide, probe)
+		if occupant != "":
+			toShift.append(occupant)
+		probe += towardVacated
+	for i in range(toShift.size() - 1, -1, -1):
+		placeActor(toShift[i], actorSide, getActorPosition(toShift[i]) + towardVacated)
 	placeActor(actorName, actorSide, column)
 	return true
 
+## With squeeze repositioning a move inside the row always works: legal
+## whenever the (clamped) target differs from the actor's current column.
 func canMoveActor(actorName: String, column) -> bool:
 	var actorSide = sideOfActor(actorName)
 	if actorSide == "":
 		return false
 	column = clampi(int(column), 1, 4)
-	var current = getActorPosition(actorName)
-	if column == current:
-		return false
-	var direction = 1 if column > current else -1
-	return pushChain(actorSide, column, direction) != null
-
-func pushChain(actorSide: String, column: int, direction: int):
-	var chain = []
-	var probe = column
-	while probe >= 1 and probe <= 4:
-		var occupant = actorAtPosition(actorSide, probe)
-		if occupant == "":
-			return chain
-		chain.append(occupant)
-		probe += direction
-	return null
+	return getActorPosition(actorName) != column
 
 func sideOfActor(actorName: String) -> String:
 	for actorSide in shootoutActors:
