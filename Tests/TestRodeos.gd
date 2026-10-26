@@ -32,12 +32,13 @@ class FakeShootout:
 	extends Node
 	var turnManager = FakeTurnManager.new()
 	var actors = {}
+	var popups = []
 	func getActor(actorName):
 		return actors.get(actorName, null)
 	func getPositionForColumn(_actorSide, column):
 		return Vector2(column * 10, 0)
-	func spawnDamageNumber(_label, _color, _position):
-		pass
+	func spawnDamageNumber(label, _color, position):
+		popups.append({ "label": label, "position": position })
 
 
 func _init() -> void:
@@ -98,6 +99,29 @@ func _run() -> void:
 	_check(manager.shootout.turnManager.shootoutActors["player team"]["Walker0"].actorPosition == 3, "turn manager position not updated")
 	manager.trigger("turn_end", { "actor": walker })
 	_check(manager.rodeos["Walker0"].column == 3, "Leaders Duck fired on odd turn end")
+
+	print("\n--- everyOtherTurn Rodeo ignores other actors' turn ends ---")
+	manager = makeManager()
+	var friendlyWalker = addActor(manager, "Walker0", "leaders duck", 2)
+	friendlyWalker.position = Vector2(0, 0)
+	var enemyWalker = addActor(manager, "Walker1", "leaders duck", 2, "enemy team")
+	enemyWalker.position = Vector2(100, 0)
+	var squeky = addActor(manager, "Squeky0", null, 1, "enemy team")
+	var rotation = [friendlyWalker, enemyWalker, squeky]
+	for turn in range(9):
+		var current = rotation[turn % 3]
+		manager.trigger("turn_end", { "actor": current })
+		var popupCount = manager.shootout.popups.size()
+		if current == squeky:
+			_check(popupCount == 0, "a turn end without a Rodeo owner fired %d popup(s)" % popupCount)
+		else:
+			_check(popupCount <= 1, "turn end fired %d popup(s) for one Rodeo owner" % popupCount)
+			if popupCount == 1:
+				var ownerX = current.position.x - 4.0
+				_check(abs(manager.shootout.popups[0].position.x - ownerX) < 0.5, "the Rodeo popup spawned on the acting owner, got x=%s" % manager.shootout.popups[0].position.x)
+		manager.shootout.popups.clear()
+	_check(manager.rodeos["Walker0"].column == 3, "friendly Leaders Duck did not advance on its every-other cadence, column %s" % manager.rodeos["Walker0"].column)
+	_check(manager.rodeos["Walker1"].column == 3, "enemy Leaders Duck did not advance on its every-other cadence, column %s" % manager.rodeos["Walker1"].column)
 
 	print("\n--- unregisterActor stops the Rodeo ---")
 	manager.unregisterActor("Walker0")

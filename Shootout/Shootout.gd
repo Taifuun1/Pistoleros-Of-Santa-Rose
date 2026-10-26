@@ -25,6 +25,16 @@ const BETWEEN_ACTS_PAUSE = 0.4
 # Move move needs an animation). Must stay under BETWEEN_ACTS_PAUSE so the
 # next act can never capture a mid-slide actor position as its rest anchor.
 const REPOSITION_SLIDE_TIME = 0.3
+# Beat before a turn-end Rodeo procs, so the act settle and the Rodeo's own
+# move read as separate moments instead of one snap.
+const RODEO_PROC_PAUSE = 0.25
+
+# Armed-move feedback (Docs/System Design/Shootout/Shootout UI.md): while a
+# data move waits for its target click, its valid targets tint warm on the
+# field; while the reposition picker is open, the reachable destination
+# columns get the turn-marker art at the column spot.
+const TARGET_TINT = Color(1.0, 0.9, 0.55)
+const COLUMN_MARKER_TEXTURE = preload("res://Assets/UI/Highlight2.png")
 
 @onready var actorsRoot = $Actors
 @onready var ui = $CanvasLayer/ShootoutUI
@@ -60,6 +70,10 @@ var encounterLootEnabled = true
 var lootGenerator
 # baseName -> { hp, injuryDamage, downed } for dead party members this fight.
 var partyFightState = {}
+# Field markers for the reposition picker (direction -> Sprite2D), parented
+# under Actors in front of the background but behind every fighter.
+var repositionMarkersRoot = null
+var repositionMarkers = {}
 
 
 func _ready() -> void:
@@ -97,6 +111,16 @@ func _ready() -> void:
 	ui.item.connect(_on_shootout_ui_item)
 	ui.reposition.connect(_on_shootout_ui_reposition)
 	ui.flee.connect(_on_shootout_ui_flee)
+	ui.repositionPicker.connect(_on_shootout_ui_reposition_picker)
+	# Reposition column markers draw under every fighter: first child of the
+	# scene root (tree order puts it before Actors) instead of a z_index,
+	# which is global to the canvas layer. It must NOT live under Actors:
+	# several systems iterate Actors' children as the fighters themselves
+	# (the turn highlight, the focus manager's actor collection).
+	repositionMarkersRoot = Node2D.new()
+	repositionMarkersRoot.name = "RepositionMarkers"
+	add_child(repositionMarkersRoot)
+	move_child(repositionMarkersRoot, 0)
 	actorDone.connect(_on_actor_done)
 	var encounterScript = DefaultEncounter
 	if Shootout.pendingEncounter != null:
@@ -213,8 +237,12 @@ func startCurrentTurn() -> void:
 	# Only the current actor carries the turn highlight: the old toggle left
 	# previous actors highlighted and hid it on an actor's second turn (the
 	# "highlight doesn't always show" bug; Docs/System Design/Shootout/Shootout UI.md).
+	# get_node_or_null: Actors children are assumed to be fighters, but the
+	# loop must survive a non-fighter node slipping in.
 	for otherActor in actorsRoot.get_children():
-		otherActor.get_node("Highlight2").hide()
+		var highlight = otherActor.get_node_or_null("Highlight2")
+		if highlight != null:
+			highlight.hide()
 	actor.actorTurn.emit()
 	if turnManager.isPlayerActing(actorName):
 		playerAction = true
@@ -258,6 +286,7 @@ func selectActor(actorName: String = "") -> void:
 	var actingActor = getActor(actingActorName)
 	selectedActor = actorName
 	ui.hideActsPanel()
+	_clearTargetHighlights()
 	playerHasControl = false
 	ui.playerHasControl = false
 	actingActor.actorTurn.emit()
@@ -352,10 +381,13 @@ func finishTurn(targetActor) -> void:
 	if !waitingForAnimation and focusManager != null:
 		focusManager.endAct()
 	effectManager.onTurnEnd(turnManager.currentActorName())
-	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_END, {
+	# The acting actor is captured before advanceTurn() rolls the turn over:
+	# the turn-end Rodeo procs after the settle (below), when the current actor
+	# has already changed.
+	var turnEndContext = {
 		"actor": getActor(turnManager.currentActorName()),
 		"target": targetActor
-	})
+	}
 	if targetActor != null:
 		turnManager.checkActorDead(targetActor)
 	turnManager.checkBattleEnd()
@@ -363,6 +395,8 @@ func finishTurn(targetActor) -> void:
 	selectedAct = null
 	selectedActor = ""
 	pendingEnemyAct = {}
+	_clearTargetHighlights()
+	_hideRepositionMarkers()
 	if waitingForAnimation:
 		if focusManager != null:
 			focusManager.syncRestPositionsFromTurnManager()
@@ -370,6 +404,26 @@ func finishTurn(targetActor) -> void:
 			await animationSequencer.sequenceDone
 		if focusManager != null:
 			focusManager.endAct()
+	# Turn-end Rodeos proc on a brief beat after the act/reposition animations
+	# have settled, and the Rodeo's own move walks the fighter to its new
+	# column instead of snapping there — both keep the transition from reading
+	# as a jarring jump, and the popup lands on the right fighter.
+	var rodeoProcs = not battleOver and rodeoManager != null \
+			and rodeoManager.has_method("hasTurnEndRodeo") and rodeoManager.hasTurnEndRodeo()
+	if rodeoProcs:
+		await get_tree().create_timer(RODEO_PROC_PAUSE).timeout
+	var formationBefore := {}
+	var actorRegistry = turnManager.get("shootoutActors")
+	if actorRegistry is Dictionary:
+		for actorSide in actorRegistry:
+			for actorName in actorRegistry[actorSide]:
+				var fighter = getActor(actorName)
+				if fighter != null:
+					formationBefore[fighter] = fighter.position
+	rodeoManager.trigger(Shootout.RODEO_TRIGGER_TURN_END, turnEndContext)
+	for fighter in formationBefore:
+		if is_instance_valid(fighter):
+			playRepositionSlide(fighter, formationBefore[fighter])
 	# Turn effects, deaths and victory resolve immediately; only the hand-off to
 	# the next actor waits, giving the focus/recoil a brief moment to settle.
 	if !battleOver:
@@ -403,6 +457,8 @@ func _on_battle_ended(winningSide: String) -> void:
 	battleOver = true
 	playerHasControl = false
 	ui.playerHasControl = false
+	_clearTargetHighlights()
+	_hideRepositionMarkers()
 	# An act may still be mid-animation when the last fighter drops: release the
 	# act focus so the end screen shows the whole street, not a zoomed-in corner.
 	if focusManager != null:
@@ -551,11 +607,81 @@ func _on_shootout_ui_move(moveName: String) -> void:
 	if !playerHasControl:
 		return
 	selectedAct = { "name": moveName, "type": Shootout.ACT_TYPE_MOVES }
+	_refreshTargetHighlights()
 
 func _on_shootout_ui_item(itemName: String) -> void:
 	if !playerHasControl:
 		return
 	selectedAct = { "name": itemName, "type": Shootout.ACT_TYPE_ITEMS }
+	_clearTargetHighlights()
+
+## The reposition picker replaced any armed data move: one armed thing at a
+## time, so drop the move's target tints and mark the reachable columns.
+func _on_shootout_ui_reposition_picker(pickerOpen: bool) -> void:
+	_clearTargetHighlights()
+	if pickerOpen:
+		selectedAct = null
+		_showRepositionMarkers()
+	else:
+		_hideRepositionMarkers()
+
+
+## --- armed-act field feedback ---
+
+## Valid targets of the armed data move tint warm on the field (the hover
+## outline stays independent: it works on a material, the tint on modulate).
+func _refreshTargetHighlights() -> void:
+	_clearTargetHighlights()
+	if selectedAct == null or selectedAct.type != Shootout.ACT_TYPE_MOVES or !playerHasControl:
+		return
+	var actingActorName = turnManager.currentActorName()
+	for actor in actorsRoot.get_children():
+		if !is_instance_valid(actor):
+			continue
+		if targetingManager.isValidTarget(selectedAct, str(actor.name), actingActorName):
+			var animations = actor.getAnimations()
+			if animations != null:
+				animations.modulate = TARGET_TINT
+
+
+func _clearTargetHighlights() -> void:
+	for actor in actorsRoot.get_children():
+		if !is_instance_valid(actor):
+			continue
+		var animations = actor.getAnimations()
+		if animations != null:
+			animations.modulate = Color(1, 1, 1)
+
+
+## A marker on each column the current fighter can slide to; blocked
+## directions get no marker (and are greyed out in the picker).
+func _showRepositionMarkers() -> void:
+	_hideRepositionMarkers()
+	var actorName = turnManager.currentActorName()
+	var actorSide = turnManager.sideOfActor(actorName)
+	if actorSide == "":
+		return
+	var usability = {}
+	for direction in ["forward", "backward"]:
+		var delta = -1 if direction == "forward" else 1
+		var destination = turnManager.getActorPosition(actorName) + delta
+		var reachable = turnManager.canMoveActor(actorName, destination)
+		usability[direction.capitalize()] = reachable
+		if !reachable:
+			continue
+		var marker = Sprite2D.new()
+		marker.texture = COLUMN_MARKER_TEXTURE
+		marker.position = getPositionForColumn(actorSide, destination)
+		repositionMarkers[direction] = marker
+		repositionMarkersRoot.add_child(marker)
+	ui.setDirectionsUsable(usability)
+
+
+func _hideRepositionMarkers() -> void:
+	for marker in repositionMarkers.values():
+		if is_instance_valid(marker):
+			marker.queue_free()
+	repositionMarkers.clear()
 
 # Fleeing is instant in Dust-ups and unlocks after 10 turns in Showdowns
 # (decided: enemies never flee). Costs every survivor a portion of MxHp.
@@ -578,6 +704,7 @@ func _on_shootout_ui_reposition(direction: String) -> void:
 	if !turnManager.canMoveActor(actorName, turnManager.getActorPosition(actorName) + delta):
 		return
 	ui.hideActsPanel()
+	_hideRepositionMarkers()
 	playerHasControl = false
 	ui.playerHasControl = false
 	repositionActor(actor, turnManager.getActorPosition(actorName) + delta)

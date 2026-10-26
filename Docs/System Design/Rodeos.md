@@ -131,7 +131,7 @@ Evaluated in `trigger()` before effects run. Initial set:
 | Condition | Meaning |
 | --- | --- |
 | `target` | Who the effects apply to: `self`, `allies`, `enemies`, `adjacent_allies` (both adjacent allies), `ally_in_front` / `ally_behind` (the single adjacent ally in front or behind), `all` |
-| `everyOtherTurn` | Fires only when the Rodeo owner's elapsed personal turns are a multiple of N |
+| `everyOtherTurn` | Fires only when the Rodeo owner's elapsed personal turns are a multiple of N. The Rodeo ticks and evaluates on its **owner's** turn end only — other actors' turn ends are ignored |
 | `position` | Owner must stand in one of the listed columns, e.g. `[1]` for Happy Shot |
 | `hpBelow` / `hpAbove` | Owner HP threshold (fraction of maxHp) |
 | `oncePerFight` | Fires at most once per Shootout |
@@ -189,7 +189,7 @@ Class Rodeos from `Docs/Actors.md` follow the same mapping (stat ups, cylinder c
 ## UI
 
 - Rodeos always show in UI, for player and enemy actors alike: the hovered-actor stats panel shows the actor's Rodeo name (payload `actorStatsPayload` gains a `Rodeo` field), and the player character panel shows the acting character's Rodeo next to their class. Descriptions are available for tooltips.
-- Triggered Rodeos surface a small popup/damage-number-style label using the existing `Shootout.spawnDamageNumber()` (Rodeo name in a distinct color) so passive effects are visible to the player.
+- Triggered Rodeos surface a small popup/damage-number-style label using the existing `Shootout.spawnDamageNumber()` (Rodeo name in a distinct color) so passive effects are visible to the player. Turn-end Rodeos proc after the act/reposition animations settle (`finishTurn` awaits the sequence, then beats briefly) and the moved fighter walks to its new column, so the popup lands on its owner's resting spot instead of a mid-slide position.
 
 ## Files to create / modify
 

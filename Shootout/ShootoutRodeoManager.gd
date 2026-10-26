@@ -17,7 +17,7 @@ const TEAM_ENEMY = "enemy team"
 const DIRECT_STATS = ["maxHp"]
 
 const RODEO_POPUP_COLOR = "yellow"
-const RODEO_POPUP_OFFSET = Vector2(-4, -36)
+const RODEO_POPUP_OFFSET = Vector2(-4, -60)
 
 var shootout
 var rodeosData = {}
@@ -133,8 +133,9 @@ func getHitQualityFloor(actor) -> int:
 	return floor
 
 
-func trigger(triggerName: String, context := {}) -> void:
+func trigger(triggerName: String, context := {}) -> int:
 	context["round"] = getRoundNumber()
+	var firedCount := 0
 	for actorName in rodeos:
 		var entry = rodeos[actorName]
 		if entry.data.get("trigger", "") != triggerName:
@@ -142,15 +143,33 @@ func trigger(triggerName: String, context := {}) -> void:
 		var ownerActor = shootout.getActor(actorName)
 		if ownerActor == null:
 			continue
+		var conditions = entry.data.get("conditions", {})
+		# Turn-count Rodeos (everyOtherTurn) tick and fire on their OWNER's
+		# turn end only: right after firing the counter sits on a multiple, so
+		# also evaluating on other actors' turn ends re-fired the Rodeo there
+		# (duplicate popup on the other fighter).
+		if triggerName == TRIGGER_TURN_END and conditions.has("everyOtherTurn") and context.get("actor") != ownerActor:
+			continue
 		if triggerName == TRIGGER_TURN_END and context.get("actor") == ownerActor:
 			entry.state.turnsElapsed += 1
 		if !passesConditions(entry, ownerActor, context):
 			continue
 		fireRodeo(actorName, entry, ownerActor)
+		firedCount += 1
 	if triggerName == TRIGGER_TURN_END and context.get("actor") != null:
 		tickModifiers(context.actor.name)
 	if triggerName == TRIGGER_FIGHT_END:
 		cleanupFightModifiers()
+	return firedCount
+
+
+## Whether any registered Rodeo fires at turn_end (so the Shootout can pace the
+## proc with a beat and a slide instead of snapping it between animations).
+func hasTurnEndRodeo() -> bool:
+	for actorName in rodeos:
+		if rodeos[actorName].data.get("trigger", "") == TRIGGER_TURN_END:
+			return true
+	return false
 
 
 func passesConditions(entry: Dictionary, ownerActor, context: Dictionary) -> bool:

@@ -4,7 +4,7 @@ extends RefCounted
 
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 
-const DAMAGE_NUMBER_OFFSET = Vector2(-4, -24)
+const DAMAGE_NUMBER_OFFSET = Vector2(-4, -48)
 
 # Attack abilities advance the Cylinder (decided); everything else doesn't.
 const ATTACK_ABILITY_CATEGORY = "attack_ability"

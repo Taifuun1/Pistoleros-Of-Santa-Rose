@@ -5,7 +5,7 @@ extends RefCounted
 ## marks, damage-type marks, damage piercing/decrease, taunt and silence,
 ## plus the Cylinder effect type delegated to the cylinder manager.
 
-const DAMAGE_NUMBER_OFFSET = Vector2(-4, -24)
+const DAMAGE_NUMBER_OFFSET = Vector2(-4, -48)
 
 # Placeholder: damage piercing/decrease stack up to this many instances.
 const MODIFIER_STACK_LIMIT = 4
