@@ -45,9 +45,9 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `TestAnimationSequencer` | `ShootoutAnimationSequencer.gd` + `Animations.gd` | Back-to-back animation restarts (the turn soft lock), unreachable hit frames, missing animations, target-effect anchoring above the drawn body |
 | `TestShootoutFocus` | `ShootoutFocusManager.gd` + `Animations.gd` act motion | Lunge/recoil hold-until-settle, focus zoom, facing flips, fixed screen anchors, only-landed-hits-recoil |
 | `TestShootoutTurnTiming` | `Shootout/Shootout.tscn` (scene-run) | Turn cleanup is immediate; next-actor hand-off waits for the between-act pause |
-| `TestShootoutUI` | `Shootout/UI/TurnOrderStrip.gd`, `ShootoutUI.tscn` | Turn order strip rendering, grey-out reasons for acts, scene wiring, acts row icons |
+| `TestShootoutUI` | `Shootout/UI/TurnOrderStrip.gd`, `ShootoutUI.tscn` | Turn order strip rendering, grey-out reasons for acts, armed-act selection tint, reposition picker states, scene wiring, acts row icons |
 | `TestHPIndicator` | `Nodes/HP Indicator/HPIndicator.tscn` | World-space HP bar fill clipping, low-HP tint |
-| `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, re-measure on animation change, sprite re-parenting, scene-created shadows |
+| `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, sizing to the frame's visible (opaque) body with raw-frame fallback, FEET/BODY coverage modes, re-measure on animation change, sprite re-parenting, scene-created shadows |
 | `TestMusicPlayer` | `Globals/MusicPlayer.gd` | Playback, tail fades, crossfades, full-volume start from silence, push/pop stack, zone/location/encounter/cutscene decisions |
 
 ### In-tree tests
@@ -95,7 +95,7 @@ The solver is tested, but `LocationGeneration.gd`, `LocationMap.gd`, `LocationMa
 `ShootoutActor` input-collision sizing (body rect from the sprite, capped width) was a bug farm historically and has no regression test.
 
 ### 7. UI widgets and small nodes
-All small, most pure-ish, all untested: `UI/Dialog/Dialog.gd`, `UI/Popup/Popup.gd`, `UI/Tooltip/Tooltip.gd` + `AddTooltip`, `RichTextLabelExtended(8px)`, `Nodes/DamageNumber.gd` (only the scene is implicitly exercised), `Nodes/ItemNumber.gd`, `Nodes/ItemStats.gd` (interactive-only today), `Nodes/Dynamic Sprite/DynamicSprite.gd`, `Nodes/Exit/Exit.gd`, `Nodes/AStar/AStar.gd` + `AStarGrid.gd`. The two RichTextLabel extensions and the tooltip wrappers are classic "break silently on next Godot upgrade" candidates — a minimal smoke test each (instantiate, set text/theme, no crash) is cheap.
+All small, most pure-ish, all untested: `UI/Dialog/Dialog.gd`, `UI/Popup/Popup.gd`, `UI/Tooltip/Tooltip.gd` + `AddTooltip`, `RichTextLabelExtended(8px)`, `Nodes/ItemNumber.gd`, `Nodes/ItemStats.gd` (interactive-only today), `Nodes/Dynamic Sprite/DynamicSprite.gd`, `Nodes/Exit/Exit.gd`, `Nodes/AStar/AStar.gd` + `AStarGrid.gd`. The two RichTextLabel extensions and the tooltip wrappers are classic "break silently on next Godot upgrade" candidates — a minimal smoke test each (instantiate, set text/theme, no crash) is cheap. `Nodes/Damage Number/DamageNumber.gd` is covered by `Tests/TestDamageNumber.gd` (palette lookup, fallback color, spawn position).
 
 ### 8. Party persistence beyond injury
 `Party.gd` is tested through the injury lens only. `applyLoot()`, `effectiveMaxHp()`, and the save/serialize side (once save/load exists — MainMenu's Continue is still a stub) will need their own coverage. `Quests.gd` and `PokerMoney.gd` are near-stubs today; test when they grow.
@@ -114,4 +114,3 @@ All small, most pure-ish, all untested: `UI/Dialog/Dialog.gd`, `UI/Popup/Popup.g
 3. Add an OverworldEvents trigger test with an injected RNG.
 4. Port the `RobbingTest` simulation pattern to Bear Hunt scoring.
 5. Add a data-lint test pass over cutscene data and music/animation references.
-6. Fix or retire the known `RobbingTest` failure ("Caught robber is freed" — `Robbing.gd` tweens a freed robber node).

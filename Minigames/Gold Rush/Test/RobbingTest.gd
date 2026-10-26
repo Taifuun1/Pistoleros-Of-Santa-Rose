@@ -25,13 +25,23 @@ func runTests() -> void:
 		finish()
 		return
 
+	# Pin the pack in place: random spawns can overlap, and the catch loop
+	# catches the last hit — a pinned, spaced pack makes the click target
+	# deterministic.
+	for i in range(robbing.activeRobbers.size()):
+		var pinned: AnimatedSprite2D = robbing.activeRobbers[i]
+		pinned.velocity = Vector2.ZERO
+		pinned.position = Vector2(30 + i * 50.0, 30)
+
 	# Clicking a robber awards points, frees it and spawns collectibles
 	var robber: AnimatedSprite2D = robbing.activeRobbers[0]
 	var scoreBefore: int = robbing.score
 	robbing._gui_input(makeClickEvent(robber.position))
 	assert_true(robbing.score == scoreBefore + robbing.POINTS_PER_ROBBER, "Clicking a robber awards 10 points")
-	assert_true(robber.is_queued_for_deletion(), "Caught robber is freed")
 	assert_true(not robbing.activeRobbers.has(robber), "Caught robber is removed from activeRobbers")
+	# The catch plays a short shrink-and-fade before the robber is freed.
+	await get_tree().create_timer(0.3).timeout
+	assert_true(not is_instance_valid(robber) or robber.is_queued_for_deletion(), "Caught robber is freed")
 
 	# Collectibles become clickable once their pop-in animation finishes
 	await get_tree().create_timer(0.3).timeout

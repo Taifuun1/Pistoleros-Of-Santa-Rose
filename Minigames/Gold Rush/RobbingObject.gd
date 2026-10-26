@@ -3,6 +3,7 @@ extends AnimatedSprite2D
 var objectType
 var velocity: Vector2 = Vector2.ZERO
 var parentScene: TextureRect
+var caught = false
 
 var robbingTextures = [
 	"res://Assets/Gold Rush/Robbing/ProspectorBlue.png",
@@ -69,15 +70,20 @@ func get_frame_size() -> Vector2:
 	return Vector2(24, 24)
 
 func collect() -> void:
+	if caught:
+		return
+	caught = true
 	if parentScene != null and parentScene.has_method("_on_robber_caught"):
 		parentScene._on_robber_caught(self)
 	_spawnRobbingCollectibles()
 	_spawnCatchParticles()
-	var tween = get_tree().create_tween()
+	# Bound to this node so the tween dies quietly if the robber is freed
+	# externally mid-shrink (e.g. the minigame ending).
+	var tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(self, "scale", Vector2(0.0, 0.0), 0.2)
 	tween.tween_property(self, "modulate:a", 0.0, 0.2)
-	tween.finished.connect(func(): queue_free())
+	tween.finished.connect(queue_free)
 
 func _spawnRobbingCollectibles() -> void:
 	var numCollectibles = randi() % 3 + 1

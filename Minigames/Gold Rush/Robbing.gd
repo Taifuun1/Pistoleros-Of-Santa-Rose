@@ -81,11 +81,15 @@ func _spawnRobbingObject() -> void:
 
 	var obj_ref = weakref(obj)
 	get_tree().create_timer(objectLifetime).timeout.connect(func():
-		var tween = get_tree().create_tween()
+		# Caught robbers already play their own shrink and are freed by it.
+		var robber = obj_ref.get_ref()
+		if robber == null or robber.caught:
+			return
+		var tween = robber.create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(obj_ref.get_ref(), "scale", Vector2(0.0, 0.0), 0.2)
-		tween.tween_property(obj_ref.get_ref(), "modulate:a", 0.0, 0.2)
-		tween.finished.connect(func(): obj_ref.get_ref().queue_free())
+		tween.tween_property(robber, "scale", Vector2(0.0, 0.0), 0.2)
+		tween.tween_property(robber, "modulate:a", 0.0, 0.2)
+		tween.finished.connect(robber.queue_free)
 	)
 
 func _gui_input(event: InputEvent) -> void:
