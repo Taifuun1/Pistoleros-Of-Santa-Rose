@@ -59,13 +59,13 @@ func _on_animation_player_animation_finished(animation) -> void:
 # rectangle (a sibling under the actor root) stays put — hover and click
 # targeting keep working unchanged mid-act.
 
-const LUNGE_DISTANCE = 10.0
+const LUNGE_DISTANCE = 8.0
 const LUNGE_LEAN = 0.0
-const LUNGE_TIME = 1.5
-const SETTLE_TIME = 0.24
-const RECOIL_DISTANCE = 10.0
+const LUNGE_TIME = 1.75
+const SETTLE_TIME = 0.25
+const RECOIL_DISTANCE = 8.0
 const RECOIL_LEAN = 0.0
-const RECOIL_TIME = 1.5
+const RECOIL_TIME = 1.75
 const FOCUS_ZOOM = 2
 const FOCUS_ZOOM_IN_TIME = 0.15
 const FOCUS_ZOOM_OUT_TIME = 0.25
