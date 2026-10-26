@@ -97,7 +97,10 @@ Enemy death is permanent for the fight only; named story characters are downed r
 ## Open Questions
 
 1. If the party wins a fight where a member died mid-fight, is that member knocked out (downed) or back at 1 HP? (Proposed: downed with knockout debuffs.)
+	- No knock-outs or debuffs, party members always start at max hp at start of fights
+	- MxHP reduction defined elsewhere for attrition during runs
 2. Exact injury rate defaults per character and the camp-item restoration amounts — balance data.
 3. Exact MxHP portion lost when fleeing (20% proposed placeholder — any placeholder is fine for now, confirmed).
 4. ~~Can enemies flee?~~ — **decided**: no, fleeing is player-only.
 5. Does Vamoose halve money only, or items/equipment loot too ("half of all loot")?
+	- Money and equipment

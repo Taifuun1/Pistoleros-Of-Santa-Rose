@@ -1,77 +1,26 @@
 
-# Features and Issues
+# Issues
 
-Markdown file for listing miscellaneous features and issues.
+Markdown file for listing issues that popup.
 
-## Features
-
-- Rework Overworld spawns to be dynamic
-    - Spawns are not static, but instead based on Zone
-    - Different parties can spawn, animals, people etc.
-    - Groups of multiple actors can spawn
-    - Different spawns have different spawn rates
-    - Spawns are only visual, they don't interact with the player
-- Journal
-    - Houses all information, quests, map, character stats, inventory and equipment, settings
-    - Tabs for each category
-    - Each category is a separate feature
-        - Overworld map
-            - Shows the Overworld map with the current player location
-            - Shows points of interest, which are Locations
-            - Shows current quest targets, which are always key points on the map
-            - Explore viability of generating map from chunk data, instead of separately drawing a sprite
-            - Sprites
-                - Map sprite?
-                - Location icons
-                - Player icon
-                - Current quest icon
-        - Quests
-            - Show current and completed quests
-            - Show progress of current quest, with info on what has happened and what to do next
-            - Sprites
-                - Quest icon
-                - Current quest icon
-                - Active and completed quests icon
-        - Character stats
-            - Show all relevant character stats
-            - Sprites
-                - Character icon
-                - Character model if there is space
-                - Icons for stats
-        - Inventory and equipment
-            - Show inventory and look at and manage characters equipments
-            - Drop items
-            - Inventory space
-                - Similar to Darkest Dungeon, a maximum amount of items can be carried
-                - Some items stack, some are unstackable
-                - Loot, supplies, and equipment all share the same inventory
-                - Goal is to make the player make decisions on what items to carry and what to leave
-            - Equipment management
-                - Each character must be able to be selected and their equipment managed
-                - Character and equipment stats need to displayed
-                - Each equipment can only go to a single slot, so likely one-click equipment switch is best
-        - Settings
-            - Sound and video settings
-            - Game settings
-            - Save management
-            - What other settings are needed?
-- Location vendors
-    - Vendors and buildings that can be entered need a floating icon
-    - General store
-        - Buy supplies for the next trip
-    - Bank
-        - Store equipment from inventory for later use
-    - Newspaper office
-        - Find info on enemy parties in the current Zone, and tips for Shootouts
-
-## Issues
-
-### Open
+## Open
 
 (none)
 
-### Fixed
+## Fixed
 
+- Fixed — Shootout moves have no visual feedback when hovered or selected
+    - Arming a move (or item, or opening the reposition picker) changed nothing on screen: the player could not see which act was waiting for its target, which actors were clickable, or which reposition columns were reachable
+    - Act icons now carry a persistent armed tint (`ShootoutAct.SELECTED_MODULATE`, a warm gold distinct from the transient hover lighten) for the armed act, cleared when another act is armed or the panel clears
+    - While a data move is armed, Shootout.gd tints its valid targets' sprites warm on the field (`isValidTarget` decides; the hover outline stays independent — material vs modulate)
+    - While the reposition picker is open, each reachable destination column gets the turn-marker art at the column spot (markers parented as the scene root's first child — above the background, below every fighter, and out of `Actors` whose children several systems iterate as the fighters), blocked directions are greyed out in the picker (`setDirectionsUsable`) instead of silently doing nothing, and both highlights clear when the act resolves, the picker closes or the turn/battle ends
+- Fixed — The wagon's shadow does not cover it while moving diagonally
+    - The thin feet ellipse sits under one corner of the diagonally drawn wagon (Move Up Side / Move Down Side show it from above at an angle with a 14x16 top-down footprint), leaving the rest of the sprite hanging over bare ground
+    - `ActorShadow.gd` gained a `Coverage` mode: `FEET` (the default thin feet ellipse) and `BODY` (an ellipse spanning the whole visible body, centered on it, with the sprite's own pixels drawing over it). `PlayerOverworldActor` switches its shadow to `BODY` for the two diagonal-move animations and back to `FEET` for everything else (`BODY_SHADOW_ANIMATIONS`); stopping keeps the last animation's frame, so the coverage stays correct while parked mid-diagonal
+- Fixed — OverworldActor shadows are tiny and out of proportion with other actors
+    - The shared ActorShadow sized itself from the raw animation frame width, but assets pad their frames very differently: the overworld rabbit packs a ~10px body into 12x12 frames (shadow = 36% of its body) while 40x40 character frames carry a ~17px body (shadow = 70% of its body), so tightly-cropped actors got disproportionately small shadows — most visibly the overworld rabbit's near-invisible 3.6px ellipse
+    - `ActorShadow.gd` now measures the frame's visible (non-transparent) pixel bounds and sizes the shadow from those: every actor's shadow is the same fraction of its actual body. Width ratio is 0.7 of the body width, which keeps the previous look for the padded 40x40 character frames, and the feet lift scales with body height instead of a fixed 4px (a third of the rabbit's height)
+    - Pixel bounds are decoded once per texture+frame and cached, and unreadable/blank frames (e.g. test textures) fall back to the raw frame, so behaviour degrades to the old measurement instead of failing
 - Fixed — In locations, the transparency shader makes character shadows disappear
     - The shared ActorShadow set `z_index = -1`, but z_index is global to the whole canvas layer: every ground tilemap (z_index 0) drew over the shadows in all locations except Lazysprings (whose `Entities` happens to sit at z_index 1) — most visibly through Clearwater Grove's transparency shader, where the see-through trees revealed the ground but no shadow
     - The shadow now parents under the character's sprite with `show_behind_parent` (`Nodes/Actor Shadow/ActorShadow.gd`), so it draws directly behind its own character and never under ground tiles, buildings or transparent objects; scene-created shadows (LocationActor) re-parent at runtime

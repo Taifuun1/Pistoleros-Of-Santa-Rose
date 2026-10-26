@@ -136,6 +136,11 @@ Move the reserved `cleanse_effect` op from warn-and-skip to `effectManager.clean
 
 1. Exact numbers per effect (bleed/poison base amounts, mark bonus damage, piercing caps, poison wear-off ~35%) — balance pass; all values in data files, not code. Any placeholder is fine for now (confirmed).
 2. Does healing remove the whole bleed stack or one stack per heal (proposed: whole stack — "won't stop until healed")?
+- Updated Bleed behaviour:
+- Bleed applies stacks of bleed
+- Multiple stacks equate to damage eg. 2 stacks = 1 damage
+- Bleed healing removes stacks
 3. Does silence also hide already-known ability tooltips, or just block use?
+- Just block use, don't block information
 5. Decided placeholder (implementation detail): piercing/decrease amounts sum across types and are capped at the total blocked amount; per-type blocked breakdowns can come with the armor calculations from `Docs/Combat.md` Open Question 12.
 4. Mark expiry counts the priming Round or starts after activation ("expires after a turn or two")? Any placeholder is fine for now (confirmed); pick one when implementing.

@@ -106,3 +106,4 @@ This deletes the special-cased enemy attack and routes everything through the an
 1. How much should enemies "know"? (Proposed: full Cylinder and effect knowledge, since the player sees the same; HP thresholds only for their own side. First pass uses full knowledge.)
 2. ~~Should generic enemies flee or surrender?~~ — **decided**: no, enemies never flee; quest variety comes from win conditions instead (survive N turns, get MxHP below an amount, etc. — see [Encounters](Encounters.md)).
 3. Difficulty knobs: should Dust-ups use dumber weights (more randomness) than Showdowns? (First pass: `PICK_FROM_TOP = 2` for everything; the knob exists on the AI.)
+- Dust-ups are easier than Showdowns, which should be expressed in dumber weights and lower stats for enemies

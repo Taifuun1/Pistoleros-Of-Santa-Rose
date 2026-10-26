@@ -427,5 +427,6 @@ Remaining art/product choices do not block the architecture:
 - Final palette, coast/road outlines, and whether a separate coarse overview improves fit-scale readability.
 - Location label density, icon variants, player pulse/orientation, and maximum useful zoom.
 - Whether discovery/fog is ever desired; the current requirement shows Locations without it.
+    - No discovery or fog
 - Stable non-Location key-point authoring if future quest targets are not Locations.
 - Whether decorative output should imitate `Map Outline.aseprite` more closely through generated borders/paper treatments.

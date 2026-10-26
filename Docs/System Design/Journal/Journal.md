@@ -135,7 +135,13 @@ Suggested order:
 ## Open decisions
 
 - Exact scenes beyond Overworld/Locations that permit Journal access, especially Shootouts and minigames.
+    - Settings menu must be available everywhere
+    - If it's decided that equipment can only be managed in Towns, then Journal can be fully accessed in Shootouts, since equipment can't be changed mid-fight
 - Controller glyph/focus conventions and whether tab shortcuts should be global or remappable.
 - Which settings apply immediately versus through Apply/Revert, and the save-management flow.
+    - Resolution is managed by Godot, so is there need for apply functionality? Immediate apply seems sensible
 - Whether Character shows a static portrait, rendered model, or only stats when space is limited.
+    - Likely the character icon should be shown instead of the model, since pixel counts on the page mostly get taken by text
+    - If there's space, model can be shown
 - Final tab order and art direction; these do not block the shell or Map implementation.
+    - Tab order should be: Map, Inventory, Quests, Character, Settings

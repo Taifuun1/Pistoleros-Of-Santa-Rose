@@ -111,6 +111,9 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 
 1. ~~Is `Data/Shootout/SqueekyRat.gd`'s grid still used?~~ — **decided**: no; remove the file, keep the assets.
 2. Do Location ambushes pick one encounter file per fight, or compose enemies from a pool at spawn time?
+- Use predefined encounter files for party compositions
 3. Where do quest Shootout party compositions come from — the encounter file's `player team` block (current format supports it) or always the live `Party.party`?
 4. Do flavor names have any gameplay effect (e.g. Hold-up = enemies act first) or are they pure flavor? (First pass: pure flavor.)
+- Flavour
 5. Should `hp_below` also support per-actor thresholds ("the boss under 25%") or is the side total enough? (First pass: side total only.)
+- Should be hp below for a character, specifically for the boss

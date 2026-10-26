@@ -132,6 +132,7 @@ This lives on the shootout root (`Shootout.getModifiedStat`) so turn manager (in
 ## Open Questions
 
 1. Do on-hit effects (bleed from a weapon, etc.) apply on a Miss (0% damage)? Proposed: no — a Miss applies nothing.
+	- No
 2. Can rifle/shotgun "defense increases damage" push damage above what a zero-defense target would take, or is the bonus capped at the target's contributed defense? (The `Docs/Combat.md` example implies uncapped; confirm.)
 3. Exact rounding: round once at the end (proposed) or at each step?
 4. Armor calculations and whether piercing/decrease stack with themselves — explicitly deferred in `Docs/Combat.md` Open Question 12 until armor calculations are built; this doc's step-5 hooks are the seam for that decision.
