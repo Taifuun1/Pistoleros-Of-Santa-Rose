@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build Linux release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Godot 4.7 and export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.0
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import project resources
+        run: godot --headless --path . --import
+
+      - name: Run automated tests
+        run: godot --headless --path . --script res://Tests/RunAll.gd
+
+      - name: Export Linux release
+        run: godot --headless --path . --export-release Linux build/linux/PistolerosOfSantaRose.x86_64
+
+      - name: Upload Linux release
+        uses: actions/upload-artifact@v4
+        with:
+          name: pistoleros-linux-x86_64
+          path: build/linux/
+          if-no-files-found: error
+          retention-days: 7
