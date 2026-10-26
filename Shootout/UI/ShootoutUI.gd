@@ -4,6 +4,9 @@ signal move
 signal item
 signal reposition(direction)
 signal flee
+## The Move icon toggled the reposition picker open/closed; Shootout marks the
+## reachable destination columns in the field while it is open.
+signal repositionPicker(open)
 
 const TURN_ORDER_PATH = "MarginContainer/VBoxContainer/MarginContainer/PanelContainer/Turn Order"
 
@@ -65,6 +68,9 @@ func _showSharedTooltip(control: Control) -> void:
 var actOpen = null
 var playerHasControl = false
 var turnOrderNames = []
+## The armed act's name ("" = none): its act icon keeps the selected tint
+## until another act is armed or the panel clears.
+var selectedActName = ""
 
 ## The fight background (CanvasLayer below the world) defocuses while an act
 ## plays so the zoomed-in fighters read clearly — the Darkest-Dungeon style act
@@ -176,8 +182,10 @@ func setPlayerCharacterActs(acts: Array, actType: String, usability := {}) -> vo
 		attachTooltip(newAct, actName, actTooltip(actName, actType, info))
 		newAct.actClicked.connect(func():
 			if actType == Shootout.ACT_TYPE_ITEMS:
+				setActSelected(actName)
 				item.emit(actName)
 			elif actType == Shootout.ACT_TYPE_MOVES:
+				setActSelected(actName)
 				move.emit(actName)
 			elif actType == Shootout.ACT_TYPE_REPOSITION:
 				reposition.emit(actName.to_lower())
@@ -185,9 +193,27 @@ func setPlayerCharacterActs(acts: Array, actType: String, usability := {}) -> vo
 	if actType == Shootout.ACT_TYPE_MOVES:
 		_renderUtilityActs()
 
+
+## Marks the armed act's icon with the selected tint and clears the previous
+## one, so the player can see which act is waiting for its target ("" clears).
+func setActSelected(actName: String) -> void:
+	selectedActName = actName
+	var actsRow = get_node(ACTS_PATH)
+	for containerName in ["Moves", "Items"]:
+		var row = actsRow.get_node_or_null(containerName)
+		if row == null:
+			continue
+		for actButton in row.get_children():
+			actButton.setSelected(actButton.actName == actName)
+	for iconName in ["Move", "Flee"]:
+		var icon = actsRow.get_node_or_null(iconName)
+		if icon != null:
+			icon.setSelected(icon.actName == actName)
+
 ## Clearing the act icons (turn over, or the reposition picker closed).
 func hideActsPanel() -> void:
 	actOpen = null
+	selectedActName = ""
 	var actsRow = get_node(ACTS_PATH)
 	for containerName in ["Moves", "Items"]:
 		var row = actsRow.get_node_or_null(containerName)
@@ -232,9 +258,13 @@ func _on_move_act_clicked() -> void:
 	if actOpen == "reposition":
 		actOpen = null
 		_setRepositionPickerVisible(false)
+		setActSelected("")
+		repositionPicker.emit(false)
 		return
 	actOpen = "reposition"
 	_setRepositionPickerVisible(true)
+	setActSelected("Move")
+	repositionPicker.emit(true)
 
 ## The direction picker renders into the Moves group; clicking a direction
 ## emits reposition (the reposition handler clears the whole acts row).
@@ -262,7 +292,18 @@ func _on_direction_act_clicked(direction: String) -> void:
 func setFleeEnabled(enabled: bool) -> void:
 	var fleeIcon = get_node(ACTS_PATH).get_node_or_null("Flee")
 	if fleeIcon != null:
-		fleeIcon.modulate = Color(1, 1, 1) if enabled else Color(0.5, 0.5, 0.5, 0.7)
+		fleeIcon.setEnabled(enabled)
+
+## Marks the picker's directions usable/blocked (Shootout calls this when the
+## picker opens; blocked directions are greyed out instead of silently
+## doing nothing on click).
+func setDirectionsUsable(usability: Dictionary) -> void:
+	var movesGroup = get_node(ACTS_PATH).get_node_or_null("Moves")
+	if movesGroup == null:
+		return
+	for directionAct in movesGroup.get_children():
+		if directionAct.actName in usability:
+			directionAct.setEnabled(usability[directionAct.actName])
 
 ## Cylinder display in the pre-existing MagazineContainer/Magazine row of a
 ## stats panel: one Chamber icon per slot (Docs/System Design/Shootout/Shootout

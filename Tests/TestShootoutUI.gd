@@ -12,6 +12,7 @@ const PlaceholderIcon = preload("res://Assets/Icons/PlaceholderIcon.png")
 const BleedIcon = preload("res://Assets/Effects/Bleed.png")
 const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
 const TargetingManagerScript = preload("res://Shootout/ShootoutTargetingManager.gd")
+const ShootoutActScript = preload("res://Shootout/UI/ShootoutAct.gd")
 
 var failures = 0
 
@@ -134,6 +135,15 @@ func _run() -> void:
 	actClick.pressed = false
 	movesRow.get_child(0).gui_input.emit(actClick)
 	_check(moveRequests == ["Sharp"], "clicking an act icon requests the act")
+	_check(movesRow.get_child(0).selected, "the clicked act icon is marked selected")
+	_check(movesRow.get_child(0).modulate.is_equal_approx(ShootoutActScript.SELECTED_MODULATE),
+		"the armed act icon carries the selected tint")
+	movesRow.get_child(0).mouse_entered.emit()
+	_check(movesRow.get_child(0).modulate.b > ShootoutActScript.SELECTED_MODULATE.b,
+		"hovering the armed icon lightens it further")
+	movesRow.get_child(0).mouse_exited.emit()
+	_check(movesRow.get_child(0).modulate.is_equal_approx(ShootoutActScript.SELECTED_MODULATE),
+		"leaving the armed icon restores the selected tint")
 	movesRow.get_child(0).mouse_entered.emit()
 	_check(tooltipPanel.get_node("MarginContainer/VBoxContainer/Title").get_parsed_text() == "Sharp", "act icons show their tooltip in the shared Tooltip node")
 	_check(actsRow.get_child(actsRow.get_child_count() - 1).name == "Flee" and actsRow.get_child(actsRow.get_child_count() - 2).name == "Move", "the Move and Flee icons render last in the Acts row")
@@ -141,10 +151,21 @@ func _run() -> void:
 	ui.reposition.connect(func(direction): repositionRequests.append(direction))
 	var fleeRequests = []
 	ui.flee.connect(func(): fleeRequests.append(true))
+	var pickerStates = []
+	ui.repositionPicker.connect(func(open): pickerStates.append(open))
 	actsRow.get_node("Move").actClicked.emit()
 	_check(movesRow.get_child_count() == 3 and movesRow.get_child(1).actName == "Forward", "the Move icon opens the reposition picker, got %d children" % movesRow.get_child_count())
+	_check(pickerStates == [true], "opening the reposition picker signals the field to mark the columns")
+	_check(actsRow.get_node("Move").selected, "the Move icon is marked selected while the picker is open")
+	_check(movesRow.get_child(1).modulate.is_equal_approx(Color(1, 1, 1)),
+		"picker directions start enabled")
+	ui.setDirectionsUsable({ "Forward": true, "Backward": false })
+	_check(movesRow.get_child(2).modulate.r < 1.0, "a blocked direction is greyed out")
+	_check(movesRow.get_child(1).modulate.r == 1.0, "a reachable direction stays enabled")
 	actsRow.get_node("Move").actClicked.emit()
 	_check(movesRow.get_child_count() == 1, "the Move icon toggles the picker closed")
+	_check(pickerStates == [true, false], "closing the reposition picker signals the field to clear the markers")
+	_check(!actsRow.get_node("Move").selected, "closing the picker disarms the Move icon")
 	actsRow.get_node("Move").actClicked.emit()
 	movesRow.get_child(1).actClicked.emit()
 	_check(repositionRequests == ["forward"], "the picker requests the reposition direction, got %s" % [repositionRequests])
