@@ -1,10 +1,13 @@
 # Godot 4+ specific ignores
 .godot/
 
+# Local toolchain and exported builds
+.tools/
+build/
+
 # Godot-specific ignores
 .import/
 export.cfg
-export_presets.cfg
 *.tmp
 rcedit-x64.exe
 /Pistoleros of Santa Rose*
