@@ -4,6 +4,13 @@ const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 var _previous_position: Vector2 = Vector2.ZERO
 
+## Diagonal movement shows the wagon from above at an angle: its ground
+## footprint covers the whole sprite, so the shadow switches from the thin
+## feet ellipse to a full-body ellipse (ActorShadow.Coverage.BODY). Straight
+## moves keep the feet ellipse. Stopping keeps the last animation's frame, so
+## the coverage only changes when a new animation starts.
+const BODY_SHADOW_ANIMATIONS = ["Move Up Side", "Move Down Side"]
+
 
 func _ready():
 	speed = 350
@@ -65,6 +72,18 @@ func get_input():
 			$AnimatedSprite2D.set_flip_h(true)
 		else:
 			$AnimatedSprite2D.set_flip_h(false)
+	_updateShadowCoverage($AnimatedSprite2D.animation)
+
+## The diagonal-move animations need the whole-sprite shadow (see
+## BODY_SHADOW_ANIMATIONS); every other animation keeps the feet ellipse.
+func _updateShadowCoverage(animationName: String) -> void:
+	var shadow = ShadowScript.findShadow(self)
+	if shadow == null:
+		return
+	if animationName in BODY_SHADOW_ANIMATIONS:
+		shadow.coverage = ShadowScript.Coverage.BODY
+	else:
+		shadow.coverage = ShadowScript.Coverage.FEET
 
 func _physics_process(_delta):
 	get_input()

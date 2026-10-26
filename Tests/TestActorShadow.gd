@@ -1,9 +1,10 @@
 extends SceneTree
 
 ## Headless validation for actor drop shadows (Nodes/Actor Shadow/ActorShadow.gd):
-## the ellipse sits on the sprite's drawn bottom line, sizes to the frame width
-## and re-measures on animation changes; scene-created shadows auto-find their
-## sprite sibling.
+## the ellipse sits on the sprite's drawn bottom line, sizes to the frame's
+## visible body (opaque pixels, falling back to the raw frame when its pixels
+## are unreadable) and re-measures on animation changes; scene-created shadows
+## auto-find their sprite sibling.
 ## Run with: godot --headless --script res://Tests/TestActorShadow.gd
 
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
@@ -15,12 +16,16 @@ const IDLE_SIZE = 24.0
 const BIG_SIZE = 40.0
 
 
-func expectedWidth(frameWidth: float) -> float:
-	return maxf(2.0, frameWidth * ShadowScript.WIDTH_RATIO)
+func expectedWidth(bodyWidth: float) -> float:
+	return maxf(2.0, bodyWidth * ShadowScript.WIDTH_RATIO)
+
+
+func expectedLift(bodyHeight: float) -> float:
+	return maxf(1.0, bodyHeight * ShadowScript.FEET_LIFT_RATIO)
 
 
 func expectedFeetY(spriteOffsetY: float, frameHeight: float) -> float:
-	return spriteOffsetY + frameHeight / 2.0 - ShadowScript.FEET_LIFT
+	return spriteOffsetY + frameHeight / 2.0 - expectedLift(frameHeight)
 
 var failures = 0
 
@@ -34,6 +39,9 @@ func _run() -> void:
 	_test_attached_shadow_geometry()
 	await _test_scene_created_shadow_auto_finds_sprite()
 	_test_sprite2d_hframes_geometry()
+	_test_padded_frame_sizes_to_visible_body()
+	_test_atlas_frame_sizes_to_visible_body()
+	_test_body_coverage_covers_whole_sprite()
 	_test_location_actor_scenes_get_shadows()
 
 	if failures == 0:
@@ -117,6 +125,100 @@ func _test_sprite2d_hframes_geometry() -> void:
 	actor.free()
 
 
+## A padded frame must measure its visible body, not the raw frame: assets
+## pad frames very differently (the overworld rabbit packs a ~10px body into
+## 12x12 frames, 40x40 character frames carry a ~17px body), so a ratio taken
+## from the raw frame width gave each actor a different shadow-to-body
+## proportion. Here an 8px body inside a 24x24 frame must get an 8px-body
+## shadow, centered on the body and lifted proportionally to the body height.
+func _test_padded_frame_sizes_to_visible_body() -> void:
+	var actor = Node2D.new()
+	var sprite = Sprite2D.new()
+	var bodyRect = Rect2i(4, 2, 8, 22)
+	sprite.texture = makeBodyTexture(24, 24, bodyRect)
+	actor.add_child(sprite)
+	root.add_child(actor)
+	ShadowScript.attachTo(actor)
+	var shadow = _findShadow(actor)
+	_check(shadow != null, "a padded frame still gets a shadow")
+	if shadow == null:
+		return
+	_check(is_equal_approx(shadow.shadowSize.x, expectedWidth(bodyRect.size.x)),
+		"the ellipse sizes to the visible body width, not the frame width (got %f, want %f)"
+			% [shadow.shadowSize.x, expectedWidth(bodyRect.size.x)])
+	# Centered sprite: frame top left at (-12, -12); the body's bottom-center
+	# sits at top left + body position + body size, minus the proportional lift.
+	var expectedPosition = Vector2(-12 + bodyRect.position.x + bodyRect.size.x / 2.0,
+		-12 + bodyRect.position.y + bodyRect.size.y - expectedLift(bodyRect.size.y))
+	_check(shadow.position.is_equal_approx(expectedPosition),
+		"the padded-frame shadow sits on the body's bottom line, centered on it (got %s, want %s)"
+			% [shadow.position, expectedPosition])
+	actor.free()
+
+
+## AnimatedSprite2D frames are AtlasTextures: the region is the frame, and the
+## shadow must size to the opaque pixels inside it (Walker Langley-style
+## sheets). Frame 0 is left blank on purpose — the blank-frame fallback is
+## covered by the transparent-texture checks above.
+func _test_atlas_frame_sizes_to_visible_body() -> void:
+	var actor = Node2D.new()
+	var sprite = AnimatedSprite2D.new()
+	var frames = SpriteFrames.new()
+	frames.add_animation("Idle")
+	frames.add_frame("Idle", makeBlankAtlasFrame(48, 24, Rect2i(0, 0, 24, 24)))
+	frames.add_frame("Idle", makeBlankAtlasFrame(48, 24, Rect2i(24, 0, 24, 24)))
+	sprite.sprite_frames = frames
+	sprite.animation = "Idle"
+	sprite.frame = 1
+	sprite.offset = Vector2(0, -10)
+	actor.add_child(sprite)
+	root.add_child(actor)
+	ShadowScript.attachTo(actor)
+	var shadow = _findShadow(actor)
+	_check(shadow != null, "an AtlasTexture frame still gets a shadow")
+	if shadow == null:
+		return
+	var bodyRect = Rect2i(4, 0, 10, 20)
+	_check(is_equal_approx(shadow.shadowSize.x, expectedWidth(bodyRect.size.x)),
+		"the AtlasTexture shadow sizes to the visible body inside the region (got %f, want %f)"
+			% [shadow.shadowSize.x, expectedWidth(bodyRect.size.x)])
+	# Frame top left at (-12, -22): centered 24x24 region, offset (0, -10).
+	var expectedPosition = Vector2(-12 + bodyRect.position.x + bodyRect.size.x / 2.0,
+		-22 + bodyRect.position.y + bodyRect.size.y - expectedLift(bodyRect.size.y))
+	_check(shadow.position.is_equal_approx(expectedPosition),
+		"the AtlasTexture shadow sits on the body's bottom line (got %s, want %s)"
+			% [shadow.position, expectedPosition])
+	actor.free()
+
+
+## BODY coverage (the wagon's diagonal moves): the ellipse spans the whole
+## visible body and centers on it, and switching back to FEET restores the
+## feet-line geometry.
+func _test_body_coverage_covers_whole_sprite() -> void:
+	var actor = Node2D.new()
+	var sprite = Sprite2D.new()
+	var bodyRect = Rect2i(4, 2, 8, 22)
+	sprite.texture = makeBodyTexture(24, 24, bodyRect)
+	actor.add_child(sprite)
+	root.add_child(actor)
+	ShadowScript.attachTo(actor)
+	var shadow = _findShadow(actor)
+	_check(shadow != null, "a BODY-coverage sprite still gets a shadow")
+	if shadow == null:
+		return
+	shadow.coverage = ShadowScript.Coverage.BODY
+	_check(shadow.shadowSize.is_equal_approx(Vector2(bodyRect.size.x, bodyRect.size.y)),
+		"the BODY shadow spans the whole visible body (got %s)" % shadow.shadowSize)
+	var expectedCenter = Vector2(-12 + bodyRect.position.x + bodyRect.size.x / 2.0,
+		-12 + bodyRect.position.y + bodyRect.size.y / 2.0)
+	_check(shadow.position.is_equal_approx(expectedCenter),
+		"the BODY shadow centers on the body (got %s, want %s)" % [shadow.position, expectedCenter])
+	shadow.coverage = ShadowScript.Coverage.FEET
+	_check(is_equal_approx(shadow.shadowSize.x, expectedWidth(bodyRect.size.x)),
+		"switching back to FEET restores the feet ellipse width (got %f)" % shadow.shadowSize.x)
+	actor.free()
+
+
 ## The player location scene carries the shadow setup itself (attached from
 ## _ready). The NPC scene uses the same plain-node auto-find path covered
 ## above; instantiating it here would pull in AI.gd, which needs autoloads that
@@ -145,6 +247,29 @@ func _findShadow(actor: Node) -> Node:
 
 func makeTexture(width: int, height: int) -> Texture2D:
 	return ImageTexture.create_from_image(Image.create_empty(width, height, false, Image.FORMAT_RGBA8))
+
+
+## A fully transparent texture with an opaque body block drawn at bodyRect
+## (offset by frameOffset inside a larger sheet).
+func makeBodyImage(width: int, height: int, bodyRect: Rect2i, frameOffset: Vector2i) -> Image:
+	var image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
+	image.fill_rect(Rect2i(bodyRect.position + frameOffset, bodyRect.size), Color(1, 1, 1, 1))
+	return image
+
+
+func makeBodyTexture(width: int, height: int, bodyRect: Rect2i) -> Texture2D:
+	return ImageTexture.create_from_image(makeBodyImage(width, height, bodyRect, Vector2i.ZERO))
+
+
+## An AtlasTexture frame cut from a sheet whose region-local body matches the
+## shared bodyRect the atlas test expects.
+func makeBlankAtlasFrame(sheetWidth: int, sheetHeight: int, region: Rect2i) -> AtlasTexture:
+	var bodyRect = Rect2i(4, 0, 10, 20)
+	var sheet = ImageTexture.create_from_image(makeBodyImage(sheetWidth, sheetHeight, bodyRect, region.position))
+	var atlas = AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = region
+	return atlas
 
 
 func _check(condition: bool, message: String) -> void:
