@@ -13,6 +13,10 @@ var colors = {
 	"status": "#c58aff",
 	"keyword": "#ffd6ba",
 	"unique": "#cf3662",
+	"green": "#00ff00",
+	"red": "#ff0000",
+	"yellow": "#ffff00",
+	"orange": "#ffa500",
 }
 
 var rawText = ""

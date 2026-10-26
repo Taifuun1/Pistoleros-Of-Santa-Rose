@@ -1,12 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfjgww2c0wct8"]
+[gd_scene load_steps=3 format=3 uid="uid://bfjgww2c0wct8"]
 
 [ext_resource type="Script" uid="uid://sgopdnm5cec4" path="res://Nodes/Damage Number/DamageNumber.gd" id="1_t4f4c"]
+[ext_resource type="PackedScene" uid="uid://ce2thwvlne3vr" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="2_rtlx"]
 
-[node name="DamageNumber" type="RichTextLabel"]
+[node name="DamageNumber" type="Node2D"]
+script = ExtResource("1_t4f4c")
+
+[node name="Label" parent="." instance=ExtResource("2_rtlx")]
+mouse_filter = 2
+offset_right = 0.0
+offset_bottom = 0.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
-bbcode_enabled = true
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-script = ExtResource("1_t4f4c")
+offset_transform_enabled = false
+offset_transform_position = Vector2(0, 0)
+text = ""
+
