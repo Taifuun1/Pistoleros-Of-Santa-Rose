@@ -1,0 +1,71 @@
+[gd_resource type="Resource" script_class="OverworldMapData" format=3]
+
+[ext_resource type="Script" path="res://Data/Overworld/OverworldMapData.gd" id="1_lntne"]
+[ext_resource type="Texture2D" path="res://Assets/Journal/OverworldMap.png" id="2_dobwv"]
+
+[resource]
+script = ExtResource("1_lntne")
+texture = ExtResource("2_dobwv")
+image_size = Vector2i(2304, 1152)
+map_origin = Vector2(-1535, -2)
+chunk_grid = Rect2i(0, 0, 12, 24)
+cell_min = Vector2i(-2, -2)
+cell_max = Vector2i(765, 1533)
+source_fingerprint = "4d364cc4a075ac035c281714946a5ad4"
+locations = Array[Dictionary]([{
+"cell": Vector2i(69, 1434),
+"chunk": Vector2i(1, 22),
+"display_name": "Donnafolk Caves",
+"icon": "location",
+"id": "Donnafolk Caves",
+"image_position": Vector2(170, 753.5),
+"tile": Vector2i(7, 28)
+}, {
+"cell": Vector2i(106, 1484),
+"chunk": Vector2i(1, 23),
+"display_name": "Bandit Camp",
+"icon": "location",
+"id": "Bandit Camp",
+"image_position": Vector2(157, 797),
+"tile": Vector2i(44, 14)
+}, {
+"cell": Vector2i(169, 1099),
+"chunk": Vector2i(2, 17),
+"display_name": "Twin Creek Mines",
+"icon": "location",
+"id": "Twin Creek Mines",
+"image_position": Vector2(605, 636),
+"tile": Vector2i(43, 13)
+}, {
+"cell": Vector2i(232, 937),
+"chunk": Vector2i(3, 14),
+"display_name": "Gold Run",
+"icon": "location",
+"id": "Gold Run",
+"image_position": Vector2(830, 586.5),
+"tile": Vector2i(42, 43)
+}, {
+"cell": Vector2i(530, 1122),
+"chunk": Vector2i(8, 17),
+"display_name": "Lazysprings",
+"icon": "location",
+"id": "Lazysprings",
+"image_position": Vector2(943, 828),
+"tile": Vector2i(20, 36)
+}, {
+"cell": Vector2i(535, 1211),
+"chunk": Vector2i(8, 18),
+"display_name": "Clearwater Grove",
+"icon": "location",
+"id": "Clearwater Grove",
+"image_position": Vector2(859, 875),
+"tile": Vector2i(25, 61)
+}, {
+"cell": Vector2i(673, 1218),
+"chunk": Vector2i(10, 19),
+"display_name": "Clearsprings",
+"icon": "location",
+"id": "Clearsprings",
+"image_position": Vector2(990, 947.5),
+"tile": Vector2i(35, 4)
+}])
