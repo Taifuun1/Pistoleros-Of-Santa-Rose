@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://buxsqhults1u1"]
+
+[ext_resource type="Script" uid="uid://efi6eku6mytn" path="res://UI/Journal/TabSprite.gd" id="1_tabsprite"]
+
+[node name="TabSprite" type="TextureRect" unique_id=199012603]
+custom_minimum_size = Vector2(24, 24)
+custom_maximum_size = Vector2(24, 24)
+offset_left = 16.0
+offset_right = 40.0
+offset_bottom = 40.0
+stretch_mode = 5
+script = ExtResource("1_tabsprite")

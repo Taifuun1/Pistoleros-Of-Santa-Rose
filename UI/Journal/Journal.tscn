@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://bxe7xo3asg7w7"]
+
+[ext_resource type="Script" uid="uid://che031nn5ktfn" path="res://UI/Journal/Journal.gd" id="1_journal"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://ckjp3qkbmor8g" path="res://Assets/Journal/JournalBackground.png" id="3_background"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_journal_panel"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("3_background")
+
+[node name="Journal" type="Control" unique_id=1513806185]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_journal")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=99200060]
+self_modulate = Color(1, 1, 1, 0.5019608)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1587678541]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer" unique_id=18598351]
+custom_minimum_size = Vector2(560, 280)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_journal_panel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer" unique_id=1202814347]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/VBoxContainer" unique_id=925000090]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+
+[node name="Header" type="HBoxContainer" parent="CenterContainer/PanelContainer/VBoxContainer/MarginContainer" unique_id=596214375]
+layout_mode = 2
+
+[node name="TabBar" type="TabBar" parent="CenterContainer/PanelContainer/VBoxContainer/MarginContainer/Header" unique_id=1852733157]
+custom_maximum_size = Vector2(-1, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/tab_separation = 12
+
+[node name="CloseButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/MarginContainer/Header" unique_id=159805637]
+layout_mode = 2
+text = " Close "
+
+[node name="TabContentHost" type="Control" parent="CenterContainer/PanelContainer/VBoxContainer" unique_id=1248872996]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3

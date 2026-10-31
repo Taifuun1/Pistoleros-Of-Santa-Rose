@@ -2,7 +2,7 @@
 
 The Journal is the game's central information and management interface: Overworld map, quests, character stats, inventory/equipment, and settings in one tabbed shell.
 
-This is a high-level design overview. Each tab is a separate feature with its own implementation and detailed design. **Status: proposed; no Journal implementation exists yet.**
+This is a high-level design overview. Each tab is a separate feature with its own implementation and detailed design. **Status: shell implemented — `UI/Journal/Journal.tscn` with lazy tabs, modal/pause coordination and `TOGGLE_JOURNAL`, integrated into `SceneManager`; the five tabs are intentional empty/unavailable states and the Overworld map does not exist yet.**
 
 ## Goals
 
@@ -14,7 +14,7 @@ This is a high-level design overview. Each tab is a separate feature with its ow
 
 ## Current state and dependencies
 
-- There is no Journal scene, input action, tab framework, or Overworld map.
+- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, and runtime tab are implemented through its step 5).
 - `Globals/Party.gd` already owns party members, persistent HP/injuries, money, and a basic `inventory` Array. Equipment management, stack limits, dropping, and inventory commands still need their own design.
 - `Globals/Quests.gd` currently contains only main-quest level/rarity. `Globals/Locations.gd::currentQuest` is a string used for scene selection, not a quest journal or map-target model.
 - Settings and save management do not yet have an authoritative settings/save service.
@@ -45,13 +45,12 @@ SceneManager (input/toggle policy)
 │       ├── Dim/InputBlocker
 │       └── PanelContainer
 │           └── VBoxContainer
-│               ├── Header / CloseButton
-│               ├── TabBar
+│               ├── Header (icon-only TabBar / CloseButton)
 │               └── TabContentHost
 └── TransitionLayer                      # remains above Journal
 ```
 
-Use a `TabBar` plus one content host rather than relying on `TabContainer`'s built-in child visibility if tabs need lazy instantiation. `Journal.gd` owns tab registration, selection, modal input, and lifecycle. Each tab is a separate `Control` scene with a small contract:
+Use a `TabBar` plus one content host rather than relying on `TabContainer`'s built-in child visibility if tabs need lazy instantiation. The strip is icon-only — no tab text — with tab names in tooltips; `UI/Journal/TabSprite.tscn` is the reusable icon-only sprite node, and tab empty states identify their tab with that same sprite. `Journal.gd` owns tab registration, selection, modal input, and lifecycle. Each tab is a separate `Control` scene with a small contract:
 
 ```gdscript
 func refreshTab() -> void       # Re-read authoritative state; no arguments tied to Journal internals.

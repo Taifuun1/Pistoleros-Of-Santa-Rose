@@ -36,11 +36,24 @@ var transitioning := false
 @onready var currentSceneContainer: Node = $CurrentScene
 @onready var fadeRect: ColorRect = $TransitionLayer/FadeRect
 @onready var loadingScreen: Control = $TransitionLayer/LoadingScreen
+@onready var journal: Journal = $JournalLayer/Journal
+
+## Per-scene Journal availability policy (Journal.md): the Overworld and
+## normal Locations initially. Cutscenes, Shootouts, minigames and the main
+## menu stay blocked until an explicit decision extends this list.
+@export var journalAllowedScenes: Array[String] = ["overworld", "location", "pregenerated_location", "wfc_location"]
+
+var _pauseCoordinator: ModalPauseCoordinator
 
 
 func _ready() -> void:
 	# Start from a black screen so the initial scene fades in.
 	fadeRect.modulate.a = 1.0
+	# The Journal is a persistent modal owned by the layer below the
+	# transitions; its open/close and pause policy live here.
+	_pauseCoordinator = ModalPauseCoordinator.new(get_tree())
+	journal.pauseCoordinator = _pauseCoordinator
+	scene_change_started.connect(_on_scene_change_started)
 	if initialScene != "":
 		change_scene(initialScene)
 
@@ -152,3 +165,26 @@ func _abortTransition() -> void:
 	loadingScreen.hide()
 	await _fadeIn()
 	transitioning = false
+
+
+func canOpenJournal() -> bool:
+	return !transitioning and journalAllowedScenes.has(currentSceneKey)
+
+
+func toggleJournal() -> void:
+	if journal.isOpen:
+		journal.close()
+	elif canOpenJournal():
+		journal.open()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("TOGGLE_JOURNAL"):
+		toggleJournal()
+		get_viewport().set_input_as_handled()
+
+
+func _on_scene_change_started(_sceneKey) -> void:
+	# The Journal is modal over gameplay; scene changes close it first.
+	if journal.isOpen:
+		journal.close()

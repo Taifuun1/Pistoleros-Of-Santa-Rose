@@ -64,6 +64,25 @@ border_color = Color(0.53227663, 0.23604882, 0.32117972, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u8erq"]
 bg_color = Color(0.44313726, 0.77254903, 0.8745098, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ximrv"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vl36l"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7t46k"]
+bg_color = Color(0.3563206, 0.70466703, 0.5800074, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6snf3"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v8d03"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 12.0
+bg_color = Color(0, 0, 0, 0.5019608)
+
 [resource]
 default_font = ExtResource("3_f0h75")
 default_font_size = 12
@@ -97,4 +116,9 @@ PopupMenu/styles/panel = SubResource("StyleBoxFlat_u8erq")
 RichTextLabel/constants/line_separation = 1
 RichTextLabel/font_sizes/normal_font_size = 12
 RichTextLabel/fonts/normal_font = ExtResource("3_f0h75")
+TabBar/styles/tab_focus = SubResource("StyleBoxFlat_ximrv")
+TabBar/styles/tab_hovered = SubResource("StyleBoxFlat_vl36l")
+TabBar/styles/tab_selected = SubResource("StyleBoxFlat_7t46k")
+TabBar/styles/tab_unselected = SubResource("StyleBoxFlat_6snf3")
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_v8d03")
 VBoxContainer/constants/separation = 4

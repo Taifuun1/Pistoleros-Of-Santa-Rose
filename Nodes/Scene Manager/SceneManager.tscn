@@ -1,12 +1,20 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://Nodes/Scene Manager/SceneManager.gd" id="1_scenemanager"]
 [ext_resource type="PackedScene" uid="uid://cke45gidyls33" path="res://UI/Loading/Loading.tscn" id="2_loading"]
+[ext_resource type="PackedScene" path="res://UI/Journal/Journal.tscn" id="3_journal"]
 
 [node name="SceneManager" type="Node"]
+process_mode = 3
 script = ExtResource("1_scenemanager")
 
 [node name="CurrentScene" type="Node" parent="."]
+process_mode = 1
+
+[node name="JournalLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Journal" parent="JournalLayer" instance=ExtResource("3_journal")]
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 10

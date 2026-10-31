@@ -2,7 +2,7 @@
 
 The Journal's Overworld map shows the world, the player's current/last known position, Location points of interest, and current quest targets. This doc focuses on generating the base map from authoritative chunk data and keeping live markers aligned with it.
 
-This is a design doc: it describes intended behavior, and implementation may lag behind it. **Status: proposed; no Journal or Overworld map implementation exists.**
+This is a design doc: it describes intended behavior, and implementation may lag behind it. **Status: steps 1–5 implemented — shared `OverworldChunkReader`/`OverworldCoordinates`/`OverworldMapProjection`, explicit `WorldData`, `MapTileStyles`, the headless bake tool with the checked-in `Assets/Journal/OverworldMap.png` and `Data/Overworld/OverworldMapData.tres` manifest (fingerprint + `--check`), and the Journal map tab (`UI/Journal/Tabs/MapTab.*`: fit/pan/zoom, constant-size markers, generated POIs). The exact live/last-known player provider (step 6) and the quest key-point API (step 7) are pending; the placeholder palette art pass is still pending.**
 
 ## Requirements
 
@@ -32,17 +32,17 @@ Do not instantiate the whole Overworld or regenerate the map when the Journal op
 
 ### World and chunk data
 
-- `Data/Music/MusicData.gd` documents a **12×24 chunk grid** (`x = 0..11`, `y = 0..23`). This grid size currently exists only in a comment, so the generator needs explicit world-grid data rather than inferring bounds from filenames or Zone bands.
+- `Data/Music/MusicData.gd` documents a **12×24 chunk grid** (`x = 0..11`, `y = 0..23`); the explicit declaration now lives in `Data/Overworld/WorldData.gd`.
 - `HelperVariables.overworldChunkSize` is **64×64 tiles**. A complete grid therefore contains **768×1536 = 1,179,648 tile cells**.
 - `Overworld/Overworld.tscn` uses a large isometric chunk TileMap (`1536×384`), while `MergedTiles` and `OverworldTileChunkTemplate` use the isometric `24×12` tileset.
-- `Overworld/Overworld.gd::getChunkCellData()` reads `layer_0/tile_data` from each `PackedScene` and caches flat records of `[cellX, cellY, sourceId, atlasX, atlasY, alternative]`. This is the correct source for a generator; raw `.tscn` text parsing should not be duplicated.
-- `getChunkBaseCell()` converts a chunk into shared template-grid coordinates. The decoder's local-to-shared cell conversion includes a `- Vector2i.ONE` offset that must remain in the shared implementation.
+- The baked `layer_0/tile_data` decode lives in the shared `Overworld/OverworldChunkReader.gd` (extracted from `Overworld.gd`, which now calls it); it returns flat records of `[cellX, cellY, sourceId, atlasX, atlasY, alternative]`. Raw `.tscn` text parsing must not be duplicated.
+- `chunkToBaseCell()` (in `Overworld/OverworldCoordinates.gd`, extracted from the old `getChunkBaseCell()`) converts a chunk into shared template-grid coordinates. The decoder's local-to-shared cell conversion includes a `- Vector2i.ONE` offset that must remain in the shared implementation. Note: Godot 4.7's isometric transform is **staggered** (map basis u = (24, 0), v = (+/-12, 6) by row parity), so every conversion goes through the real tile map transforms rather than hand math; chunk base cells form a plain `64*chunk - 1` lattice and the full declared grid spans exactly 768x1536 shared cells.
 - At runtime, `MergedTiles` contains only the current chunk and eight neighbours. Chunk scenes are parsed ahead within radius two, but most of the world is not loaded. `MergedTiles` alone therefore cannot produce a complete map.
 - The 274 current chunk scenes total roughly 21 MiB of text. **14 of the 288 grid positions have no scene**: `(0,0)-(0,4)`, `(1,0)-(1,4)`, `(7,23)`, and `(8,21)-(8,23)`. Generation must report these and leave them transparent; it must not invent tiles.
 
 ### Locations, player, and quests
 
-- Seven current chunk scripts define `locations`: Donnafolk Caves, Bandit Camp, Clearsprings, Twin Creek Mines, Gold Run, Lazysprings, and Clearwater Grove. Each entry has a name, local `tiles`, and `pregenerated`; the first tile is the current Overworld entrance anchor.
+- Seven current chunk scripts define `locations`: Donnafolk Caves, Bandit Camp, Clearsprings, Twin Creek Mines, Gold Run, Lazysprings, and Clearwater Grove. Each entry has a name, local `tiles`, and `pregenerated`; the first tile is the current Overworld entrance anchor. Donnafolk Caves was once attached to chunks (2,22)/(2,23) as well (duplicate declarations — a data bug, fixed); the manifest still dedupes defensively in case multi-chunk locations ever become intentional.
 - `Overworld.gd::setChunk()` instantiates chunk scripts as bare data objects. The same reader can collect Location anchors for a map manifest without adding chunk scenes to the tree.
 - The live player is `$Actors/PlayerOverworldActor`. The `Overworld` autoload has `spawnChunk`/`spawnTile`, but these are not consistently updated when entering Locations. A last-known-position provider is required for a correct marker outside the Overworld.
 - `Quests.gd` has no active/completed quest or objective-target model. `Locations.currentQuest` is only a scene-selection string. The map needs a future quest map-marker API and must not parse quest text or cutscene names.
@@ -78,7 +78,7 @@ A semantic bake does not mean the map must look like the gameplay TileMap. Map s
 | `Tools/GenerateOverworldMap.gd` | Headless full-world bake, validation, coverage report, and stale check |
 | `Overworld/OverworldMapProjection.gd` | Pure shared-cell/continuous-world-position to generated-image transforms |
 | `Data/Overworld/OverworldMapData.tres` | Generated texture reference, projection bounds, source fingerprint, and Location manifest |
-| `Assets/UI/Journal/OverworldMap.png` | Generated base image; no dynamic markers baked in |
+| `Assets/Journal/OverworldMap.png` | Generated base image; no dynamic markers baked in |
 | `UI/Journal/Tabs/OverworldMapTab.tscn` / `.gd` | Pan/zoom, player/POI/quest overlays, focus and tooltips |
 
 `WorldData` is world topology, for example `chunk_grid = Rect2i(0, 0, 12, 24)`. It does not duplicate `HelperVariables.overworldChunkSize` or any `ZoneData` bands. The generator iterates that explicit rectangle and reports every present/missing/decode-failed chunk.
@@ -88,7 +88,7 @@ The generated resource should contain data equivalent to:
 ```gdscript
 {
     "format_version": 1,
-    "texture": "res://Assets/UI/Journal/OverworldMap.png",
+    "texture": "res://Assets/Journal/OverworldMap.png",
     "image_size": Vector2i(2304, 1152), # actual value derived from projected bounds
     "map_origin": Vector2(...),          # normalizes projected shared-cell coordinates
     "pixels_per_cell": Vector2(1.0, 0.5),
@@ -159,6 +159,8 @@ var cellFraction = cellFromLocal * localPosition
 
 Convert the player's global position into `MergedTiles` local space first. This preserves sub-cell movement and uses Godot's real isometric transform instead of assuming an offset.
 
+Implementation note: because the 4.7 isometric transform is staggered (not affine), `worldToCellFraction()` solves the fraction on each cell's actual u/v basis instead of one global `Transform2D`; cell centers round-trip exactly and fractions are exact within a cell (they may wobble a fraction of a cell on row crossings). `chunkTileToWorld()` is defined through the cell (`cellToWorld(chunkTileToCell())`); the legacy anchor formulas still embedded in `Overworld.gd` (location collisions, the initial spawn) intentionally stay untouched until the player-position unification step.
+
 ### Image projection
 
 For a shared-cell coordinate `(u, v)`, the recommended final-image projection is:
@@ -177,9 +179,9 @@ Rasterization uses a separate lossless working surface so fractional final `y` c
 working pixel = Vector2i(u - v, u + v) - working_origin
 ```
 
-Write exactly one pixel per source cell to the working image. After all cells and neighbor-based features are complete, resize only the vertical axis by 1/2 using `Image.INTERPOLATE_BILINEAR` to produce the final image. With identical horizontal/vertical padding, `map_origin = Vector2(working_origin.x, working_origin.y * 0.5)`. The working image/origin and resize algorithm are generator details, not runtime metadata. This gives approximately two final pixels per cell without collisions or a lossy “round every cell directly to final pixels” step.
+Write one **2×1 footprint per source cell** to the working image: the cell's lattice pixel `(u − v, u + v)` plus the `(x + 1, y)` pixel next to it. The lattice only hits pixels whose x and y share parity (half the surface); the `x + 1` neighbor is the parity hole of exactly one cell (no other cell's lattice pixel can claim it), so the working image tiles densely. Painting only the lattice pixels left transparent every-other-column stripes that survived the downsample as vertical lines in the final PNG. After all cells and neighbor-based features are complete, resize only the vertical axis by 1/2 using `Image.INTERPOLATE_BILINEAR` to produce the final image. With identical horizontal/vertical padding, `map_origin = Vector2(working_origin.x, working_origin.y * 0.5)`. The working image/origin and resize algorithm are generator details, not runtime metadata. This gives approximately two final pixels per cell without collisions or a lossy “round every cell directly to final pixels” step.
 
-Derive bounds from the **full declared world grid**, including currently missing chunks. Otherwise adding a missing edge chunk would unexpectedly shift the image and every marker. With 768×1536 cells at this scale, the expected image is approximately **2304×1152 pixels**:
+Derive bounds from the **full declared world grid**, including currently missing chunks. Otherwise adding a missing edge chunk would unexpectedly shift the image and every marker. With 768×1536 cells at this scale, the derived image is **2304×1152 pixels** (computed and asserted by the projection, roughly `(768 + 1536) × 1` wide and `× 0.5` tall):
 
 - Width: `(768 + 1536) × 1 = 2304`.
 - Height: `(768 + 1536) × 0.5 = 1152`.
@@ -234,7 +236,7 @@ godot --headless --path . --script res://Tools/GenerateOverworldMap.gd -- --requ
 
 Inputs are `WorldData`, every declared chunk path, chunk scripts, `MapTileStyles`, the shared coordinate/reader version, and `ZoneData` only if Zone styling is enabled. Outputs are:
 
-- `Assets/UI/Journal/OverworldMap.png` (RGBA8, transparent outside world/holes).
+- `Assets/Journal/OverworldMap.png` (RGBA8, transparent outside world/holes).
 - `Data/Overworld/OverworldMapData.tres` (texture, projection, grid, fingerprint, POIs).
 - A console coverage report; optionally a small generated text report for CI diagnostics.
 
@@ -244,7 +246,7 @@ The PNG, resource, and Godot import metadata are checked in. The game never runs
 
 1. Load world/style data and construct the theoretical full-grid cell bounds and image projection. Initialize an empty RGBA8 `Image` and a `PackedInt32Array` of `768 × 1536` style ids (zero = no cell).
 2. For each chunk in sorted order, report missing or load/decode it through `OverworldChunkReader`. Convert each cell to a shared cell, then to a zero-based full-grid index using the generated grid origin.
-3. Resolve source/atlas/alternative to an integer style id and store it in the typed style array. A second write to an occupied index indicates a seam/coordinate bug and fails generation. Out-of-grid cells are also errors.
+3. Resolve source/atlas/alternative to an integer style id and store it in the typed style array. A second write to an occupied index is reported as an authoring overlap and resolved deterministically (the later chunk in sorted order wins) — the current world data carries 37 such seam overlaps, invisible in live streaming because the merged layer simply overwrites; `--strict` fails on them. Out-of-grid cells are also errors.
 4. Collect Location entries, validate unique ids/non-empty tiles, and project their first entrance tile. Preserve a generic visible Location icon by default until per-Location map metadata exists.
 5. After every chunk is read, write each present cell once to the working image with `Image.set_pixel()` using the working projection above. Add deterministic neighbor-based outlines/features, then vertically downsample to the final image with `Image.INTERPOLATE_BILINEAR`. Do not use viewport drawing or texture sampling.
 6. Build the manifest and source fingerprint, save outputs, and print counts for present/missing chunks, present cells, unknown styles, POIs, image bounds, and output paths.
@@ -256,7 +258,7 @@ The typed style grid is about 4.5 MiB rather than a Dictionary with over a milli
 - Sort chunks, style keys, and POIs before output. Never depend on filesystem or Dictionary iteration order.
 - The source fingerprint covers sorted chunk paths/content (including additions/deletions), chunk scripts, world/style data, generator/projection/reader versions, and shared Zone data when used.
 - Normal generation writes only when output changed. `--check` performs the same bake in memory/temporary output and fails if the committed PNG or metadata differs, so manual edits to generated output are also detected.
-- Decode errors, duplicate cells, invalid Location anchors, and projection failures always fail. Unknown style policy is configurable during palette development and strict afterward.
+- Decode errors, out-of-grid cells, invalid Location anchors, and projection failures always fail. Overlapping seam cells are reported and resolved deterministically (see the algorithm); `--strict` treats them as failures. Unknown style policy is configurable during palette development and strict afterward.
 - A useful CI command is `--check`; add `--require-complete` only when missing chunks are no longer intentional.
 
 The first visual prototype should generate the complete base and inspect it beside `Map Outline.aseprite` at actual Journal fit scale before investing in labels or decoration. If fine detail becomes noise, adjust palette/aggregation rather than increasing runtime work. An optional later overview can aggregate 4×4 cells by dominant ground style while preserving high-priority roads/water; it must use the same projection metadata or a clearly versioned LOD transform.
@@ -290,7 +292,7 @@ Markers should remain a consistent **screen-space size** rather than shrinking w
 Initial behavior:
 
 - First open fits the whole map and makes the player icon visually distinct (for example, a subtle pulse). “Center player” switches to a useful close zoom.
-- Mouse drag pans; wheel/buttons zoom. Keyboard/controller can pan, zoom, cycle markers, activate tooltips, fit, and center. Map input must not leak to player movement or Journal tab shortcuts.
+- Mouse drag pans (implemented as a per-frame cursor poll — “left held over the map” arms the drag — because grabbed press/motion `gui_input` delivery proved unreliable across engine grab semantics); wheel/buttons zoom. Keyboard/controller can pan, zoom, fit, and center. Arrow keys always pan the map: shortcut buttons and markers use `FOCUS_NONE` so focus traversal never hops between them, a focused map clip consumes the arrows through `gui_input`, and an unhandled-key fallback pans when focus sits elsewhere (the shell TabBar still consumes arrows for tab switching by design). Map input must not leak to player movement or Journal tab shortcuts.
 - POI names can use hover/focus/selected labels instead of displaying every label at once. Add a legend only if the final icon set is not self-explanatory.
 - A quest “Show on map” request selects the tab, centers the target, and focuses/pulses its marker without altering quest state.
 
@@ -364,7 +366,7 @@ Until that API exists, ship the base map/player/POIs with an empty quest-marker 
 - `Overworld/OverworldCoordinates.gd` — shared chunk/tile/cell/world transforms, also reusable by dynamic spawns.
 - `Overworld/OverworldMapProjection.gd` — pure generated-image transforms.
 - `Tools/GenerateOverworldMap.gd` — headless bake/check/report tool.
-- `Assets/UI/Journal/OverworldMap.png` and import metadata — generated base.
+- `Assets/Journal/OverworldMap.png` and import metadata — generated base.
 - `Data/Overworld/OverworldMapData.tres` — generated projection and POI manifest.
 - Location/player/current-quest icons under `Assets/UI/Journal/` or the existing icon folder.
 
@@ -391,7 +393,7 @@ Until that API exists, ship the base map/player/POIs with an empty quest-marker 
 - Two unchanged bakes produce byte-equivalent PNG/metadata. Chunk, style, script, and coordinate changes trigger `--check`; unrelated dynamic player/quest state does not.
 - Output bounds remain stable when an edge chunk changes from missing to present.
 - Every encountered tile has a style in strict mode; roads/water and world silhouettes are inspected at actual fit scale.
-- The current seven Location anchors are present exactly once and match their chunk/tile data.
+- The current seven Location anchors are present exactly once (multi-chunk declarations dedupe to the first) and match their chunk/tile data.
 
 ### Runtime
 
@@ -409,11 +411,11 @@ Compare the generated silhouette and major features with `Map Outline.aseprite` 
 
 ## Implementation order
 
-1. Extract/test `OverworldChunkReader` and `OverworldCoordinates` without changing live streaming behavior; add explicit `WorldData`.
-2. Build projection tests and a small semantic-style fixture generator. Validate full-grid bounds and chunk seams before reading the entire world.
-3. Implement the headless bake/report and an initial complete tile palette. Generate the full map, inspect fit-scale readability, and adjust the art rules.
-4. Add generated metadata/POIs, deterministic fingerprints, `--check`, and checked-in outputs.
-5. Add the Journal map tab, fit/pan/zoom, constant-size markers, and generated POIs.
+1. ✅ Extract/test `OverworldChunkReader` and `OverworldCoordinates` without changing live streaming behavior; add explicit `WorldData`. (`Tests/TestOverworldMapGeneration.gd` keeps the original decode as its oracle; `SceneManagerTest` covers live streaming.)
+2. ✅ Build projection tests and a small semantic-style fixture generator. Validate full-grid bounds and chunk seams before reading the entire world. (`Tests/TestOverworldMapProjection.gd`, synthetic bake fixtures in `Tests/TestOverworldMapGeneration.gd`.)
+3. ✅ Implement the headless bake/report and an initial complete tile palette. Generate the full map, inspect fit-scale readability, and adjust the art rules. (`Tools/GenerateOverworldMap.gd` + `Tools/OverworldMapBaker.gd`; the palette is the survey-generated prototype — the fit-scale art review is still pending.)
+4. ✅ Add generated metadata/POIs, deterministic fingerprints, `--check`, and checked-in outputs. (`Data/Overworld/OverworldMapData.tres` — typed manifest; `--check` compares committed PNG + manifest against a fresh in-memory bake; the fingerprint covers chunk scenes/scripts, the tileset, world/style data and the shared bake code.)
+5. ✅ Add the Journal map tab, fit/pan/zoom, constant-size markers, and generated POIs. (`UI/Journal/Tabs/MapTab.gd`/`.tscn` + `Tests/TestOverworldMapTab.gd`; the player marker runs on the injectable position provider, whose default is the Overworld autoload's last-known spawn until step 6.)
 6. Add exact live/last-known player state and unify it with Overworld re-entry where practical.
 7. Add the quest key-point API and markers when quest state lands; keep Quests/Map on the same objective source.
 8. Run generator/runtime tests and the manual world/art review before adding optional Zone shading, overview LOD, or decorative polish.
