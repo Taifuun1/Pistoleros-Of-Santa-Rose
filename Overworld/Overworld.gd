@@ -32,6 +32,24 @@ var pendingChunkLoads = []
 var cellOpQueue = []
 const cellOpBudget = 8192
 
+# Shared chunk/cell decoding (extracted; see OverworldChunkReader.gd and
+# OverworldCoordinates.gd). Built lazily because _process's init() is the
+# live entry point.
+var _coordinates: OverworldCoordinates = null
+var _chunkReader: OverworldChunkReader = null
+
+
+func _getCoordinates() -> OverworldCoordinates:
+	if _coordinates == null:
+		_coordinates = OverworldCoordinates.new(self, $OverworldTileChunkTemplate)
+	return _coordinates
+
+
+func _getChunkReader() -> OverworldChunkReader:
+	if _chunkReader == null:
+		_chunkReader = OverworldChunkReader.new(_getCoordinates())
+	return _chunkReader
+
 
 func _process(_delta):
 	if currentChunk == null:
@@ -84,32 +102,28 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> bool:
 		# Mark missing chunks as handled so they are not retried every frame.
 		loadedChunkCells[chunkLocation] = true
 		return true
-	var cellData = getChunkCellData(chunkLocation)
+	var chunkRead = _getChunkReader().readChunk(chunkLocation, chunkScene)
+	var cellData: PackedInt32Array = chunkRead["cells"]
+	chunkCellDataCache[chunkLocation] = cellData
 	loadedChunkCells[chunkLocation] = true
 	if !presentChunkCells.has(chunkLocation):
 		queueCellOp(chunkLocation, cellData, true)
-	# Per-chunk data scripts (locations / spawnPoints) run on a bare script
-	# instance; the scene itself is never added to the tree.
-	var chunkScript = getChunkScript(chunkScene)
-	if chunkScript != null:
-		var chunkData = chunkScript.new()
-		if "locations" in chunkData:
-			var locations = chunkData.locations
-			for location in locations:
-				if !isOverworldObjectLoaded(location, "Locations"):
-					createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
-		if "spawnPoints" in chunkData:
-			var spawnPoints = chunkData.spawnPoints
-			for actorName in spawnPoints:
-				if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
-					createSpawnPoint(
-						actorName,
-						spawnPoints[actorName].type,
-						Vector2i(map_to_local(chunkLocation) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(spawnPoints[actorName].tiles[0])),
-						spawnPoints[actorName].chance,
-						spawnPoints[actorName].maximum
-					)
-		chunkData.free()
+	# Per-chunk data scripts (locations / spawnPoints) are read by the shared
+	# chunk reader on a bare script instance; the scene never enters the tree.
+	var locations = chunkRead["locations"]
+	for location in locations:
+		if !isOverworldObjectLoaded(location, "Locations"):
+			createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
+	var spawnPoints = chunkRead["spawnPoints"]
+	for actorName in spawnPoints:
+		if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
+			createSpawnPoint(
+				actorName,
+				spawnPoints[actorName].type,
+				Vector2i(map_to_local(chunkLocation) - Vector2(32 * 24, 32 * 6) + $OverworldTileChunkTemplate.map_to_local(spawnPoints[actorName].tiles[0])),
+				spawnPoints[actorName].chance,
+				spawnPoints[actorName].maximum
+			)
 	return true
 
 func setAdjacentChunks(newAdjacentChunks: Array) -> void:
@@ -137,8 +151,7 @@ func getAdjacentChunks() -> Array:
 # The chunk's first cell on the shared template grid (the old setTiles()
 # formula's base offset for the chunk's local keys).
 func getChunkBaseCell(chunkLocation: Vector2i) -> Vector2i:
-	var origin = Vector2i(map_to_local(chunkLocation).x - (32 * 24), map_to_local(chunkLocation).y - (32 * 6))
-	return $OverworldTileChunkTemplate.local_to_map(origin)
+	return _getCoordinates().chunkToBaseCell(chunkLocation)
 
 # The chunk's tiles as shared template-grid cells (exactly the cells the
 # old setTiles() copy used to write), decoded once from the scene's baked
@@ -148,35 +161,9 @@ func getChunkCellData(chunkLocation: Vector2i) -> PackedInt32Array:
 		return chunkCellDataCache[chunkLocation]
 	var cellData = PackedInt32Array()
 	if chunkScenes.has(chunkLocation) and chunkScenes[chunkLocation] != null:
-		var baseCell = getChunkBaseCell(chunkLocation)
-		var state = chunkScenes[chunkLocation].get_state()
-		for n in range(state.get_node_count()):
-			for p in range(state.get_node_property_count(n)):
-				if state.get_node_property_name(n, p) != "layer_0/tile_data":
-					continue
-				var data: PackedInt32Array = state.get_node_property_value(n, p)
-				for i in range(0, data.size() - 2, 3):
-					var packedCoords = data[i]
-					var packedTile = data[i + 1]
-					var packedAtlas = data[i + 2]
-					var cell = baseCell + Vector2i(
-						_s16(packedCoords & 0xFFFF),
-						_s16((packedCoords >> 16) & 0xFFFF)
-					) - Vector2i(1, 1)
-					cellData.append(cell.x)
-					cellData.append(cell.y)
-					cellData.append(_s16(packedTile & 0xFFFF))
-					cellData.append(_s16((packedTile >> 16) & 0xFFFF))
-					cellData.append(_s16(packedAtlas & 0xFFFF))
-					cellData.append(_s16((packedAtlas >> 16) & 0xFFFF))
+		cellData = _getChunkReader().readCells(chunkLocation, chunkScenes[chunkLocation])
 	chunkCellDataCache[chunkLocation] = cellData
 	return cellData
-
-# Sign-extends a 16-bit packed component of the baked tile_data format.
-func _s16(v: int) -> int:
-	if v >= 0x8000:
-		return v - 0x10000
-	return v
 
 # Queues a write/erase of the chunk's cells, processed a slice per frame by
 # processCellOps(). Any already queued op for the same chunk is replaced (a
@@ -230,7 +217,7 @@ func processCellOps() -> void:
 ###################################
 
 func getChunkPath(chunkLocation: Vector2i) -> String:
-	return "res://Overworld/Overworld Chunks/#{x}#{y}.tscn".format({ "x": chunkLocation.x, "y": chunkLocation.y })
+	return WorldData.getChunkPath(chunkLocation)
 
 # Parses a chunk scene on a background thread before it is needed, so
 # first-time chunk loads don't stall a frame on disk I/O and scene parsing.
@@ -282,16 +269,6 @@ func getChunkScene(chunkLocation: Vector2i):
 		return null
 	chunkScenes[chunkLocation] = load(path)
 	return chunkScenes[chunkLocation]
-
-# The per-chunk data script (locations / spawnPoints), if the chunk scene's
-# root node has one.
-func getChunkScript(chunkScene):
-	var state = chunkScene.get_state()
-	for n in range(state.get_node_count()):
-		for p in range(state.get_node_property_count(n)):
-			if state.get_node_property_name(n, p) == "script":
-				return state.get_node_property_value(n, p)
-	return null
 
 # Loads chunks whose background parse finished after they were needed.
 func processPendingChunkLoads() -> void:
