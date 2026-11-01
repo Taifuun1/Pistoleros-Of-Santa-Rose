@@ -111,6 +111,14 @@ func focusTarget(targetId: String) -> void:
 	_selectMarker(marker, kind)
 
 
+## Shell focus handoff contract (Journal): the control that receives
+## keyboard/controller focus when the shell moves down from the tab bar into
+## this tab's content. Null means the tab has no focusable content (for example
+## the map's regeneration state), so the shell keeps its default traversal.
+func getFocusTarget() -> Control:
+	return _mapClip if _built else null
+
+
 ## Locations in image order (left to right, then top to bottom) so keyboard and
 ## controller POI cycling is predictable and independent of authoring order.
 func _buildPoiFocusOrder() -> void:

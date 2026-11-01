@@ -20,6 +20,9 @@ var closedCount := 0
 var tabOne: FakeTab
 var tabTwo: FakeTab
 var tabGuard: FakeTab
+## Every fake tab instance created by installFakeTabs(); inactive injected tabs
+## are not children of the Journal, so the test owns and frees them.
+var fakeTabs: Array = []
 
 
 class FakeTab:
@@ -61,7 +64,21 @@ func _ready() -> void:
 	await testPauseCoordinator()
 	await testSceneChangePolicy()
 	await testRealTabs()
+	await testMapControllerFocusHandoff()
 	await testSceneTreeSetup()
+
+	# Free the real/fake tabs the test owns and release the music autoload's
+	# playbacks before quitting, so the process exits without node/RID/audio
+	# leaks.
+	journal.setTabDefinitions([])
+	for tab in fakeTabs:
+		if is_instance_valid(tab):
+			tab.free()
+	fakeTabs.clear()
+	var music = get_node_or_null("/root/MusicPlayer")
+	if music != null and music.has_method("shutdown"):
+		music.shutdown()
+	await get_tree().create_timer(0.3).timeout
 
 	print("TestJournal: %d passed, %d failed" % [testsPassed, testsFailed])
 	get_tree().quit(testsFailed)
@@ -80,6 +97,7 @@ func installFakeTabs() -> void:
 	tabOne = FakeTab.new()
 	tabTwo = FakeTab.new()
 	tabGuard = FakeTab.new()
+	fakeTabs.append_array([tabOne, tabTwo, tabGuard])
 	journal.setTabDefinitions([
 		{ "id": "one", "title": "One", "instance": tabOne },
 		{ "id": "two", "title": "Two", "instance": tabTwo },
@@ -99,6 +117,17 @@ func cancelEvent() -> InputEventAction:
 	event.action = "ui_cancel"
 	event.pressed = true
 	return event
+
+
+## Routes a real input action through the viewport so focus traversal, gui_input
+## and unhandled-input paths all run as they do in game.
+func pressAction(action: String) -> void:
+	var event := InputEventAction.new()
+	event.action = action
+	event.pressed = true
+	Input.parse_input_event(event)
+	await get_tree().process_frame
+	await get_tree().process_frame
 
 
 func testLifecycle() -> void:
@@ -256,6 +285,41 @@ func testRealTabs() -> void:
 			check(tab.get_child_count() > 0, "the %s tab shows its empty/unavailable state" % tabId)
 	journal.close()
 	check(!journal.isOpen, "the real tabs close cleanly")
+
+
+## Controller/keyboard focus handoff through the real shell (Docs/System Design/
+## Journal/Overworld Map.md, iteration step 2): the tab bar hands focus down to
+## the map, D-pad pans the map instead of switching tabs, and ui_cancel backs
+## out to the tab bar before it closes the Journal.
+func testMapControllerFocusHandoff() -> void:
+	print("--- Controller focus handoff ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	journal.selectTab("map")
+	journal.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var mapTab = journal._tabInstances.get("map")
+	check(mapTab != null, "the real map tab is active for the handoff test")
+	if mapTab == null:
+		journal.close()
+		return
+	check(get_viewport().gui_get_focus_owner() == journal.tabBar, "the shell starts with tab focus")
+	check(mapTab.getFocusTarget() != null, "the map tab exposes a content focus target")
+	await pressAction("ui_down")
+	check(get_viewport().gui_get_focus_owner() == mapTab.getFocusTarget(), "D-pad down hands focus from the tab bar to the map")
+	await pressAction("MAP_ZOOM_IN")
+	var panBefore: Vector2 = mapTab._mapContent.position
+	var tabBefore: int = journal.tabBar.current_tab
+	await pressAction("ui_left")
+	check(mapTab._mapContent.position.x > panBefore.x, "D-pad pans the focused map instead of switching tabs")
+	check(journal.tabBar.current_tab == tabBefore, "panning the map does not change the selected tab")
+	await pressAction("ui_cancel")
+	check(journal.isOpen, "back from the map keeps the journal open")
+	check(get_viewport().gui_get_focus_owner() == journal.tabBar, "back returns focus to the tab bar")
+	await pressAction("ui_right")
+	check(journal.tabBar.current_tab == tabBefore + 1, "D-pad switches tabs again after focus returns")
+	await pressAction("ui_cancel")
+	check(!journal.isOpen, "closing from the tab bar still closes the journal")
 
 
 func testSceneTreeSetup() -> void:

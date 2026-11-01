@@ -112,6 +112,7 @@ func testFailureState() -> void:
 	brokenTab.refreshTab()
 	check(brokenTab.find_child("TabSprite", true, false) != null, "missing map data shows the regeneration state")
 	check(brokenTab.find_child("BaseMap", true, false) == null, "missing map data never builds a map view")
+	check(brokenTab.getFocusTarget() == null, "the regeneration state exposes no focus target")
 	brokenTab.queue_free()
 	await get_tree().process_frame
 
@@ -158,6 +159,7 @@ func testBuildAndView() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	check(tab.find_child("BaseMap", true, false) != null, "the tab builds the base map view from the manifest")
+	check(tab.getFocusTarget() == tab._mapClip, "the map tab exposes the map clip as its shell focus target")
 	var markerLayer: Control = tab.find_child("MarkerLayer", true, false)
 	check(markerLayer != null and markerLayer.get_child_count() == 4, "two POIs, one quest target and the player marker are built")
 	check(tab._locationMarkers.size() == 2 and tab._questMarkers.size() == 1, "markers resolve through the manifest")
@@ -534,6 +536,21 @@ func testPlayerPositionProvider() -> void:
 	check(overworldAutoload.spawnChunk == Vector2i(8, 12) and overworldAutoload.spawnTile == Vector2i(41, 39), "the spawn anchor tracks the snapshotted cell")
 	var reentryPlacement: Vector2 = coordinates.chunkTileToWorld(overworldAutoload.spawnChunk, overworldAutoload.spawnTile)
 	check(reentryPlacement.distance_to(coordinates.cellToWorld(Vector2i(551, 805))) < 0.01, "re-entry from the reseeded anchor places the player back at the same tile, not a default spawn")
+
+	# Off-center exit: the last-known marker keeps the exact position, while
+	# re-entry must use the containing tile rather than flooring the fraction.
+	var offCenterCell := Vector2i(550, 804)
+	var offCenterWorld: Vector2 = coordinates.cellToWorld(offCenterCell) + Vector2(0, -1)
+	var containingCell: Vector2i = coordinates._templateMap.local_to_map(coordinates._templateMap.to_local(offCenterWorld))
+	var containingAnchor: Dictionary = coordinates.cellToChunkTile(containingCell)
+	liveActor.global_position = offCenterWorld
+	overworldAutoload.registerLivePlayer(liveActor)
+	overworldAutoload.clearLivePlayer()
+	var offCenterLastKnown: Dictionary = overworldAutoload.getOverworldMapPosition()
+	check((offCenterLastKnown["world_position"] as Vector2) == offCenterWorld, "an off-center exit retains the exact last-known position")
+	check(overworldAutoload.spawnChunk == containingAnchor["chunk"] and overworldAutoload.spawnTile == containingAnchor["tile"], "an off-center exit reseeds re-entry to its containing tile, not the neighboring cell")
+	var offCenterReentry: Vector2 = coordinates.chunkTileToWorld(overworldAutoload.spawnChunk, overworldAutoload.spawnTile)
+	check(offCenterReentry.distance_to(coordinates.cellToWorld(containingCell)) < 0.01, "off-center re-entry places the player at the containing tile's center")
 	liveActor.queue_free()
 
 	# The map tab's default provider wires straight into the autoload API.

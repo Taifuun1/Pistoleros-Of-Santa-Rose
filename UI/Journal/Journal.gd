@@ -72,9 +72,13 @@ func setTabDefinitions(definitions: Array) -> void:
 	tabDefinitions = definitions
 	_tabInstances = {}
 	_activeTabId = ""
+	# Drop any focus handoff that pointed at a tab instance being replaced.
+	tabBar.focus_neighbor_bottom = NodePath()
 	for tab in tabContentHost.get_children():
 		tabContentHost.remove_child(tab)
-		tab.queue_free()
+		# Free immediately instead of queue_free(): replaced tabs must not
+		# survive as pending deletions when a test/process exits.
+		tab.free()
 	tabBar.clear_tabs()
 	for definition in tabDefinitions:
 		# Icon-only tabs: the strip never shows tab text; the tooltip carries
@@ -160,9 +164,39 @@ func showOnMap(targetId: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if !isOpen:
 		return
-	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("TOGGLE_JOURNAL"):
+	if event.is_action_pressed("TOGGLE_JOURNAL"):
 		get_viewport().set_input_as_handled()
 		close()
+		return
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		# Controller/keyboard back: focused tab content hands focus back to the
+		# tab bar first, so the next ui_cancel (or a tab change) still works.
+		if _focusIsInTabContent():
+			tabBar.grab_focus()
+			return
+		close()
+
+
+## True when keyboard/controller focus currently sits inside the active tab's
+## content instead of the shell chrome.
+func _focusIsInTabContent() -> bool:
+	var focusOwner := get_viewport().gui_get_focus_owner()
+	return focusOwner != null and tabContentHost.is_ancestor_of(focusOwner)
+
+
+## Shell focus handoff: a tab may expose getFocusTarget(); the tab bar then
+## moves down into that control, and the control moves back up to the tab bar.
+## Tabs without one keep the default traversal.
+func _wireTabFocus(tab: Control) -> void:
+	tabBar.focus_neighbor_bottom = NodePath()
+	if !tab.has_method("getFocusTarget"):
+		return
+	var target := tab.getFocusTarget() as Control
+	if target == null or !target.is_inside_tree():
+		return
+	tabBar.focus_neighbor_bottom = tabBar.get_path_to(target)
+	target.focus_neighbor_top = target.get_path_to(tabBar)
 
 
 func _onTabBarTabChanged(tab: int) -> void:
@@ -178,11 +212,14 @@ func _activateTab(tabId: String) -> void:
 	if !_hasTabId(tabId):
 		return
 	var selectionChanged := _activeTabId != tabId
+	var focusInContent := selectionChanged and _focusIsInTabContent()
 	if selectionChanged and _activeTabId != "" and _tabInstances.has(_activeTabId):
 		var previous: Control = _tabInstances[_activeTabId]
 		if previous.has_method("setTabActive"):
 			previous.setTabActive(false)
 		previous.visible = false
+	if focusInContent:
+		tabBar.grab_focus()
 	var tab := _getTabInstance(tabId)
 	if tab == null:
 		return
@@ -193,6 +230,7 @@ func _activateTab(tabId: String) -> void:
 		tab.setTabActive(true)
 	if tab.has_method("refreshTab"):
 		tab.refreshTab()
+	_wireTabFocus(tab)
 	_activeTabId = tabId
 	if selectionChanged:
 		tabChanged.emit(tabId)

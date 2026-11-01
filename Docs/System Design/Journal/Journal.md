@@ -14,7 +14,7 @@ This is a high-level design overview. Each tab is a separate feature with its ow
 
 ## Current state and dependencies
 
-- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, runtime tab, hardening, and the gameplay-aligned map orientation are implemented).
+- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The shell's keyboard/controller focus handoff is implemented too: the tab bar moves down into a tab's exposed focus target (the Map tab's map clip), and `ui_cancel` backs out to the tab bar before closing. The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, runtime tab, hardening, and the gameplay-aligned map orientation are implemented).
 - `Globals/Party.gd` already owns party members, persistent HP/injuries, money, and a basic `inventory` Array. Equipment management, stack limits, dropping, and inventory commands still need their own design.
 - `Globals/Quests.gd` currently contains only main-quest level/rarity. `Globals/Locations.gd::currentQuest` is a string used for scene selection, not a quest journal or map-target model.
 - Settings and save management do not yet have an authoritative settings/save service.
@@ -25,7 +25,8 @@ The Journal shell must not wait for every underlying feature. Tabs can show an i
 
 ## User experience
 
-- Toggle the Journal with a dedicated `TOGGLE_JOURNAL` action (suggested default: `J`). `ui_cancel` closes it or backs out of a tab's current secondary panel first.
+- Toggle the Journal with a dedicated `TOGGLE_JOURNAL` action (suggested default: `J`). `ui_cancel` backs out of a tab's focused content to the tab bar, backs out of a tab's current secondary panel, and closes the Journal only from shell chrome.
+- Keyboard/controller focus handoff: a tab may expose `getFocusTarget()`; the shell points the tab bar's down focus neighbour at it and the target's up neighbour back at the tab bar. Tabs without one keep the default traversal. The Map tab exposes its map clip, so D-pad down enters map panning and `ui_cancel` returns to tab switching.
 - The Journal opens as a modal overlay without replacing the current gameplay scene or triggering Scene Manager loading/fades.
 - The first version pauses single-player gameplay while open. Opening/closing must be idempotent and must not unpause a game that was already paused for another reason.
 - Do not open during Scene Manager transitions. Initially allow it in the Overworld and normal Locations; Cutscene, Shootout, minigame, and main-menu availability should be an explicit per-scene policy, not an accidental side effect.
@@ -136,7 +137,7 @@ Suggested order:
 - Exact scenes beyond Overworld/Locations that permit Journal access, especially Shootouts and minigames.
     - Settings menu must be available everywhere
     - If it's decided that equipment can only be managed in Towns, then Journal can be fully accessed in Shootouts, since equipment can't be changed mid-fight
-- Controller glyph/focus conventions and whether tab shortcuts should be global or remappable.
+- Controller glyph/focus conventions and whether tab shortcuts should be global or remappable. The shell's content-focus handoff is decided (tab bar ↔ `getFocusTarget()`, `ui_cancel` backs out); glyph art and global/remappable tab shortcuts remain open.
 - Which settings apply immediately versus through Apply/Revert, and the save-management flow.
     - Resolution is managed by Godot, so is there need for apply functionality? Immediate apply seems sensible
 - Whether Character shows a static portrait, rendered model, or only stats when space is limited.
