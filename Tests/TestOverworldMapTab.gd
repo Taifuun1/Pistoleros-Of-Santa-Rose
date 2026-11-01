@@ -31,13 +31,19 @@ func _ready() -> void:
 	add_child(tab)
 
 	await testFailureState()
+	await testManifestValidation()
 	await testBuildAndView()
 	await testPanZoomFit()
+	await testOverviewLod()
+	await testNonMouseInput()
 	await testRefreshAndLifecycle()
+	await testDisposalAndRebuild()
 	await testFocusTarget()
 	await testMouseDragAndFocus()
+	await testPlayerPositionProvider()
 
 	print("TestOverworldMapTab: %d passed, %d failed" % [testsPassed, testsFailed])
+	coordinates.dispose()
 	get_tree().quit(testsFailed)
 
 
@@ -53,10 +59,16 @@ func check(condition: bool, testName: String) -> void:
 ## Synthetic manifest: a tiny 2x2-chunk world with two Location anchors.
 func _makeFakeMapData() -> OverworldMapData:
 	var data := OverworldMapData.new()
+	data.format_version = OverworldMapData.FORMAT_VERSION
 	var image := Image.create(projection.imageSize.x, projection.imageSize.y, false, Image.FORMAT_RGBA8)
 	data.texture = ImageTexture.create_from_image(image)
 	data.image_size = projection.imageSize
+	var overviewImage := Image.create(projection.imageSize.x / 4, projection.imageSize.y / 4, false, Image.FORMAT_RGBA8)
+	data.overview_texture = ImageTexture.create_from_image(overviewImage)
+	data.overview_image_size = overviewImage.get_size()
+	data.map_orientation = projection.orientation
 	data.map_origin = projection.mapOrigin
+	data.pixels_per_cell = projection.pixelsPerCell
 	data.cell_min = projection.cellMin
 	data.cell_max = projection.cellMax
 	data.chunk_grid = Rect2i(0, 0, 2, 2)
@@ -101,6 +113,42 @@ func testFailureState() -> void:
 	check(brokenTab.find_child("TabSprite", true, false) != null, "missing map data shows the regeneration state")
 	check(brokenTab.find_child("BaseMap", true, false) == null, "missing map data never builds a map view")
 	brokenTab.queue_free()
+	await get_tree().process_frame
+
+
+func testManifestValidation() -> void:
+	print("--- Manifest validation ---")
+	check(tab._isMapDataValid(mapData), "the valid synthetic manifest passes validation")
+	var invalidOrigin: OverworldMapData = mapData.duplicate(true)
+	invalidOrigin.map_origin += Vector2.ONE
+	check(!tab._isMapDataValid(invalidOrigin), "a map origin that disagrees with cell bounds is rejected")
+	var invalidScale: OverworldMapData = mapData.duplicate(true)
+	invalidScale.pixels_per_cell = Vector2.ONE
+	check(!tab._isMapDataValid(invalidScale), "an incompatible pixels-per-cell value is rejected")
+	var invalidOrientation: OverworldMapData = mapData.duplicate(true)
+	invalidOrientation.map_orientation = 99
+	check(!tab._isMapDataValid(invalidOrientation), "an unknown map orientation is rejected")
+	var invalidTexture: OverworldMapData = mapData.duplicate(true)
+	invalidTexture.texture = ImageTexture.create_from_image(Image.create(2, 2, false, Image.FORMAT_RGBA8))
+	check(!tab._isMapDataValid(invalidTexture), "a texture whose size differs from image_size is rejected")
+	var invalidOverview: OverworldMapData = mapData.duplicate(true)
+	invalidOverview.overview_image_size = Vector2i(3, 3)
+	invalidOverview.overview_texture = ImageTexture.create_from_image(Image.create(3, 3, false, Image.FORMAT_RGBA8))
+	check(!tab._isMapDataValid(invalidOverview), "an overview that does not divide image_size is rejected")
+	var invalidPoi: OverworldMapData = mapData.duplicate(true)
+	invalidPoi.locations[0]["image_position"] += Vector2.ONE
+	check(!tab._isMapDataValid(invalidPoi), "a POI image position that disagrees with its cell is rejected")
+	var duplicatePoi: OverworldMapData = mapData.duplicate(true)
+	duplicatePoi.locations[1]["id"] = duplicatePoi.locations[0]["id"]
+	check(!tab._isMapDataValid(duplicatePoi), "duplicate POI ids are rejected")
+
+	# The checked-in artifact itself must satisfy the runtime contract.
+	var committedTab = MapTabScene.instantiate()
+	add_child(committedTab)
+	var committed: OverworldMapData = committedTab._loadMapData()
+	check(committed != null and committedTab._isMapDataValid(committed), "the committed generated manifest passes runtime validation")
+	check(committed != null and committed.map_orientation == OverworldMapProjection.SHIPPED_ORIENTATION, "the committed manifest records the shipped orientation")
+	committedTab.queue_free()
 	await get_tree().process_frame
 
 
@@ -163,6 +211,92 @@ func _keyEvent(keycode: int) -> InputEventKey:
 	return event
 
 
+func testOverviewLod() -> void:
+	print("--- Overview LOD ---")
+	check(mapData.overview_texture != null, "the fake manifest carries an overview")
+	tab._fitMap()
+	check(tab._baseMap.texture == mapData.overview_texture, "the generalized overview is used at fit scale")
+	check(tab._baseMap.scale.is_equal_approx(Vector2(mapData.image_size) / Vector2(mapData.overview_image_size)), "the overview is drawn in the detailed map's coordinate space")
+	tab._zoomAt(tab._mapClip.size * 0.5, 4.0)
+	check(tab._baseMap.texture == mapData.texture, "zooming in switches to the detailed map")
+	tab._fitMap()
+	check(tab._baseMap.texture == mapData.overview_texture, "fitting again switches back to the overview")
+
+
+## Step 5: keyboard and controller operation — zoom actions, POI cycling, real
+## wheel delivery, and the map filling the tab with the controls overlaid.
+func testNonMouseInput() -> void:
+	print("--- Non-mouse input ---")
+	tab.setTabActive(true)
+	await get_tree().process_frame
+	check(tab._mapClip.size.is_equal_approx(tab.size), "the map clip fills the whole tab content area")
+	var controls: Control = tab.find_child("MapControls", true, false)
+	check(controls != null and tab._mapClip.get_global_rect().encloses(controls.get_global_rect()), "the shortcut controls overlay the map instead of taking their own row")
+
+	tab._fitMap()
+	await get_tree().process_frame
+	var clipRect: Rect2 = tab._mapClip.get_global_rect()
+	var centre: Vector2 = clipRect.position + clipRect.size * 0.5
+
+	var scaleBefore: float = tab._mapScale
+	Input.parse_input_event(_wheelEvent(centre, MOUSE_BUTTON_WHEEL_UP))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._mapScale > scaleBefore, "the mouse wheel zooms the map over the base texture")
+
+	tab._fitMap()
+	scaleBefore = tab._mapScale
+	Input.parse_input_event(_keyEvent(KEY_EQUAL))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._mapScale > scaleBefore, "the zoom-in key zooms the map")
+	var zoomedIn: float = tab._mapScale
+	Input.parse_input_event(_keyEvent(KEY_MINUS))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._mapScale < zoomedIn, "the zoom-out key zooms the map")
+
+	tab._fitMap()
+	scaleBefore = tab._mapScale
+	Input.parse_input_event(_joypadEvent(JOY_BUTTON_RIGHT_SHOULDER))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._mapScale > scaleBefore, "the controller shoulder button zooms in")
+	Input.parse_input_event(_joypadEvent(JOY_BUTTON_LEFT_SHOULDER))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(is_equal_approx(tab._mapScale, tab._fitScale), "zooming out with the controller reaches fit scale")
+
+	tab._poiFocusIndex = -1
+	check(tab._poiFocusOrder.size() == mapData.locations.size(), "the POI cycle order lists every Location")
+	tab._focusRelativePoi(1)
+	check(tab._selectionPanel.visible and tab._selectionLabel.text.contains(tab._poiFocusOrder[0]), "cycling selects the first POI")
+	tab._focusRelativePoi(1)
+	check(tab._selectionLabel.text.contains(tab._poiFocusOrder[1]), "cycling advances to the next POI")
+	tab._focusRelativePoi(1)
+	check(tab._poiFocusIndex == 0, "POI cycling wraps past the last POI")
+	tab._focusRelativePoi(-1)
+	check(tab._poiFocusIndex == tab._poiFocusOrder.size() - 1, "POI cycling wraps backwards past the first POI")
+
+	tab._poiFocusIndex = -1
+	Input.parse_input_event(_keyEvent(KEY_BRACKETRIGHT))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._selectionPanel.visible and tab._selectionLabel.text.contains(tab._poiFocusOrder[0]), "the POI key cycles through the map input path")
+	Input.parse_input_event(_joypadEvent(JOY_BUTTON_Y))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._selectionLabel.text.contains(tab._poiFocusOrder[1]), "the controller button cycles POIs")
+
+	tab._mapClip.grab_focus()
+	await get_tree().process_frame
+	var focusOwner := get_viewport().gui_get_focus_owner()
+	check(focusOwner != null and focusOwner.name == "MapClip", "the map clip keeps focus while cycling POIs")
+	if focusOwner != null:
+		focusOwner.release_focus()
+	await get_tree().process_frame
+
+
 func testRefreshAndLifecycle() -> void:
 	print("--- Refresh and lifecycle ---")
 	var markerLayer: Control = tab.find_child("MarkerLayer", true, false)
@@ -207,6 +341,42 @@ func _ghostQuestMarkerProvider() -> Array:
 	return [{ "quest_id": "q3", "objective_id": "o3", "target_id": "Ghost", "icon": "quest_current" }]
 
 
+func testDisposalAndRebuild() -> void:
+	print("--- Disposal and rebuild ---")
+	var rebuildTab = MapTabScene.instantiate()
+	rebuildTab.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rebuildTab.tabIcon = preload("res://Assets/Journal/MapIcon.png")
+	rebuildTab.mapData = mapData
+	rebuildTab.positionProvider = Callable(self, "_fakePositionProvider")
+	add_child(rebuildTab)
+	rebuildTab.refreshTab()
+	rebuildTab.setTabActive(true)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var oldTimer: Timer = rebuildTab._refreshTimer
+	var oldView: Control = rebuildTab._view
+	rebuildTab._disposeView()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(!is_instance_valid(oldTimer), "disposal frees the direct-child refresh timer")
+	check(!is_instance_valid(oldView), "disposal frees the old map view")
+	check(rebuildTab._refreshTimer == null and rebuildTab._playerPulse == null, "disposal clears runtime timer and tween state")
+	rebuildTab.refreshTab()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(rebuildTab._built and rebuildTab._refreshTimer != null, "a disposed tab rebuilds with one fresh timer")
+	var rebuiltTimer: Timer = rebuildTab._refreshTimer
+	rebuildTab.mapData = null
+	rebuildTab.mapDataPath = "res://Tests/nonexistent-map-data.tres"
+	rebuildTab.refreshTab()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(!is_instance_valid(rebuiltTimer), "a later data failure also frees the rebuilt timer")
+	check(rebuildTab.find_child("TabSprite", true, false) != null, "a later data failure leaves the regeneration state")
+	rebuildTab.queue_free()
+	await get_tree().process_frame
+
+
 func testFocusTarget() -> void:
 	print("--- Show on map ---")
 	tab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
@@ -219,7 +389,16 @@ func testFocusTarget() -> void:
 	check(tab._selectionPanel != null and tab._selectionPanel.visible and tab._selectionLabel.text.contains("Alpha"), "'Show on map' selects the target marker")
 	var clipCenter: Vector2 = tab._mapClip.size * 0.5
 	var markerScreen: Vector2 = tab._mapContent.position + expectedImage * tab._mapScale
-	check(markerScreen.distance_to(clipCenter) < 260.0, "'Show on map' centers the target (within pan clamp reach)")
+	var mapSize: Vector2 = Vector2(mapData.image_size) * tab._mapScale
+	var clipSize: Vector2 = tab._mapClip.size
+	var idealPosition: Vector2 = clipCenter - expectedImage * tab._mapScale
+	var expectedPosition := Vector2(
+		clampf(idealPosition.x, minf(0.0, clipSize.x - mapSize.x), maxf(0.0, clipSize.x - mapSize.x)),
+		clampf(idealPosition.y, minf(0.0, clipSize.y - mapSize.y), maxf(0.0, clipSize.y - mapSize.y))
+	)
+	check(tab._mapContent.position.distance_to(expectedPosition) < 0.01, "'Show on map' centers the target as far as pan clamping allows")
+	check(tab._mapScale > tab._fitScale, "'Show on map' zooms in on the target")
+	check(Rect2(Vector2.ZERO, clipSize).has_point(markerScreen), "the focused marker is visible inside the map clip")
 	check(tab._questMarkers.size() == 1, "quest markers survive navigation")
 	tab.focusTarget("Ghost")
 	check(!tab._selectionLabel.text.contains("Ghost"), "unknown targets navigate nowhere without crashing")
@@ -233,6 +412,9 @@ func testMouseDragAndFocus() -> void:
 	await get_tree().process_frame
 	var clipRect: Rect2 = tab._mapClip.get_global_rect()
 	check(clipRect.size.x > 10.0 and clipRect.size.y > 10.0, "the map clip is laid out")
+	# Fit scale leaves no pan slack on the shipped 2:1 map, so pan interactions
+	# are exercised from a zoomed view like a player inspecting terrain.
+	tab._zoomAt(clipRect.size * 0.5, 4.0)
 	var dragStart: Vector2 = clipRect.position + clipRect.size * 0.5
 	var contentBefore: Vector2 = tab._mapContent.position
 	Input.parse_input_event(_mouseButtonEvent(dragStart, true))
@@ -290,3 +472,80 @@ func _mouseMotionEvent(position: Vector2, relative: Vector2) -> InputEventMouseM
 	event.relative = relative
 	event.button_mask = MOUSE_BUTTON_MASK_LEFT
 	return event
+
+
+func _wheelEvent(position: Vector2, button: MouseButton) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.position = position
+	event.global_position = position
+	event.button_index = button
+	event.pressed = true
+	return event
+
+
+func _joypadEvent(button: JoyButton) -> InputEventJoypadButton:
+	var event := InputEventJoypadButton.new()
+	event.button_index = button
+	event.pressed = true
+	return event
+
+
+## The step-6 player position provider against the real Overworld autoload:
+## spawn fallback, exact last-known retention, spawn reseeding (re-entry
+## unification), live registration, and the tab's default provider wiring.
+## Autoload state is saved and restored afterwards.
+func testPlayerPositionProvider() -> void:
+	print("--- Player position provider ---")
+	var overworldAutoload = get_tree().root.get_node_or_null("Overworld")
+	check(overworldAutoload != null, "the Overworld autoload is available in scene-run tests")
+	if overworldAutoload == null:
+		return
+	var savedChunk: Vector2i = overworldAutoload.spawnChunk
+	var savedTile: Vector2i = overworldAutoload.spawnTile
+	var savedLastKnown: Vector2 = overworldAutoload._lastKnownPosition
+	var savedHasLastKnown: bool = overworldAutoload._hasLastKnownPosition
+	var savedLiveActor = overworldAutoload._livePlayerActor
+
+	var initial: Dictionary = overworldAutoload.getOverworldMapPosition()
+	var initialExpected: Vector2 = coordinates.chunkTileToWorld(overworldAutoload.spawnChunk, overworldAutoload.spawnTile)
+	check(initial["valid"] and !initial["is_live"], "with no exact state yet the provider falls back to the spawn anchor")
+	check((initial["world_position"] as Vector2).distance_to(initialExpected) < 0.01, "the fallback is the spawn anchor, never (0,0)")
+
+	var lazyspringsWorld: Vector2 = coordinates.cellToWorld(Vector2i(530, 1122))
+	overworldAutoload.storeLastKnownPlayerPosition(lazyspringsWorld)
+	var stored: Dictionary = overworldAutoload.getOverworldMapPosition()
+	check(stored["valid"] and !stored["is_live"] and (stored["world_position"] as Vector2).distance_to(lazyspringsWorld) < 0.01, "a stored position is returned exactly as last-known")
+	check(overworldAutoload.spawnChunk == Vector2i(8, 17) and overworldAutoload.spawnTile == Vector2i(20, 36), "storing reseeds the spawn anchor to the stored position's chunk/tile")
+
+	var liveActor := Node2D.new()
+	liveActor.name = "FakePlayerActor"
+	add_child(liveActor)
+	liveActor.global_position = coordinates.cellToWorld(Vector2i(550, 804))
+	overworldAutoload.registerLivePlayer(liveActor)
+	var live: Dictionary = overworldAutoload.getOverworldMapPosition()
+	check(live["valid"] and live["is_live"] and (live["world_position"] as Vector2) == liveActor.global_position, "a registered actor provides the live position")
+	liveActor.global_position = coordinates.cellToWorld(Vector2i(551, 805))
+	var liveMoved: Dictionary = overworldAutoload.getOverworldMapPosition()
+	check((liveMoved["world_position"] as Vector2) == liveActor.global_position, "the live position follows the actor")
+
+	overworldAutoload.clearLivePlayer()
+	var lastKnown: Dictionary = overworldAutoload.getOverworldMapPosition()
+	check(lastKnown["valid"] and !lastKnown["is_live"] and (lastKnown["world_position"] as Vector2) == liveActor.global_position, "clearing the live player snapshots its exact final position")
+	check(overworldAutoload.spawnChunk == Vector2i(8, 12) and overworldAutoload.spawnTile == Vector2i(41, 39), "the spawn anchor tracks the snapshotted cell")
+	var reentryPlacement: Vector2 = coordinates.chunkTileToWorld(overworldAutoload.spawnChunk, overworldAutoload.spawnTile)
+	check(reentryPlacement.distance_to(coordinates.cellToWorld(Vector2i(551, 805))) < 0.01, "re-entry from the reseeded anchor places the player back at the same tile, not a default spawn")
+	liveActor.queue_free()
+
+	# The map tab's default provider wires straight into the autoload API.
+	tab.positionProvider = Callable()
+	tab._refreshPlayerMarker()
+	check(tab._playerMarker != null and tab._playerMarker.visible, "the default provider shows the player marker")
+	var expectedImage: Vector2 = projection.cellFractionToImage(coordinates.worldToCellFraction(overworldAutoload.getOverworldMapPosition()["world_position"]))
+	check((tab._playerMarker.get_meta("image_position") as Vector2).distance_to(expectedImage) < 0.01, "the default provider's marker projects through the shared pipeline")
+
+	overworldAutoload.spawnChunk = savedChunk
+	overworldAutoload.spawnTile = savedTile
+	overworldAutoload._lastKnownPosition = savedLastKnown
+	overworldAutoload._hasLastKnownPosition = savedHasLastKnown
+	overworldAutoload._livePlayerActor = savedLiveActor
+	tab.positionProvider = Callable(self, "_fakePositionProvider")

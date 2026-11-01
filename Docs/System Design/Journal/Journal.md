@@ -14,7 +14,7 @@ This is a high-level design overview. Each tab is a separate feature with its ow
 
 ## Current state and dependencies
 
-- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, and runtime tab are implemented through its step 5).
+- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, runtime tab, hardening, and the gameplay-aligned map orientation are implemented).
 - `Globals/Party.gd` already owns party members, persistent HP/injuries, money, and a basic `inventory` Array. Equipment management, stack limits, dropping, and inventory commands still need their own design.
 - `Globals/Quests.gd` currently contains only main-quest level/rarity. `Globals/Locations.gd::currentQuest` is a string used for scene selection, not a quest journal or map-target model.
 - Settings and save management do not yet have an authoritative settings/save service.

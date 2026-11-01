@@ -63,3 +63,15 @@ Markdown file for listing first-iteration features.
         - Store equipment from inventory for later use
     - Newspaper office
         - Find info on enemy parties in the current Zone, and tips for Shootouts
+- Generated map rework and iteration
+    - Larger areas
+    - Fix apple pie pathfinding test not supposed to be there
+    - Placemenet bug where chunk is changed and the player is instantly thrown to the next chunk?
+    - Add minigames for herb picking
+    - Add flavour and variety to chunks
+        - Use bushes or empty tiles instead of just trees
+        - Add more flowers
+        - Add dynamic animal spawning
+        - Record the chunk vegetation to memory
+    - Make the tight paths more visible, wider, and generally more passable
+    - Map and map discovery as new chunks are explored

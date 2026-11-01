@@ -47,8 +47,9 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `TestShootoutTurnTiming` | `Shootout/Shootout.tscn` (scene-run) | Turn cleanup is immediate; next-actor hand-off waits for the between-act pause |
 | `TestShootoutUI` | `Shootout/UI/TurnOrderStrip.gd`, `ShootoutUI.tscn` | Turn order strip rendering, grey-out reasons for acts, armed-act selection tint, reposition picker states, scene wiring, acts row icons |
 | `TestHPIndicator` | `Nodes/HP Indicator/HPIndicator.tscn` | World-space HP bar fill clipping, low-HP tint |
-| `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, sizing to the frame's visible (opaque) body with raw-frame fallback, FEET/BODY coverage modes, re-measure on animation change, sprite re-parenting, scene-created shadows |
+| `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, sizing to the frame's visible (opaque) body with raw-frame fallback, HORIZONTAL/DIAGONAL/VERTICAL coverage geometry, re-measure on animation and horizontal-flip changes, sprite re-parenting, scene-created shadows |
 | `TestMusicPlayer` | `Globals/MusicPlayer.gd` | Playback, tail fades, crossfades, full-volume start from silence, push/pop stack, zone/location/encounter/cutscene decisions |
+| `TestOverworldChunkStream` | `Overworld/OverworldChunkStreamCache.gd` (+ `Overworld.gd` placement) | Per-chunk queue replacement/drain, budgeted partial writes with resume offsets, the queued erase of an unloaded chunk, the shared unload rule, cache bounds over 120 crossings, and the shared-anchor collision diamond |
 
 ### In-tree tests
 
@@ -61,16 +62,15 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `RobbingTest` | `Minigames/Gold Rush/Robbing.gd` | Simulated clicks, scoring, despawn, end condition |
 | `SceneManagerTest` | `Nodes/SceneManager/SceneManager.gd` | Scene switching, transition guard, fade state |
 
-**Rough coverage profile:** the Shootout simulation core (turns, targeting, acts, damage, effects, cylinders, rodeos, AI, encounters, loot, injury) is well covered by fast headless fakes. Presentation-adjacent logic (sequencer, focus, shadows, HP indicators, music) is covered at the unit level. Everything that is mostly *scene, input or asset plumbing* — overworld streaming, cutscenes, minigames, UI widgets, dialogue/events — is thin or untested.
+**Rough coverage profile:** the Shootout simulation core (turns, targeting, acts, damage, effects, cylinders, rodeos, AI, encounters, loot, injury) is well covered by fast headless fakes. Presentation-adjacent logic (sequencer, focus, shadows, HP indicators, music) is covered at the unit level. Overworld streaming's pure cache/queue/eviction logic is covered by `TestOverworldChunkStream`; everything that is mostly *scene, input or asset plumbing* — the streaming scene wiring, cutscenes, minigames, UI widgets, dialogue/events — is thin or untested.
 
 ## Gaps, prioritized
 
-### 1. Overworld chunk streaming (`Overworld/Overworld.gd`, ~420 lines) — highest value
-The most recently reworked, most concurrency-heavy logic in the game (background thread scene parsing, `chunkScenes` cache, `cellOpQueue` with a per-frame budget, `pendingChunkLoads` retries, merged TileMapLayer cell writes). Bugs here are frame stalls and invisible tiles — exactly the class of regressions that reappear. Much of it is plain data manipulation and is testable headlessly if the tile-write step is stubbed:
+### 1. Overworld chunk streaming (`Overworld/Overworld.gd` + `OverworldChunkStreamCache.gd`) — highest value
+The most recently reworked, most concurrency-heavy logic in the game (background thread scene parsing, `chunkScenes` cache, `cellOpQueue` with a per-frame budget, `pendingChunkLoads` retries, merged TileMapLayer cell writes). Bugs here are frame stalls and invisible tiles — exactly the class of regressions that reappear. The cache, queue, eviction and unload-rule bookkeeping now live in `OverworldChunkStreamCache.gd` and are covered by `TestOverworldChunkStream.gd`; what is still untested there:
 - cache fill/invalidation and the "no scene file → null cache entry" path,
-- adjacency/chunk bookkeeping (`getAdjacentChunks`, `setAdjacentChunks`, faraway-object cleanup),
-- `cellOpQueue` budgeting: N writes spread over frames, erase-before-write ordering,
-- retry semantics when a chunk is requested while its scene is still parsing.
+- the real background-parse round trip (`requestChunkScene` → `pollChunkScenes`) and retry semantics when a chunk is requested while its scene is still parsing,
+- `Overworld.gd`'s own crossing orchestration (`setAdjacentChunks`, `processPendingChunkLoads`, `removeFarawayObjects`) — the pure decision (`isKept`) is tested, the scene-level wiring is not.
 `Docs/System Design/Overworld Spawns.md` already plans `OverworldSpawnpoint` rework — testing the spawn-point path now would de-risk that.
 
 ### 2. Overworld event triggering (`Globals/OverworldEvents.gd`)
@@ -110,7 +110,7 @@ All small, most pure-ish, all untested: `UI/Dialog/Dialog.gd`, `UI/Popup/Popup.g
 
 ## Suggested next steps
 1. Wire `Tests/RunAll.gd` into the workflow (run it before pushing / in CI).
-2. Extract the pure-logic parts of `Overworld/Overworld.gd` (cache, queue, adjacency) into a testable seam and add the first overworld test.
+2. ~~Extract the pure-logic parts of `Overworld/Overworld.gd` (cache, queue, adjacency) into a testable seam and add the first overworld test.~~ Done: `Overworld/OverworldChunkStreamCache.gd` + `Tests/TestOverworldChunkStream.gd`. Next in that vein: the background-parse round trip and the scene-level crossing orchestration.
 3. Add an OverworldEvents trigger test with an injected RNG.
 4. Port the `RobbingTest` simulation pattern to Bear Hunt scoring.
 5. Add a data-lint test pass over cutscene data and music/animation references.

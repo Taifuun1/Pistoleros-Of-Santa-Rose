@@ -23,6 +23,7 @@ func runTests() -> void:
 	await testUnknownSceneKey()
 	await testTransitionGuard()
 	await testFadeStateAfterTransition()
+	await testOverworldPlayerProvider()
 
 
 func check(condition: bool, testName: String) -> void:
@@ -70,3 +71,29 @@ func testFadeStateAfterTransition() -> void:
 	check(fadeRect.modulate.a == 0.0, "fade rect is transparent after a transition")
 	check(fadeRect.mouse_filter == Control.MOUSE_FILTER_IGNORE, "fade rect ignores mouse after a transition")
 	check(!sceneManager.get_node("TransitionLayer/LoadingScreen").visible, "loading screen stays hidden for a fast load")
+
+
+## Live/last-known player state (Docs/System Design/Journal/Overworld Map.md,
+## player position provider): the running Overworld registers the exact live
+## position, and destroying it retains that exact position for the Journal map
+## and re-entry seeding instead of resetting to a default spawn.
+func testOverworldPlayerProvider() -> void:
+	sceneManager.change_scene("overworld")
+	await sceneManager.scene_changed
+	# The Overworld scene initializes from its first _process frame.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var livePosition: Dictionary = Overworld.getOverworldMapPosition()
+	check(livePosition["valid"] and livePosition["is_live"], "the running Overworld provides a live player position")
+	var playerActor = sceneManager.get_current_scene().get_node_or_null("Actors/PlayerOverworldActor")
+	check(playerActor != null and (livePosition["world_position"] as Vector2) == playerActor.global_position, "the live position is the player actor's exact position")
+	var coordinates := OverworldCoordinates.makeHeadless()
+	var expectedPlacement: Vector2 = coordinates.chunkTileToWorld(Overworld.spawnChunk, Overworld.spawnTile)
+	check(playerActor != null and playerActor.global_position.distance_to(expectedPlacement) < 0.001, "the player is placed through the shared chunkTileToWorld pipeline")
+	coordinates.dispose()
+
+	sceneManager.change_scene("main_menu")
+	await sceneManager.scene_changed
+	var lastKnownPosition: Dictionary = Overworld.getOverworldMapPosition()
+	check(lastKnownPosition["valid"] and !lastKnownPosition["is_live"], "destroying the Overworld switches the provider to last-known")
+	check((lastKnownPosition["world_position"] as Vector2) == (livePosition["world_position"] as Vector2), "the last-known position is the exact pre-exit position, not a default spawn")
