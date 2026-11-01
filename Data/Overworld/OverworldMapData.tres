@@ -16,7 +16,7 @@ overview_image_size = Vector2i(192, 384)
 chunk_grid = Rect2i(0, 0, 12, 24)
 cell_min = Vector2i(-2, -2)
 cell_max = Vector2i(765, 1533)
-source_fingerprint = "789e85cc191ed65dce610965f88cb8e7"
+source_fingerprint = "37f1216ea41ec555932de18c1edc05e1"
 locations = Array[Dictionary]([{
 "cell": Vector2i(69, 1434),
 "chunk": Vector2i(1, 22),

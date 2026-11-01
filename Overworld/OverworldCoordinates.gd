@@ -86,32 +86,53 @@ func cellToWorld(cell: Vector2i) -> Vector2:
 	return _templateMap.map_to_local(cell)
 
 
-## Continuous cell coordinates for a world position (sub-cell motion). The
-## integer cell comes from the real map transform and the fraction is solved
-## on that cell's actual u/v basis, so cell centers round-trip exactly. The
-## staggered v axis alternates per row, so fractions are exact within a cell
-## and may wobble a fraction of a cell on row crossings.
+## The shared cell containing a world position through the tile map's real
+## transform. Re-entry reseeds from this cell; never floor a continuous
+## fraction to recover it.
+func worldToCell(worldPosition: Vector2) -> Vector2i:
+	return _templateMap.local_to_map(_templateMap.to_local(worldPosition))
+
+
+## Exact world position as its containing cell plus the offset on that cell's
+## own u/v basis: { "cell": Vector2i, "fraction": Vector2 }. The staggered grid's
+## per-cell parallelograms overlap, so this pair (not a packed Vector2) is the
+## invertible contract.
+func worldToCellAndFraction(worldPosition: Vector2) -> Dictionary:
+	var local := _templateMap.to_local(worldPosition)
+	var cell := _templateMap.local_to_map(local)
+	return { "cell": cell, "fraction": _localToFraction(cell, local) }
+
+
+## Inverse of worldToCellAndFraction, on the given cell's own axes.
+func cellAndFractionToWorld(cell: Vector2i, fraction: Vector2) -> Vector2:
+	var axes := _cellAxes(cell)
+	var uAxis: Vector2 = axes[1]
+	var vAxis: Vector2 = axes[2]
+	return _templateMap.to_global(axes[0] + uAxis * fraction.x + vAxis * fraction.y)
+
+
+## Continuous projection coordinate for a world position (sub-cell marker
+## motion): the containing cell plus its local offset. Projection is affine, so
+## this value is safe to hand to OverworldMapProjection, but it is not
+## invertible on its own — use worldToCellAndFraction() for exact conversion.
 func worldToCellFraction(worldPosition: Vector2) -> Vector2:
 	var local := _templateMap.to_local(worldPosition)
 	var cell := _templateMap.local_to_map(local)
+	return Vector2(cell) + _localToFraction(cell, local)
+
+
+## Position within its containing cell expressed on that cell's u/v basis.
+func _localToFraction(cell: Vector2i, localPosition: Vector2) -> Vector2:
 	var axes := _cellAxes(cell)
 	var center: Vector2 = axes[0]
 	var uAxis: Vector2 = axes[1]
 	var vAxis: Vector2 = axes[2]
-	var delta: Vector2 = local - center
+	var delta: Vector2 = localPosition - center
 	var determinant := uAxis.x * vAxis.y - uAxis.y * vAxis.x
-	var fractionU: float = (delta.x * vAxis.y - delta.y * vAxis.x) / determinant
-	var fractionV: float = (uAxis.x * delta.y - uAxis.y * delta.x) / determinant
-	return Vector2(cell) + Vector2(fractionU, fractionV)
-
-
-func cellFractionToWorld(cellFraction: Vector2) -> Vector2:
-	var cell := Vector2i(floori(cellFraction.x), floori(cellFraction.y))
-	var axes := _cellAxes(cell)
-	var uAxis: Vector2 = axes[1]
-	var vAxis: Vector2 = axes[2]
-	var offset := uAxis * (cellFraction.x - cell.x) + vAxis * (cellFraction.y - cell.y)
-	return _templateMap.to_global(axes[0] + offset)
+	return Vector2(
+		(delta.x * vAxis.y - delta.y * vAxis.x) / determinant,
+		(uAxis.x * delta.y - uAxis.y * delta.x) / determinant
+	)
 
 
 func _cellAxes(cell: Vector2i) -> Array:

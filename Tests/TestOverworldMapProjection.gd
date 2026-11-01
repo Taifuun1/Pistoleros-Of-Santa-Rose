@@ -72,7 +72,9 @@ func _run() -> void:
 		_check(world.distance_to(coordinates.cellToWorld(cell)) < 0.001, "chunkTileToWorld agrees with cellToWorld for {chunk}/{tile}".format({ "chunk": chunk, "tile": tile }))
 		var fraction := coordinates.worldToCellFraction(world)
 		_check(fraction.distance_to(Vector2(cell)) < 0.001, "worldToCellFraction round-trips the {chunk}/{tile} center".format({ "chunk": chunk, "tile": tile }))
-		_check(coordinates.cellFractionToWorld(fraction).distance_to(world) < 0.001, "cellFractionToWorld round-trips the {chunk}/{tile} center".format({ "chunk": chunk, "tile": tile }))
+		var pair: Dictionary = coordinates.worldToCellAndFraction(world)
+		_check(pair["cell"] == cell and (pair["fraction"] as Vector2).length() < 0.001, "worldToCellAndFraction round-trips the {chunk}/{tile} center".format({ "chunk": chunk, "tile": tile }))
+		_check(coordinates.cellAndFractionToWorld(pair["cell"], pair["fraction"]).distance_to(world) < 0.001, "cellAndFractionToWorld round-trips the {chunk}/{tile} center".format({ "chunk": chunk, "tile": tile }))
 	var motionCell := Vector2i(530, 1122)
 	var motionCenter := coordinates.cellToWorld(motionCell)
 	var quarterStep := motionCenter + (coordinates.cellToWorld(motionCell + Vector2i(1, 0)) - motionCenter) * 0.25
@@ -81,6 +83,37 @@ func _run() -> void:
 	for negativeCell in [Vector2i(-1, -1), Vector2i(-2, 0), Vector2i(0, -2), Vector2i(-70, 900)]:
 		var negativeWorld := coordinates.cellToWorld(negativeCell)
 		_check(coordinates.worldToCellFraction(negativeWorld).distance_to(Vector2(negativeCell)) < 0.001, "negative cell {cell} round-trips".format({ "cell": negativeCell }))
+
+	print("\n--- Signed fractional round-trips and containing cells ---")
+	# Signed offsets in every direction, exact axis-half boundaries and offsets
+	# that cross into the next row/column, on both staggered row parities.
+	var signedOffsets := [
+		Vector2(0, -1), Vector2(0, 1), Vector2(-1, 0), Vector2(1, 0),
+		Vector2(-3.2, 0), Vector2(3.2, 0), Vector2(0, -3.2), Vector2(0, 3.2),
+		Vector2(-5, 1), Vector2(5, -1), Vector2(-6, -3), Vector2(6, 3),
+		Vector2(-12, 0), Vector2(12, 0), Vector2(0, -7), Vector2(0, 7),
+	]
+	var parityCells := [Vector2i(550, 804), Vector2i(551, 805), Vector2i(530, 1122), Vector2i(-2, -2), Vector2i(765, 1533)]
+	var containingCellsOk := true
+	var signedRoundTripsOk := true
+	var numericFractionsOk := true
+	for cell in parityCells:
+		var center := coordinates.cellToWorld(cell)
+		for offset in signedOffsets:
+			var world: Vector2 = center + offset
+			var expectedCell: Vector2i = coordinates._templateMap.local_to_map(coordinates._templateMap.to_local(world))
+			if coordinates.worldToCell(world) != expectedCell:
+				containingCellsOk = false
+			var pair: Dictionary = coordinates.worldToCellAndFraction(world)
+			if pair["cell"] != expectedCell:
+				containingCellsOk = false
+			if coordinates.cellAndFractionToWorld(pair["cell"], pair["fraction"]).distance_to(world) > 0.001:
+				signedRoundTripsOk = false
+			if coordinates.worldToCellFraction(world).distance_to(Vector2(pair["cell"]) + (pair["fraction"] as Vector2)) > 0.001:
+				numericFractionsOk = false
+	_check(containingCellsOk, "worldToCell and worldToCellAndFraction return the tile map's containing cell for signed offsets on both row parities")
+	_check(signedRoundTripsOk, "signed ±u/±v world positions round-trip exactly through the cell+fraction contract")
+	_check(numericFractionsOk, "worldToCellFraction stays consistent with the exact cell+fraction pair")
 
 	print("\n--- Projection: both orientations ---")
 	_check(projection.orientation == OverworldMapProjection.SHIPPED_ORIENTATION, "cellForGrid defaults to the shipped orientation")

@@ -41,9 +41,7 @@ func storeLastKnownPlayerPosition(worldPosition: Vector2) -> void:
 	_lastKnownPosition = worldPosition
 	_hasLastKnownPosition = true
 	var coordinates := _getCoordinates()
-	var fraction := coordinates.worldToCellFraction(worldPosition)
-	var cell := Vector2i(floori(fraction.x), floori(fraction.y))
-	var chunkTile := coordinates.cellToChunkTile(cell)
+	var chunkTile := coordinates.cellToChunkTile(coordinates.worldToCell(worldPosition))
 	spawnChunk = chunkTile["chunk"]
 	spawnTile = chunkTile["tile"]
 
