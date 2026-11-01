@@ -3,8 +3,8 @@ extends SceneTree
 ## Headless validation for actor drop shadows (Nodes/Actor Shadow/ActorShadow.gd):
 ## the ellipse sits on the sprite's drawn bottom line, sizes to the frame's
 ## visible body (opaque pixels, falling back to the raw frame when its pixels
-## are unreadable) and re-measures on animation changes; scene-created shadows
-## auto-find their sprite sibling.
+## are unreadable) and re-measures on animation and horizontal-flip changes;
+## scene-created shadows auto-find their sprite sibling.
 ## Run with: godot --headless --script res://Tests/TestActorShadow.gd
 
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
@@ -41,7 +41,8 @@ func _run() -> void:
 	_test_sprite2d_hframes_geometry()
 	_test_padded_frame_sizes_to_visible_body()
 	_test_atlas_frame_sizes_to_visible_body()
-	_test_body_coverage_covers_whole_sprite()
+	_test_directional_coverage_geometry()
+	await _test_flip_h_mirrors_visible_body()
 	_test_location_actor_scenes_get_shadows()
 
 	if failures == 0:
@@ -191,10 +192,9 @@ func _test_atlas_frame_sizes_to_visible_body() -> void:
 	actor.free()
 
 
-## BODY coverage (the wagon's diagonal moves): the ellipse spans the whole
-## visible body and centers on it, and switching back to FEET restores the
-## feet-line geometry.
-func _test_body_coverage_covers_whole_sprite() -> void:
+## The wagon's directional modes add their finalized padding around the
+## visible body and anchor at their own offsets below its bottom line.
+func _test_directional_coverage_geometry() -> void:
 	var actor = Node2D.new()
 	var sprite = Sprite2D.new()
 	var bodyRect = Rect2i(4, 2, 8, 22)
@@ -203,19 +203,72 @@ func _test_body_coverage_covers_whole_sprite() -> void:
 	root.add_child(actor)
 	ShadowScript.attachTo(actor)
 	var shadow = _findShadow(actor)
-	_check(shadow != null, "a BODY-coverage sprite still gets a shadow")
+	_check(shadow != null, "a directionally covered sprite still gets a shadow")
 	if shadow == null:
 		return
-	shadow.coverage = ShadowScript.Coverage.BODY
-	_check(shadow.shadowSize.is_equal_approx(Vector2(bodyRect.size.x, bodyRect.size.y)),
-		"the BODY shadow spans the whole visible body (got %s)" % shadow.shadowSize)
-	var expectedCenter = Vector2(-12 + bodyRect.position.x + bodyRect.size.x / 2.0,
-		-12 + bodyRect.position.y + bodyRect.size.y / 2.0)
-	_check(shadow.position.is_equal_approx(expectedCenter),
-		"the BODY shadow centers on the body (got %s, want %s)" % [shadow.position, expectedCenter])
-	shadow.coverage = ShadowScript.Coverage.FEET
+	var bodyCenterX = -12.0 + bodyRect.position.x + bodyRect.size.x / 2.0
+	var bodyBottomY = -12.0 + bodyRect.position.y + bodyRect.size.y
+	var proportionalLift = bodyRect.size.y * ShadowScript.FEET_LIFT_RATIO
+
+	shadow.coverage = ShadowScript.Coverage.DIAGONAL
+	var diagonalSize = Vector2(
+		maxf(2.0, bodyRect.size.x * ShadowScript.WIDTH_RATIO + 2.0),
+		maxf(1.0, bodyRect.size.y * ShadowScript.HEIGHT_RATIO + 6.0)
+	)
+	_check(shadow.shadowSize.is_equal_approx(diagonalSize),
+		"the DIAGONAL shadow applies its directional padding (got %s, want %s)" % [shadow.shadowSize, diagonalSize])
+	var diagonalPosition = Vector2(bodyCenterX, bodyBottomY - proportionalLift - 4.0)
+	_check(shadow.position.is_equal_approx(diagonalPosition),
+		"the DIAGONAL shadow uses its finalized bottom-line offset (got %s, want %s)" % [shadow.position, diagonalPosition])
+
+	shadow.coverage = ShadowScript.Coverage.VERTICAL
+	var verticalSize = Vector2(
+		maxf(2.0, bodyRect.size.x * ShadowScript.WIDTH_RATIO + 5.0),
+		maxf(1.0, bodyRect.size.y * ShadowScript.HEIGHT_RATIO + 6.0)
+	)
+	_check(shadow.shadowSize.is_equal_approx(verticalSize),
+		"the VERTICAL shadow applies its directional padding (got %s, want %s)" % [shadow.shadowSize, verticalSize])
+	var verticalPosition = Vector2(bodyCenterX, bodyBottomY - proportionalLift - 2.0)
+	_check(shadow.position.is_equal_approx(verticalPosition),
+		"the VERTICAL shadow uses its finalized bottom-line offset (got %s, want %s)" % [shadow.position, verticalPosition])
+
+	shadow.coverage = ShadowScript.Coverage.HORIZONTAL
 	_check(is_equal_approx(shadow.shadowSize.x, expectedWidth(bodyRect.size.x)),
-		"switching back to FEET restores the feet ellipse width (got %f)" % shadow.shadowSize.x)
+		"switching back to HORIZONTAL restores the feet ellipse width (got %f)" % shadow.shadowSize.x)
+	var horizontalPosition = Vector2(bodyCenterX, bodyBottomY - expectedLift(bodyRect.size.y))
+	_check(shadow.position.is_equal_approx(horizontalPosition),
+		"switching back to HORIZONTAL restores the feet-line position (got %s, want %s)" % [shadow.position, horizontalPosition])
+	actor.free()
+
+
+## Flipping the sprite mirrors its visible body inside the frame. The shadow
+## must follow even when the animation and frame stay unchanged.
+func _test_flip_h_mirrors_visible_body() -> void:
+	var actor = Node2D.new()
+	var sprite = Sprite2D.new()
+	var bodyRect = Rect2i(3, 2, 8, 20)
+	sprite.texture = makeBodyTexture(24, 24, bodyRect)
+	actor.add_child(sprite)
+	root.add_child(actor)
+	ShadowScript.attachTo(actor)
+	var shadow = _findShadow(actor)
+	_check(shadow != null, "a direction-changing sprite still gets a shadow")
+	if shadow == null:
+		return
+	var rightCenterX = -12.0 + bodyRect.position.x + bodyRect.size.x / 2.0
+	var leftCenterX = -rightCenterX
+	_check(is_equal_approx(shadow.position.x, rightCenterX),
+		"the unflipped shadow centers on the visible body (got %f, want %f)" % [shadow.position.x, rightCenterX])
+	sprite.flip_h = true
+	await process_frame
+	await process_frame
+	_check(is_equal_approx(shadow.position.x, leftCenterX),
+		"flipping left immediately mirrors the shadow onto the visible body (got %f, want %f)" % [shadow.position.x, leftCenterX])
+	sprite.flip_h = false
+	await process_frame
+	await process_frame
+	_check(is_equal_approx(shadow.position.x, rightCenterX),
+		"flipping right restores the shadow without a frame change (got %f, want %f)" % [shadow.position.x, rightCenterX])
 	actor.free()
 
 

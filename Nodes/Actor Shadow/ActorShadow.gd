@@ -39,14 +39,9 @@ const SEGMENTS = 16
 const OPAQUE_RECT_CACHE_LIMIT = 256
 
 enum Coverage {
-	## Thin ellipse on the feet line — side/front views of a standing actor.
-	FEET,
-	## Full ellipse spanning the whole visible body, centered on it — for
-	## sprites whose ground footprint covers the entire drawn body, e.g. the
-	## overworld wagon seen diagonally (Move Up Side / Move Down Side): there
-	## the thin feet ellipse sits under one corner of the wagon and the rest
-	## of the sprite hangs over bare ground.
-	BODY,
+	HORIZONTAL,
+	DIAGONAL,
+	VERTICAL,
 }
 
 static var opaqueRectCache = {}
@@ -54,7 +49,8 @@ static var opaqueRectCache = {}
 var sprite = null
 var shadowSize = Vector2.ZERO
 var attached = false
-var coverage = Coverage.FEET: set = setCoverage
+var measuredFlipH = false
+var coverage = Coverage.HORIZONTAL: set = setCoverage
 
 
 func setCoverage(newCoverage: Coverage) -> void:
@@ -91,8 +87,8 @@ static func findSprite(node: Node) -> Node:
 
 
 ## The shadow previously attached under container's sprite, or null. Owners
-## use this to retune their shadow at runtime (e.g. the wagon switching to
-## BODY coverage for its diagonal-move animations).
+## use this to retune their shadow at runtime (e.g. the wagon selecting its
+## directional coverage for each move animation).
 static func findShadow(container: Node) -> Node:
 	var spriteNode = findSprite(container)
 	if spriteNode == null:
@@ -148,23 +144,41 @@ func _attach() -> void:
 		remeasure()
 
 
+## Sprite2D.flip_h only changes how the sprite's own texture is drawn: it does
+## not transform children or emit frame_changed/animation_changed. Watch it so
+## the child shadow follows direction changes even on a stationary frame.
+func _process(_delta: float) -> void:
+	if sprite != null and sprite.flip_h != measuredFlipH:
+		remeasure()
+
+
 ## Recomputes the ellipse size and the feet position from the sprite's current
 ## frame; keeps the last known values when a frame briefly has no texture.
 ## The shadow is parented to the sprite, so its position is sprite-local.
 func remeasure() -> void:
 	if sprite == null:
 		return
+	measuredFlipH = sprite.flip_h
 	var drawnSize = spriteDrawnSize()
 	if drawnSize == Vector2.ZERO:
 		return
 	var bodyRect = spriteBodyRect()
 	if bodyRect.size == Vector2.ZERO:
 		return
-	if coverage == Coverage.BODY:
-		# Cover the whole visible body: an ellipse as large as the body rect,
-		# centered on it (the sprite's own pixels draw over the shadow).
-		shadowSize = Vector2(maxf(2.0, bodyRect.size.x), maxf(1.0, bodyRect.size.y))
-		position = bodyRect.position + bodyRect.size / 2.0
+	if coverage == Coverage.DIAGONAL:
+		shadowSize = Vector2(maxf(2.0, bodyRect.size.x * WIDTH_RATIO + 2), maxf(1.0, bodyRect.size.y * HEIGHT_RATIO + 6))
+		position = Vector2(
+			bodyRect.position.x + bodyRect.size.x / 2.0,
+			bodyRect.position.y + bodyRect.size.y - bodyRect.size.y * FEET_LIFT_RATIO - 4
+		)
+		queue_redraw()
+		return
+	if coverage == Coverage.VERTICAL:
+		shadowSize = Vector2(maxf(2.0, bodyRect.size.x * WIDTH_RATIO + 3), maxf(1.0, bodyRect.size.y * HEIGHT_RATIO + 6))
+		position = Vector2(
+			bodyRect.position.x + bodyRect.size.x / 2.0,
+			bodyRect.position.y + bodyRect.size.y - bodyRect.size.y * FEET_LIFT_RATIO - 3
+		)
 		queue_redraw()
 		return
 	shadowSize = Vector2(
@@ -209,6 +223,8 @@ func spriteBodyRect() -> Rect2:
 	var bodyRect = spriteOpaqueRect()
 	if bodyRect.size == Vector2.ZERO:
 		bodyRect = Rect2(Vector2.ZERO, frame.rect.size)
+	if sprite.flip_h:
+		bodyRect.position.x = frame.rect.size.x - bodyRect.end.x
 	var topLeft = sprite.offset
 	if sprite.centered:
 		topLeft -= Vector2(frame.rect.size) / 2

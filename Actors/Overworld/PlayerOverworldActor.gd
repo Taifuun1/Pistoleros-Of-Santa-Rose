@@ -4,12 +4,12 @@ const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 var _previous_position: Vector2 = Vector2.ZERO
 
-## Diagonal movement shows the wagon from above at an angle: its ground
-## footprint covers the whole sprite, so the shadow switches from the thin
-## feet ellipse to a full-body ellipse (ActorShadow.Coverage.BODY). Straight
-## moves keep the feet ellipse. Stopping keeps the last animation's frame, so
-## the coverage only changes when a new animation starts.
-const BODY_SHADOW_ANIMATIONS = ["Move Up Side", "Move Down Side"]
+## Each wagon view has its own ground footprint: diagonal moves use DIAGONAL
+## coverage, straight vertical moves use VERTICAL, and horizontal moves keep
+## the default HORIZONTAL feet ellipse. Stopping keeps the last animation's
+## frame, so the coverage only changes when a new animation starts.
+const BODY_SHADOW_ANIMATIONS_DIAGONAL = ["Move Up Side", "Move Down Side"]
+const BODY_SHADOW_ANIMATIONS_VERTICAL = ["Move Up", "Move Down"]
 
 
 func _ready():
@@ -74,16 +74,17 @@ func get_input():
 			$AnimatedSprite2D.set_flip_h(false)
 	_updateShadowCoverage($AnimatedSprite2D.animation)
 
-## The diagonal-move animations need the whole-sprite shadow (see
-## BODY_SHADOW_ANIMATIONS); every other animation keeps the feet ellipse.
+## Select the shadow geometry that matches the wagon's current view.
 func _updateShadowCoverage(animationName: String) -> void:
 	var shadow = ShadowScript.findShadow(self)
 	if shadow == null:
 		return
-	if animationName in BODY_SHADOW_ANIMATIONS:
-		shadow.coverage = ShadowScript.Coverage.BODY
+	if animationName in BODY_SHADOW_ANIMATIONS_DIAGONAL:
+		shadow.coverage = ShadowScript.Coverage.DIAGONAL
+	elif animationName in BODY_SHADOW_ANIMATIONS_VERTICAL:
+		shadow.coverage = ShadowScript.Coverage.VERTICAL
 	else:
-		shadow.coverage = ShadowScript.Coverage.FEET
+		shadow.coverage = ShadowScript.Coverage.HORIZONTAL
 
 func _physics_process(_delta):
 	get_input()

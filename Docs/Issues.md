@@ -5,10 +5,13 @@ Markdown file for listing issues that popup.
 
 ## Open
 
-(none)
+- When having the journal open for a minute or two, music starts playing
 
 ## Fixed
 
+- Fixed — The overworld wagon's shadow is one pixel to the side depending on its previous horizontal direction
+    - Vertical movement preserves the previous horizontal `flip_h`. The wagon's opaque bounds are asymmetric within their 24px frames (`WagonUp`/`WagonDown`: 11px wide at x=6; `WagonSide`: 15px wide at x=5), so flipping moves the visible body center by one pixel
+    - `ActorShadow` measured only the unflipped opaque rect, and `flip_h` emits neither `frame_changed` nor `animation_changed`, so the child shadow did not follow direction-only changes. It now mirrors the body rect and re-measures whenever `flip_h` changes, including while the frame is stationary
 - Fixed — Shootout moves have no visual feedback when hovered or selected
     - Arming a move (or item, or opening the reposition picker) changed nothing on screen: the player could not see which act was waiting for its target, which actors were clickable, or which reposition columns were reachable
     - Act icons now carry a persistent armed tint (`ShootoutAct.SELECTED_MODULATE`, a warm gold distinct from the transient hover lighten) for the armed act, cleared when another act is armed or the panel clears
@@ -16,7 +19,7 @@ Markdown file for listing issues that popup.
     - While the reposition picker is open, each reachable destination column gets the turn-marker art at the column spot (markers parented as the scene root's first child — above the background, below every fighter, and out of `Actors` whose children several systems iterate as the fighters), blocked directions are greyed out in the picker (`setDirectionsUsable`) instead of silently doing nothing, and both highlights clear when the act resolves, the picker closes or the turn/battle ends
 - Fixed — The wagon's shadow does not cover it while moving diagonally
     - The thin feet ellipse sits under one corner of the diagonally drawn wagon (Move Up Side / Move Down Side show it from above at an angle with a 14x16 top-down footprint), leaving the rest of the sprite hanging over bare ground
-    - `ActorShadow.gd` gained a `Coverage` mode: `FEET` (the default thin feet ellipse) and `BODY` (an ellipse spanning the whole visible body, centered on it, with the sprite's own pixels drawing over it). `PlayerOverworldActor` switches its shadow to `BODY` for the two diagonal-move animations and back to `FEET` for everything else (`BODY_SHADOW_ANIMATIONS`); stopping keeps the last animation's frame, so the coverage stays correct while parked mid-diagonal
+    - `ActorShadow.gd` gained directional `Coverage` modes: `HORIZONTAL` (the default thin feet ellipse), `DIAGONAL` (a wider ellipse padded for the wagon's diagonal footprint), and `VERTICAL` (the straight vertical-move ellipse). `PlayerOverworldActor` selects the mode from the current move animation; stopping keeps the last animation's frame, so the coverage stays correct while parked mid-diagonal
 - Fixed — OverworldActor shadows are tiny and out of proportion with other actors
     - The shared ActorShadow sized itself from the raw animation frame width, but assets pad their frames very differently: the overworld rabbit packs a ~10px body into 12x12 frames (shadow = 36% of its body) while 40x40 character frames carry a ~17px body (shadow = 70% of its body), so tightly-cropped actors got disproportionately small shadows — most visibly the overworld rabbit's near-invisible 3.6px ellipse
     - `ActorShadow.gd` now measures the frame's visible (non-transparent) pixel bounds and sizes the shadow from those: every actor's shadow is the same fraction of its actual body. Width ratio is 0.7 of the body width, which keeps the previous look for the padded 40x40 character frames, and the feet lift scales with body height instead of a fixed 4px (a third of the rabbit's height)
