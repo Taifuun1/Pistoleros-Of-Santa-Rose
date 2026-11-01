@@ -97,7 +97,7 @@ func get_current_scene() -> Node
 
 1. **Guard** — return early if a transition is already running or the key is unknown.
 2. **Fade out** — tween `FadeRect.modulate.a` from 0 → 1 over ~0.3 s and await completion. Input is effectively blocked because the opaque `FadeRect` (temporarily `mouse_filter = stop`) covers the screen.
-3. **Start threaded load** — call `ResourceLoader.load_threaded_request(scene_path)`. All managed scenes benefit, but this is especially important for WFC generation scenes and large pregenerated locations, which are the heaviest to load.
+3. **Start threaded load** — call `ResourceLoader.load_threaded_request(scene_path)`. All managed scenes benefit, but this is especially important for WFC generation scenes and large pregenerated locations, which are the heaviest to load. In headless runs (tests) the manager loads synchronously instead, because the process can quit before `ResourceLoader`'s background tasks are joined and would otherwise report leaked loader objects.
 4. **Loading screen fallback** — poll `ResourceLoader.load_threaded_get_status()` each frame:
    - If the load finishes before the fade-out completes (or within a short grace period, ~0.2 s), never show the loading screen — fast switches (cutscenes, fight, main menu) just get the fade.
    - If the load is still in progress after the grace period, show `LoadingScreen` and keep polling until `THREAD_LOAD_LOADED`, optionally updating a progress indicator from the `progress` array.

@@ -44,6 +44,10 @@ var players = []
 var activePlayerIndex = 0
 var generation = 0
 var volumeTweens = {}
+## One-shot fade-before-end timer, owned by this node so shutdown() can stop it
+## instead of leaving a pending SceneTreeTimer/lambda at process exit.
+var _tailTimer: Timer = null
+var _tailGeneration = 0
 
 
 func _ready() -> void:
@@ -53,12 +57,44 @@ func _ready() -> void:
 		player.volume_db = SILENT_VOLUME_DB
 		add_child(player)
 		players.append(player)
+	_tailTimer = Timer.new()
+	_tailTimer.name = "TailTimer"
+	_tailTimer.one_shot = true
+	_tailTimer.timeout.connect(_onTailFadeTimeout)
+	add_child(_tailTimer)
 	if musicData.is_empty() and ResourceLoader.exists(MUSIC_DATA_SCRIPT):
 		var dataInstance = load(MUSIC_DATA_SCRIPT).new()
 		musicData = dataInstance.data
 		dataInstance.free()
 	if tracks.is_empty():
 		_scanMusicFolder(MUSIC_ROOT, "")
+
+
+## Releases streams, playbacks and tweens so process exit and headless tests do
+## not report leaked audio resources. Safe to call more than once.
+func shutdown() -> void:
+	generation += 1
+	if _tailTimer != null and is_instance_valid(_tailTimer):
+		_tailTimer.stop()
+	for tween in volumeTweens.values():
+		if is_instance_valid(tween):
+			tween.kill()
+	volumeTweens.clear()
+	for player in players:
+		if is_instance_valid(player):
+			player.stop()
+			player.stream = null
+	players.clear()
+	playlist.clear()
+	musicStack.clear()
+	currentTrackId = ""
+	currentZone = ""
+	tracks.clear()
+	musicData.clear()
+
+
+func _exit_tree() -> void:
+	shutdown()
 
 
 ## Test/override seam: inject the mapping data and the track registry instead
@@ -205,13 +241,17 @@ func _tweenVolume(player: AudioStreamPlayer, targetDb: float, fadeSeconds: float
 ## once only a tailFade-long stretch remains, crossfade into the next song of
 ## the playlist or back to the beginning of the loop.
 func _scheduleTailFade(stream: AudioStream) -> void:
-	var scheduledGeneration = generation
+	_tailGeneration = generation
 	var remaining = maxf(0.1, stream.get_length() - tailFade)
-	get_tree().create_timer(remaining).timeout.connect(func():
-		if scheduledGeneration != generation:
-			return
-		_startPlaylist(playlist, (playlistIndex + 1) % playlist.size(), tailFade)
-	)
+	_tailTimer.start(remaining)
+
+
+func _onTailFadeTimeout() -> void:
+	if _tailGeneration != generation:
+		return
+	if playlist.is_empty():
+		return
+	_startPlaylist(playlist, (playlistIndex + 1) % playlist.size(), tailFade)
 
 
 # ── Decisions (Docs/System Design/Music player.md, Data/Music/MusicData.gd) ──

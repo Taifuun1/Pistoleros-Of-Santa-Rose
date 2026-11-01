@@ -14,6 +14,19 @@ func _ready() -> void:
 	sceneManager.initialScene = ""
 	add_child(sceneManager)
 	await runTests()
+
+	# Release the music autoload's playbacks before quitting so the process
+	# exits without audio leaks (the same shutdown the autoload runs on exit).
+	var music = get_node_or_null("/root/MusicPlayer")
+	if music != null and music.has_method("shutdown"):
+		music.shutdown()
+		music.free()
+	# The Overworld autoload keeps headless coordinates for the map provider;
+	# release them before quitting so the test process exits cleanly.
+	if Overworld._coordinates != null:
+		Overworld._coordinates.dispose()
+		Overworld._coordinates = null
+	await get_tree().create_timer(0.8).timeout
 	print("SceneManagerTest: {passed} passed, {failed} failed".format({ "passed": testsPassed, "failed": testsFailed }))
 	get_tree().quit()
 

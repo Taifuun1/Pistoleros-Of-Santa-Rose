@@ -78,6 +78,14 @@ func _exit_tree() -> void:
 	# snapshots the exact player position first: Journal map last-known state
 	# and re-entry seeding stay in sync (see Globals/Overworld.gd).
 	Overworld.clearLivePlayer()
+	# Drain background chunk parses and release the streaming caches so the
+	# scene does not leave loaders/resources behind.
+	streamCache.dispose()
+	streamCache = null
+	if _coordinates != null:
+		_coordinates.dispose()
+		_coordinates = null
+	_chunkReader = null
 
 
 #######################
@@ -233,6 +241,11 @@ func processPendingChunkLoads() -> void:
 # Preloads every chunk scene within two chunks of the player, nearest first,
 # so the chunks needed on the next boundary crossing are already parsed.
 func preloadChunkScenes() -> void:
+	# Headless test runs quit without joining ResourceLoader's background
+	# tasks, which leaves loader objects behind at exit. Preloading is a
+	# runtime-only optimization, so skip it in headless mode.
+	if DisplayServer.get_name() == "headless":
+		return
 	for radius in range(1, OverworldChunkStreamCache.PRELOAD_RADIUS + 1):
 		for x in range(currentChunk.x - radius, currentChunk.x + radius + 1):
 			for y in range(currentChunk.y - radius, currentChunk.y + radius + 1):

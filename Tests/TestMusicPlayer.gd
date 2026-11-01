@@ -95,7 +95,10 @@ func _run() -> void:
 	_test_shootout_decisions(music)
 	_test_shootout_outcome_stingers(music)
 	_test_cutscene_decisions(music)
+	music.shutdown()
+	await create_timer(0.3).timeout
 	music.free()
+	await create_timer(0.1).timeout
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

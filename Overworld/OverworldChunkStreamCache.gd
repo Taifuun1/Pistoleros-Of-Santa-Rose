@@ -51,7 +51,9 @@ func requestScene(chunk: Vector2i, path: String) -> bool:
 		return false
 	if !ResourceLoader.exists(path):
 		return false
-	if !ResourceLoader.load_threaded_request(path):
+	# Cache-ignore: the scene cache owns these scenes, so ResourceLoader must
+	# not keep a second global reference after the Overworld is freed.
+	if !ResourceLoader.load_threaded_request(path, "", false, ResourceLoader.CACHE_MODE_IGNORE):
 		return false
 	pendingChunkPaths[path] = chunk
 	return true
@@ -90,7 +92,7 @@ func getScene(chunk: Vector2i, path: String) -> PackedScene:
 		return chunkScenes[chunk]
 	if !ResourceLoader.exists(path):
 		return null
-	chunkScenes[chunk] = load(path)
+	chunkScenes[chunk] = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)
 	return chunkScenes[chunk]
 
 
@@ -145,6 +147,22 @@ func unload(chunk: Vector2i) -> void:
 		return
 	loadedChunkCells.erase(chunk)
 	queueCellOp(chunk, chunkCellDataCache.get(chunk, PackedInt32Array()), false)
+
+
+## Releases every cache and forces any in-flight background parse to finish so
+## its loader is not left pending when the owning scene is freed. Called from
+## Overworld._exit_tree().
+func dispose() -> void:
+	for path in pendingChunkPaths.keys():
+		if ResourceLoader.exists(path):
+			ResourceLoader.load_threaded_get(path)
+	pendingChunkPaths.clear()
+	pendingChunkLoads.clear()
+	cellOpQueue.clear()
+	chunkScenes.clear()
+	chunkCellDataCache.clear()
+	loadedChunkCells.clear()
+	presentChunkCells.clear()
 
 
 ## Drops cached scenes and cell data outside the kept set, so a long traversal

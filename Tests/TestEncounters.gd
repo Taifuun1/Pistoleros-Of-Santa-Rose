@@ -56,6 +56,9 @@ func addActor(ctx: Dictionary, nodeName: String, baseName: String, side: String,
 	actor.actorName = baseName
 	actor.hp = hp
 	actor.maxHp = maxHp
+	# Keep the actor in the tree so the test owns it like the real shootout does;
+	# an orphan Node2D would leak its CanvasItem RID at process exit.
+	ctx.fake.add_child(actor)
 	ctx.fake.actors[nodeName] = actor
 	ctx.turnManager.registerActor(side, nodeName, 1)
 	return actor
@@ -94,19 +97,23 @@ func _run() -> void:
 		if !fileName.ends_with(".gd"):
 			continue
 		fileCount += 1
-		var data = load("res://Data/Shootout/Encounters/{fileName}".format({ "fileName": fileName })).new().data
+		var encounterInstance = load("res://Data/Shootout/Encounters/{fileName}".format({ "fileName": fileName })).new()
+		var data = encounterInstance.data
 		_check(data is Dictionary and !data.is_empty(), "%s: empty encounter data" % fileName)
 		validateEncounter(data, fileName)
 		_check(data.has("winCondition") and data.winCondition.get("type", "rout") in ["rout", "defeat_actor", "survive_rounds", "hp_below"], "%s: bad winCondition" % fileName)
+		encounterInstance.free()
 	_check(fileCount > 0, "expected at least one encounter file")
 
 	print("\n--- Metadata and legacy defaults ---")
-	var rat = load("res://Data/Shootout/Encounters/RatAmbush.gd").new().data
+	var ratInstance = load("res://Data/Shootout/Encounters/RatAmbush.gd").new()
+	var rat = ratInstance.data
 	_check(rat.has("name") and rat.has("kind") and rat.has("teams"), "RatAmbush carries encounter metadata")
 	var legacyTeams = rat.get("teams", rat)
 	_check(legacyTeams.has("player team") and legacyTeams.has("enemy team"), "teams extraction works for the new format")
 	var legacy = { "player team": {}, "enemy team": {} }
 	_check(legacy.get("teams", legacy) == legacy, "legacy format (teams at root) still resolves")
+	ratInstance.free()
 
 	print("\n--- Same actor name on both teams stays unique ---")
 	var plan = shootoutScript.actorSpawnPlan({
@@ -182,6 +189,13 @@ func _run() -> void:
 	ctx.turnManager.setWinCondition({})
 	ctx.turnManager.checkBattleEnd()
 	_check(wins == ["player team"], "wiping the enemy side wins by rout")
+
+	# Release the fake shootouts (and their actor children) before quitting so
+	# the test process exits without node/RID leaks.
+	for child in root.get_children():
+		if child is FakeShootout:
+			child.free()
+	shootoutScript = null
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

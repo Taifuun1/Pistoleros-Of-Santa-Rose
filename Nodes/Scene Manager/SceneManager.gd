@@ -103,32 +103,48 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	fadeRect.mouse_filter = Control.MOUSE_FILTER_STOP
 	var fadeOut := create_tween()
 	fadeOut.tween_property(fadeRect, "modulate:a", 1.0, fadeDuration)
-	var requestError := ResourceLoader.load_threaded_request(scenePath)
+	# Headless test runs quit before ResourceLoader's background tasks join, so
+	# they load synchronously; the game keeps the threaded path.
+	var headless := DisplayServer.get_name() == "headless"
+	var requestError := OK
+	if !headless:
+		requestError = ResourceLoader.load_threaded_request(scenePath)
 	await fadeOut.finished
-	if requestError != OK:
-		push_error("SceneManager: could not start loading '{path}' (error {error}).".format({ "path": scenePath, "error": requestError }))
-		await _abortTransition()
-		return
+	var scenePacked: PackedScene = null
+	if headless:
+		scenePacked = load(scenePath)
+		if scenePacked == null:
+			requestError = ERR_CANT_OPEN
+	else:
+		if requestError != OK:
+			push_error("SceneManager: could not start loading '{path}' (error {error}).".format({ "path": scenePath, "error": requestError }))
+			await _abortTransition()
+			return
+		# Poll the load; show the loading screen only if it takes a while.
+		var previousMsec := Time.get_ticks_msec()
+		var elapsed := 0.0
+		var status := ResourceLoader.load_threaded_get_status(scenePath)
+		while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			await get_tree().process_frame
+			var now := Time.get_ticks_msec()
+			elapsed += float(now - previousMsec) / 1000.0
+			previousMsec = now
+			if elapsed >= loadingScreenDelay:
+				loadingScreen.show()
+			status = ResourceLoader.load_threaded_get_status(scenePath)
+		loadingScreen.hide()
+		if status != ResourceLoader.THREAD_LOAD_LOADED:
+			push_error("SceneManager: failed to load '{path}'.".format({ "path": scenePath }))
+			await _abortTransition()
+			return
+		scenePacked = ResourceLoader.load_threaded_get(scenePath)
 
-	# Poll the load; show the loading screen only if it takes a while.
-	var previousMsec := Time.get_ticks_msec()
-	var elapsed := 0.0
-	var status := ResourceLoader.load_threaded_get_status(scenePath)
-	while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		await get_tree().process_frame
-		var now := Time.get_ticks_msec()
-		elapsed += float(now - previousMsec) / 1000.0
-		previousMsec = now
-		if elapsed >= loadingScreenDelay:
-			loadingScreen.show()
-		status = ResourceLoader.load_threaded_get_status(scenePath)
-	loadingScreen.hide()
-	if status != ResourceLoader.THREAD_LOAD_LOADED:
+	if scenePacked == null:
 		push_error("SceneManager: failed to load '{path}'.".format({ "path": scenePath }))
 		await _abortTransition()
 		return
 
-	var newScene: Node = ResourceLoader.load_threaded_get(scenePath).instantiate()
+	var newScene: Node = scenePacked.instantiate()
 	var oldScene := get_current_scene()
 	currentSceneContainer.add_child(newScene)
 	if oldScene != null:
