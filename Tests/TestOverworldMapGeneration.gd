@@ -10,6 +10,7 @@ extends SceneTree
 ## Run with: godot --headless --script res://Tests/TestOverworldMapGeneration.gd
 
 const HelperVariablesScript := preload("res://Globals/HelperVariables.gd")
+const GeneratorScript := preload("res://Tools/GenerateOverworldMap.gd")
 
 var failures = 0
 var coordinates: OverworldCoordinates
@@ -199,6 +200,14 @@ func testAuthoredPalette() -> void:
 	var groundPixel: Color = image.get_pixelv(Vector2i(mapProjection.cellToImage(groundCell)))
 	var rockPixel: Color = image.get_pixelv(Vector2i(mapProjection.cellToImage(rockCell)))
 	_check(groundPixel != rockPixel and groundPixel.a > 0.9 and rockPixel.a > 0.9, "Grande Cañón ground and rock bake as different opaque pixels")
+
+	# --palette-report fails closed on collapsed sources and unknown keys.
+	var collapsedCells := { Vector2i(0, 0): PackedInt32Array([0, 0, 1, 4, 0, 0, 1, 0, 1, 4, 0, 0]) }
+	_check(!GeneratorScript._paletteReport(collapsedCells, styles, []), "palette report fails when every encountered key shares one style")
+	var unknownCells := { Vector2i(0, 0): PackedInt32Array([0, 0, 99, 0, 0, 0]) }
+	_check(!GeneratorScript._paletteReport(unknownCells, styles, []), "palette report fails on unknown tile keys")
+	var mixedCells := { Vector2i(0, 0): PackedInt32Array([0, 0, 1, 4, 0, 0, 1, 0, 1, 8, 1, 0]) }
+	_check(GeneratorScript._paletteReport(mixedCells, styles, []), "palette report passes when sources spread across known styles")
 
 
 ## Overview/LOD aggregation: thin features survive generalization, area features

@@ -12,6 +12,10 @@ extends SceneTree
 ##   ... -- --require-complete  fail when any declared chunk is missing
 ##   ... -- --strict            fail on unstyled tile keys / overlapping cells
 ##
+## Fail-closed exit status: 0 only when the selected mode's validation passes.
+## Decode/bake errors, --require-complete, --strict and --palette-report findings
+## are nonzero; an unknown argument or orientation refuses to bake or write.
+##
 ## Deterministic: sorted chunk/style/POI order, outputs written only when
 ## their bytes/values changed. The source fingerprint covers sorted chunk
 ## scenes (including missing ones), their chunk scripts, the shared tileset,
@@ -52,6 +56,9 @@ var _orientationOverride := -1
 ## Writes comparison previews under res://.godot/ without touching the
 ## committed outputs, so candidate orientations can be judged side by side.
 var _preview := false
+## Set when the command line itself is invalid; _run refuses to bake or write
+## anything and exits nonzero.
+var _cliError := ""
 
 
 func _init() -> void:
@@ -59,9 +66,10 @@ func _init() -> void:
 		if argument.begins_with("--orientation="):
 			var requested := OverworldMapProjection.orientationFromName(argument.trim_prefix("--orientation="))
 			if requested < 0:
-				push_warning("GenerateOverworldMap: unknown orientation '{value}' (isometric|aligned)".format({
+				_setCliError("unknown orientation '{value}' (isometric|aligned)".format({
 					"value": argument.trim_prefix("--orientation="),
 				}))
+				continue
 			_orientationOverride = requested
 			continue
 		match argument:
@@ -78,11 +86,21 @@ func _init() -> void:
 			"--preview":
 				_preview = true
 			_:
-				push_warning("GenerateOverworldMap: unknown argument '{argument}'".format({ "argument": argument }))
+				_setCliError("unknown argument '{argument}'".format({ "argument": argument }))
 	call_deferred("_run")
 
 
+func _setCliError(message: String) -> void:
+	if _cliError == "":
+		_cliError = message
+	push_error("GenerateOverworldMap: " + message)
+
+
 func _run() -> void:
+	if _cliError != "":
+		printerr("GenerateOverworldMap: refusing to bake or write; ", _cliError)
+		quit(1)
+		return
 	var helperVars = HelperVariablesScript.new()
 	var chunkTiles: Vector2i = helperVars.overworldChunkSize
 	helperVars.free()
@@ -119,14 +137,21 @@ func _run() -> void:
 
 	if _survey:
 		_surveyPalette(chunkCells, missingChunks)
+		_printDecodeFailures(failedChunks)
+		var surveyExit := _commonExitCode(failedChunks, missingChunks)
 		coordinates.dispose()
-		quit(0)
+		quit(surveyExit)
 		return
 
 	if _reportPalette:
-		_paletteReport(chunkCells, MapTileStyles.new(), missingChunks)
+		var paletteOk := _paletteReport(chunkCells, MapTileStyles.new(), missingChunks)
+		_printDecodeFailures(failedChunks)
+		var paletteExit := _commonExitCode(failedChunks, missingChunks)
+		if !paletteOk:
+			printerr("  --palette-report: collapsed sources or unknown tile keys found")
+			paletteExit = 1
 		coordinates.dispose()
-		quit(0)
+		quit(paletteExit)
 		return
 
 	var styles := MapTileStyles.new()
@@ -142,8 +167,7 @@ func _run() -> void:
 	}))
 	if !missingChunks.is_empty():
 		print("  missing chunks: ", missingChunks)
-	for failed in failedChunks:
-		printerr("  decode failed: ", failed[0], " ", failed[1])
+	_printDecodeFailures(failedChunks)
 	print("  cells: ", report["cells"])
 	print("  overlapping seam cells: ", report["overlappingCells"].size(), " (later chunk in sorted order wins; --strict fails on these)")
 	print("  out-of-grid cells: ", report["outOfGridCells"].size())
@@ -173,13 +197,10 @@ func _run() -> void:
 		"size": baked["overview"].get_size(), "block": LOD_BLOCK.x,
 	}))
 
-	var exitCode := 0
-	if !failedChunks.is_empty() or !report["errors"].is_empty():
+	var exitCode := _commonExitCode(failedChunks, missingChunks)
+	if !report["errors"].is_empty():
 		for reportError in report["errors"]:
 			printerr("  bake error: ", reportError)
-		exitCode = 1
-	if _requireComplete and !missingChunks.is_empty():
-		printerr("  --require-complete: {count} declared chunks are missing".format({ "count": missingChunks.size() }))
 		exitCode = 1
 	if _strict:
 		if !unknownKeys.is_empty():
@@ -190,7 +211,8 @@ func _run() -> void:
 			exitCode = 1
 
 	if _preview:
-		_writePreviews(baked, mapProjection)
+		if exitCode == 0:
+			_writePreviews(baked, mapProjection)
 		coordinates.dispose()
 		quit(exitCode)
 		return
@@ -212,6 +234,24 @@ func _run() -> void:
 			exitCode = 1
 	coordinates.dispose()
 	quit(exitCode)
+
+
+## One exit-status policy for every mode: decode failures always fail, and
+## --require-complete fails when declared chunks are missing. Missing chunks are
+## otherwise coverage holes, not errors.
+func _commonExitCode(failedChunks: Array, missingChunks: Array) -> int:
+	var exitCode := 0
+	if !failedChunks.is_empty():
+		exitCode = 1
+	if _requireComplete and !missingChunks.is_empty():
+		printerr("  --require-complete: {count} declared chunks are missing".format({ "count": missingChunks.size() }))
+		exitCode = 1
+	return exitCode
+
+
+func _printDecodeFailures(failedChunks: Array) -> void:
+	for failed in failedChunks:
+		printerr("  decode failed: ", failed[0], " ", failed[1])
 
 
 ## True when the committed PNG and manifest match a fresh in-memory bake,
@@ -357,8 +397,10 @@ func _fitPreview(image: Image, fitSize: Vector2) -> Image:
 ## Semantic palette audit (Docs/System Design/Journal/Overworld Map.md): reports
 ## the authored classification per source so collapsed terrain is visible before
 ## it reaches the map. A source whose encountered keys all share one style is
-## flagged — the check the flat Grande Cañón/Rocky Hills regions failed.
-func _paletteReport(chunkCells: Dictionary, styles: MapTileStyles, missingChunks: Array) -> void:
+## flagged — the check the flat Grande Cañón/Rocky Hills regions failed. Returns
+## false when a source collapses or an unknown key is encountered, so
+## --palette-report can fail closed.
+static func _paletteReport(chunkCells: Dictionary, styles: MapTileStyles, missingChunks: Array) -> bool:
 	var counts := {}
 	var alternatives := {}
 	for chunk in chunkCells:
@@ -448,9 +490,10 @@ func _paletteReport(chunkCells: Dictionary, styles: MapTileStyles, missingChunks
 		printerr("  unknown keys ({count}):".format({ "count": unknownKeys.size() }))
 		for key in unknownKeys:
 			printerr("    ", key, " x", counts[key])
+	return collapsed.is_empty() and unknownKeys.is_empty()
 
 
-func _firstStyleIdForFeature(styles: MapTileStyles, keys: Array, feature: String) -> int:
+static func _firstStyleIdForFeature(styles: MapTileStyles, keys: Array, feature: String) -> int:
 	for key in keys:
 		var styleId := styles.styleIdFor(key.x, key.y, key.z)
 		if styles.styleForId(styleId)["feature"] == feature:
