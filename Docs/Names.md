@@ -244,3 +244,28 @@ Source: [namingpower.com/cowboy-names](https://namingpower.com/cowboy-names/)
 - Felicia Lynn
 - Layton Riley
 - Huxley Kipp
+
+## Shootout flair names
+
+### Dust-ups
+
+- Scuffle!
+- Tussle!
+- Brawl!
+- Scrape!
+- Hold-up!
+
+### Showdowns
+
+- Draw!
+- Sling!
+- Duel!
+- Shoot!
+
+### Quests
+
+- It's the Feds!
+- El duelo!
+- He's back!
+- Cheats!
+- High Noon!
