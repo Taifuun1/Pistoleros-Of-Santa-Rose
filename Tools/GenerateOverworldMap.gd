@@ -20,7 +20,19 @@ extends SceneTree
 
 const HelperVariablesScript := preload("res://Globals/HelperVariables.gd")
 const OUTPUT_PNG := "res://Assets/Journal/OverworldMap.png"
+## Fit-scale overview (LOD) of the same map; the runtime uses it while zoomed
+## out so tile-level speckle reads as terrain masses.
+const OUTPUT_OVERVIEW_PNG := "res://Assets/Journal/OverworldMapOverview.png"
 const OUTPUT_DATA := "res://Data/Overworld/OverworldMapData.tres"
+## One overview pixel per LOD_BLOCK cells.
+const LOD_BLOCK := Vector2i(4, 4)
+## --preview writes here instead of the committed outputs.
+const PREVIEW_DIR := "res://.godot"
+## 640x360 Journal reference canvas used to judge readability at real fit scale
+## (the map clip inside the 560x280 Journal panel).
+const PREVIEW_FIT_CANVAS := Vector2i(640, 360)
+const PREVIEW_FIT_AREA := Rect2i(40, 72, 560, 216)
+const PREVIEW_FIT_BACKGROUND := Color("2a221c")
 const FINGERPRINT_CODE_PATHS := [
 	"res://Data/Overworld/WorldData.gd",
 	"res://Data/Overworld/MapTileStyles.gd",
@@ -31,22 +43,40 @@ const FINGERPRINT_CODE_PATHS := [
 ]
 
 var _survey := false
+var _reportPalette := false
 var _strict := false
 var _check := false
 var _requireComplete := false
+## -1 keeps OverworldMapProjection.SHIPPED_ORIENTATION.
+var _orientationOverride := -1
+## Writes comparison previews under res://.godot/ without touching the
+## committed outputs, so candidate orientations can be judged side by side.
+var _preview := false
 
 
 func _init() -> void:
 	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--orientation="):
+			var requested := OverworldMapProjection.orientationFromName(argument.trim_prefix("--orientation="))
+			if requested < 0:
+				push_warning("GenerateOverworldMap: unknown orientation '{value}' (isometric|aligned)".format({
+					"value": argument.trim_prefix("--orientation="),
+				}))
+			_orientationOverride = requested
+			continue
 		match argument:
 			"--survey":
 				_survey = true
+			"--palette-report":
+				_reportPalette = true
 			"--require-complete":
 				_requireComplete = true
 			"--strict":
 				_strict = true
 			"--check":
 				_check = true
+			"--preview":
+				_preview = true
 			_:
 				push_warning("GenerateOverworldMap: unknown argument '{argument}'".format({ "argument": argument }))
 	call_deferred("_run")
@@ -58,7 +88,8 @@ func _run() -> void:
 	helperVars.free()
 
 	var coordinates := OverworldCoordinates.makeHeadless()
-	var mapProjection := OverworldMapProjection.cellForGrid(coordinates, WorldData.CHUNK_GRID, chunkTiles)
+	var mapOrientation := _orientationOverride if _orientationOverride >= 0 else OverworldMapProjection.SHIPPED_ORIENTATION
+	var mapProjection := OverworldMapProjection.cellForGrid(coordinates, WorldData.CHUNK_GRID, chunkTiles, mapOrientation)
 	var reader := OverworldChunkReader.new(coordinates)
 
 	var chunkCells := {}
@@ -88,12 +119,19 @@ func _run() -> void:
 
 	if _survey:
 		_surveyPalette(chunkCells, missingChunks)
+		coordinates.dispose()
+		quit(0)
+		return
+
+	if _reportPalette:
+		_paletteReport(chunkCells, MapTileStyles.new(), missingChunks)
+		coordinates.dispose()
 		quit(0)
 		return
 
 	var styles := MapTileStyles.new()
 	var baker := OverworldMapBaker.new(coordinates, mapProjection, WorldData.CHUNK_GRID, chunkTiles)
-	var baked := baker.bake(chunkCells, chunkScripts, styles)
+	var baked := baker.bake(chunkCells, chunkScripts, styles, LOD_BLOCK)
 	var report: Dictionary = baked["report"]
 
 	print("GenerateOverworldMap report")
@@ -124,8 +162,15 @@ func _run() -> void:
 			"cell": location["cell"], "image": location["image_position"],
 		}))
 	print("  cell bounds: min={min} max={max}".format({ "min": mapProjection.cellMin, "max": mapProjection.cellMax }))
+	print("  orientation: {name} (pixels per cell {ppc})".format({
+		"name": OverworldMapProjection.orientationName(mapProjection.orientation),
+		"ppc": mapProjection.pixelsPerCell,
+	}))
 	print("  working image: {working}, final image: {final}, map origin: {origin}".format({
 		"working": mapProjection.workingSize, "final": baked["image"].get_size(), "origin": mapProjection.mapOrigin,
+	}))
+	print("  overview: {size} ({block}x{block} cells per pixel)".format({
+		"size": baked["overview"].get_size(), "block": LOD_BLOCK.x,
 	}))
 
 	var exitCode := 0
@@ -144,16 +189,28 @@ func _run() -> void:
 			printerr("  --strict: {count} cells are written by more than one chunk".format({ "count": report["overlappingCells"].size() }))
 			exitCode = 1
 
+	if _preview:
+		_writePreviews(baked, mapProjection)
+		coordinates.dispose()
+		quit(exitCode)
+		return
+
 	if exitCode == 0 and _check:
 		if !_checkOutputs(baked, mapProjection, missingChunks, chunkScriptPaths):
 			exitCode = 1
 	elif exitCode == 0:
-		var pngStatus := _savePng(baked["image"])
-		var manifest := _buildManifest(baked["image"], baked["locations"], mapProjection, missingChunks, chunkScriptPaths)
+		var pngStatus := _savePng(baked["image"], OUTPUT_PNG)
+		var overviewStatus := _savePng(baked["overview"], OUTPUT_OVERVIEW_PNG)
+		var manifest := _buildManifest(baked, mapProjection, missingChunks, chunkScriptPaths)
 		var dataStatus := _saveData(manifest)
-		print("  outputs: ", OUTPUT_PNG, " (", pngStatus, "), ", OUTPUT_DATA, " (", dataStatus, ")")
-		if pngStatus == "error" or dataStatus == "error":
+		print("  outputs: {png} ({pngStatus}), {overview} ({overviewStatus}), {data} ({dataStatus})".format({
+			"png": OUTPUT_PNG, "pngStatus": pngStatus,
+			"overview": OUTPUT_OVERVIEW_PNG, "overviewStatus": overviewStatus,
+			"data": OUTPUT_DATA, "dataStatus": dataStatus,
+		}))
+		if pngStatus == "error" or overviewStatus == "error" or dataStatus == "error":
 			exitCode = 1
+	coordinates.dispose()
 	quit(exitCode)
 
 
@@ -161,32 +218,39 @@ func _run() -> void:
 ## so manual edits to the generated outputs are detected too.
 func _checkOutputs(baked: Dictionary, mapProjection: OverworldMapProjection, missingChunks: Array, chunkScriptPaths: Dictionary) -> bool:
 	var pngCurrent: bool = FileAccess.get_file_as_bytes(OUTPUT_PNG) == baked["image"].save_png_to_buffer()
-	var manifest := _buildManifest(baked["image"], baked["locations"], mapProjection, missingChunks, chunkScriptPaths)
+	var overviewCurrent: bool = FileAccess.get_file_as_bytes(OUTPUT_OVERVIEW_PNG) == baked["overview"].save_png_to_buffer()
+	var manifest := _buildManifest(baked, mapProjection, missingChunks, chunkScriptPaths)
 	var manifestCurrent := false
 	if ResourceLoader.exists(OUTPUT_DATA):
 		var committed = load(OUTPUT_DATA)
 		if committed != null and committed is OverworldMapData:
-			manifestCurrent = manifest.matches(committed) and committed.texture != null
+			manifestCurrent = manifest.matches(committed) and committed.texture != null and committed.overview_texture != null
 	if !pngCurrent:
 		printerr("  --check: the committed PNG differs from a fresh bake (regenerate, or revert manual edits)")
+	if !overviewCurrent:
+		printerr("  --check: the committed overview PNG differs from a fresh bake")
 	if !manifestCurrent:
 		printerr("  --check: the committed manifest is missing, unreadable or stale (regenerate it)")
-	if pngCurrent and manifestCurrent:
+	if pngCurrent and overviewCurrent and manifestCurrent:
 		print("  --check: committed outputs are current")
-	return pngCurrent and manifestCurrent
+	return pngCurrent and overviewCurrent and manifestCurrent
 
 
-func _buildManifest(image: Image, bakedLocations: Array, mapProjection: OverworldMapProjection, missingChunks: Array, chunkScriptPaths: Dictionary) -> OverworldMapData:
+func _buildManifest(baked: Dictionary, mapProjection: OverworldMapProjection, missingChunks: Array, chunkScriptPaths: Dictionary) -> OverworldMapData:
 	var manifest := OverworldMapData.new()
+	manifest.format_version = OverworldMapData.FORMAT_VERSION
 	manifest.texture = load(OUTPUT_PNG)
-	manifest.image_size = image.get_size()
+	manifest.image_size = baked["image"].get_size()
+	manifest.overview_texture = load(OUTPUT_OVERVIEW_PNG)
+	manifest.overview_image_size = baked["overview"].get_size()
+	manifest.map_orientation = mapProjection.orientation
 	manifest.map_origin = mapProjection.mapOrigin
-	manifest.pixels_per_cell = Vector2(1.0, 0.5)
+	manifest.pixels_per_cell = mapProjection.pixelsPerCell
 	manifest.chunk_grid = WorldData.CHUNK_GRID
 	manifest.cell_min = mapProjection.cellMin
 	manifest.cell_max = mapProjection.cellMax
 	manifest.source_fingerprint = _buildFingerprint(missingChunks, chunkScriptPaths)
-	for location in bakedLocations:
+	for location in baked["locations"]:
 		manifest.locations.append(location)
 	return manifest
 
@@ -231,20 +295,170 @@ func _saveData(manifest: OverworldMapData) -> String:
 
 ## Writes the PNG only when its bytes changed, so unchanged bakes leave the
 ## checked-in output (and its import metadata) untouched.
-func _savePng(image: Image) -> String:
+func _savePng(image: Image, path: String) -> String:
 	var pngBytes := image.save_png_to_buffer()
-	if FileAccess.get_file_as_bytes(OUTPUT_PNG) == pngBytes:
+	if FileAccess.get_file_as_bytes(path) == pngBytes:
 		return "unchanged"
-	var file := FileAccess.open(OUTPUT_PNG, FileAccess.WRITE)
+	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		printerr("  could not write ", OUTPUT_PNG)
+		printerr("  could not write ", path)
 		return "error"
 	file.store_buffer(pngBytes)
 	file.close()
 	return "written"
 
 
-## Palette survey: every (sourceId, atlasX, atlasY) key encountered in the
+## Writes the full-resolution PNG plus fit-scale composites for the detailed map
+## and its overview under res://.godot/, leaving the committed outputs alone so
+## candidate orientations and palette changes can be compared before shipping.
+func _writePreviews(baked: Dictionary, mapProjection: OverworldMapProjection) -> void:
+	var image: Image = baked["image"]
+	var orientationLabel := OverworldMapProjection.orientationName(mapProjection.orientation)
+	var fullPath := "{dir}/overworld_map_preview_{name}.png".format({ "dir": PREVIEW_DIR, "name": orientationLabel })
+	var fitPath := "{dir}/overworld_map_preview_{name}_fit.png".format({ "dir": PREVIEW_DIR, "name": orientationLabel })
+	var overviewFitPath := "{dir}/overworld_map_preview_{name}_overview_fit.png".format({ "dir": PREVIEW_DIR, "name": orientationLabel })
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(PREVIEW_DIR))
+	_writePng(image, fullPath)
+	_writePng(_fitPreview(image, Vector2(image.get_size())), fitPath)
+	_writePng(_fitPreview(baked["overview"], Vector2(image.get_size())), overviewFitPath)
+	print("  preview: {path} ({size})".format({ "path": fullPath, "size": image.get_size() }))
+	print("  preview: {path} ({size} fit scale)".format({ "path": fitPath, "size": PREVIEW_FIT_CANVAS }))
+	print("  preview: {path} ({size} fit scale, overview LOD)".format({ "path": overviewFitPath, "size": PREVIEW_FIT_CANVAS }))
+
+
+func _writePng(image: Image, path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		printerr("  could not write ", path)
+		return
+	file.store_buffer(image.save_png_to_buffer())
+	file.close()
+
+
+## Scales the map into the Journal's map area on a 640x360 canvas so candidate
+## orientations and the overview LOD can be compared at the size the player
+## actually sees. fitSize is the size the image occupies in map coordinates
+## (the overview is drawn larger than its own texture).
+func _fitPreview(image: Image, fitSize: Vector2) -> Image:
+	var canvas := Image.create(PREVIEW_FIT_CANVAS.x, PREVIEW_FIT_CANVAS.y, false, Image.FORMAT_RGBA8)
+	canvas.fill(PREVIEW_FIT_BACKGROUND)
+	var area := PREVIEW_FIT_AREA
+	var scale := minf(float(area.size.x) / fitSize.x, float(area.size.y) / fitSize.y)
+	var size := Vector2i(
+		maxi(1, roundi(fitSize.x * scale)),
+		maxi(1, roundi(fitSize.y * scale))
+	)
+	var scaled: Image = image.duplicate()
+	scaled.resize(size.x, size.y, Image.INTERPOLATE_BILINEAR)
+	canvas.blend_rect(scaled, Rect2i(Vector2i.ZERO, size), area.position + (area.size - size) / 2)
+	return canvas
+
+
+## Semantic palette audit (Docs/System Design/Journal/Overworld Map.md): reports
+## the authored classification per source so collapsed terrain is visible before
+## it reaches the map. A source whose encountered keys all share one style is
+## flagged — the check the flat Grande Cañón/Rocky Hills regions failed.
+func _paletteReport(chunkCells: Dictionary, styles: MapTileStyles, missingChunks: Array) -> void:
+	var counts := {}
+	var alternatives := {}
+	for chunk in chunkCells:
+		var cells: PackedInt32Array = chunkCells[chunk]
+		var index := 0
+		while index < cells.size():
+			var key := Vector3i(cells[index + 2], cells[index + 3], cells[index + 4])
+			counts[key] = int(counts.get(key, 0)) + 1
+			if cells[index + 5] != 0:
+				alternatives[key] = cells[index + 5]
+			index += 6
+
+	var keys: Array = counts.keys()
+	keys.sort_custom(func(a, b): return a.x < b.x or (a.x == b.x and a.y < b.y) or (a.x == b.x and a.y == b.y and a.z < b.z))
+	var sources := {}
+	var featureKeys := {}
+	var featureCells := {}
+	var unknownKeys: Array = []
+	for key in keys:
+		var styleId := styles.styleIdFor(key.x, key.y, key.z)
+		if styleId == 0:
+			unknownKeys.append(key)
+		var style := styles.styleForId(styleId)
+		var entry: Dictionary = sources.get(key.x, { "cells": 0, "styles": {}, "features": {}, "keys": {} })
+		entry["cells"] += int(counts[key])
+		entry["keys"][key] = int(counts[key])
+		entry["styles"][styleId] = int(entry["styles"].get(styleId, 0)) + int(counts[key])
+		entry["features"][style["feature"]] = int(entry["features"].get(style["feature"], 0)) + int(counts[key])
+		sources[key.x] = entry
+		featureKeys[style["feature"]] = int(featureKeys.get(style["feature"], 0)) + 1
+		featureCells[style["feature"]] = int(featureCells.get(style["feature"], 0)) + int(counts[key])
+
+	print("\nGenerateOverworldMap palette report")
+	print("  chunks: {present} present, {missing} missing".format({ "present": chunkCells.size(), "missing": missingChunks.size() }))
+	print("  distinct tile keys: {keys}   authored styles: {styles}".format({ "keys": keys.size(), "styles": styles.styleCount() }))
+	if !alternatives.is_empty():
+		print("  non-zero alternatives encountered: ", alternatives)
+
+	var sourceIds: Array = sources.keys()
+	sourceIds.sort()
+	var collapsed: Array = []
+	for sourceId in sourceIds:
+		var entry: Dictionary = sources[sourceId]
+		var total: int = entry["cells"]
+		var dominant := 0
+		for styleId in entry["styles"]:
+			dominant = maxi(dominant, int(entry["styles"][styleId]))
+		print("  source {id}: {cells} cells, {styles} styles, dominant {share}%".format({
+			"id": sourceId, "cells": total, "styles": entry["styles"].size(),
+			"share": int(round(100.0 * dominant / float(maxi(1, total)))),
+		}))
+		var featureNames: Array = entry["features"].keys()
+		featureNames.sort()
+		for feature in featureNames:
+			print("    {feature}: {cells} cells ({share}%)".format({
+				"feature": feature, "cells": entry["features"][feature],
+				"share": int(round(100.0 * int(entry["features"][feature]) / float(maxi(1, total)))),
+			}))
+		var keyList: Array = entry["keys"].keys()
+		keyList.sort_custom(func(a, b): return int(entry["keys"][a]) > int(entry["keys"][b]))
+		for index in mini(3, keyList.size()):
+			var key: Vector3i = keyList[index]
+			var style := styles.styleForId(styles.styleIdFor(key.x, key.y, key.z))
+			print("    top key {key}: {cells} cells, {feature} #{color}".format({
+				"key": key, "cells": entry["keys"][key], "feature": style["feature"],
+				"color": style["color"].to_html(false),
+			}))
+		if entry["styles"].size() <= 1:
+			collapsed.append(sourceId)
+	if collapsed.is_empty():
+		print("  no source collapses to a single style")
+	else:
+		printerr("  collapsed sources (every encountered key uses one style): ", collapsed)
+
+	print("\n  feature summary:")
+	var featureNames: Array = featureKeys.keys()
+	featureNames.sort()
+	for feature in featureNames:
+		var sample: Dictionary = styles.styleForId(_firstStyleIdForFeature(styles, keys, feature))
+		print("    {feature}: {keys} keys, {cells} cells, {color}".format({
+			"feature": feature, "keys": featureKeys[feature], "cells": featureCells[feature],
+			"color": sample["color"].to_html(false),
+		}))
+	if unknownKeys.is_empty():
+		print("  unknown keys: none")
+	else:
+		printerr("  unknown keys ({count}):".format({ "count": unknownKeys.size() }))
+		for key in unknownKeys:
+			printerr("    ", key, " x", counts[key])
+
+
+func _firstStyleIdForFeature(styles: MapTileStyles, keys: Array, feature: String) -> int:
+	for key in keys:
+		var styleId := styles.styleIdFor(key.x, key.y, key.z)
+		if styles.styleForId(styleId)["feature"] == feature:
+			return styleId
+	return 0
+
+
+
 ## chunks, with per-source names, tileset terrain tags, and prototype colors
 ## sampled from each atlas tile's ground band (bottom 24x12 rows, falling
 ## back to the top rows and then the source's dominant ground). Prints a
@@ -305,19 +519,17 @@ func _surveyPalette(chunkCells: Dictionary, missingChunks: Array) -> void:
 		}))
 	if !alternatives.is_empty():
 		printerr("  non-zero alternatives encountered (not styled yet): ", alternatives)
-	print("\n## Paste into Data/Overworld/MapTileStyles.gd -> STYLES:")
+	# Diagnostic only: the shipped palette is authored in MapTileStyles.gd (biome
+	# ground + feature colors); these sampled colors exist to inform edits.
+	print("\n## Sampled tile colors (diagnostic; the shipped palette is authored in MapTileStyles.gd):")
+	print("## Classification and collapse warnings: --palette-report")
+	var styles := MapTileStyles.new()
 	for key in keys:
 		var color: Color = candidates.get(key, sourceGround.get(key.x, Color(0.5, 0.5, 0.5)))
-		var feature: String = terrainTags.get(key, MapTileStyles.FEATURE_GROUND)
-		var priority := 10
-		if feature == MapTileStyles.FEATURE_WATER:
-			priority = 20
-		elif feature == MapTileStyles.FEATURE_ROAD:
-			priority = 25
-		elif feature == MapTileStyles.FEATURE_STRUCTURE:
-			priority = 30
-		print("\tVector3i(%d, %d, %d): { \"color\": Color(\"#%s\"), \"feature\": \"%s\", \"priority\": %d }, # x%d %s" % [
-			key.x, key.y, key.z, color.to_html(false), feature, priority, counts[key], sourceNames.get(key.x, "?"),
+		var style := styles.styleForId(styles.styleIdFor(key.x, key.y, key.z))
+		print("\tVector3i(%d, %d, %d): sampled #%s, authored %s #%s, x%d %s" % [
+			key.x, key.y, key.z, color.to_html(false), style["feature"],
+			style["color"].to_html(false), counts[key], sourceNames.get(key.x, "?"),
 		])
 
 
@@ -333,13 +545,9 @@ func _collectTerrainTags(tileSet: TileSet) -> Dictionary:
 			var terrainName = tileSet.get("terrain_set_{set}/terrain_{terrain}/name".format({ "set": setIndex, "terrain": terrainIndex }))
 			if terrainName == null:
 				break
-			var feature := MapTileStyles.FEATURE_STRUCTURE
-			var lowered: String = String(terrainName).to_lower()
-			if lowered.contains("water"):
-				feature = MapTileStyles.FEATURE_WATER
-			elif lowered.contains("track") or lowered.contains("road"):
-				feature = MapTileStyles.FEATURE_ROAD
-			setFeatures[[setIndex, terrainIndex]] = feature
+			var feature := MapTileStyles.featureForTerrainName(String(terrainName))
+			if feature != "":
+				setFeatures[[setIndex, terrainIndex]] = feature
 	for sourceIndex in tileSet.get_source_count():
 		var sourceId: int = tileSet.get_source_id(sourceIndex)
 		var source: TileSetAtlasSource = tileSet.get_source(sourceId)

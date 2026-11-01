@@ -10,6 +10,7 @@ class_name OverworldCoordinates
 
 var _chunkMap: TileMap
 var _templateMap: TileMap
+var _ownsMaps := false
 
 
 func _init(chunkMap: TileMap, templateMap: TileMap) -> void:
@@ -26,7 +27,23 @@ static func makeHeadless() -> OverworldCoordinates:
 	chunkMap.tile_set = chunkTileSet
 	var templateMap := TileMap.new()
 	templateMap.tile_set = load(WorldData.TEMPLATE_TILESET_PATH)
-	return OverworldCoordinates.new(chunkMap, templateMap)
+	var coordinates := OverworldCoordinates.new(chunkMap, templateMap)
+	coordinates._ownsMaps = true
+	return coordinates
+
+
+## Frees maps created by makeHeadless(). Live coordinates borrow scene nodes
+## and never take ownership of them.
+func dispose() -> void:
+	if !_ownsMaps:
+		return
+	if is_instance_valid(_chunkMap):
+		_chunkMap.free()
+	if is_instance_valid(_templateMap):
+		_templateMap.free()
+	_chunkMap = null
+	_templateMap = null
+	_ownsMaps = false
 
 
 ## The chunk's first cell on the shared template grid (the live
@@ -44,11 +61,23 @@ func chunkTileToCell(chunk: Vector2i, tile: Vector2i) -> Vector2i:
 	return chunkToBaseCell(chunk) + tile - Vector2i.ONE
 
 
+## Inverse of chunkTileToCell: the chunk and 1-based local tile a shared cell
+## belongs to, derived from the real chunk-frame transforms (never hand math).
+func cellToChunkTile(cell: Vector2i) -> Dictionary:
+	var baseZero := chunkToBaseCell(Vector2i.ZERO)
+	var stepX := chunkToBaseCell(Vector2i(1, 0)) - baseZero
+	var stepY := chunkToBaseCell(Vector2i(0, 1)) - baseZero
+	var chunk := Vector2i(
+		floori(float(cell.x - baseZero.x + 1) / float(stepX.x)),
+		floori(float(cell.y - baseZero.y + 1) / float(stepY.y))
+	)
+	var tile := cell - chunkToBaseCell(chunk) + Vector2i.ONE
+	return { "chunk": chunk, "tile": tile }
+
+
 ## The chunk/tile anchor in world space, defined through the shared cell so
-## it always agrees with cellToWorld(chunkTileToCell()). The legacy anchor
-## formulas still embedded in Overworld.gd (location collisions, the initial
-## player spawn) are intentionally untouched until the player-position
-## unification step; they differ from this by a small constant offset.
+## it always agrees with cellToWorld(chunkTileToCell()). The player spawn, the
+## location collision areas and the spawn points all place through this.
 func chunkTileToWorld(chunk: Vector2i, tile: Vector2i) -> Vector2:
 	return cellToWorld(chunkTileToCell(chunk, tile))
 

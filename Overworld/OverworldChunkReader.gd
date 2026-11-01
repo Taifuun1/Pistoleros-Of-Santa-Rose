@@ -24,7 +24,11 @@ func readChunk(chunk: Vector2i, packedScene: PackedScene) -> Dictionary:
 	if packedScene == null:
 		result["errors"].append("chunk {chunk} has no scene".format({ "chunk": chunk }))
 		return result
-	result["cells"] = readCells(chunk, packedScene)
+	var cellRead := _readCells(chunk, packedScene)
+	if !cellRead["errors"].is_empty():
+		result["errors"].append_array(cellRead["errors"])
+		return result
+	result["cells"] = cellRead["cells"]
 	var chunkScript := getChunkScript(packedScene)
 	if chunkScript == null:
 		return result
@@ -44,17 +48,34 @@ func readChunk(chunk: Vector2i, packedScene: PackedScene) -> Dictionary:
 ## the live merged-layer cache uses (signed 16-bit components, the
 ## -Vector2i.ONE local correction, six ints per cell).
 func readCells(chunk: Vector2i, packedScene: PackedScene) -> PackedInt32Array:
-	var cellData := PackedInt32Array()
+	var result := _readCells(chunk, packedScene)
+	for error in result["errors"]:
+		push_error(str(error))
+	return result["cells"]
+
+
+## Decodes complete tile_data records only. Any malformed property rejects the
+## chunk's cells instead of returning plausible partial terrain.
+func _readCells(chunk: Vector2i, packedScene: PackedScene) -> Dictionary:
+	var result := { "cells": PackedInt32Array(), "errors": [] }
 	if packedScene == null:
-		return cellData
+		return result
+	var cellData := PackedInt32Array()
 	var baseCell := _coordinates.chunkToBaseCell(chunk)
 	var state := packedScene.get_state()
 	for n in range(state.get_node_count()):
 		for p in range(state.get_node_property_count(n)):
 			if state.get_node_property_name(n, p) != "layer_0/tile_data":
 				continue
-			var data: PackedInt32Array = state.get_node_property_value(n, p)
-			for i in range(0, data.size() - 2, 3):
+			var value = state.get_node_property_value(n, p)
+			if typeof(value) != TYPE_PACKED_INT32_ARRAY:
+				result["errors"].append("chunk {chunk} node {node} has non-integer tile_data".format({ "chunk": chunk, "node": n }))
+				continue
+			var data: PackedInt32Array = value
+			if data.size() % 3 != 0:
+				result["errors"].append("chunk {chunk} node {node} has incomplete tile_data records".format({ "chunk": chunk, "node": n }))
+				continue
+			for i in range(0, data.size(), 3):
 				var packedCoords: int = data[i]
 				var packedTile: int = data[i + 1]
 				var packedAtlas: int = data[i + 2]
@@ -68,7 +89,9 @@ func readCells(chunk: Vector2i, packedScene: PackedScene) -> PackedInt32Array:
 				cellData.append(_s16((packedTile >> 16) & 0xFFFF))
 				cellData.append(_s16(packedAtlas & 0xFFFF))
 				cellData.append(_s16((packedAtlas >> 16) & 0xFFFF))
-	return cellData
+	if result["errors"].is_empty():
+		result["cells"] = cellData
+	return result
 
 
 ## The per-chunk data script (locations/spawnPoints), if the scene's root

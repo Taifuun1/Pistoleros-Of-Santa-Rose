@@ -1,24 +1,29 @@
 [gd_resource type="Resource" script_class="OverworldMapData" format=3]
 
+[ext_resource type="Texture2D" path="res://Assets/Journal/OverworldMapOverview.png" id="1_dobwv"]
 [ext_resource type="Script" path="res://Data/Overworld/OverworldMapData.gd" id="1_lntne"]
 [ext_resource type="Texture2D" path="res://Assets/Journal/OverworldMap.png" id="2_dobwv"]
 
 [resource]
 script = ExtResource("1_lntne")
+format_version = 2
 texture = ExtResource("2_dobwv")
-image_size = Vector2i(2304, 1152)
-map_origin = Vector2(-1535, -2)
+map_orientation = 1
+image_size = Vector2i(3072, 1536)
+map_origin = Vector2(-8, -2)
+overview_texture = ExtResource("1_dobwv")
+overview_image_size = Vector2i(192, 384)
 chunk_grid = Rect2i(0, 0, 12, 24)
 cell_min = Vector2i(-2, -2)
 cell_max = Vector2i(765, 1533)
-source_fingerprint = "4d364cc4a075ac035c281714946a5ad4"
+source_fingerprint = "789e85cc191ed65dce610965f88cb8e7"
 locations = Array[Dictionary]([{
 "cell": Vector2i(69, 1434),
 "chunk": Vector2i(1, 22),
 "display_name": "Donnafolk Caves",
 "icon": "location",
 "id": "Donnafolk Caves",
-"image_position": Vector2(170, 753.5),
+"image_position": Vector2(284, 1436),
 "tile": Vector2i(7, 28)
 }, {
 "cell": Vector2i(106, 1484),
@@ -26,7 +31,7 @@ locations = Array[Dictionary]([{
 "display_name": "Bandit Camp",
 "icon": "location",
 "id": "Bandit Camp",
-"image_position": Vector2(157, 797),
+"image_position": Vector2(432, 1486),
 "tile": Vector2i(44, 14)
 }, {
 "cell": Vector2i(169, 1099),
@@ -34,7 +39,7 @@ locations = Array[Dictionary]([{
 "display_name": "Twin Creek Mines",
 "icon": "location",
 "id": "Twin Creek Mines",
-"image_position": Vector2(605, 636),
+"image_position": Vector2(684, 1101),
 "tile": Vector2i(43, 13)
 }, {
 "cell": Vector2i(232, 937),
@@ -42,7 +47,7 @@ locations = Array[Dictionary]([{
 "display_name": "Gold Run",
 "icon": "location",
 "id": "Gold Run",
-"image_position": Vector2(830, 586.5),
+"image_position": Vector2(936, 939),
 "tile": Vector2i(42, 43)
 }, {
 "cell": Vector2i(530, 1122),
@@ -50,7 +55,7 @@ locations = Array[Dictionary]([{
 "display_name": "Lazysprings",
 "icon": "location",
 "id": "Lazysprings",
-"image_position": Vector2(943, 828),
+"image_position": Vector2(2128, 1124),
 "tile": Vector2i(20, 36)
 }, {
 "cell": Vector2i(535, 1211),
@@ -58,7 +63,7 @@ locations = Array[Dictionary]([{
 "display_name": "Clearwater Grove",
 "icon": "location",
 "id": "Clearwater Grove",
-"image_position": Vector2(859, 875),
+"image_position": Vector2(2148, 1213),
 "tile": Vector2i(25, 61)
 }, {
 "cell": Vector2i(673, 1218),
@@ -66,6 +71,6 @@ locations = Array[Dictionary]([{
 "display_name": "Clearsprings",
 "icon": "location",
 "id": "Clearsprings",
-"image_position": Vector2(990, 947.5),
+"image_position": Vector2(2700, 1220),
 "tile": Vector2i(35, 4)
 }])

@@ -45,6 +45,24 @@ func _run() -> void:
 		var seamYDown := coordinates.chunkTileToCell(chunk + Vector2i(0, 1), Vector2i(17, 0))
 		_check(seamYDown - seamYUp == Vector2i(0, 1), "y seam at chunk {chunk} is adjacent with no gap or overlap".format({ "chunk": chunk }))
 
+	print("\n--- Cell to chunk/tile inverses ---")
+	for anchor in [[Vector2i(8, 17), Vector2i(20, 36)], [Vector2i(8, 12), Vector2i(40, 38)], [Vector2i(0, 0), Vector2i(0, 0)], [Vector2i(11, 23), Vector2i(63, 63)]]:
+		var anchorChunk: Vector2i = anchor[0]
+		var anchorTile: Vector2i = anchor[1]
+		var inverted: Dictionary = coordinates.cellToChunkTile(coordinates.chunkTileToCell(anchorChunk, anchorTile))
+		_check(inverted["chunk"] == anchorChunk and inverted["tile"] == anchorTile, "cellToChunkTile inverts chunkTileToCell for {chunk}/{tile}".format({ "chunk": anchorChunk, "tile": anchorTile }))
+	var firstInverted: Dictionary = coordinates.cellToChunkTile(coordinates.chunkTileToCell(Vector2i(1, 1), Vector2i(0, 0)))
+	_check(firstInverted["chunk"] == Vector2i(1, 1) and firstInverted["tile"] == Vector2i(0, 0), "the first cell of a chunk inverts to tile (0,0)")
+	var lastInverted: Dictionary = coordinates.cellToChunkTile(coordinates.chunkTileToCell(Vector2i(0, 0), Vector2i(63, 63)))
+	_check(lastInverted["chunk"] == Vector2i(0, 0) and lastInverted["tile"] == Vector2i(63, 63), "the last cell of a chunk stays in the same chunk")
+	var sweepOk := true
+	for localX in [0, 1, 31, 32, 62, 63]:
+		for localY in [0, 1, 31, 32, 62, 63]:
+			var sweepInverted: Dictionary = coordinates.cellToChunkTile(coordinates.chunkTileToCell(Vector2i(8, 12), Vector2i(localX, localY)))
+			if sweepInverted["chunk"] != Vector2i(8, 12) or sweepInverted["tile"] != Vector2i(localX, localY):
+				sweepOk = false
+	_check(sweepOk, "cellToChunkTile round-trips every sampled cell of the spawn chunk")
+
 	print("\n--- World agreement and fractional round-trips ---")
 	for anchor in [[Vector2i(8, 17), Vector2i(20, 36)], [Vector2i(8, 12), Vector2i(40, 38)]]:
 		var chunk: Vector2i = anchor[0]
@@ -64,33 +82,80 @@ func _run() -> void:
 		var negativeWorld := coordinates.cellToWorld(negativeCell)
 		_check(coordinates.worldToCellFraction(negativeWorld).distance_to(Vector2(negativeCell)) < 0.001, "negative cell {cell} round-trips".format({ "cell": negativeCell }))
 
-	print("\n--- Projection ---")
-	_check(projection.imageSize == Vector2i(2304, 1152), "the full-grid image is 2304x1152 (cell footprints span one column wider than the lattice)")
-	for cornerCell in [projection.cellMin, projection.cellMax, Vector2i(projection.cellMin.x, projection.cellMax.y), Vector2i(projection.cellMax.x, projection.cellMin.y)]:
-		var cornerImage := projection.cellToImage(cornerCell)
-		var cornerWorking := projection.cellToWorkingPixel(cornerCell)
-		_check(cornerImage.x >= 0 and cornerImage.y >= 0 and cornerImage.x < projection.imageSize.x and cornerImage.y < projection.imageSize.y, "corner cell {cell} projects inside the final image".format({ "cell": cornerCell }))
-		_check(cornerWorking.x >= 0 and cornerWorking.y >= 0 and cornerWorking.x < projection.workingSize.x and cornerWorking.y < projection.workingSize.y, "corner cell {cell} projects inside the working image".format({ "cell": cornerCell }))
+	print("\n--- Projection: both orientations ---")
+	_check(projection.orientation == OverworldMapProjection.SHIPPED_ORIENTATION, "cellForGrid defaults to the shipped orientation")
+	_check(projection.imageSize == Vector2i(3072, 1536), "the shipped aligned full-grid image is 3072x1536")
+	_check(projection.pixelsPerCell == Vector2(4.0, 1.0), "the aligned map uses the Overworld's 4:1 chunk spacing")
+	var isoProjection := OverworldMapProjection.cellForGrid(coordinates, WorldData.CHUNK_GRID, chunkTiles, OverworldMapProjection.ORIENTATION_ISOMETRIC)
 	var neighborCell := Vector2i(100, 500)
-	_check(projection.cellToWorkingPixel(neighborCell + Vector2i(1, 0)) - projection.cellToWorkingPixel(neighborCell) == Vector2i(1, 1), "+u neighbor projects (+1,+1) in working space")
-	_check(projection.cellToWorkingPixel(neighborCell + Vector2i(0, 1)) - projection.cellToWorkingPixel(neighborCell) == Vector2i(-1, 1), "+v neighbor projects (-1,+1) in working space")
-	_check(projection.cellToWorkingPixel(neighborCell + Vector2i(-1, 0)) - projection.cellToWorkingPixel(neighborCell) == Vector2i(-1, -1), "-u neighbor projects (-1,-1) in working space")
-	_check(projection.cellToWorkingPixel(neighborCell + Vector2i(0, -1)) - projection.cellToWorkingPixel(neighborCell) == Vector2i(1, -1), "-v neighbor projects (+1,-1) in working space")
-	var workingPixels := {}
-	for localX in chunkTiles.x:
-		for localY in chunkTiles.y:
-			workingPixels[projection.cellToWorkingPixel(coordinates.chunkTileToCell(Vector2i(8, 12), Vector2i(localX, localY)))] = true
-	_check(workingPixels.size() == chunkTiles.x * chunkTiles.y, "every fixture cell writes a unique working pixel")
-	for sampleCell in [Vector2i(-2, -2), Vector2i(550, 804), Vector2i(530, 1122), Vector2i(765, 1533)]:
-		_check(projection.imageToCellFraction(projection.cellToImage(sampleCell)).distance_to(Vector2(sampleCell)) < 0.001, "imageToCellFraction inverts cellToImage for {cell}".format({ "cell": sampleCell }))
-	var halfCell := Vector2(neighborCell) + Vector2(0.5, 0)
-	var halfExpected := (projection.cellToImage(neighborCell) + projection.cellToImage(neighborCell + Vector2i(1, 0))) * 0.5
-	_check(projection.cellFractionToImage(halfCell).distance_to(halfExpected) < 0.001, "fractional cells project linearly between their integer neighbours")
+	_check(isoProjection.imageSize == Vector2i(2304, 1152), "the isometric full-grid image stays 2304x1152")
+	_check(isoProjection.mapOrigin == Vector2(-1535, -2), "the isometric origin is unchanged by the shared basis")
+	_check(isoProjection.pixelsPerCell == Vector2(1.0, 0.5), "the isometric map keeps 1x0.5 pixels per cell")
+
+	for subjectVariant in [projection, isoProjection]:
+		var subject: OverworldMapProjection = subjectVariant
+		var label := OverworldMapProjection.orientationName(subject.orientation)
+		for cornerCell in [subject.cellMin, subject.cellMax, Vector2i(subject.cellMin.x, subject.cellMax.y), Vector2i(subject.cellMax.x, subject.cellMin.y)]:
+			var cornerImage := subject.cellToImage(cornerCell)
+			var cornerWorking := subject.cellToWorkingPixel(cornerCell)
+			_check(cornerImage.x >= 0 and cornerImage.y >= 0 and cornerImage.x < subject.imageSize.x and cornerImage.y < subject.imageSize.y, "{orientation} corner cell {cell} projects inside the final image".format({ "orientation": label, "cell": cornerCell }))
+			_check(cornerWorking.x >= 0 and cornerWorking.y >= 0 and cornerWorking.x < subject.workingSize.x and cornerWorking.y < subject.workingSize.y, "{orientation} corner cell {cell} fits the working image with its footprint".format({ "orientation": label, "cell": cornerCell }))
+			_check(cornerWorking.x + subject.workingCellFootprint.x <= subject.workingSize.x and cornerWorking.y + subject.workingCellFootprint.y <= subject.workingSize.y, "{orientation} corner cell {cell} footprint is not clipped".format({ "orientation": label, "cell": cornerCell }))
+
+		# Footprints must tile densely: every working pixel maps to exactly one cell.
+		var covered := {}
+		var overlap := false
+		for localX in chunkTiles.x:
+			for localY in chunkTiles.y:
+				var cellPixel := subject.cellToWorkingPixel(coordinates.chunkTileToCell(Vector2i(8, 12), Vector2i(localX, localY)))
+				for footprintY in subject.workingCellFootprint.y:
+					for footprintX in subject.workingCellFootprint.x:
+						var pixel := cellPixel + Vector2i(footprintX, footprintY)
+						if covered.has(pixel):
+							overlap = true
+						covered[pixel] = true
+		_check(!overlap, "{orientation} cell footprints never overlap".format({ "orientation": label }))
+		_check(covered.size() == chunkTiles.x * chunkTiles.y * subject.workingCellFootprint.x * subject.workingCellFootprint.y, "{orientation} a full chunk tiles its working area densely".format({ "orientation": label }))
+
+		for sampleCell in [Vector2i(-2, -2), Vector2i(550, 804), Vector2i(530, 1122), Vector2i(765, 1533)]:
+			_check(subject.imageToCellFraction(subject.cellToImage(sampleCell)).distance_to(Vector2(sampleCell)) < 0.001, "{orientation} imageToCellFraction inverts cellToImage for {cell}".format({ "orientation": label, "cell": sampleCell }))
+		var halfCell := Vector2(neighborCell) + Vector2(0.5, 0)
+		var halfExpected := (subject.cellToImage(neighborCell) + subject.cellToImage(neighborCell + Vector2i(1, 0))) * 0.5
+		_check(subject.cellFractionToImage(halfCell).distance_to(halfExpected) < 0.001, "{orientation} fractional cells project linearly between their integer neighbours".format({ "orientation": label }))
+		var quarterCell := Vector2(neighborCell) + Vector2(0.0, 0.25)
+		var quarterExpected := subject.cellToImage(neighborCell) + (subject.cellToImage(neighborCell + Vector2i(0, 1)) - subject.cellToImage(neighborCell)) * 0.25
+		_check(subject.cellFractionToImage(quarterCell).distance_to(quarterExpected) < 0.001, "{orientation} fractional v motion projects linearly".format({ "orientation": label }))
+		_check(subject.cellToImage(neighborCell + Vector2i(1, 0)).x > subject.cellToImage(neighborCell).x, "{orientation} +u always moves right in the image".format({ "orientation": label }))
+		_check(subject.cellToImage(neighborCell + Vector2i(0, 1)).y > subject.cellToImage(neighborCell).y, "{orientation} +v always moves down in the image".format({ "orientation": label }))
+
+	# Unknown values fail closed to the shipped orientation instead of
+	# producing a transform the manifest never recorded.
+	_check(!OverworldMapProjection.isKnownOrientation(7), "unknown orientation ids are rejected")
+	_check(OverworldMapProjection.orientationFromName("aligned") == OverworldMapProjection.ORIENTATION_ALIGNED, "the aligned orientation parses from its command-line name")
+	_check(OverworldMapProjection.orientationFromName("isometric") == OverworldMapProjection.ORIENTATION_ISOMETRIC, "the isometric orientation parses from its command-line name")
+	_check(OverworldMapProjection.orientationFromName("diagonal") == -1, "unknown orientation names are rejected")
+
+	print("\n--- Headless map ownership ---")
+	var ownedCoordinates := OverworldCoordinates.makeHeadless()
+	var ownedChunkMap := ownedCoordinates._chunkMap
+	var ownedTemplateMap := ownedCoordinates._templateMap
+	ownedCoordinates.dispose()
+	_check(!is_instance_valid(ownedChunkMap) and !is_instance_valid(ownedTemplateMap), "disposing headless coordinates frees both owned maps")
+	ownedCoordinates.dispose()
+	_check(true, "disposing headless coordinates twice is safe")
+	var borrowedChunkMap := TileMap.new()
+	var borrowedTemplateMap := TileMap.new()
+	var borrowedCoordinates := OverworldCoordinates.new(borrowedChunkMap, borrowedTemplateMap)
+	borrowedCoordinates.dispose()
+	_check(is_instance_valid(borrowedChunkMap) and is_instance_valid(borrowedTemplateMap), "disposing live coordinates does not free borrowed scene maps")
+	borrowedChunkMap.free()
+	borrowedTemplateMap.free()
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:
 		print("\n%d CHECK(S) FAILED" % failures)
+	coordinates.dispose()
 	quit(failures)
 
 

@@ -24,13 +24,14 @@ func _init(mapCoordinates: OverworldCoordinates, mapProjection: OverworldMapProj
 ## chunkCells: chunk -> PackedInt32Array (reader six-int records);
 ## chunkScripts: chunk -> { "locations": Dictionary, "spawnPoints": Dictionary }.
 ## Returns { "image": Image (final), "locations": Array (normalized),
-## "report": Dictionary }; report["errors"] being non-empty makes the bake
-## invalid (out-of-grid cells, invalid Location anchors). Missing chunks stay
-## transparent and are only reported. Cells written by more than one chunk
-## (authoring overlaps across seams) are reported in "overlappingCells" and
-## resolved deterministically — the later chunk in sorted (x, y) order wins —
-## instead of failing; the current world data carries a few of these.
-func bake(chunkCells: Dictionary, chunkScripts: Dictionary, styles: MapTileStyles) -> Dictionary:
+## "report": Dictionary } plus "overview": Image when lodBlock is non-zero.
+## report["errors"] being non-empty makes the bake invalid (out-of-grid cells,
+## invalid Location anchors). Missing chunks stay transparent and are only
+## reported. Cells written by more than one chunk (authoring overlaps across
+## seams) are reported in "overlappingCells" and resolved deterministically —
+## the later chunk in sorted (x, y) order wins — instead of failing; the current
+## world data carries a few of these.
+func bake(chunkCells: Dictionary, chunkScripts: Dictionary, styles: MapTileStyles, lodBlock: Vector2i = Vector2i.ZERO) -> Dictionary:
 	var report := {
 		"presentChunks": [], "missingChunks": [], "cells": 0,
 		"unknownStyles": {}, "overlappingCells": [], "outOfGridCells": [], "sharedLocationIds": {}, "errors": [],
@@ -51,7 +52,93 @@ func bake(chunkCells: Dictionary, chunkScripts: Dictionary, styles: MapTileStyle
 
 	var locations := _collectLocations(chunkScripts, report)
 	var image := _rasterize(styleGrid, gridWidth, styles)
-	return { "image": image, "locations": locations, "report": report }
+	var result := { "image": image, "locations": locations, "report": report }
+	if lodBlock.x > 0 and lodBlock.y > 0:
+		result["overview"] = _aggregate(styleGrid, gridWidth, styles, lodBlock)
+	return result
+
+## Overview/LOD aggregation (Docs/System Design/Journal/Overworld Map.md): one
+## output pixel per lodBlock cells. Thin, absolute features (water, track,
+## powerline) win their block with any presence, so rivers and lines survive
+## generalization; area features (forest, swamp, mountain, cliff, structure)
+## need LOD_AREA_SHARE of the block, so scattered foliage does not flood the
+## plains. Among qualifying features the higher style priority wins (cliff over
+## forest, structure over everything), and the block's most common style within
+## that feature supplies the color. Blocks that are mostly empty stay
+## transparent so missing chunks keep their shape.
+const LOD_MIN_FILL_SHARE := 0.25
+const LOD_AREA_SHARE := 0.3
+const LOD_LINEAR_FEATURES := [
+	MapTileStyles.FEATURE_WATER,
+	MapTileStyles.FEATURE_TRACK,
+	MapTileStyles.FEATURE_POWERLINE,
+]
+
+
+func _aggregate(styleGrid: PackedInt32Array, gridWidth: int, styles: MapTileStyles, lodBlock: Vector2i) -> Image:
+	var gridHeight := styleGrid.size() / gridWidth
+	var outWidth := ceili(float(gridWidth) / float(lodBlock.x))
+	var outHeight := ceili(float(gridHeight) / float(lodBlock.y))
+	var pixels := PackedByteArray()
+	pixels.resize(outWidth * outHeight * 4)
+	var minFilled := int(ceil(float(lodBlock.x * lodBlock.y) * LOD_MIN_FILL_SHARE))
+	for blockY in outHeight:
+		for blockX in outWidth:
+			var featureCells := {}
+			var featureStyles := {}
+			var filled := 0
+			for y in range(blockY * lodBlock.y, mini((blockY + 1) * lodBlock.y, gridHeight)):
+				for x in range(blockX * lodBlock.x, mini((blockX + 1) * lodBlock.x, gridWidth)):
+					var stored := styleGrid[y * gridWidth + x]
+					if stored == 0:
+						continue
+					var styleId := stored - 1
+					filled += 1
+					var feature: String = styles.styleForId(styleId)["feature"]
+					featureCells[feature] = int(featureCells.get(feature, 0)) + 1
+					var perFeature: Dictionary = featureStyles.get(feature, {})
+					perFeature[styleId] = int(perFeature.get(styleId, 0)) + 1
+					featureStyles[feature] = perFeature
+			if filled < minFilled:
+				continue
+			var bestFeature := ""
+			var bestPriority := -1
+			var bestShare := -1.0
+			var features: Array = featureCells.keys()
+			features.sort()
+			for feature in features:
+				var share := float(featureCells[feature]) / float(filled)
+				var isLinear: bool = feature in LOD_LINEAR_FEATURES
+				if !isLinear and feature != MapTileStyles.FEATURE_GROUND and share < LOD_AREA_SHARE:
+					continue
+				var priority: int = int(styles.styleForId(_mostCommonStyle(featureStyles[feature]))["priority"])
+				if priority > bestPriority or (priority == bestPriority and share > bestShare):
+					bestPriority = priority
+					bestShare = share
+					bestFeature = feature
+			var color: Color = styles.styleForId(_mostCommonStyle(featureStyles[bestFeature]))["color"]
+			var offset := (blockY * outWidth + blockX) * 4
+			pixels[offset] = color.r8
+			pixels[offset + 1] = color.g8
+			pixels[offset + 2] = color.b8
+			pixels[offset + 3] = color.a8
+	return Image.create_from_data(outWidth, outHeight, false, Image.FORMAT_RGBA8, pixels)
+
+
+## Most common style id in a { styleId: count } tally; ties break to the lowest
+## id so the result never depends on Dictionary order.
+func _mostCommonStyle(counts: Dictionary) -> int:
+	var winner := 0
+	var best := -1
+	var ids: Array = counts.keys()
+	ids.sort()
+	for styleId in ids:
+		if int(counts[styleId]) > best:
+			best = int(counts[styleId])
+			winner = styleId
+	return winner
+
+
 
 
 func _readChunkCells(chunk: Vector2i, cells: PackedInt32Array, styles: MapTileStyles, styleGrid: PackedInt32Array, gridWidth: int, report: Dictionary) -> void:
@@ -115,14 +202,15 @@ func _collectLocations(chunkScripts: Dictionary, report: Dictionary) -> Array:
 	return locations
 
 
-## Each present cell paints a 2x1 footprint — its lattice pixel (u - v, u + v)
-## plus the (x + 1, y) parity hole, which no other cell's lattice pixel can
-## claim — so the working surface tiles densely with no transparent
-## every-other-column stripes, then a vertical 1/2 bilinear downsample produces
-## the final image. No viewport drawing, no texture sampling.
+## Each present cell paints the projection's working footprint — the isometric
+## lattice pixel plus its parity hole, or the aligned cell block — so the
+## working surface tiles densely, then the projection's downsample produces the
+## final image (a vertical 1/2 bilinear resize when isometric). No viewport
+## drawing, no texture sampling.
 func _rasterize(styleGrid: PackedInt32Array, gridWidth: int, styles: MapTileStyles) -> Image:
 	var width := projection.workingSize.x
 	var height := projection.workingSize.y
+	var footprint := projection.workingCellFootprint
 	var colors := PackedByteArray()
 	colors.resize((styles.styleCount() + 2) * 4)
 	_storeColor(colors, 0, Color(0, 0, 0, 0))
@@ -141,15 +229,18 @@ func _rasterize(styleGrid: PackedInt32Array, gridWidth: int, styles: MapTileStyl
 			projection.cellMin.y + gridIndex / gridWidth
 		)
 		var workingPixel := projection.cellToWorkingPixel(cell)
-		var pixelIndex := (workingPixel.y * width + workingPixel.x) * 4
 		var colorIndex := value * 4
-		for offset in [pixelIndex, pixelIndex + 4]:
-			pixels[offset] = colors[colorIndex]
-			pixels[offset + 1] = colors[colorIndex + 1]
-			pixels[offset + 2] = colors[colorIndex + 2]
-			pixels[offset + 3] = colors[colorIndex + 3]
+		for footprintY in footprint.y:
+			var rowIndex := (workingPixel.y + footprintY) * width + workingPixel.x
+			for footprintX in footprint.x:
+				var offset := (rowIndex + footprintX) * 4
+				pixels[offset] = colors[colorIndex]
+				pixels[offset + 1] = colors[colorIndex + 1]
+				pixels[offset + 2] = colors[colorIndex + 2]
+				pixels[offset + 3] = colors[colorIndex + 3]
 	var working := Image.create_from_data(width, height, false, Image.FORMAT_RGBA8, pixels)
-	working.resize(width, ceili(float(height) * 0.5), Image.INTERPOLATE_BILINEAR)
+	if projection.downsample != Vector2i.ONE:
+		working.resize(projection.imageSize.x, projection.imageSize.y, Image.INTERPOLATE_BILINEAR)
 	return working
 
 
