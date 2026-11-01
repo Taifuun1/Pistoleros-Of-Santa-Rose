@@ -73,6 +73,8 @@ func loadDataFolder(folderPath: String) -> Dictionary:
 		var entryData = entry.get("data")
 		if entryData != null:
 			data[entryData.name] = entryData
+		if entry is Node:
+			entry.free()
 	return data
 
 func checkIfActorIsOnSide(actorName, actorSide, shootoutActors):

@@ -54,7 +54,9 @@ func _ready() -> void:
 		add_child(player)
 		players.append(player)
 	if musicData.is_empty() and ResourceLoader.exists(MUSIC_DATA_SCRIPT):
-		musicData = load(MUSIC_DATA_SCRIPT).new().data
+		var dataInstance = load(MUSIC_DATA_SCRIPT).new()
+		musicData = dataInstance.data
+		dataInstance.free()
 	if tracks.is_empty():
 		_scanMusicFolder(MUSIC_ROOT, "")
 
