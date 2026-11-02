@@ -4,6 +4,8 @@ The Journal's Overworld map shows the world, the player's current/last known pos
 
 This is a design doc: it describes intended behavior, and implementation may lag behind it. **Status: steps 1–6 implemented plus baseline hardening — shared `OverworldChunkReader`/`OverworldCoordinates`/`OverworldMapProjection`, explicit `WorldData`, `MapTileStyles`, the headless bake tool with the checked-in `Assets/Journal/OverworldMap.png` and `Data/Overworld/OverworldMapData.tres` manifest (fingerprint + `--check`), the Journal map tab (`UI/Journal/Tabs/MapTab.*`: fit/pan/zoom, constant-size markers, generated POIs), and the exact live/last-known player provider (`Globals/Overworld.gd::getOverworldMapPosition()`, re-entry unified). Hardening adds coordinate-map ownership/disposal, malformed-chunk rejection, fail-closed runtime manifest validation, POI projection checks and complete MapTab view disposal. Orientation is resolved: the shipped map uses the gameplay-aligned projection recorded as `map_orientation` in manifest format version 2. The terrain palette is now authored rather than sampled and follows the authored per-row reference [Tileset Classification](Tileset%20Classification.md) (rocks, cliffs, forest, swamp, water, tracks, fences). Fit-scale readability is handled by a generated overview LOD that the map tab uses while zoomed out, and the map is fully operable by mouse, keyboard and controller (pan, zoom, fit, center, POI cycling) with the map filling the tab and the shortcut buttons overlaid. The second review's iteration step 1 is implemented: re-entry reseeds from the tile map's containing cell, and exact world/cell conversion uses an explicit cell+fraction pair instead of an invertible-looking packed fraction. Iteration step 2 is implemented too: the Journal wires TabBar-down to the map's exposed focus target, `ui_cancel` backs out to tab switching before closing, and the real-shell tests cover controller pan and tab navigation at 640×360. Iteration step 3 makes every generator mode fail closed: decode errors, `--require-complete`, `--strict`, palette collapse/unknown keys and invalid CLI input all exit nonzero, invalid input refuses to bake or write, and a subprocess suite locks the exit codes and output preservation. Iteration step 4 removes the remaining test-process leaks: MusicPlayer shuts its streams/tweens/timer down explicitly, SceneManager loads scenes synchronously in headless runs, Overworld disposes its streaming caches and skips background preloading in headless mode, and the Journal/Encounters tests free the tabs, actors and script instances they own. The quest key-point API (step 7) is still pending.**
 
+Quest marker identity and “Show on map” navigation are implemented (Quests stage 3): MapTab reads `Quests.getCurrentMapMarkers()`, keys badges by `quest_id:objective_id`, focuses the exact requested badge through `focusQuestTarget()`, and refreshes from `questStateChanged` only while active. The shell forwards the Quests tab's request through `Journal.showOnMap()`.
+
 ## Requirements
 
 - Show the complete Overworld, not only currently streamed chunks.
@@ -46,7 +48,7 @@ Do not instantiate the whole Overworld or regenerate the map when the Journal op
 - `Overworld.gd::setChunk()` instantiates chunk scripts as bare data objects. The same reader can collect Location anchors for a map manifest without adding chunk scenes to the tree.
 - The live player is `$Actors/PlayerOverworldActor`. The `Overworld` autoload now owns the exact live/last-known state (`getOverworldMapPosition()`, `registerLivePlayer()`, `clearLivePlayer()`, `storeLastKnownPlayerPosition()`); `spawnChunk`/`spawnTile` stay the re-entry contract and are reseeded from the exact position whenever it is stored, so there is one position instead of three.
 - `OverworldChunkStreamCache.dispose()` clears the scene/cell caches on Overworld exit and `Overworld._exit_tree()` releases its coordinates/reader references. Background chunk preloading is a runtime-only optimization and is skipped in headless runs, because `ResourceLoader`'s threaded tasks are not joined before a test process quits.
-- `Quests.gd` has no active/completed quest or objective-target model. `Locations.currentQuest` is only a scene-selection string. The map needs a future quest map-marker API and must not parse quest text or cutscene names.
+- `Quests.gd` exposes authoritative active/completed state and `getCurrentMapMarkers()` (Quests stages 1–3, covered by `Tests/TestQuests.gd` and `Tests/TestOverworldMapTab.gd`). `Locations.currentQuest` is only a scene-selection string. MapTab's default provider now reads the Quests autoload and must not parse quest text or cutscene names.
 - Zone geometry must come only from the shared `ZoneData.gd`/catalog defined in `Docs/System Design/Overworld Spawns.md`. The map must not add another copy if Zone shading or labels are added.
 
 ### Art and UI
@@ -372,9 +374,9 @@ Markers should remain a consistent **screen-space size** rather than shrinking w
 Initial behavior:
 
 - First open fits the whole map and makes the player icon visually distinct (for example, a subtle pulse). “Center player” switches to a useful close zoom.
-- Mouse drag pans (implemented as a per-frame cursor poll — “left held over the map” arms the drag — because grabbed press/motion `gui_input` delivery proved unreliable across engine grab semantics); wheel/buttons zoom. Keyboard/controller can pan, zoom, fit, center, and cycle POIs: arrows/D-pad pan, `MAP_ZOOM_IN`/`MAP_ZOOM_OUT` (`=`/`-`, controller shoulders) zoom, `MAP_POI_NEXT`/`MAP_POI_PREV` (`]`/`[`, controller Y/X) cycle Locations in image order through the same `focusTarget()` path as “Show on map”, `MAP_CENTER_PLAYER` (`C`, controller A) centers on the player, and `F` fits (controller: zoom out to the minimum, which clamps at fit). Shortcut buttons and markers use `FOCUS_NONE` so focus traversal never hops between them, and the focused map clip consumes map input through `gui_input`. Shell focus handoff: the Journal points the TabBar's down focus neighbour at the tab's `getFocusTarget()` (the map clip), so D-pad down enters map panning; `ui_cancel` from the map returns focus to the TabBar while keeping the Journal open, and the next `ui_cancel` closes it. An unhandled-input fallback still drives the map when focus sits elsewhere, so map actions work from the TabBar. Map input must not leak to player movement or Journal tab shortcuts.
+- Mouse drag pans (implemented as a per-frame cursor poll — “left held over the map” arms the drag — because grabbed press/motion `gui_input` delivery proved unreliable across engine grab semantics); wheel/buttons zoom. Keyboard/controller can pan, zoom, fit, center, and cycle POIs: arrows/D-pad pan, `MAP_ZOOM_IN`/`MAP_ZOOM_OUT` (`=`/`-`, controller shoulders) zoom, `MAP_POI_NEXT`/`MAP_POI_PREV` (`]`/`[`, controller Y/X) cycle Locations in image order through `focusTarget()`, `MAP_CENTER_PLAYER` (`C`, controller A) centers on the player, and `F` fits (controller: zoom out to the minimum, which clamps at fit). Shortcut buttons and markers use `FOCUS_NONE` so focus traversal never hops between them, and the focused map clip consumes map input through `gui_input`. Shell focus handoff: the Journal points the TabBar's down focus neighbour at the tab's `getFocusTarget()` (the map clip), so D-pad down enters map panning; `ui_cancel` from the map returns focus to the TabBar while keeping the Journal open, and the next `ui_cancel` closes it. An unhandled-input fallback still drives the map when focus sits elsewhere, so map actions work from the TabBar. Map input must not leak to player movement or Journal tab shortcuts.
 - POI names can use hover/focus/selected labels instead of displaying every label at once. Add a legend only if the final icon set is not self-explanatory.
-- A quest “Show on map” request selects the tab, centers the target, and focuses/pulses its marker without altering quest state.
+- A quest “Show on map” request selects the tab, centers the target, and focuses/pulses the exact quest/objective marker through the Quests design's dedicated navigation path without altering quest state.
 
 ## Live data and markers
 
@@ -407,7 +409,7 @@ POIs never bake into the PNG. Selecting one shows its name and basic type; it do
 
 ### Current quest targets
 
-The quest system should expose an array so the UI does not assume there can only ever be one marker:
+The quest system should expose an array so the UI does not assume there can only ever be one marker. The [Quests tab design](Quests.md) defines the shared state and quest/objective-aware navigation contract:
 
 ```gdscript
 func getCurrentMapMarkers() -> Array
@@ -423,15 +425,15 @@ func getCurrentMapMarkers() -> Array
 - `target_id` resolves through the generated Location/key-point manifest. Quest data does not duplicate map coordinates.
 - Targets are always key points, per the feature requirement. Do not accept enemy-party nodes, arbitrary actor paths, cutscene scene names, or free-moving positions.
 - Unknown/inactive targets produce a quest-data warning and no marker. They must not move the player icon or appear at `(0,0)`.
-- If a quest marker shares a Location anchor, keep the Location icon at the anchor and offset/raise the quest badge. Both remain available in the tooltip/focus cycle, with the current quest visually prioritized.
-- The Quests tab and Map call the same API. `Locations.currentQuest` and `Quests.currentMainQuestLevel` are not sufficient substitutes.
+- If a quest marker shares a Location anchor, keep the Location icon at the anchor and layer the quest badge above it. Both remain independently selectable through `focusTarget()` (Location/POI) and `focusQuestTarget()` (exact quest/objective), with the current quest visually prioritized.
+- The Quests tab and Map consume the same authoritative current-objective state. `Locations.currentQuest` and `Quests.currentMainQuestLevel` are not sufficient substitutes.
 
-Until that API exists, ship the base map/player/POIs with an empty quest-marker list; do not hardcode introductory quest targets in the map tab.
+MapTab now reads `Quests.getCurrentMapMarkers()` by default and keys badges by `quest_id:objective_id`, so multiple objectives may share one target without overwriting each other. Unknown, malformed, or duplicate entries are rejected without creating an origin marker. An injected `questMarkerProvider` remains the test seam; do not hardcode introductory quest targets in the map tab.
 
 ## Runtime refresh and failure behavior
 
-- On tab activation, validate `format_version`, texture, projection, and manifest once; build POI markers; connect player/quest providers; then refresh.
-- On deactivation/scene exit, disconnect signals and stop timers/tweens. Repeated Journal opens must not duplicate markers or listeners.
+- On tab activation, validate `format_version`, texture, projection, and manifest once; build POI markers; refresh quest markers; connect the quest-state signal source; then refresh the player marker.
+- On deactivation/scene exit, disconnect quest signals and stop timers/tweens. Repeated Journal opens must not duplicate markers or listeners.
 - Player/quest updates change only markers, never the base texture or generated resource.
 - A missing/corrupt generated asset shows a readable “Map data needs regeneration” state and logs the tool command. Do not attempt a blocking full-world runtime bake as a fallback.
 - Pan/zoom, marker hit testing, and labels operate in one transform space. Add automated screen-coordinate tests rather than tuning icon offsets manually at one zoom.
@@ -458,7 +460,7 @@ Until that API exists, ship the base map/player/POIs with an empty quest-marker 
 - `UI/Journal/Tabs/OverworldMapTab.tscn` and `.gd` — display, transforms, markers, focus, and tooltips.
 - `project.godot` — `MAP_ZOOM_IN`/`MAP_ZOOM_OUT`/`MAP_POI_NEXT`/`MAP_POI_PREV`/`MAP_CENTER_PLAYER` actions (keyboard + controller).
 - `Overworld/Overworld.gd` and `Globals/Overworld.gd` — shared reader/coordinates integration and exact last-known player position.
-- Future quest state/API — current objective key-point markers shared with the Quests tab.
+- `Globals/Quests.gd` — `getCurrentMapMarkers()` and `questStateChanged`, shared with the Quests tab (implemented in Quests stages 1–3).
 - `Docs/System Design/Journal/Journal.md` — shell integration remains the parent design.
 
 **Tests**
@@ -502,7 +504,7 @@ Compare the generated silhouette and major features with `Map Outline.aseprite` 
 4. ✅ Add generated metadata/POIs, deterministic fingerprints, `--check`, and checked-in outputs. (`Data/Overworld/OverworldMapData.tres` — typed manifest; `--check` compares committed PNG + manifest against a fresh in-memory bake; the fingerprint covers chunk scenes/scripts, the tileset, world/style data and the shared bake code.)
 5. ✅ Add the Journal map tab, fit/pan/zoom, constant-size markers, and generated POIs. (`UI/Journal/Tabs/MapTab.gd`/`.tscn` + `Tests/TestOverworldMapTab.gd`; the player marker runs on the injectable position provider, whose default is the Overworld autoload's last-known spawn until step 6.)
 6. ✅ Add exact live/last-known player state and unify it with Overworld re-entry where practical. (`Globals/Overworld.gd` provider + `Overworld.gd` registration/`_exit_tree` snapshot; `OverworldCoordinates.cellToChunkTile()` reseeds `spawnChunk`/`spawnTile` from the exact position; live spawn placement now uses `chunkTileToWorld`. Covered by `Tests/TestOverworldMapTab.gd` and the scene-run checks in `Nodes/Scene Manager/Test/SceneManagerTest.gd`.)
-7. Add the quest key-point API and markers when quest state lands; keep Quests/Map on the same objective source.
+7. ✅ Quest key-point API and Map wiring complete (Quests stages 1–3): `Quests.getCurrentMapMarkers()`, the real default provider, `quest_id:objective_id` marker identity, exact `focusQuestTarget()`, and active `questStateChanged` refresh, covered by `Tests/TestQuests.gd`, `Tests/TestOverworldMapTab.gd` and the real-shell navigation check in `Tests/TestJournal.gd`.
 8. ✅ Baseline hardening (coordinate-map ownership/disposal, malformed-chunk rejection, fail-closed manifest validation, complete MapTab disposal, regenerated manifest, 69 MapTab checks).
 9. ✅ Resolve map orientation. `OverworldMapProjection` now shares one integer-basis working surface between `ORIENTATION_ISOMETRIC` (unchanged 2304×1152 diamond) and `ORIENTATION_ALIGNED` (3072×1536, `+u` right / `+v` down, matching the Overworld's 4:1 chunk spacing). The manifest records `map_orientation` at format version 2, the runtime rebuilds from it and rejects unknown values, `--orientation=`/`--preview` generate side-by-side candidates at real fit scale, and both orientations are covered by projection tests. **Aligned is shipped** after the fit-scale comparison; isometric remains selectable for in-game sign-off. (`Tests/TestOverworldMapTab.gd` is at 72 checks; `--check` is current.)
 10. Next: fit-scale outlines/LOD, non-mouse input, streaming/coordinate hardening, and quests. Revisit whether to delete the unused orientation after in-game sign-off.

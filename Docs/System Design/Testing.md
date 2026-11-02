@@ -49,6 +49,9 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `TestHPIndicator` | `Nodes/HP Indicator/HPIndicator.tscn` | World-space HP bar fill clipping, low-HP tint |
 | `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, sizing to the frame's visible (opaque) body with raw-frame fallback, HORIZONTAL/DIAGONAL/VERTICAL coverage geometry, re-measure on animation and horizontal-flip changes, sprite re-parenting, scene-created shadows |
 | `TestMusicPlayer` | `Globals/MusicPlayer.gd` | Playback, tail fades, crossfades, full-volume start from silence, push/pop stack, zone/location/encounter/cutscene decisions |
+| `TestQuests` | `Data/Quests/` + `Globals/Quests.gd` | Definition/catalog validation, availability and fail-closed loading, linear progress and final completion, duplicate/out-of-order rejection, journal projections/history, current-marker derivation, deterministic ordering, copy isolation, production catalog |
+| `TestQuestsTab` | `UI/Journal/Tabs/QuestsTab.tscn` (scene-run) | Active/Completed sections, default/selected/completed detail states, empty/unavailable/malformed providers, live signal refresh and connection lifecycle, focus handoff/restoration, Show on map request payload, long-content scrolling at 640×360 |
+| `TestQuestTriggers` | `Cutscenes/Cutscene.gd` + Pistoleros Regroup data (scene-run) | Quest shot start/complete dispatch, non-blocking behavior, rejected/unknown actions, end-shot placement and objective order in all five cutscene data files, played-cutscene keys, and the five-Location prologue scene/cutscene/exit chain |
 | `TestOverworldChunkStream` | `Overworld/OverworldChunkStreamCache.gd` (+ `Overworld.gd` placement) | Per-chunk queue replacement/drain, budgeted partial writes with resume offsets, the queued erase of an unloaded chunk, the shared unload rule, cache bounds over 120 crossings, and the shared-anchor collision diamond |
 
 ### In-tree tests
@@ -77,7 +80,7 @@ The most recently reworked, most concurrency-heavy logic in the game (background
 Small but decision-heavy: distance accumulation, per-biome event pools (`Data/Events/*.gd` are plain data), random selection, cooldown/gating via `on_event_closed`. A headless test with an injected RNG over the real event data would catch "event pool typo silently never fires" bugs. `PlayerOverworldActor.process_event_result()` (applying event outcomes) is the companion seam.
 
 ### 3. Cutscene playback engine (`Cutscenes/Cutscene.gd`)
-~190 lines driving every story scene: shot sequencing, actor placement, waits, music hooks, fade handshakes. Tests could validate the *interpreter* against a small synthetic cutscene data dict (shots in order, waits respected, music shots fired, end signal) rather than any real arc — the 50+ data files in `Data/Cutscenes/` are content, but a lint-style pass ("every referenced actor/scene/track exists") is a cheap bulk win that catches typos the first time a cutscene runs.
+~190 lines driving every story scene: shot sequencing, actor placement, waits, music hooks, fade handshakes. `TestQuestTriggers` now covers the quest shot's start/complete dispatch, non-blocking behavior, rejected actions, and the Pistoleros Regroup end shots/objective order. The rest of the interpreter (waits, music hooks, end signal) and a full data lint ("every referenced actor/scene/track exists") remain open.
 
 ### 4. Bear Hunt minigame (`Minigames/Bear Hunt/` — ~1,700 lines, zero tests)
 The largest untested code block in the repo: three sub-games (Dodging, Gathering, Hunting) with scoring, spawning and difficulty logic. `RobbingTest.gd` is the in-repo template for simulating a minigame headlessly; porting that pattern to Bear Hunt (especially scoring and end conditions) is high value per line.
@@ -98,10 +101,12 @@ The solver is tested, but `LocationGeneration.gd`, `LocationMap.gd`, `LocationMa
 All small, most pure-ish, all untested: `UI/Dialog/Dialog.gd`, `UI/Popup/Popup.gd`, `UI/Tooltip/Tooltip.gd` + `AddTooltip`, `RichTextLabelExtended(8px)`, `Nodes/ItemNumber.gd`, `Nodes/ItemStats.gd` (interactive-only today), `Nodes/Dynamic Sprite/DynamicSprite.gd`, `Nodes/Exit/Exit.gd`, `Nodes/AStar/AStar.gd` + `AStarGrid.gd`. The two RichTextLabel extensions and the tooltip wrappers are classic "break silently on next Godot upgrade" candidates — a minimal smoke test each (instantiate, set text/theme, no crash) is cheap. `Nodes/Damage Number/DamageNumber.gd` is covered by `Tests/TestDamageNumber.gd` (palette lookup, fallback color, spawn position).
 
 ### 8. Party persistence beyond injury
-`Party.gd` is tested through the injury lens only. `applyLoot()`, `effectiveMaxHp()`, and the save/serialize side (once save/load exists — MainMenu's Continue is still a stub) will need their own coverage. `Quests.gd` and `PokerMoney.gd` are near-stubs today; test when they grow.
+`Party.gd` is tested through the injury lens only. `applyLoot()`, `effectiveMaxHp()`, and the save/serialize side (once save/load exists — MainMenu's Continue is still a stub) will need their own coverage. `PokerMoney.gd` is still a near-stub. `Quests.gd` is covered by `Tests/TestQuests.gd`, the tab by `Tests/TestQuestsTab.gd`, Map navigation by `Tests/TestJournal.gd`/`Tests/TestOverworldMapTab.gd`, and cutscene progression by `Tests/TestQuestTriggers.gd`; persistence remains untested until save support lands.
 
-### 9. Known planned-but-missing test
-`Docs/System Design/Journal/Journal.md` references `Tests/TestJournal.gd` (shell lifecycle, tab navigation, input/pause with fake providers) — it does not exist yet. Either write it when the Journal UI lands or update the doc.
+### 9. Known planned-but-missing tests
+`Tests/TestJournal.gd` covers the Journal shell lifecycle, tab navigation, input/pause behavior and the real-shell Quests → Journal → Map navigation flow. `Tests/TestQuestsTab.gd` covers the Quests tab UI, `Tests/TestOverworldMapTab.gd` covers quest marker identity/exact focus/malformed entries/same-anchor selection/active signal lifecycle, and `Tests/TestQuestTriggers.gd` covers the cutscene quest shot, Pistoleros Regroup progression data, and the five-Location prologue chain.
+
+The latest full `RunAll` run is 32/33. The only failure is the pre-existing, unrelated `Tests/TestActorShadow.gd` VERTICAL shadow padding/offset check, which reproduces standalone and is not touched by the Quests feature.
 
 ### Lower priority / consciously untested
 - **Visual/shader systems** — `Shaders/Blur`, `PlayerRevealController`/`RevealableObject`, outline shaders: headless asserts are mostly meaningless here; keep them manual/QA.

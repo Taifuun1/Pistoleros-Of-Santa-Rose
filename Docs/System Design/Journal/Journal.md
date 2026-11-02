@@ -14,9 +14,9 @@ This is a high-level design overview. Each tab is a separate feature with its ow
 
 ## Current state and dependencies
 
-- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The shell's keyboard/controller focus handoff is implemented too: the tab bar moves down into a tab's exposed focus target (the Map tab's map clip), and `ui_cancel` backs out to the tab bar before closing. The four non-Map tabs show intentional empty/unavailable states; the Map tab renders the generated Overworld map (see the map doc — bake, manifest, runtime tab, hardening, and the gameplay-aligned map orientation are implemented).
+- The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The shell's keyboard/controller focus handoff is implemented too: the tab bar moves down into a tab's exposed focus target (the Map tab's map clip), and `ui_cancel` backs out to the tab bar before closing. The Map tab renders the generated Overworld map (see the map doc — bake, manifest, runtime tab, hardening, and the gameplay-aligned map orientation are implemented), the Quests tab now renders its read-only master/detail view (empty production catalog shows **No quests yet**), and the Inventory/Character/Settings tabs show intentional empty/unavailable states.
 - `Globals/Party.gd` already owns party members, persistent HP/injuries, money, and a basic `inventory` Array. Equipment management, stack limits, dropping, and inventory commands still need their own design.
-- `Globals/Quests.gd` currently contains only main-quest level/rarity. `Globals/Locations.gd::currentQuest` is a string used for scene selection, not a quest journal or map-target model.
+- `Globals/Quests.gd` owns validated quest definitions/catalog and authoritative runtime state, projections and current-marker APIs (`Data/Quests/`, `Tests/TestQuests.gd`). The Quests tab reads it through an injectable provider, the shell forwards `showOnMapRequested` requests to MapTab's exact quest/objective marker path, and Pistoleros Regroup progresses through end-of-cutscene quest shots across the five prologue Location scenes (`Tests/TestQuestsTab.gd`, `Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`, `Tests/TestQuestTriggers.gd`). `Globals/Locations.gd::currentQuest` remains a string used for scene selection.
 - Settings and save management do not yet have an authoritative settings/save service.
 - Existing popup scenes establish reusable UI conventions (`PanelContainer`, `ScrollContainer`, shared theme, close button), while `SceneManager` provides a persistent root above changing gameplay scenes.
 - `Docs/Map Outline.aseprite` is a visual reference, not a runtime map or authoritative source of world geometry.
@@ -68,7 +68,7 @@ Pause ownership needs a small shared modal/pause coordinator rather than every p
 | Tab | Responsibility | Dependencies / detailed design |
 | --- | --- | --- |
 | **Map** | Generated Overworld map, player marker, Location POIs, current quest key-point markers; pan/zoom and marker inspection | [Overworld Map](Overworld%20Map.md); Overworld position provider; quest map-marker API |
-| **Quests** | Active/current and completed quests, progress history, what happened, and the next objective | Real quest definitions/state and progress events; current quest targets shared with Map |
+| **Quests** | Active/current and completed quests, progress history, what happened, and the next objective | [Quests tab](Quests.md); real quest definitions/state and progress events; current quest targets shared with Map |
 | **Character** | Select a party member and inspect base/effective stats, HP/injuries, class, Rodeo, and relevant modifiers | `Party`; shared stat/equipment calculation so values match Shootouts |
 | **Inventory & Equipment** | Shared limited inventory, stacking/unstackable items, supplies/loot/equipment, dropping, character selection, one-click valid-slot equipment swaps, stat comparison | `Party.inventory`; item instance model; equipment/slot and inventory command APIs |
 | **Settings** | Audio/video, gameplay options, input/accessibility as needed, and save management | Persistent settings service; save service; apply/revert and confirmation flows |
@@ -80,7 +80,7 @@ The tab designs own their detailed layouts and sprites. The Journal overview onl
 - **Read authoritative state.** `Party`, future quest/settings/save services, and the Overworld position provider remain owners. The Journal does not copy their mutable state into tab-specific save data.
 - **Mutate through commands.** Equipment, dropping, settings, and save operations call domain APIs and refresh from the result. Buttons must not directly edit nested Dictionaries in several places.
 - **One quest-target source.** The Quests tab and Map consume the same current objective data. Map markers resolve only stable key-point/Location ids; they do not infer targets from quest text or `Locations.currentQuest`.
-- **Map navigation request.** Selecting “Show on map” asks `Journal.gd` to select Map and pass a target id. It does not make the Quests tab instantiate or manipulate map nodes.
+- **Map navigation request.** Selecting “Show on map” asks `Journal.gd` to select Map and pass a request containing quest/objective identity and a target id, as defined in the [Quests tab design](Quests.md). It does not make the Quests tab instantiate or manipulate map nodes.
 - **Refresh only while visible.** Domain signals may mark a cached tab dirty while hidden; reload it on next activation rather than rebuilding every tab on every state change.
 - **No hidden gameplay.** Opening the Journal cannot advance quests, generate loot, change encounter RNG, move actors, or consume supplies.
 
@@ -117,7 +117,7 @@ Suggested order:
 
 1. Shell, modal/pause coordination, input/focus, lazy tabs, and empty states.
 2. [Overworld Map](Overworld%20Map.md), including generated base data and player/POI markers; quest markers follow the quest API.
-3. Quests, with shared objective/map-target contracts.
+3. [Quests](Quests.md), with shared objective/map-target contracts.
 4. Character stats using the same effective-stat calculations as combat.
 5. Inventory and equipment, after their capacity/item/slot rules are specified.
 6. Settings and save management, reusing applicable settings UI in the main menu.
