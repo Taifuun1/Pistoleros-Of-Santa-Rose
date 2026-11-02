@@ -37,9 +37,17 @@ polygon = PackedVector2Array(0, 0, 14, 0, 14, 100, 0, 100)
 
 [node name="Exit" parent="Exits/Great Fall Ridge" instance=ExtResource("4_rliqv")]
 position = Vector2(492, -12)
+exitTo = {
+&"location": &"Great Fall Ridge",
+&"playerPosition": Vector2i(600, 125)
+}
 
 [node name="Exit2" parent="Exits/Great Fall Ridge" instance=ExtResource("4_rliqv")]
 position = Vector2(516, -12)
+exitTo = {
+&"location": &"Great Fall Ridge",
+&"playerPosition": Vector2i(600, 125)
+}
 
 [node name="Fade" parent="." instance=ExtResource("4_hgx2x")]
 

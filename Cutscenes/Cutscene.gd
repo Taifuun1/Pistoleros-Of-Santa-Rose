@@ -84,6 +84,9 @@ func advanceScene() -> void:
 			"move":
 				_playMoveShot(scene.data)
 
+			"quest":
+				_playQuestShot(scene.data)
+
 			"music":
 				# Non-blocking song switch (Docs/System Design/Music player.md):
 				# { "object": "music", "data": { "name": "<MusicPlayer track id>" } };
@@ -175,6 +178,30 @@ func _onMoveShotFinished() -> void:
 	if pendingMoves <= 0:
 		pendingMoves = 0
 		wait = false
+
+# ── Quest shot ────────────────────────────────────────────────────────────────
+
+## Non-blocking quest progression boundary (Docs/System Design/Journal/Quests.md):
+## { "object": "quest", "data": { "action": "start", "quest_id": ... } } or
+## { "object": "quest", "data": { "action": "complete_objective", "quest_id": ...,
+## "objective_id": ... } }. The shot changes only quest state; it never blocks,
+## and the existing _process loop advances on the next tick.
+func _playQuestShot(data: Dictionary) -> void:
+	var action := str(data.get("action", ""))
+	var questId := str(data.get("quest_id", ""))
+	var objectiveId := str(data.get("objective_id", ""))
+	var accepted := false
+	match action:
+		"start":
+			accepted = Quests.startQuest(questId)
+		"complete_objective":
+			accepted = Quests.completeCurrentObjective(questId, objectiveId)
+		_:
+			push_warning("Cutscene: unknown quest action '%s'." % action)
+			return
+	if !accepted:
+		push_warning("Cutscene: quest shot rejected (%s, %s, %s)." % [action, questId, objectiveId])
+
 
 # ── Existing signal handlers ──────────────────────────────────────────────────
 

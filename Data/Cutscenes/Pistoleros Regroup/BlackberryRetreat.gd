@@ -30,6 +30,7 @@ var data = {
 		{"object": "action", "data": {"description": "Gwyneth helps Manuel get up"}},
 		{"object": "dialog", "data": {"actor": "Gwyneth", "text": "There, you'll be riding again in no time."}},
 		{"object": "dialog", "data": {"actor": "Walker", "text": "Good. Let's get moving. We have to find Morrison."}},
-		{"object": "dialog", "data": {"actor": "Manuel", "text": "Oh, I hope he's okay. He's not the bravest <i>alma</i>."}}
+		{"object": "dialog", "data": {"actor": "Manuel", "text": "Oh, I hope he's okay. He's not the bravest <i>alma</i>."}},
+		{"object": "quest", "data": {"action": "complete_objective", "quest_id": "pistoleros_regroup", "objective_id": "find_manuel"}}
 	]
 }

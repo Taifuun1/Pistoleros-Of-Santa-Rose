@@ -231,6 +231,14 @@ var data = {
 				"actor": "Gwyneth",
 				"text": "...It's okay. Let's just go see Manuel."
 			}
+		},
+		{
+			"object": "quest",
+			"data": {
+				"action": "complete_objective",
+				"quest_id": "pistoleros_regroup",
+				"objective_id": "find_aiyana"
+			}
 		}
 	]
 }

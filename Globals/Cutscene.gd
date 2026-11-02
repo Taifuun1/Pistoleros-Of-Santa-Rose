@@ -5,8 +5,8 @@ var cutsceneName = "Finch Pond"
 
 var playedCutscenes = {
 	"Finch Pond": false,
-	"Walker finds Gwyneth": false,
+	"Pine Meadows": false,
 	"Great Fall Ridge": false,
 	"Blackberry Retreat": false,
-	"Littehill Grove": false
+	"Littlehill Grove": false
 }

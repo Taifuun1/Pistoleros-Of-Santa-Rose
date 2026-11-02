@@ -163,6 +163,13 @@ var data = {
 				"actor": "Walker",
 				"text": "I got to find Gwyneth. Where is she?"
 			}
+		},
+		{
+			"object": "quest",
+			"data": {
+				"action": "start",
+				"quest_id": "pistoleros_regroup"
+			}
 		}
 	]
 }

@@ -92,6 +92,14 @@ var data = {
 				"actor": "Walker",
 				"text": "Hells, we didn't do all this for nothing, did we, Gwyneth? Let's search, the rest of them must be around here somewhere."
 			}
+		},
+		{
+			"object": "quest",
+			"data": {
+				"action": "complete_objective",
+				"quest_id": "pistoleros_regroup",
+				"objective_id": "find_gwyneth"
+			}
 		}
 	]
 }

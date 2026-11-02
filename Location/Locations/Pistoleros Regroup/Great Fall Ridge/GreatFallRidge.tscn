@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://plqhvmf2uttb" path="res://Nodes/Exit/Exit.tscn" id="5_yrrrn"]
 [ext_resource type="PackedScene" uid="uid://muesuexxtn5o" path="res://Cutscenes/Generic Cutscenes/Fade.tscn" id="6_sug1q"]
 
-[node name="PineMeadows" type="Node2D"]
+[node name="GreatFallRidge" type="Node2D"]
 script = ExtResource("1_25rci")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
@@ -22,24 +22,32 @@ tile_set = ExtResource("3_s20as")
 
 [node name="Cutscenes" type="Node2D" parent="."]
 
-[node name="Pine Meadows" type="Node2D" parent="Cutscenes"]
+[node name="Great Fall Ridge" type="Node2D" parent="Cutscenes"]
 
-[node name="Cutscene" parent="Cutscenes/Pine Meadows" instance=ExtResource("4_t1esl")]
+[node name="Cutscene" parent="Cutscenes/Great Fall Ridge" instance=ExtResource("4_t1esl")]
 position = Vector2(434, 86)
-cutsceneName = "Pine Meadows"
+cutsceneName = "Great Fall Ridge"
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Cutscenes/Pine Meadows/Cutscene"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Cutscenes/Great Fall Ridge/Cutscene"]
 polygon = PackedVector2Array(0, 0, 14, 0, 14, 100, 0, 100)
 
 [node name="Exits" type="Node2D" parent="."]
 
-[node name="Great Fall Ridge" type="Node2D" parent="Exits"]
+[node name="Blackberry Retreat" type="Node2D" parent="Exits"]
 
-[node name="Exit" parent="Exits/Great Fall Ridge" instance=ExtResource("5_yrrrn")]
+[node name="Exit" parent="Exits/Blackberry Retreat" instance=ExtResource("5_yrrrn")]
 position = Vector2(492, -12)
+exitTo = {
+&"location": &"Blackberry Retreat",
+&"playerPosition": Vector2i(400, 540)
+}
 
-[node name="Exit2" parent="Exits/Great Fall Ridge" instance=ExtResource("5_yrrrn")]
+[node name="Exit2" parent="Exits/Blackberry Retreat" instance=ExtResource("5_yrrrn")]
 position = Vector2(516, -12)
+exitTo = {
+&"location": &"Blackberry Retreat",
+&"playerPosition": Vector2i(400, 540)
+}
 
 [node name="Fade" parent="." instance=ExtResource("6_sug1q")]
 

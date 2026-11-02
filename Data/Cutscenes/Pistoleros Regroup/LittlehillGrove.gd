@@ -50,6 +50,8 @@ var data = {
 		{"object": "dialog", "data": {"actor": "Manuel", "text": "<i>Salud!</i>"}},
 		{"object": "dialog", "data": {"actor": "Morrison", "text": "<i>sob</i>"}},
 		{"object": "dialog", "data": {"actor": "Walker", "text": "Alright, let's move it. We're going to Lazysprings."}},
-		{"object": "dialog", "data": {"actor": "Aiyana", "text": "I can't wait to get to the saloon! Nothing beats a bottle of whiskey after a bad day!"}}
+		{"object": "dialog", "data": {"actor": "Aiyana", "text": "I can't wait to get to the saloon! Nothing beats a bottle of whiskey after a bad day!"}},
+		{"object": "quest", "data": {"action": "complete_objective", "quest_id": "pistoleros_regroup", "objective_id": "find_morrison"}},
+		{"object": "quest", "data": {"action": "complete_objective", "quest_id": "pistoleros_regroup", "objective_id": "regroup_pistoleros_of_santa_rose"}}
 	]
 }
