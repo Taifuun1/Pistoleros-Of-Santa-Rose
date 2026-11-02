@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="QuestCatalog" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Data/Quests/QuestCatalog.gd" id="1_catalog"]
+[ext_resource type="Resource" path="res://Data/Quests/Definitions/PistolerosRegroup.tres" id="2_pistoleros_regroup"]
+
+[resource]
+script = ExtResource("1_catalog")
+definitions = Array[Resource]([ExtResource("2_pistoleros_regroup")])

@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="QuestDefinition" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Data/Quests/QuestDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://Data/Quests/QuestObjectiveDefinition.gd" id="2_objective"]
+
+[sub_resource type="Resource" id="Resource_find_gwyneth"]
+script = ExtResource("2_objective")
+objective_id = "find_gwyneth"
+objective_text = "Find Gwyneth."
+history_text = "Gwyneth was found."
+map_target_id = ""
+
+[sub_resource type="Resource" id="Resource_find_aiyana"]
+script = ExtResource("2_objective")
+objective_id = "find_aiyana"
+objective_text = "Find Aiyana."
+history_text = "Aiyana was found."
+map_target_id = ""
+
+[sub_resource type="Resource" id="Resource_find_manuel"]
+script = ExtResource("2_objective")
+objective_id = "find_manuel"
+objective_text = "Find Manuel."
+history_text = "Manuel was found."
+map_target_id = ""
+
+[sub_resource type="Resource" id="Resource_find_morrison"]
+script = ExtResource("2_objective")
+objective_id = "find_morrison"
+objective_text = "Find Morrison."
+history_text = "Morrison was found."
+map_target_id = ""
+
+[sub_resource type="Resource" id="Resource_regroup"]
+script = ExtResource("2_objective")
+objective_id = "regroup_pistoleros_of_santa_rose"
+objective_text = "Regroup the Pistoleros of Santa Rose."
+history_text = "The Pistoleros of Santa Rose regrouped."
+map_target_id = ""
+
+[resource]
+script = ExtResource("1_definition")
+quest_id = "pistoleros_regroup"
+title = "Pistoleros Regroup"
+summary = "Find the scattered Pistoleros and regroup."
+sort_order = 0
+objectives = Array[Resource]([SubResource("Resource_find_gwyneth"), SubResource("Resource_find_aiyana"), SubResource("Resource_find_manuel"), SubResource("Resource_find_morrison"), SubResource("Resource_regroup")])
