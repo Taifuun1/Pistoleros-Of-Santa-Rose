@@ -5,16 +5,16 @@ extends JournalTab
 ## constant-size POI/player markers. All geometry goes through the shared
 ## OverworldCoordinates/OverworldMapProjection; this tab never decodes
 ## chunks and never bakes anything. Player positions come from an injectable
-## provider (the default reads the Overworld autoload's last-known spawn
-## until the exact provider lands in implementation step 6); quest markers
-## come from an injectable provider that returns none until the quest
-## key-point API exists.
+## provider (the default reads the Overworld autoload's exact live/last-known
+## state); quest markers come from an injectable provider (the default reads
+## Quests.getCurrentMapMarkers()) and refresh on the quest service's change
+## signal while the tab is active.
 
 const MAP_DATA_PATH := "res://Data/Overworld/OverworldMapData.tres"
 const GENERATOR_COMMAND := "godot --headless --path . --script res://Tools/GenerateOverworldMap.gd"
-## Code-drawn placeholder markers; real Location/player icons are still
-## pending assets, quest markers use the existing ActiveQuestIcon.
-const QUEST_CURRENT_ICON := preload("res://Assets/Journal/ActiveQuestIcon.png")
+## Code-drawn placeholder Location/player markers; quest markers use the
+## dedicated Current quest icon.
+const QUEST_CURRENT_ICON := preload("res://Assets/Journal/CurrentQuestIcon.png")
 const LOCATION_MARKER_COLOR := Color(0.96, 0.83, 0.55)
 const PLAYER_MARKER_COLOR := Color(0.85, 0.25, 0.15)
 const MARKER_PIXELS := 12
@@ -31,9 +31,13 @@ const CONTROL_MARGIN := 3
 ## Position provider contract: () -> { "valid": bool, "world_position":
 ## Vector2 (shared Overworld/MergedTiles frame), "is_live": bool }.
 var positionProvider: Callable = Callable()
-## Quest marker provider contract: () -> Array[{ "target_id": String
-## (stable Location/key-point id), "icon": "quest_current" }].
+## Quest marker provider contract: () -> Array[Dictionary] with
+## { "quest_id": String, "objective_id": String, "target_id": String
+## (stable Location/key-point id), "icon": "quest_current" }.
 var questMarkerProvider: Callable = Callable()
+## Optional quest-state signal source injection for tests. Null resolves
+## /root/Quests; only the active tab listens.
+var questStateSource: Node = null
 ## Data path is a var so failure states can be tested without the manifest.
 var mapDataPath := MAP_DATA_PATH
 var mapData: OverworldMapData = null
@@ -55,6 +59,7 @@ var _refreshTimer: Timer = null
 var _locationMarkers := {}
 var _questMarkers := {}
 var _markerTextures := {}
+var _connectedQuestStateSource: Node = null
 ## Location ids in image order (left to right, then top to bottom) for
 ## keyboard/controller POI cycling.
 var _poiFocusOrder: Array = []
@@ -95,20 +100,40 @@ func setTabActive(tabActive: bool) -> void:
 		_stopRuntime()
 
 
-## "Show on map" navigation request: selects, centers and pulses the target
-## marker without altering quest state.
+## Location/POI navigation path (keyboard POI cycling and Location inspection).
 func focusTarget(targetId: String) -> void:
 	if !_built:
 		return
 	var marker: TextureButton = _locationMarkers.get(targetId)
-	var kind := "Location"
-	if marker == null:
-		marker = _questMarkers.get(targetId)
-		kind = "Quest target"
 	if marker == null:
 		return
 	_centerOnImagePosition(marker.get_meta("image_position"))
-	_selectMarker(marker, kind)
+	_selectMarker(marker, "Location")
+
+
+## "Show on map" navigation path: focuses the exact quest/objective badge.
+## Never falls back to a same-anchor Location or another objective. Returns
+## false without moving the map when the marker is absent.
+func focusQuestTarget(request: Dictionary) -> bool:
+	if !_built or _mapContent == null:
+		return false
+	var questId := str(request.get("quest_id", ""))
+	var objectiveId := str(request.get("objective_id", ""))
+	var targetId := str(request.get("target_id", ""))
+	if questId.is_empty() or objectiveId.is_empty() or targetId.is_empty():
+		return false
+	var marker: TextureButton = _questMarkers.get(_questMarkerKey(questId, objectiveId))
+	if marker == null:
+		return false
+	_centerOnImagePosition(marker.get_meta("image_position"))
+	_selectMarker(marker, "Quest target")
+	return true
+
+
+## Stable marker identity: target ids are not unique (multiple objectives may
+## share a Location anchor). Quest/objective ids are validated identifiers.
+func _questMarkerKey(questId: String, objectiveId: String) -> String:
+	return questId + ":" + objectiveId
 
 
 ## Shell focus handoff contract (Journal): the control that receives
@@ -222,8 +247,16 @@ func _defaultPositionProvider() -> Dictionary:
 	return overworldAutoload.getOverworldMapPosition()
 
 
+## Default quest marker provider: the authoritative Quests service. The
+## autoload is resolved by path so this script stays loadable without project
+## autoloads (headless tests).
 func _defaultQuestMarkerProvider() -> Array:
-	return []
+	if !is_inside_tree():
+		return []
+	var questsAutoload = get_tree().root.get_node_or_null("Quests")
+	if questsAutoload == null or !questsAutoload.has_method("getCurrentMapMarkers"):
+		return []
+	return questsAutoload.getCurrentMapMarkers()
 
 
 ## Detailed map while zoomed in, generalized overview while zoomed out: the
@@ -247,6 +280,14 @@ func _resolvePositionProvider() -> Callable:
 
 func _resolveQuestMarkerProvider() -> Callable:
 	return questMarkerProvider if questMarkerProvider.is_valid() else Callable(self, "_defaultQuestMarkerProvider")
+
+
+func _resolveQuestStateSource() -> Node:
+	if questStateSource != null:
+		return questStateSource
+	if !is_inside_tree():
+		return null
+	return get_tree().root.get_node_or_null("Quests")
 
 
 ## The map view is built in code once from the manifest; repeated activations
@@ -434,6 +475,7 @@ func _startRuntime() -> void:
 	if _playerMarker != null and _playerPulse == null:
 		_playerPulse = create_tween().set_loops()
 		_playerPulse.tween_property(_playerMarker, "modulate:a", 0.55, 0.8).from(1.0).set_trans(Tween.TRANS_SINE)
+	_connectQuestStateSource(_resolveQuestStateSource())
 
 
 func _stopRuntime() -> void:
@@ -444,6 +486,33 @@ func _stopRuntime() -> void:
 		_playerPulse = null
 	if _playerMarker != null:
 		_playerMarker.modulate.a = 1.0
+	_disconnectQuestStateSource()
+
+
+func _connectQuestStateSource(source: Node) -> void:
+	if _connectedQuestStateSource == source:
+		return
+	_disconnectQuestStateSource()
+	if source == null or !source.has_signal("questStateChanged"):
+		return
+	var callback := Callable(self, "_onQuestStateChanged")
+	if !source.is_connected("questStateChanged", callback):
+		source.connect("questStateChanged", callback)
+	_connectedQuestStateSource = source
+
+
+func _disconnectQuestStateSource() -> void:
+	if _connectedQuestStateSource == null:
+		return
+	var callback := Callable(self, "_onQuestStateChanged")
+	if is_instance_valid(_connectedQuestStateSource) and _connectedQuestStateSource.is_connected("questStateChanged", callback):
+		_connectedQuestStateSource.disconnect("questStateChanged", callback)
+	_connectedQuestStateSource = null
+
+
+func _onQuestStateChanged(_questId: String) -> void:
+	if _built and active:
+		_refreshQuestMarkers()
 
 
 func _selectMarker(marker: TextureButton, kind: String) -> void:
@@ -470,25 +539,48 @@ func _refreshPlayerMarker() -> void:
 	_layoutMarker(_playerMarker)
 
 
-## Quest markers resolve only through the generated manifest; unknown or
-## inactive targets warn and never appear at (0,0).
+## Quest markers resolve only through the generated manifest; malformed,
+## duplicate, unknown, or inactive targets warn and never appear at (0,0).
 func _refreshQuestMarkers() -> void:
 	if !_built or _markerLayer == null:
 		return
 	for marker in _questMarkers.values():
-		marker.queue_free()
+		var oldMarker: TextureButton = marker
+		if is_instance_valid(oldMarker):
+			if oldMarker.get_parent() != null:
+				oldMarker.get_parent().remove_child(oldMarker)
+			oldMarker.free()
 	_questMarkers = {}
-	var questMarkers: Array = _resolveQuestMarkerProvider().call()
-	for questMarker in questMarkers:
+	var questMarkersValue = _resolveQuestMarkerProvider().call()
+	if !(questMarkersValue is Array):
+		push_warning("Overworld map: quest marker provider did not return an Array.")
+		return
+	for questMarkerValue in questMarkersValue:
+		if !(questMarkerValue is Dictionary):
+			push_warning("Overworld map: ignored a non-Dictionary quest marker entry.")
+			continue
+		var questMarker := questMarkerValue as Dictionary
+		var questId := str(questMarker.get("quest_id", ""))
+		var objectiveId := str(questMarker.get("objective_id", ""))
 		var targetId := str(questMarker.get("target_id", ""))
+		if !questId.is_valid_identifier() or !objectiveId.is_valid_identifier() or targetId.is_empty():
+			push_warning("Overworld map: ignored malformed quest marker identity '%s:%s' target '%s'." % [questId, objectiveId, targetId])
+			continue
+		var markerKey := _questMarkerKey(questId, objectiveId)
+		if _questMarkers.has(markerKey):
+			push_warning("Overworld map: duplicate quest marker identity '%s'." % markerKey)
+			continue
 		var location := mapData.resolveLocation(targetId)
 		if location.is_empty():
 			push_warning("Overworld map: quest target '{target}' has no manifest entry".format({ "target": targetId }))
 			continue
 		var imagePosition := projection.cellToImage(location["cell"])
 		var marker := _addMarker(_markerTexture("quest_current"), imagePosition, location["display_name"])
+		marker.set_meta("quest_id", questId)
+		marker.set_meta("objective_id", objectiveId)
+		marker.set_meta("target_id", targetId)
 		marker.pressed.connect(_selectMarker.bind(marker, "Quest target"))
-		_questMarkers[targetId] = marker
+		_questMarkers[markerKey] = marker
 
 
 func _fitMap() -> void:

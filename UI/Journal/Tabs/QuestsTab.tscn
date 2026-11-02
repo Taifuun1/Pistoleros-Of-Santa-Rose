@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://UI/Journal/Tabs/QuestsTab.gd" id="1_queststab"]
+[ext_resource type="Script" path="res://UI/Journal/Tabs/QuestsTab.gd" id="1_quests"]
+[ext_resource type="Texture2D" path="res://Assets/Journal/CurrentQuestIcon.png" id="2_current"]
+[ext_resource type="Texture2D" path="res://Assets/Journal/CompletedQuestIcon.png" id="3_completed"]
+[ext_resource type="Texture2D" path="res://Assets/Journal/ActiveQuestIcon.png" id="4_active"]
+[ext_resource type="PackedScene" path="res://UI/Journal/TabSprite.tscn" id="5_sprite"]
 
 [node name="QuestsTab" type="Control"]
 layout_mode = 3
@@ -9,4 +13,144 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_queststab")
+script = ExtResource("1_quests")
+
+[node name="ContentView" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="QuestListPanel" type="PanelContainer" parent="ContentView"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.45
+
+[node name="QuestListScroll" type="ScrollContainer" parent="ContentView/QuestListPanel"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="QuestList" type="VBoxContainer" parent="ContentView/QuestListPanel/QuestListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="ActiveHeader" type="Label" parent="ContentView/QuestListPanel/QuestListScroll/QuestList"]
+layout_mode = 2
+text = "Active"
+
+[node name="ActiveQuestRows" type="VBoxContainer" parent="ContentView/QuestListPanel/QuestListScroll/QuestList"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="CompletedHeader" type="Label" parent="ContentView/QuestListPanel/QuestListScroll/QuestList"]
+layout_mode = 2
+text = "Completed"
+
+[node name="CompletedQuestRows" type="VBoxContainer" parent="ContentView/QuestListPanel/QuestListScroll/QuestList"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="QuestDetailPanel" type="PanelContainer" parent="ContentView"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.55
+
+[node name="DetailLayout" type="VBoxContainer" parent="ContentView/QuestDetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="TitleLabel" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="QuestStateLabel" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="SummaryLabel" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="NextPanel" type="PanelContainer" parent="ContentView/QuestDetailPanel/DetailLayout"]
+visible = false
+layout_mode = 2
+
+[node name="NextLayout" type="VBoxContainer" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NextHeader" type="HBoxContainer" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel/NextLayout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CurrentQuestIcon" type="TextureRect" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel/NextLayout/NextHeader"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("2_current")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="NextHeaderLabel" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel/NextLayout/NextHeader"]
+layout_mode = 2
+text = "Next"
+
+[node name="NextLabel" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel/NextLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+
+[node name="ShowOnMapButton" type="Button" parent="ContentView/QuestDetailPanel/DetailLayout/NextPanel/NextLayout"]
+visible = false
+layout_mode = 2
+text = "Show on map"
+
+[node name="ProgressScroll" type="ScrollContainer" parent="ContentView/QuestDetailPanel/DetailLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ProgressLayout" type="VBoxContainer" parent="ContentView/QuestDetailPanel/DetailLayout/ProgressScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="ProgressHeader" type="Label" parent="ContentView/QuestDetailPanel/DetailLayout/ProgressScroll/ProgressLayout"]
+layout_mode = 2
+text = "Progress"
+
+[node name="ProgressEntries" type="VBoxContainer" parent="ContentView/QuestDetailPanel/DetailLayout/ProgressScroll/ProgressLayout"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="StateView" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StateLayout" type="VBoxContainer" parent="StateView"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="StateTabSprite" parent="StateView/StateLayout" instance=ExtResource("5_sprite")]
+layout_mode = 2
+
+[node name="StateMessageLabel" type="Label" parent="StateView/StateLayout"]
+layout_mode = 2
+text = "Quest data unavailable"
+horizontal_alignment = 1
+autowrap_mode = 3

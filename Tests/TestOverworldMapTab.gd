@@ -19,6 +19,15 @@ var playerWorldPosition := Vector2.ZERO
 var playerValid := true
 
 
+class FakeQuestStateSource:
+	extends Node
+
+	signal questStateChanged(questId: String)
+
+	func emitQuestState(questId: String) -> void:
+		questStateChanged.emit(questId)
+
+
 func _ready() -> void:
 	coordinates = OverworldCoordinates.makeHeadless()
 	projection = OverworldMapProjection.cellForGrid(coordinates, Rect2i(0, 0, 2, 2), Vector2i(4, 4))
@@ -39,6 +48,9 @@ func _ready() -> void:
 	await testRefreshAndLifecycle()
 	await testDisposalAndRebuild()
 	await testFocusTarget()
+	await testQuestMarkerIdentity()
+	await testMalformedQuestMarkers()
+	await testQuestStateSignalLifecycle()
 	await testMouseDragAndFocus()
 	await testPlayerPositionProvider()
 
@@ -326,7 +338,7 @@ func testRefreshAndLifecycle() -> void:
 	tab._refreshQuestMarkers()
 	await get_tree().process_frame
 	await get_tree().process_frame
-	check(tab._questMarkers.size() == 1 and tab._questMarkers.has("Beta"), "quest provider changes swap markers through the manifest")
+	check(tab._questMarkers.size() == 1 and tab._questMarkers.has(tab._questMarkerKey("q2", "o2")), "quest provider changes swap markers through the manifest")
 	check(markerLayer.get_child_count() == childCount, "marker swaps do not duplicate nodes")
 	tab.questMarkerProvider = Callable(self, "_ghostQuestMarkerProvider")
 	tab._refreshQuestMarkers()
@@ -341,6 +353,114 @@ func _secondQuestMarkerProvider() -> Array:
 
 func _ghostQuestMarkerProvider() -> Array:
 	return [{ "quest_id": "q3", "objective_id": "o3", "target_id": "Ghost", "icon": "quest_current" }]
+
+
+func _sameTargetQuestMarkerProvider() -> Array:
+	return [
+		{ "quest_id": "qa", "objective_id": "oa", "target_id": "Alpha", "icon": "quest_current" },
+		{ "quest_id": "qb", "objective_id": "ob", "target_id": "Alpha", "icon": "quest_current" },
+	]
+
+
+func _oneObjectiveQuestMarkerProvider() -> Array:
+	return [{ "quest_id": "qa", "objective_id": "oa2", "target_id": "Alpha", "icon": "quest_current" }]
+
+
+func _malformedQuestMarkerProvider() -> Array:
+	return [
+		42,
+		{ "quest_id": "", "objective_id": "o", "target_id": "Alpha", "icon": "quest_current" },
+		{ "quest_id": "q", "objective_id": "o", "target_id": "", "icon": "quest_current" },
+		{ "quest_id": "q1", "objective_id": "o1", "target_id": "Alpha", "icon": "quest_current" },
+		{ "quest_id": "q1", "objective_id": "o1", "target_id": "Alpha", "icon": "quest_current" },
+		{ "quest_id": "q2", "objective_id": "o2", "target_id": "Ghost", "icon": "quest_current" },
+	]
+
+
+func testQuestMarkerIdentity() -> void:
+	print("--- Quest marker identity and focus ---")
+	tab.questMarkerProvider = Callable(self, "_sameTargetQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var keyA: String = tab._questMarkerKey("qa", "oa")
+	var keyB: String = tab._questMarkerKey("qb", "ob")
+	check(tab._questMarkers.size() == 2, "two quests sharing a target create two markers")
+	check(tab._questMarkers.has(keyA) and tab._questMarkers.has(keyB), "markers are keyed by quest/objective identity, not target id")
+	var markerA: TextureButton = tab._questMarkers[keyA]
+	check(markerA.get_meta("quest_id") == "qa" and markerA.get_meta("objective_id") == "oa" and markerA.get_meta("target_id") == "Alpha", "markers carry all three identity values")
+	check((markerA.get_meta("image_position") as Vector2).is_equal_approx(tab._locationMarkers["Alpha"].get_meta("image_position") as Vector2), "a quest badge keeps the manifest anchor position")
+
+	tab._fitMap()
+	var focused: bool = tab.focusQuestTarget({ "quest_id": "qa", "objective_id": "oa", "target_id": "Alpha" })
+	check(focused, "focusQuestTarget finds the exact quest/objective marker")
+	check(tab._selectionLabel.text == "Quest target: Alpha", "the focused quest marker is selected")
+	var positionBefore: Vector2 = tab._mapContent.position
+	var scaleBefore: float = tab._mapScale
+	check(!tab.focusQuestTarget({ "quest_id": "missing", "objective_id": "oa", "target_id": "Alpha" }), "an unknown identity fails to focus")
+	check(tab._mapContent.position.distance_to(positionBefore) < 0.01 and absf(tab._mapScale - scaleBefore) < 0.001, "a failed quest focus does not move the map")
+
+	tab.focusTarget("Alpha")
+	check(tab._selectionLabel.text.begins_with("Location:"), "the Location/POI path still selects the Location marker")
+	tab.focusQuestTarget({ "quest_id": "qa", "objective_id": "oa", "target_id": "Alpha" })
+	check(tab._selectionLabel.text.begins_with("Quest target:"), "the quest path selects the quest badge at the same anchor")
+
+	tab.questMarkerProvider = Callable(self, "_oneObjectiveQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._questMarkers.size() == 1 and tab._questMarkers.has(tab._questMarkerKey("qa", "oa2")), "advancing to another objective swaps only that quest marker")
+	check(!tab._questMarkers.has(keyA), "the previous objective marker is removed")
+	tab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	await get_tree().process_frame
+
+
+func testMalformedQuestMarkers() -> void:
+	print("--- Malformed quest markers ---")
+	tab.questMarkerProvider = Callable(self, "_malformedQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._questMarkers.size() == 1, "malformed, duplicate and unknown quest markers are rejected")
+	check(tab._questMarkers.has(tab._questMarkerKey("q1", "o1")), "the one valid quest marker survives")
+	check(_markerLayerChildCount() == 4, "rejected markers never create origin or duplicate nodes")
+	tab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	await get_tree().process_frame
+
+
+func testQuestStateSignalLifecycle() -> void:
+	print("--- Quest state signal lifecycle ---")
+	var source := FakeQuestStateSource.new()
+	add_child(source)
+	tab.questStateSource = source
+	tab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
+	tab.setTabActive(true)
+	await get_tree().process_frame
+	check(source.get_signal_connection_list("questStateChanged").size() == 1, "an active map connects to the quest state source once")
+
+	tab.questMarkerProvider = Callable(self, "_secondQuestMarkerProvider")
+	source.emitQuestState("q2")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(tab._questMarkers.has(tab._questMarkerKey("q2", "o2")), "a quest state signal refreshes the active markers")
+
+	var secondSource := FakeQuestStateSource.new()
+	add_child(secondSource)
+	tab.questStateSource = secondSource
+	tab.setTabActive(true)
+	check(source.get_signal_connection_list("questStateChanged").is_empty(), "replacing the quest state source disconnects the old one")
+	check(secondSource.get_signal_connection_list("questStateChanged").size() == 1, "the replacement quest state source is connected")
+	tab.setTabActive(false)
+	check(secondSource.get_signal_connection_list("questStateChanged").is_empty(), "deactivation disconnects the quest state source")
+
+	tab.questStateSource = null
+	tab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
+	tab._refreshQuestMarkers()
+	source.queue_free()
+	secondSource.queue_free()
+	await get_tree().process_frame
 
 
 func testDisposalAndRebuild() -> void:

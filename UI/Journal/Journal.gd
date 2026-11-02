@@ -153,12 +153,19 @@ func selectTab(tabId: String) -> void:
 
 
 ## Journal-level navigation request ("Show on map"): selects the map tab and
-## forwards the target id; the requesting tab never touches map nodes.
-func showOnMap(targetId: String) -> void:
+## forwards the quest/objective/target request; the requesting tab never
+## touches map nodes. Returns whether the exact quest marker was focused.
+func showOnMap(request: Dictionary) -> bool:
+	if !isOpen:
+		return false
+	for key in ["quest_id", "objective_id", "target_id"]:
+		if str(request.get(key, "")).is_empty():
+			return false
 	selectTab("map")
 	var mapTab: Control = _tabInstances.get("map")
-	if mapTab != null and mapTab.has_method("focusTarget"):
-		mapTab.focusTarget(targetId)
+	if mapTab == null or !mapTab.has_method("focusQuestTarget"):
+		return false
+	return bool(mapTab.focusQuestTarget(request))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -256,6 +263,10 @@ func _getTabInstance(tabId: String) -> Control:
 	var journalTab := tab as JournalTab
 	if journalTab != null and definition.has("icon"):
 		journalTab.tabIcon = definition["icon"]
+	# Cross-tab navigation requests are wired once per lazily created tab; the
+	# tab only emits ids and never receives Journal/Map references.
+	if tab.has_signal("showOnMapRequested") and !tab.is_connected("showOnMapRequested", Callable(self, "showOnMap")):
+		tab.connect("showOnMapRequested", Callable(self, "showOnMap"))
 	_tabInstances[tabId] = tab
 	return tab
 

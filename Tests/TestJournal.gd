@@ -49,6 +49,20 @@ class FakeOwner:
 	extends RefCounted
 
 
+class FakeQuestProvider:
+	extends Node
+
+	signal questStateChanged(questId: String)
+
+	var entries: Array = []
+
+	func isQuestDataAvailable() -> bool:
+		return true
+
+	func getQuestJournalEntries() -> Array:
+		return entries
+
+
 func _ready() -> void:
 	sceneManager = SceneManagerScene.instantiate()
 	sceneManager.initialScene = ""
@@ -64,6 +78,7 @@ func _ready() -> void:
 	await testPauseCoordinator()
 	await testSceneChangePolicy()
 	await testRealTabs()
+	await testQuestShowOnMap()
 	await testMapControllerFocusHandoff()
 	await testSceneTreeSetup()
 
@@ -280,11 +295,89 @@ func testRealTabs() -> void:
 		check(tab.tabIcon != null, "the %s tab receives its icon from the registry" % tabId)
 		if tabId == "map":
 			check(tab.find_child("BaseMap", true, false) != null, "the map tab builds its view from the generated manifest")
+		elif tabId == "quests":
+			check(tab.find_child("ContentView", true, false) != null, "the quests tab has its master/detail content view")
+			check(tab.find_child("StateView", true, false) != null, "the quests tab has its empty/unavailable state view")
+			check(tab.find_child("StateTabSprite", true, false) != null, "the quests tab identifies its empty state with its tab sprite")
+			check(tab.get_child_count() > 0, "the quests tab shows its empty/unavailable state")
 		else:
 			check(tab.find_child("TabSprite", true, false) != null, "the %s tab identifies its empty state with its tab sprite" % tabId)
 			check(tab.get_child_count() > 0, "the %s tab shows its empty/unavailable state" % tabId)
 	journal.close()
 	check(!journal.isOpen, "the real tabs close cleanly")
+
+
+func _journalQuestMarkerProvider() -> Array:
+	return [{ "quest_id": "journal_quest", "objective_id": "journal_objective", "target_id": "Lazysprings", "icon": "quest_current" }]
+
+
+## Real-shell Quests -> Journal -> Map navigation (Quests stage 3): the tab
+## emits ids, the shell selects Map, and Map focuses the exact quest badge.
+func testQuestShowOnMap() -> void:
+	print("--- Quests to map navigation ---")
+	var questProvider := FakeQuestProvider.new()
+	add_child(questProvider)
+	questProvider.entries.append({
+		"quest_id": "journal_quest",
+		"title": "Journal Quest",
+		"summary": "Navigate to the map.",
+		"status": "active",
+		"history": [],
+		"current_objective": {
+			"objective_id": "journal_objective",
+			"text": "Go to Lazysprings",
+			"target_id": "Lazysprings",
+		},
+	})
+
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	journal.open()
+	journal.selectTab("quests")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var questsTab = journal._tabInstances.get("quests")
+	check(questsTab != null, "the real Quests tab is active for navigation")
+	if questsTab == null:
+		journal.close()
+		questProvider.queue_free()
+		return
+	check(questsTab.is_connected("showOnMapRequested", Callable(journal, "showOnMap")), "the shell wires the Quests navigation signal once")
+	questsTab.questProvider = questProvider
+	questsTab.setTabActive(true)
+	questsTab.refreshTab()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(questsTab.showOnMapButton.visible, "the injected current objective offers Show on map")
+
+	var mapTab = journal._tabInstances.get("map")
+	check(mapTab != null, "the real Map tab is available")
+	if mapTab == null:
+		journal.close()
+		questProvider.queue_free()
+		return
+	mapTab.questMarkerProvider = Callable(self, "_journalQuestMarkerProvider")
+	mapTab._refreshQuestMarkers()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var stateBefore := questProvider.entries.duplicate(true)
+
+	questsTab.showOnMapButton.pressed.emit()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(journal.selectedTabId == "map", "Show on map selects the Map tab")
+	check(mapTab._questMarkers.has(mapTab._questMarkerKey("journal_quest", "journal_objective")), "Map built the exact quest/objective marker")
+	check(mapTab._selectionPanel.visible and mapTab._selectionLabel.text == "Quest target: Lazysprings", "Map focused the exact quest marker")
+	check(questProvider.entries == stateBefore, "navigation did not mutate quest state")
+	check(questsTab._selectedQuestId == "journal_quest", "navigation did not change the Quests selection")
+	check(!journal.showOnMap({ "quest_id": "missing", "objective_id": "journal_objective", "target_id": "Lazysprings" }), "an unknown quest identity returns false")
+	check(!journal.showOnMap({ "quest_id": "", "objective_id": "journal_objective", "target_id": "Lazysprings" }), "an incomplete navigation request is rejected")
+	journal.close()
+	check(!journal.showOnMap({ "quest_id": "journal_quest", "objective_id": "journal_objective", "target_id": "Lazysprings" }), "a closed Journal rejects navigation")
+
+	mapTab.questMarkerProvider = Callable()
+	questsTab.questProvider = null
+	questProvider.queue_free()
+	await get_tree().process_frame
 
 
 ## Controller/keyboard focus handoff through the real shell (Docs/System Design/
