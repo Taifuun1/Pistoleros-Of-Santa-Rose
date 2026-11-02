@@ -6,6 +6,11 @@ Markdown file for listing issues that popup.
 ## Open
 
 - When having the journal open for a minute or two, music starts playing
+- `TestActorShadow` fails its VERTICAL directional coverage checks
+    - Reproduce with `godot --headless --path . --script res://Tests/TestActorShadow.gd`; this is the only failure in the current full `RunAll` (32/33)
+    - `the VERTICAL shadow applies its directional padding (got (8.6, 13.7), want (10.6, 13.7))` — the test expects `bodyRect.size.x * WIDTH_RATIO + 5`, but `ActorShadow.gd`'s `Coverage.VERTICAL` branch uses `+ 3` for the shadow width
+    - `the VERTICAL shadow uses its finalized bottom-line offset (got (-4.0, 6.8), want (-4.0, 7.8))` — the test expects `bodyBottomY - proportionalLift - 2`, but the VERTICAL branch subtracts `3` from the feet position
+    - DIAGONAL and HORIZONTAL checks pass, so the mismatch is isolated to the VERTICAL padding/offset values in `Nodes/Actor Shadow/ActorShadow.gd` versus `Tests/TestActorShadow.gd`; decide which side is the intended look before changing either
 
 ## Fixed
 
