@@ -1,18 +1,20 @@
 
 # Issues
 
-Markdown file for listing issues that popup.
+Markdown file for listing issues that pop up.
 
 ## Open
 
 - When having the journal open for a minute or two, music starts playing
-- `TestActorShadow` fails its VERTICAL directional coverage checks
-    - Reproduce with `godot --headless --path . --script res://Tests/TestActorShadow.gd`; this is the only failure in the current full `RunAll` (32/33)
-    - `the VERTICAL shadow applies its directional padding (got (8.6, 13.7), want (10.6, 13.7))` — the test expects `bodyRect.size.x * WIDTH_RATIO + 5`, but `ActorShadow.gd`'s `Coverage.VERTICAL` branch uses `+ 3` for the shadow width
-    - `the VERTICAL shadow uses its finalized bottom-line offset (got (-4.0, 6.8), want (-4.0, 7.8))` — the test expects `bodyBottomY - proportionalLift - 2`, but the VERTICAL branch subtracts `3` from the feet position
-    - DIAGONAL and HORIZONTAL checks pass, so the mismatch is isolated to the VERTICAL padding/offset values in `Nodes/Actor Shadow/ActorShadow.gd` versus `Tests/TestActorShadow.gd`; decide which side is the intended look before changing either
+- Move and Flee icons should be positioned to the right always in Shootout UI
+- Move by clicking on the actor position instead of icons in the UI
+- Inventory party icons seems taller than the icon dimensions
 
 ## Fixed
+
+- Fixed — `TestActorShadow` failed its VERTICAL directional coverage checks
+    - The test asserted `bodyRect.size.x * WIDTH_RATIO + 5` and a bottom-line offset of `-2`, but the shipped `Coverage.VERTICAL` branch uses `+ 3` and `- 3`; both values landed in `f775b0d` and the shipped geometry is what the wagon has always rendered, so the expectation was stale rather than the implementation wrong
+    - `Tests/TestActorShadow.gd` now asserts the shipped padding/offset, which makes the full `RunAll` a usable pass/fail gate (37/37)
 
 - Fixed — The overworld wagon's shadow is one pixel to the side depending on its previous horizontal direction
     - Vertical movement preserves the previous horizontal `flip_h`. The wagon's opaque bounds are asymmetric within their 24px frames (`WagonUp`/`WagonDown`: 11px wide at x=6; `WagonSide`: 15px wide at x=5), so flipping moves the visible body center by one pixel

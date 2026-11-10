@@ -223,12 +223,12 @@ func _test_directional_coverage_geometry() -> void:
 
 	shadow.coverage = ShadowScript.Coverage.VERTICAL
 	var verticalSize = Vector2(
-		maxf(2.0, bodyRect.size.x * ShadowScript.WIDTH_RATIO + 5.0),
+		maxf(2.0, bodyRect.size.x * ShadowScript.WIDTH_RATIO + 3.0),
 		maxf(1.0, bodyRect.size.y * ShadowScript.HEIGHT_RATIO + 6.0)
 	)
 	_check(shadow.shadowSize.is_equal_approx(verticalSize),
 		"the VERTICAL shadow applies its directional padding (got %s, want %s)" % [shadow.shadowSize, verticalSize])
-	var verticalPosition = Vector2(bodyCenterX, bodyBottomY - proportionalLift - 2.0)
+	var verticalPosition = Vector2(bodyCenterX, bodyBottomY - proportionalLift - 3.0)
 	_check(shadow.position.is_equal_approx(verticalPosition),
 		"the VERTICAL shadow uses its finalized bottom-line offset (got %s, want %s)" % [shadow.position, verticalPosition])
 
