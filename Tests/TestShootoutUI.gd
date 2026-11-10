@@ -99,12 +99,12 @@ func _run() -> void:
 	var playerEffects = playerContent.get_node("HBoxContainer/Effects")
 	_check(playerEffects.get_child_count() == 2, "one icon entry per effect type, got %d" % playerEffects.get_child_count())
 	_check(playerEffects.get_child(0).name == "bleed" and playerEffects.get_child(0).get_node("Icon").texture == BleedIcon, "effects render as icons from Assets/Effects")
-	_check(playerEffects.get_child(0).get_node("Stacks").text == "x2", "stack counts render next to the icon")
+	_check(playerEffects.get_child(0).get_node("Stacks").get_parsed_text() == "x2", "stack counts render next to the icon")
 	playerEffects.get_child(1).get_node("Icon").mouse_entered.emit()
 	_check(tooltipPanel.get_node("MarginContainer/VBoxContainer/Title").get_parsed_text() == "Poison" and tooltipPanel.get_node("MarginContainer/VBoxContainer/Text").get_parsed_text() == "poison", "effect icons show their summary in the shared Tooltip node")
 	_check(!playerEffects.get_child(1).has_node("Stacks"), "unstacked effects show no count")
 	ui.showEffects(playerContent, [])
-	_check(playerEffects.get_child_count() == 1 and playerEffects.get_child(0).text == "-", "empty effects show the placeholder")
+	_check(playerEffects.get_child_count() == 1 and playerEffects.get_child(0).get_parsed_text() == "-", "empty effects show the placeholder")
 	var hoverContent = ui.get_node("MarginContainer/VBoxContainer/GridContainer/PanelContainer3/MarginContainer/VBoxContainer")
 	var hoverMagazine = hoverContent.get_node("HBoxContainer3/MagazineContainer/Magazine")
 	ui.showCylinder(hoverContent, [3], 0, "HBoxContainer3/MagazineContainer/Magazine")
@@ -175,6 +175,102 @@ func _run() -> void:
 	_check(movesRow.get_child_count() == 0 and itemsRow.get_child_count() == 0, "hiding clears the act icons")
 	_check(actsRow.get_node_or_null("Move") == null and actsRow.get_node_or_null("Flee") == null, "hiding clears the utility icons")
 	_check(turnOrder.get_child_count() == 1, "the Turn Order row keeps showing the Round order")
+	print("\n--- End screen acknowledgment and overflow ---")
+	var endSignals = []
+	ui.endScreenContinuePressed.connect(func(): endSignals.append(true))
+	# The result screen is scene-owned: it exists before any results arrive and
+	# its hierarchy never changes as results are shown.
+	var endScreen = ui.get_node_or_null("EndScreen")
+	_check(endScreen != null, "the end screen exists in ShootoutUI from scene load")
+	if endScreen == null:
+		ui.free()
+		quit(1)
+		return
+	_check(!endScreen.visible, "the end screen starts hidden")
+	var hierarchyCount = endScreen.get_child_count()
+	ui.showEndScreen({
+		"outcome": "victory",
+		"loot": { "money": 5, "items": [] },
+		"lootResult": {
+			"money": 5,
+			"accepted": [{ "definitionId": "paregoric", "name": "Paregoric", "quantity": 2 }],
+			"overflow": [{ "definitionId": "paregoric", "name": "Paregoric", "quantity": 3 }],
+		},
+	})
+	_check(endScreen.visible, "end screen becomes visible")
+	_check(endScreen.get_child_count() == hierarchyCount, "showing results does not add UI nodes")
+	var acceptedLoot = endScreen.find_child("AcceptedLoot", true, false)
+	var overflowLoot = endScreen.find_child("OverflowLoot", true, false)
+	_check(acceptedLoot.get_parsed_text().contains("5 cash") and acceptedLoot.get_parsed_text().contains("2 Paregoric"), "end screen shows accepted money and items")
+	_check(overflowLoot.visible and overflowLoot.get_parsed_text().contains("3 Paregoric"), "end screen shows capacity overflow")
+	var continueButton = endScreen.find_child("ContinueButton", true, false)
+	_check(continueButton.text == "Leave overflow & continue", "overflow mode requires explicit leave action")
+	continueButton.pressed.emit()
+	_check(endSignals.size() == 1 and continueButton.disabled, "Continue acknowledges once")
+	continueButton.pressed.emit()
+	_check(endSignals.size() == 1, "repeated press cannot acknowledge twice")
+	ui.hideEndScreen()
+	_check(!endScreen.visible, "end screen hides after acknowledgment")
+	_check(endScreen.get_child_count() == hierarchyCount, "hiding results does not remove UI nodes")
+
+	ui.showEndScreen({ "outcome": "victory", "loot": { "money": 0, "items": [] }, "lootResult": {} })
+	continueButton = endScreen.find_child("ContinueButton", true, false)
+	_check(endScreen.get_child_count() == hierarchyCount, "repeated results reuse the same hierarchy")
+	_check(continueButton.text == "Continue" and !endScreen.find_child("OverflowLoot", true, false).visible, "without overflow only Continue is shown")
+	_check(endScreen.find_child("AcceptedLoot", true, false).get_parsed_text() == "No loot.", "empty loot is explicit")
+
+	print("\n--- Effects box stays layout-stable across hover rebuilds ---")
+	ui.showEffects(hoverContent, ["bleed x2", "poison"])
+	await process_frame
+	var effectsBox = hoverContent.get_node("HBoxContainer/Effects")
+	_check(effectsBox.custom_minimum_size == ui.EFFECTS_BOX_MIN_SIZE, "the effects box keeps its pinned minimum size")
+	_check(effectsBox is HBoxContainer, "effect entries flow horizontally so they never raise the title row")
+	_check(effectsBox.get_child_count() == 2, "two effect entries are rendered")
+	var bleedEntry = effectsBox.get_child(0)
+	_check(bleedEntry.custom_minimum_size == ui.EFFECTS_BOX_MIN_SIZE, "effect entries pin their minimum size")
+	var stacksLabel = bleedEntry.get_node_or_null("Stacks")
+	_check(stacksLabel != null, "stacked effects render a count label")
+	_check(!stacksLabel.fit_content and stacksLabel.autowrap_mode == TextServer.AUTOWRAP_OFF, "inline effect text cannot feed its size back into layout")
+	ui.showEffects(hoverContent, ["bleed x2", "poison"])
+	await process_frame
+	_check(effectsBox.get_child_count() == 2, "rebuilding never duplicates entries")
+	ui.showEffects(hoverContent, [])
+	await process_frame
+	_check(effectsBox.get_child_count() == 1 and effectsBox.get_child(0).get_parsed_text() == "-", "clearing effects renders one placeholder")
+	ui.showEffects(hoverContent, ["piercing"])
+	await process_frame
+	_check(effectsBox.get_child_count() == 1 and effectsBox.get_child(0).name == "piercing", "changed effects rebuild exactly once")
+
+	print("\n--- Hovered panel content always fits its panel ---")
+	var hoverStats = { "SixShootin": 1, "HighTailin": 2, "Taffyin": 3, "Revolver": 4, "Rifle": 5, "Shotgun": 6 }
+	var titleRow = hoverContent.get_node("HBoxContainer")
+	var nameLabel = hoverContent.get_node("HBoxContainer/RichTextLabelExtended")
+	var hpLabel = hoverContent.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3")
+	var hoveredPanel = ui.get_node(ui.STATS_PANEL_PATHS[1])
+	await process_frame
+	var idlePanelHeight = hoveredPanel.size.y
+	ui.setHoveredActorStats({ "Name": "Squeky rat0", "HP": 9, "Rodeo": "-", "Effects": [], "Cylinder": [3], "ChamberIndex": 0 }, hoverStats)
+	await process_frame
+	await process_frame
+	_check(hoveredPanel.size.y == idlePanelHeight,
+		"the stats row keeps its height when the panel gets its first real content (%s -> %s)" % [idlePanelHeight, hoveredPanel.size.y])
+	var damagedHeight = hoverContent.get_combined_minimum_size().y
+	ui.setHoveredActorStats({ "Name": "Squeky rat1", "HP": 12, "Rodeo": "-", "Effects": [], "Cylinder": [3], "ChamberIndex": 0 }, hoverStats)
+	await process_frame
+	await process_frame
+	_check(hoverContent.get_combined_minimum_size().y <= hoverContent.size.y,
+		"no row is squeezed below its minimum when crossing from a damaged actor (needs %s, has %s)" % [hoverContent.get_combined_minimum_size().y, hoverContent.size.y])
+	_check(hoveredPanel.size.y == idlePanelHeight, "hovering a different actor does not resize the stats row")
+	_check(hoverContent.get_combined_minimum_size().y == damagedHeight,
+		"changing the HP digit width does not change the content height")
+	_check(titleRow.get_combined_minimum_size().y <= 18, "the title row stays one line tall")
+	_check(hpLabel.get_global_rect().position.x >= nameLabel.get_global_rect().end.x,
+		"the HP value starts after the actor name instead of overlapping it")
+	ui.showEffects(hoverContent, ["bleed x2", "poison", "mark"])
+	await process_frame
+	await process_frame
+	_check(titleRow.get_combined_minimum_size().y <= 18, "several effects still fit in the title row")
+	_check(hoverContent.get_combined_minimum_size().y == damagedHeight, "extra effects do not grow the panel content")
 	ui.free()
 
 	if failures == 0:

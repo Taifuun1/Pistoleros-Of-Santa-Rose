@@ -7,12 +7,30 @@ signal flee
 ## The Move icon toggled the reposition picker open/closed; Shootout marks the
 ## reachable destination columns in the field while it is open.
 signal repositionPicker(open)
+## The result screen was acknowledged. Shootout must not advance/emit its end
+## signal until this fires (Docs/System Design/Journal/Inventory and Equipment.md).
+signal endScreenContinuePressed
 
 const TURN_ORDER_PATH = "MarginContainer/VBoxContainer/MarginContainer/PanelContainer/Turn Order"
 
 ## The Acts row of the player panel holds the acting character's act icons:
 ## moves/reposition choices after the Moves icon, belt items after the Belt icon.
 const ACTS_PATH = "MarginContainer/VBoxContainer/GridContainer/PanelContainer/MarginContainer/VBoxContainer/Acts"
+
+## The two stats panels of the HUD (player + hovered actor). Their content must
+## never be taller than the panel: a panel that is even a pixel short makes the
+## containers squeeze a row below its minimum and grow it back on the next layout
+## pass, and that oscillation overflows the deferred-call queue and hard-crashes
+## the engine ("Object was deleted while awaiting a callback" spam + segfault).
+## Hovering a damaged actor (one-digit HP) and crossing into a neighbour (two
+## digits) changes the content just enough to start it. The title row keeps a
+## fixed single-line height (_setPanelText), effects grow horizontally instead of
+## vertically (EFFECTS_BOX_MIN_SIZE), and the icons never derive a minimum size
+## from the rect the grid assigns (_pinStatsPanelIcons).
+const STATS_PANEL_PATHS = [
+	"MarginContainer/VBoxContainer/GridContainer/PanelContainer",
+	"MarginContainer/VBoxContainer/GridContainer/PanelContainer3",
+]
 
 ## Chamber quality icons and the current-Chamber underline from Assets/Stats,
 ## rendered into the pre-existing MagazineContainer/Magazine rows of the stats
@@ -37,6 +55,9 @@ const EFFECT_ICONS = {
 	"taunt": preload("res://Assets/Effects/Taunt.png"),
 }
 const EFFECT_PLACEHOLDER_ICON = preload("res://Assets/Icons/PlaceholderIcon.png")
+## Shared rich-text scene for all runtime Shootout text (Journal UI rule: no
+## native Label nodes for presentation).
+const TextScene = preload("res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn")
 
 ## The shared tooltip node (UI/Tooltip/Tooltip.tscn): all runtime-created icons
 ## show their info through it instead of built-in control tooltips.
@@ -84,11 +105,63 @@ var backgroundBlur = null
 
 
 func _ready() -> void:
+	_pinStatsPanelIcons()
 	var background = get_node_or_null(BACKGROUND_PATH)
 	if background == null:
 		return
 	backgroundBlur = BlurMaterial.duplicate()
 	background.material = backgroundBlur
+
+## Stat/move icons sit in pinned boxes, but their expand_mode derives the
+## minimum size from the rect the container assigned (FIT_WIDTH / FIT_HEIGHT
+## keep the aspect ratio), so every grid re-split recomputes their minimum
+## height. Ignoring the texture size leaves the pinned box in charge, exactly
+## like the Turn order strip's portraits.
+func _pinStatsPanelIcons() -> void:
+	for panelPath in STATS_PANEL_PATHS:
+		var panel = get_node_or_null(panelPath)
+		if panel != null:
+			_pinIconSizes(panel)
+
+func _pinIconSizes(node: Node) -> void:
+	if node is TextureRect and node.expand_mode >= TextureRect.EXPAND_FIT_WIDTH:
+		node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	for child in node.get_children():
+		_pinIconSizes(child)
+
+## The hovered panel's title row has room for one line, but the shared 12px
+## label reserves 22px of height and draws its text 5px down, which pushed the
+## panel's content past the height the grid gives it. Content taller than the
+## panel makes the containers squeeze a row below its minimum and grow it back
+## on the next pass, forever; that oscillation overflows the deferred-call queue
+## and hard-crashes the engine (see STATS_PANEL_PATHS). These labels get a fixed
+## single-line height with a smaller text offset, and a width measured from the
+## string so the name and HP still sit side by side instead of overlapping.
+const TITLE_ROW_HEIGHT = 16.0
+
+func _setPanelText(label: RichTextLabel, value) -> void:
+	label.setRichTextLabel(str(value))
+	label.fit_content = false
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.offset_transform_position = Vector2(2, 2)
+	var font = label.get_theme_font("normal_font")
+	var fontSize = label.get_theme_font_size("normal_font_size")
+	var width = 0.0
+	for line in label.get_parsed_text().split("\n"):
+		width = maxf(width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, fontSize).x)
+	label.custom_minimum_size = Vector2(ceilf(maxf(width, 6.0)) + 2.0, TITLE_ROW_HEIGHT)
+
+## The placeholder panel is taller than the real stats, so the whole stats row
+## lost a few pixels the first time an actor was hovered (and never grew back).
+## Reserve that height once, before the first real content replaces the
+## placeholder; the real content is shorter, so nothing gets squeezed.
+var _hoveredHeightReserved := false
+
+func _reserveHoveredPanelHeight(panel: Control) -> void:
+	if _hoveredHeightReserved:
+		return
+	_hoveredHeightReserved = true
+	panel.custom_minimum_size.y = maxf(panel.custom_minimum_size.y, panel.get_combined_minimum_size().y)
 
 ## Blur/dim strength of the fight background: 0.0 is the untouched image.
 func setBackgroundFocus(amount: float) -> void:
@@ -112,10 +185,11 @@ func setTurnOrder(actorNames: Array) -> void:
 
 func setHoveredActorStats(characterData, characterStats) -> void:
 	var panel = $MarginContainer/VBoxContainer/GridContainer/PanelContainer3
+	_reserveHoveredPanelHeight(panel)
 	panel.visible = true
 	var content = panel.get_node("MarginContainer/VBoxContainer")
-	content.get_node("HBoxContainer/RichTextLabelExtended").setRichTextLabel(characterData.Name)
-	content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3").setRichTextLabel(str(characterData.HP))
+	_setPanelText(content.get_node("HBoxContainer/RichTextLabelExtended"), characterData.Name)
+	_setPanelText(content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3"), characterData.HP)
 	content.get_node("RodeoContainer/HoveredRodeo").setRichTextLabel(characterData.get("Rodeo", "-"))
 	for stat in characterStats:
 		var statNode = content.get_node_or_null("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat }))
@@ -127,8 +201,8 @@ func setHoveredActorStats(characterData, characterStats) -> void:
 func clearHoveredActorStats() -> void:
 	var panel = $MarginContainer/VBoxContainer/GridContainer/PanelContainer3
 	var content = panel.get_node("MarginContainer/VBoxContainer")
-	content.get_node("HBoxContainer/RichTextLabelExtended").setRichTextLabel("-")
-	content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3").setRichTextLabel("-")
+	_setPanelText(content.get_node("HBoxContainer/RichTextLabelExtended"), "-")
+	_setPanelText(content.get_node("HBoxContainer/HBoxContainer/RichTextLabelExtended3"), "-")
 	content.get_node("RodeoContainer/HoveredRodeo").setRichTextLabel("-")
 	for stat in ["SixShootin", "HighTailin", "Taffyin", "Revolver", "Rifle", "Shotgun"]:
 		content.get_node("HBoxContainer3/Stats/{stat}Container/{stat}".format({ "stat": stat })).setRichTextLabel("-")
@@ -339,54 +413,87 @@ func showCylinder(content: Node, cylinder: Array, chamberIndex: int, magazinePat
 ## effect type from effectManager.displayEffects() (stack counts next to the
 ## icon and in the tooltip; Docs/System Design/Shootout/Shootout UI.md).
 ##
-## The box keeps a fixed minimum size (icon entry at its widest/ tallest):
-## letting the minimum shrink to the empty "-" label and grow back per entry
-## trips a Godot layout oscillation (known engine bug: non-converging fit_content
-## container relayout) that overflows the deferred-call queue and hard-crashes
-## the engine ("Object was deleted while awaiting a callback" spam + segfault).
-const EFFECTS_BOX_MIN_SIZE = Vector2(44, 24)
+## The box is a horizontal row of fixed-size entries: stacking entries
+## vertically made the title row taller with every additional effect until the
+## panel's content no longer fit, and a squeezed row is what oscillates. Keeping
+## the minimum pinned also stops the empty "-" placeholder from resizing the row
+## on every hover rebuild.
+const EFFECTS_BOX_MIN_SIZE = Vector2(30, 18)
+## Guards against re-entrant rebuilds: a layout update during the rebuild must
+## never call back into showEffects on the same frame.
+var _rebuildingEffects := false
 
 func showEffects(content: Node, effectLines: Array) -> void:
-	if content == null:
+	if content == null or _rebuildingEffects:
 		return
 	var effects = content.get_node_or_null("HBoxContainer/Effects")
 	if effects == null:
 		return
+	var normalized = []
+	for line in effectLines:
+		normalized.append(str(line))
+	# Repeated hover enter/exit events with unchanged effects must not rebuild
+	# (and relayout) this box.
+	if content.has_meta("effectsLines") and content.get_meta("effectsLines") == normalized:
+		return
+	_rebuildingEffects = true
+	content.set_meta("effectsLines", normalized)
 	effects.custom_minimum_size = EFFECTS_BOX_MIN_SIZE
 	for child in effects.get_children():
 		# Detach immediately so the box rebuilds within the same frame.
 		child.queue_free()
 		effects.remove_child(child)
-	if effectLines.is_empty():
-		var empty = Label.new()
-		empty.text = "-"
+	if normalized.is_empty():
+		var empty = _effectText("-")
+		empty.name = "Empty"
+		empty.custom_minimum_size = EFFECTS_BOX_MIN_SIZE
 		effects.add_child(empty)
+		_rebuildingEffects = false
 		return
-	for effectLine in effectLines:
+	for effectLine in normalized:
 		# Lines are "{type}" or "{type} x{count}" (type names have no spaces).
-		var parts = str(effectLine).split(" x")
+		var parts = effectLine.split(" x")
 		var effectType = parts[0]
 		var entry = HBoxContainer.new()
 		entry.name = effectType
 		entry.add_theme_constant_override("separation", 2)
+		# Pinned entry size keeps the box's minimum independent of its contents;
+		# a content-derived minimum here trips a non-converging fit_content
+		# relayout that overflows the deferred-call queue and crashes the engine.
+		entry.custom_minimum_size = EFFECTS_BOX_MIN_SIZE
 		var icon = TextureRect.new()
 		icon.name = "Icon"
 		icon.texture = EFFECT_ICONS.get(effectType, EFFECT_PLACEHOLDER_ICON)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		entry.add_child(icon)
-		attachTooltip(icon, effectType.capitalize(), str(effectLine))
+		attachTooltip(icon, effectType.capitalize(), effectLine)
 		if parts.size() > 1:
-			var stacks = Label.new()
+			var stacks = _effectText("x" + parts[1])
 			stacks.name = "Stacks"
-			stacks.text = "x" + parts[1]
 			entry.add_child(stacks)
 		effects.add_child(entry)
+	_rebuildingEffects = false
+
+## Inline effect text from the shared rich-text scene. It deliberately has no
+## fit_content and no wrapping: its minimum size must be a constant derived from
+## the string, never from an assigned width, or the stats panel's pinned Effects
+## box enters a non-converging relayout.
+func _effectText(value: String) -> RichTextLabel:
+	var label = TextScene.instantiate() as RichTextLabel
+	label.fit_content = false
+	label.scroll_active = false
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.custom_minimum_size = Vector2(maxi(6, value.length() * 6), 10)
+	label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	label.setRichTextLabel(value)
+	return label
 
 ## Fight start banner with the flavor name (auto-fades).
 func showBanner(bannerText: String) -> void:
-	var label = Label.new()
+	var label = TextScene.instantiate()
 	label.name = "FightBanner"
-	label.text = bannerText
+	label.setRichTextLabel(bannerText)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(label)
 	label.set_anchors_preset(Control.PRESET_CENTER)
@@ -394,17 +501,19 @@ func showBanner(bannerText: String) -> void:
 	tween.tween_interval(2.0)
 	tween.tween_callback(label.queue_free)
 
-## End screen: outcome and loot summary.
+## End screen: delegates to the static ShootoutEndScreen scene node, which owns
+## the layout, text updates and one-shot acknowledgment state.
 func showEndScreen(results: Dictionary) -> void:
-	var label = Label.new()
-	label.name = "EndScreen"
-	var loot = results.get("loot", {})
-	var lines = [str(results.get("outcome", "")).capitalize()]
-	if loot.get("money", 0) > 0 or !loot.get("items", []).is_empty():
-		lines.append("Loot: {money} cash, {items} items".format({
-			"money": loot.get("money", 0), "items": loot.get("items", []).size()
-		}))
-	label.text = String(" | ").join(lines)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(label)
-	label.set_anchors_preset(Control.PRESET_CENTER)
+	var endScreen = get_node_or_null("EndScreen")
+	if endScreen != null:
+		endScreen.showResults(results)
+
+
+func hideEndScreen() -> void:
+	var endScreen = get_node_or_null("EndScreen")
+	if endScreen != null:
+		endScreen.hideResults()
+
+
+func _on_end_screen_continue_pressed() -> void:
+	endScreenContinuePressed.emit()

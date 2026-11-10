@@ -74,6 +74,10 @@ var partyFightState = {}
 # under Actors in front of the background but behind every fighter.
 var repositionMarkersRoot = null
 var repositionMarkers = {}
+# The result screen owns the final acknowledgment; shootoutEnded fires only
+# after its Continue/Leave overflow action.
+var pendingEndResults = {}
+var endScreenAcknowledged = false
 
 
 func _ready() -> void:
@@ -112,6 +116,7 @@ func _ready() -> void:
 	ui.reposition.connect(_on_shootout_ui_reposition)
 	ui.flee.connect(_on_shootout_ui_flee)
 	ui.repositionPicker.connect(_on_shootout_ui_reposition_picker)
+	ui.endScreenContinuePressed.connect(_on_end_screen_continue_pressed)
 	# Reposition column markers draw under every fighter: first child of the
 	# scene root (tree order puts it before Actors) instead of a z_index,
 	# which is global to the canvas layer. It must NOT live under Actors:
@@ -197,7 +202,10 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	newShootoutActor.add_child(hpIndicator)
 	hpIndicator.init(newShootoutActor)
 	var classData = cylinderManager.classesData.get(newShootoutActor.characterClass, {})
-	newShootoutActor.applyLoadoutLimits(int(classData.get("beltSpace", -1)))
+	var loadoutBeltSpace = int(classData.get("beltSpace", -1))
+	if Party.party.has(actorName):
+		loadoutBeltSpace = int(newShootoutActor.beltSpace)
+	newShootoutActor.applyLoadoutLimits(loadoutBeltSpace)
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
 	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats.bind(actorNameIndexed))
@@ -472,15 +480,35 @@ func _on_battle_ended(winningSide: String) -> void:
 		"rodeoLoot": rodeoManager.consumeLootModifiers()
 	}
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
-	Party.applyFightResults(results)
+	presentFightResults(results)
+
+
+## Applies the authoritative results and presents the acknowledgment screen.
+## Kept independent of scene-tree lookup so the end-flow contract is testable;
+## shootoutEnded is not emitted here.
+func presentFightResults(results: Dictionary) -> void:
+	var applicationResult = Party.applyFightResults(results)
+	results["lootResult"] = applicationResult.get("loot", {})
+	pendingEndResults = results
+	endScreenAcknowledged = false
 	# Outcome stinger for the end screen (MusicPlayer; the fight track stops
 	# and the scene change after the results brings the next scene's music).
 	MusicPlayer.on_shootout_ended(results)
-	shootoutEnded.emit(winningSide, results)
 	ui.showEndScreen(results)
 	print("Shootout ended. Winner: {winningSide}, outcome: {outcome}".format({
-		"winningSide": winningSide, "outcome": results.outcome
+		"winningSide": results.get("winningSide", ""), "outcome": results.get("outcome", "")
 	}))
+
+
+## The result screen is the final confirmation for capacity overflow. Resume
+## scene flow only after it is acknowledged, and never emit twice.
+func _on_end_screen_continue_pressed() -> void:
+	if pendingEndResults.is_empty() or endScreenAcknowledged:
+		return
+	endScreenAcknowledged = true
+	var results = pendingEndResults
+	ui.hideEndScreen()
+	shootoutEnded.emit(str(results.get("winningSide", "")), results)
 
 ## Loot (Docs/System Design/Shootout/Rewards.md): victory only, skipped for
 ## quest fights that pay out at quest end (encounter "loot": false).

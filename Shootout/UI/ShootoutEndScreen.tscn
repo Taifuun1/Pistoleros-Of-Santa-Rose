@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Shootout/UI/ShootoutEndScreen.gd" id="1_end"]
+[ext_resource type="PackedScene" path="res://UI/RichTextLabel Extended/RichTextLabelExtended.tscn" id="2_text"]
+
+[node name="ShootoutEndScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_end")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Outcome" parent="CenterContainer/PanelContainer/MarginContainer/Layout" instance=ExtResource("2_text")]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="LootScroll" type="ScrollContainer" parent="CenterContainer/PanelContainer/MarginContainer/Layout"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="LootContent" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Layout/LootScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="AcceptedLoot" parent="CenterContainer/PanelContainer/MarginContainer/Layout/LootScroll/LootContent" instance=ExtResource("2_text")]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="OverflowLoot" parent="CenterContainer/PanelContainer/MarginContainer/Layout/LootScroll/LootContent" instance=ExtResource("2_text")]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ContinueButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Layout"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "Continue"
