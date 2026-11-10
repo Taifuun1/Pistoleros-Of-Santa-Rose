@@ -3,6 +3,7 @@ extends ActorBase
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 var outlineShader = load("res://Shaders/Outline.tres")
+var actorOutlineMaterial = null
 
 signal actorSelected
 signal actorTurn
@@ -90,17 +91,31 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 	):
 		actorSelected.emit()
 
+## Hover outline uses a copy of the shared resource: one ShaderMaterial assigned
+## to two sprites at once (hovering a damaged actor, then crossing into a
+## neighbour before the exit arrives) makes the renderer reuse a shader variant
+## built for another texture and stalls the frame in deferred callbacks.
+func getOutlineMaterial():
+	if actorOutlineMaterial == null:
+		actorOutlineMaterial = outlineShader.duplicate()
+	return actorOutlineMaterial
+
+func getHoverSprite():
+	return get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
+
 func _on_area_2d_mouse_entered() -> void:
 	# Null-safe: a misnamed animations child must not crash the hover (the
 	# outline is cosmetic; the hover payload still updates the stat panel).
 	if !characterUIHidden:
-		var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
+		var sprite = getHoverSprite()
 		if sprite != null:
-			sprite.material = outlineShader
+			sprite.material = getOutlineMaterial()
 	actorHovered.emit()
 
 func _on_area_2d_mouse_exited() -> void:
-	var sprite = get_node_or_null("{actorName}/AnimationSprite".format({ "actorName": name }))
-	if sprite != null:
+	# Only clear the outline this actor put there, so a late exit cannot wipe
+	# the outline another actor (or a focus change) is currently showing.
+	var sprite = getHoverSprite()
+	if sprite != null and actorOutlineMaterial != null and sprite.material == actorOutlineMaterial:
 		sprite.material = null
 	actorUnhovered.emit()
