@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://UI/Journal/Tabs/InventoryTab.gd" id="1_inventorytab"]
+[ext_resource type="Script" path="res://UI/Journal/Tabs/InventoryTab.gd" id="1_inventory"]
+[ext_resource type="PackedScene" path="res://Nodes/Item Stats/ItemStats.tscn" id="2_itemstats"]
+[ext_resource type="PackedScene" path="res://UI/Journal/TabSprite.tscn" id="3_tabsprite"]
+[ext_resource type="PackedScene" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="4_text"]
 
 [node name="InventoryTab" type="Control"]
 layout_mode = 3
@@ -9,4 +12,264 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_inventorytab")
+script = ExtResource("1_inventory")
+
+[node name="ContentView" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="LeftPanel" type="PanelContainer" parent="ContentView"]
+custom_minimum_size = Vector2(290, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.56
+
+[node name="LeftMargin" type="MarginContainer" parent="ContentView/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="LeftLayout" type="VBoxContainer" parent="ContentView/LeftPanel/LeftMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="MembersHeader" parent="ContentView/LeftPanel/LeftMargin/LeftLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "Party"
+
+[node name="MemberScroll" type="ScrollContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+focus_mode = 2
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="MemberButtons" type="HBoxContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout/MemberScroll"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="EquipmentHeader" parent="ContentView/LeftPanel/LeftMargin/LeftLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "Equipment"
+
+[node name="EquipmentGrid" type="GridContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout"]
+layout_mode = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 7
+
+[node name="InventoryHeader" type="HBoxContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout"]
+layout_mode = 2
+
+[node name="InventoryTitle" parent="ContentView/LeftPanel/LeftMargin/LeftLayout/InventoryHeader" instance=ExtResource("4_text")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inventory"
+
+[node name="CapacityText" parent="ContentView/LeftPanel/LeftMargin/LeftLayout/InventoryHeader" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "0 / 24"
+
+[node name="InventoryScroll" type="ScrollContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="InventoryGrid" type="GridContainer" parent="ContentView/LeftPanel/LeftMargin/LeftLayout/InventoryScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 6
+
+[node name="EmptyInventoryLabel" parent="ContentView/LeftPanel/LeftMargin/LeftLayout" instance=ExtResource("4_text")]
+visible = false
+layout_mode = 2
+text = "No carried items"
+autowrap_mode = 3
+
+[node name="RightPanel" type="PanelContainer" parent="ContentView"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.44
+
+[node name="RightMargin" type="MarginContainer" parent="ContentView/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="RightLayout" type="VBoxContainer" parent="ContentView/RightPanel/RightMargin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="MemberStatsLabel" parent="ContentView/RightPanel/RightMargin/RightLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="DetailScroll" type="ScrollContainer" parent="ContentView/RightPanel/RightMargin/RightLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="DetailContent" type="VBoxContainer" parent="ContentView/RightPanel/RightMargin/RightLayout/DetailScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ItemStatsHost" type="MarginContainer" parent="ContentView/RightPanel/RightMargin/RightLayout/DetailScroll/DetailContent"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="SelectionLabel" parent="ContentView/RightPanel/RightMargin/RightLayout/DetailScroll/DetailContent" instance=ExtResource("4_text")]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ComparisonRows" type="VBoxContainer" parent="ContentView/RightPanel/RightMargin/RightLayout/DetailScroll/DetailContent"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="FeedbackLabel" parent="ContentView/RightPanel/RightMargin/RightLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="ContentView/RightPanel/RightMargin/RightLayout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EquipButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equip"
+
+[node name="DropButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Drop..."
+
+[node name="DropOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DropDim" type="ColorRect" parent="DropOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="DropCenter" type="CenterContainer" parent="DropOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DropPanel" type="PanelContainer" parent="DropOverlay/DropCenter"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="DropMargin" type="MarginContainer" parent="DropOverlay/DropCenter/DropPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="DropLayout" type="VBoxContainer" parent="DropOverlay/DropCenter/DropPanel/DropMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DropTitle" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "Drop item?"
+horizontal_alignment = 1
+
+[node name="DropItemLabel" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+autowrap_mode = 3
+horizontal_alignment = 1
+
+[node name="QuantityRow" type="HBoxContainer" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="DecrementButton" type="Button" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/QuantityRow"]
+custom_minimum_size = Vector2(32, 26)
+layout_mode = 2
+text = "-"
+
+[node name="QuantityLabel" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/QuantityRow" instance=ExtResource("4_text")]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="IncrementButton" type="Button" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/QuantityRow"]
+custom_minimum_size = Vector2(32, 26)
+layout_mode = 2
+text = "+"
+
+[node name="AllButton" type="Button" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/QuantityRow"]
+custom_minimum_size = Vector2(40, 26)
+layout_mode = 2
+text = "All"
+
+[node name="DropActions" type="HBoxContainer" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="CancelButton" type="Button" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropActions"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="ConfirmButton" type="Button" parent="DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropActions"]
+layout_mode = 2
+text = "Drop"
+
+[node name="StateView" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StateLayout" type="VBoxContainer" parent="StateView"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="StateTabSprite" parent="StateView/StateLayout" instance=ExtResource("3_tabsprite")]
+layout_mode = 2
+
+[node name="StateMessageLabel" parent="StateView/StateLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "Inventory data unavailable"
+horizontal_alignment = 1
+autowrap_mode = 3

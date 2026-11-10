@@ -1,4 +1,4 @@
-extends TextureRect
+extends NinePatchRect
 
 ## Displays a generated item (see Globals/ItemGeneration.gd) on the ItemStats
 ## scene: the item sprite on the Icon texture rect, the rarity-colored name,
@@ -13,6 +13,10 @@ const AffixDataScript = preload("res://Data/Items/AffixData.gd")
 ## (Three ASCII periods: the FFF Forward Outline 8px bitmap font only covers
 ## chars 32-125, so a U+2026 ellipsis would render as an unknown symbol.)
 const NAME_MAX_LINES = 2
+
+## Journal details need the complete name visible without hover; list/tooltip
+## contexts keep the existing two-line truncation behavior.
+var allowNameTruncation := true
 
 var icon
 var nameLabel
@@ -31,6 +35,7 @@ var _fullName = ""
 
 func _ready() -> void:
 	_ensureNodes()
+	resized.connect(_onResized)
 	# Re-display once in the tree so name truncation can measure real widths
 	if not _displayedItem.is_empty():
 		displayItem(_displayedItem)
@@ -42,7 +47,7 @@ func _ready() -> void:
 func _ensureNodes() -> void:
 	if icon != null:
 		return
-	icon = $"MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/Icon"
+	icon = $"MarginContainer/VBoxContainer/HBoxContainer/MarginContainer/IconBox/Icon"
 	nameLabel = $"MarginContainer/VBoxContainer/HBoxContainer/MarginContainer2/Name"
 	familyLabel = $"MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/Family"
 	modifierLabels = [
@@ -59,6 +64,21 @@ func _ensureNodes() -> void:
 		nameLabel.mouse_exited.connect(_onNameMouseExited)
 
 
+## Interior of the card art's icon frame: x 5-32, y 7-30 of the 200x200 texture
+## (the frame's highlight border runs x 4-33, y 6-31). The nine-patch keeps that
+## corner at 1:1, so this rect lands exactly on the drawn frame.
+const ICON_BOX = Vector2(28, 24)
+
+## Item sprites come in 12x12, 24x24 and 28x24. They are drawn at their native
+## scale so every sprite keeps even pixel proportions and its authored size (a
+## 12x12 hat stays visibly smaller than a 24x24 revolver), and centered inside the
+## frame. Scaling each sprite up to fill the frame made 12px art as large as
+## 24px art and left no room at the frame's edges.
+func _setIcon(texture: Texture2D) -> void:
+	icon.texture = texture
+	TextureFit.applyTo(icon, ICON_BOX)
+
+
 ## Maps an item dictionary onto the labels and texture rects.
 func displayItem(item: Dictionary) -> void:
 	_ensureNodes()
@@ -67,25 +87,34 @@ func displayItem(item: Dictionary) -> void:
 	_displayedItem = item
 
 	if item.get("sprite", "") != "":
-		icon.texture = load(item["sprite"])
+		_setIcon(load(item["sprite"]))
 	else:
-		icon.texture = load(PLACEHOLDER_ICON)
+		_setIcon(load(PLACEHOLDER_ICON))
 
 	_displayItemName(item)
 
-	if item["itemType"] == "weapon":
-		var familyText = item["family"].capitalize()
+	var itemType = str(item.get("itemType", ""))
+	if itemType == "weapon":
+		var familyText = str(item.get("family", "")).capitalize()
 		if item.has("familyNoun"):
 			familyText = "%s (%s)" % [familyText, item["familyNoun"]]
 		familyLabel.setRichTextLabel(familyText)
+	elif itemType == "equipment":
+		familyLabel.setRichTextLabel(str(item.get("slot", "")).capitalize())
 	else:
-		familyLabel.setRichTextLabel(item["slot"].capitalize())
+		familyLabel.setRichTextLabel(str(item.get("category", itemType)).capitalize())
 
 	var modifierLines = []
-	if item["itemType"] == "weapon":
-		modifierLines.append("%s: %d" % [nameLabel.colorize("Damage", "keyword"), item["baseDamage"]])
-	for statKey in item["stats"]:
-		modifierLines.append(_formatStatLine(statKey, item["stats"][statKey]))
+	if itemType == "weapon":
+		modifierLines.append("%s: %d" % [nameLabel.colorize("Damage", "keyword"), item.get("baseDamage", 0)])
+	elif itemType not in ["equipment"]:
+		var description = str(item.get("description", ""))
+		if description != "":
+			modifierLines.append(description)
+	var itemStats = item.get("stats", {})
+	if itemStats is Dictionary:
+		for statKey in itemStats:
+			modifierLines.append(_formatStatLine(statKey, itemStats[statKey]))
 	for i in modifierLabels.size():
 		modifierLabels[i].visible = i < modifierLines.size()
 		if modifierLabels[i].visible:
@@ -110,7 +139,11 @@ func displayItem(item: Dictionary) -> void:
 func _displayItemName(item: Dictionary) -> void:
 	var rarity = item.get("rarity", "common")
 	_nameParts = []
-	if rarity == "legendary" or not item.has("rarityName"):
+	if !allowNameTruncation:
+		_nameParts.append([str(item.get("name", "")), rarity])
+	elif item.get("itemType", "") not in ["weapon", "equipment"]:
+		_nameParts.append([str(item.get("name", "")), "white"])
+	elif rarity == "legendary" or not item.has("rarityName"):
 		_nameParts.append([item["name"], rarity])
 	else:
 		_nameParts.append([item["rarityName"], rarity])
@@ -129,7 +162,11 @@ func _displayItemName(item: Dictionary) -> void:
 		for part in _nameParts:
 			_fullName += part[0]
 		_fullName = _fullName.strip_edges()
-	call_deferred("_truncateName")
+	if allowNameTruncation:
+		call_deferred("_truncateName")
+	else:
+		_fitPanelToContent()
+	_requestRefit()
 
 
 ## Shows the tooltip with the full item name when hovering the name label.
@@ -149,10 +186,13 @@ func _tooltipDescription(item: Dictionary) -> String:
 	var description = item.get("rarityName", "")
 	if description != "":
 		description += " - "
-	if item["itemType"] == "weapon":
-		description += item["family"].capitalize()
+	var itemType = str(item.get("itemType", ""))
+	if itemType == "weapon":
+		description += str(item.get("family", "")).capitalize()
+	elif itemType == "equipment":
+		description += str(item.get("slot", "")).capitalize()
 	else:
-		description += item["slot"].capitalize()
+		description += str(item.get("category", itemType)).capitalize()
 	return description
 
 
@@ -172,7 +212,7 @@ func _renderName(parts: Array, withEllipsis := false) -> void:
 ## Trims words off the end of the name (suffix first, then base name, etc.)
 ## until it fits within NAME_MAX_LINES lines, marking it with "...".
 func _truncateName() -> void:
-	if not is_inside_tree() or _nameParts.is_empty():
+	if not allowNameTruncation or not is_inside_tree() or _nameParts.is_empty():
 		return
 	var truncated = false
 	var guard = 0
@@ -200,9 +240,52 @@ func _truncateName() -> void:
 ## Grows (or shrinks) the panel vertically to fit the content. The labels wrap
 ## and expand (autowrap + fit_content), so the VBox's combined minimum size
 ## reflects all visible lines; hidden labels take no space.
+##
+## The wrapped height only holds for the width the panel was given, and the
+## panel must never set its own size: it lives in a container that supplies the
+## width (the Journal's ItemStatsHost). Only the minimum height is reported, so
+## a narrow panel gets taller instead of squeezing its lines on top of each
+## other.
+const WIDTH_EPSILON = 0.5
+
+var _fittedWidth := -1.0
+
 func _fitPanelToContent() -> void:
-	custom_minimum_size.y = $"MarginContainer/VBoxContainer".get_combined_minimum_size().y
-	reset_size()
+	var contentHeight = $"MarginContainer/VBoxContainer".get_combined_minimum_size().y
+	_fittedWidth = size.x if is_inside_tree() else -1.0
+	if absf(custom_minimum_size.y - contentHeight) > WIDTH_EPSILON:
+		custom_minimum_size.y = contentHeight
+
+
+## Re-fits when the assigned width changes: that is the only input that changes
+## how many lines the content wraps into. The width is known a frame before the
+## labels finish re-wrapping, so the bounded re-measure below follows it.
+func _onResized() -> void:
+	if is_equal_approx(size.x, _fittedWidth):
+		return
+	_fitPanelToContent()
+	_requestRefit()
+
+
+## Text layout resolves a frame or two after the item is rendered, so the first
+## measurement can miss the wrapped height. Re-measure for a few frames until
+## the height settles; bounded so a layout that never settles cannot spin.
+const REFIT_ATTEMPTS = 4
+var _refitPending := false
+
+func _requestRefit() -> void:
+	if _refitPending or !is_inside_tree():
+		return
+	_refitPending = true
+	for _attempt in REFIT_ATTEMPTS:
+		await get_tree().process_frame
+		if !is_instance_valid(self) or !is_inside_tree():
+			return
+		var before = custom_minimum_size.y
+		_fitPanelToContent()
+		if is_equal_approx(before, custom_minimum_size.y):
+			break
+	_refitPending = false
 
 
 func _affixCategoryColor(statKey: String) -> String:

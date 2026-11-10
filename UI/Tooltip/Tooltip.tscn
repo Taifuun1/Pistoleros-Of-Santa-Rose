@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://6cv348wwh588" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="4_sknjt"]
 
 [node name="Tooltip" type="CanvasLayer" unique_id=1558058711]
-layer = 2
+layer = 6
 visible = false
 
 [node name="Tooltip" type="PanelContainer" parent="." unique_id=574383133]
