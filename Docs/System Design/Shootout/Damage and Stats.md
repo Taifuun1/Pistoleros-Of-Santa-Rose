@@ -32,14 +32,16 @@ Weapon family rules:
 
 ## Current state
 
-**Implemented** (steps 1-4 of the implementation order; equipment-derived defense is pending with equipment data):
+**Implemented** (steps 1-5 of the implementation order):
 
 - `Actors/BaseActor.gd` — extended `stats` (`defense: {style, sand}`, `resistances: {bleed, poison}`, `damage.lasso`) and `weapon.baseDamage`; `init()` duplicates source data and fills safe defaults (defense 0/0, resistances 0.0, lasso 0, melee baseDamage 2) so Shootout-time mutation never touches source data.
 - `ShootoutActionResolver.calculateAttackDamage()` — the full pipeline: quality multiplier, weapon base + offensive stat, weapon family defense rules, then the effect hooks (`applyOutgoingModifiers`/`applyIncomingModifiers` — pass-through until [Effects](Effects.md) lands).
 - Offensive stats per family: Lead uses the Rodeo-modified `stats.damage.lead` entry; Explosive adds the class `explosiveBase` from the class data file; Lasso and melee contribute no stat (lassos are weapon base damage only — decided).
 - Weapon family rules: revolvers lose the higher of Style/Sand, rifles gain Style and lose Sand, shotguns gain Sand and lose Style; explosives/lassos/melee ignore defense. Attack abilities roll quality on their own amount but skip family rules (the ability amount isn't weapon damage).
+- `Globals/CharacterStatCalculator.gd` — projects canonical equipment into fight data: Style/Sand, core stats, MxHP, matching weapon-family damage, and belt space. Only supported modifiers affect combat; other affixes remain item details.
+- Supported equipment modifiers (the only ones that produce a combat value or a comparison delta): `sixShootin`, `highTailin`, `taffyin`, `style`, `sand`, `mxHp`, the equipped weapon's own family affix (`revolverDamage`/`rifleDamage`/`shotgunDamage`), and a belt's top-level `beltSpace`. Everything else in `Data/Items/AffixData.gd` (`bleedAffliction`, `poisonAffliction`, `damagePiercing`, `damageTakenReduction`, `damageTakenReductionTaunting`, `damageVsMarked`, `gunpowderDamage`, `initiative`, `lassoDamage`, `liquidSkullDamage`, `liquidSkullDuration`, `lootGems`, `lootGold`, `lootItems`, `mxEn`, `mxHpHealTauntingPerTurn`, `negativeEffectDurationReduction`, `negativeEffectPotencyReduction`, `shrapnelDamage`, `silenceImmunity`, `turnOrder`, `cylinderIncrease`) renders on the item but has no combat effect yet — the Inventory comparison deliberately omits those rows rather than claiming a delta. Equipment-granted Move/Ability loadouts are also unimplemented.
 - `Shootout.getModifiedStat()` — single stat-read seam (Rodeos now, effects later); stat payloads carry Style/Sand, and the UI tolerates missing stat containers until the scene gains them.
-- Tests: `Tests/TestDamage.gd` covers the `Docs/Combat.md` worked example, family rules, lasso flatness, the damage floor, explosive class bases, melee, and Rodeo modifier routing.
+- Tests: `Tests/TestDamage.gd` covers the `Docs/Combat.md` worked example, family rules, lasso flatness, the damage floor, explosive class bases, melee, and Rodeo modifier routing. `Tests/TestEquipmentStats.gd` covers equipment-derived stats and preview/commit parity.
 
 ## Design
 
@@ -127,7 +129,7 @@ This lives on the shootout root (`Shootout.getModifiedStat`) so turn manager (in
 2. ✅ `calculateAttackDamage()` with quality multiplier (on top of [Cylinders](Cylinders.md)).
 3. ✅ Weapon family defense rules.
 4. ✅ Modifier hooks (piercing/decrease/marks) — pass-through seams in place, wired when [Effects](Effects.md) lands.
-5. Equipment-derived defense once equipment data exists (pending).
+5. ✅ Equipment-derived defense and supported equipment stats via `CharacterStatCalculator`.
 
 ## Open Questions
 
