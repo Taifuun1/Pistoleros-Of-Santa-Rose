@@ -54,6 +54,7 @@ func _ready() -> void:
 	_pauseCoordinator = ModalPauseCoordinator.new(get_tree())
 	journal.pauseCoordinator = _pauseCoordinator
 	scene_change_started.connect(_on_scene_change_started)
+	_syncInventoryPolicy()
 	if initialScene != "":
 		change_scene(initialScene)
 
@@ -84,6 +85,7 @@ func change_scene_to_path(scenePath: String, context := {}, sceneKey := "") -> v
 		push_warning("SceneManager: change to '{path}' ignored; a transition is already in progress.".format({ "path": scenePath }))
 		return
 	transitioning = true
+	_syncInventoryPolicy()
 	scene_change_started.emit(sceneKey)
 	_swapScene(scenePath, context, sceneKey)
 
@@ -158,6 +160,7 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 
 	await _fadeIn()
 	transitioning = false
+	_syncInventoryPolicy()
 	scene_changed.emit(sceneKey)
 
 
@@ -181,6 +184,15 @@ func _abortTransition() -> void:
 	loadingScreen.hide()
 	await _fadeIn()
 	transitioning = false
+	_syncInventoryPolicy()
+
+
+## Domain mutation policy is separate from Journal visibility: only scenes that
+## permit the Journal may equip/drop, and transitions always fail closed.
+func _syncInventoryPolicy() -> void:
+	var party = get_node_or_null("/root/Party")
+	if party != null and party.has_method("setInventoryManagementAllowed"):
+		party.setInventoryManagementAllowed(!transitioning and journalAllowedScenes.has(currentSceneKey))
 
 
 func canOpenJournal() -> bool:

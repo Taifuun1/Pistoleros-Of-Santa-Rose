@@ -96,6 +96,13 @@ func _run() -> void:
 	permissive.init(actorData)
 	permissive.applyLoadoutLimits(-1)
 	_check(permissive.items.size() == 3, "belt space -1 means no belt limit")
+	var withBelt = actorData.duplicate(true)
+	withBelt["beltSpace"] = 2
+	var beltActor = BaseActorScript.new()
+	beltActor.init(withBelt)
+	_check(beltActor.beltSpace == 2, "actor data carries computed belt space")
+	beltActor.applyLoadoutLimits(beltActor.beltSpace)
+	_check(beltActor.items.size() == 2, "actor belt space caps its own loadout")
 
 	print("\n--- Item use consumes one instance ---")
 	var ctx = makeFight()

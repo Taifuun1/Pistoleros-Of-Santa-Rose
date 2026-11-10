@@ -80,6 +80,8 @@ func _ready() -> void:
 	await testRealTabs()
 	await testQuestShowOnMap()
 	await testMapControllerFocusHandoff()
+	await testInventoryControllerFocusHandoff()
+	await testInventoryNoSideEffects()
 	await testSceneTreeSetup()
 
 	# Free the real/fake tabs the test owns and release the music autoload's
@@ -268,6 +270,20 @@ func testSceneChangePolicy() -> void:
 	check(!journal.isOpen, "a scene change closes the journal")
 	check(!get_tree().paused, "the scene change does not leave the game paused")
 	check(sceneManager.currentSceneKey == "main_menu" and !sceneManager.canOpenJournal(), "the journal stays blocked in the main menu")
+	var party = get_node("/root/Party")
+	check(!party.inventoryManagementAllowed, "inventory management is blocked in the main menu")
+	sceneManager.currentSceneKey = "overworld"
+	sceneManager._syncInventoryPolicy()
+	check(party.inventoryManagementAllowed, "inventory management is allowed in the Overworld")
+	sceneManager.transitioning = true
+	sceneManager._syncInventoryPolicy()
+	check(!party.inventoryManagementAllowed, "inventory management fails closed during transitions")
+	sceneManager.transitioning = false
+	sceneManager.currentSceneKey = "shootout"
+	sceneManager._syncInventoryPolicy()
+	check(!party.inventoryManagementAllowed, "inventory management is blocked in Shootouts")
+	sceneManager.currentSceneKey = "main_menu"
+	sceneManager._syncInventoryPolicy()
 
 
 func testRealTabs() -> void:
@@ -295,6 +311,12 @@ func testRealTabs() -> void:
 		check(tab.tabIcon != null, "the %s tab receives its icon from the registry" % tabId)
 		if tabId == "map":
 			check(tab.find_child("BaseMap", true, false) != null, "the map tab builds its view from the generated manifest")
+		elif tabId == "inventory":
+			check(tab.find_child("ContentView", true, false) != null, "the inventory tab has its member/item content view")
+			check(tab.find_child("StateView", true, false) != null, "the inventory tab has its unavailable state view")
+			check(tab._selectedMemberKey == "Walker Langley", "the inventory tab selects the real party member")
+			check(tab._inventoryButtons.has("starter_paregoric"), "the inventory tab reads the real starter stack")
+			check(tab.equipmentGrid.get_child_count() == 7, "the inventory tab renders the real seven equipment slots")
 		elif tabId == "quests":
 			check(tab.find_child("ContentView", true, false) != null, "the quests tab has its master/detail content view")
 			check(tab.find_child("StateView", true, false) != null, "the quests tab has its empty/unavailable state view")
@@ -413,6 +435,89 @@ func testMapControllerFocusHandoff() -> void:
 	check(journal.tabBar.current_tab == tabBefore + 1, "D-pad switches tabs again after focus returns")
 	await pressAction("ui_cancel")
 	check(!journal.isOpen, "closing from the tab bar still closes the journal")
+
+
+func testInventoryControllerFocusHandoff() -> void:
+	print("--- Inventory controller focus handoff ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	journal.selectTab("inventory")
+	journal.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var inventoryTab = journal._tabInstances.get("inventory")
+	check(inventoryTab != null, "the real inventory tab is active for the handoff test")
+	if inventoryTab == null:
+		journal.close()
+		return
+	check(get_viewport().gui_get_focus_owner() == journal.tabBar, "the inventory handoff starts on the tab bar")
+	check(inventoryTab.getFocusTarget() == inventoryTab._memberButtons["Walker Langley"], "the inventory tab exposes its selected member")
+	await pressAction("ui_down")
+	check(get_viewport().gui_get_focus_owner() == inventoryTab._memberButtons["Walker Langley"], "D-pad down enters the member selector")
+	await pressAction("ui_cancel")
+	check(journal.isOpen and get_viewport().gui_get_focus_owner() == journal.tabBar, "back returns inventory focus to the tab bar")
+	await pressAction("ui_cancel")
+	check(!journal.isOpen, "closing from shell chrome still closes the journal")
+
+
+func testInventoryNoSideEffects() -> void:
+	print("--- Inventory: opening the Journal has no side effects ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	var party = get_node("/root/Party")
+	# Allow management so the tab exposes the same controls a player would see;
+	# the test only inspects, never commands.
+	party.setInventoryManagementAllowed(true)
+	var inventoryBefore: Array = party.inventory.duplicate(true)
+	var partyBefore: Dictionary = party.party.duplicate(true)
+	var moneyBefore: int = int(party.money)
+	var nextIdBefore: int = int(party._nextInstanceNumber)
+
+	# The global RNG is what ItemGeneration draws from, so a fixed seed replays
+	# exactly if nothing consumed randomness.
+	seed(4242)
+	var expectedRolls := [randi(), randi(), randf()]
+	seed(4242)
+
+	journal.open()
+	for cycle in 3:
+		journal.selectTab("inventory")
+		var tab = journal._tabInstances.get("inventory")
+		if tab == null:
+			check(false, "the inventory tab is available on cycle %d" % cycle)
+			break
+		tab.refreshTab()
+		# Inspection only: selecting a member, an equipment slot, and an item must
+		# not issue a command or write state.
+		tab._onEquipmentSlotPressed("headwear")
+		if !tab._itemOrder.is_empty():
+			tab._onInventoryItemPressed(str(tab._itemOrder[0]))
+		tab.setTabActive(false)
+		tab.setTabActive(true)
+		journal.selectTab("quests")
+		journal.close()
+		journal.open()
+	var actualRolls := [randi(), randi(), randf()]
+	check(actualRolls == expectedRolls, "opening/closing the Journal consumes no RNG (%s vs %s)" % [actualRolls, expectedRolls])
+	check(party.inventory == inventoryBefore, "opening/closing the Journal writes no inventory state")
+	check(party.party == partyBefore, "opening/closing the Journal writes no member state")
+	check(int(party.money) == moneyBefore, "opening/closing the Journal writes no money")
+	check(int(party._nextInstanceNumber) == nextIdBefore, "opening/closing the Journal allocates no item ids")
+	check(party.inventory.size() == inventoryBefore.size(), "opening/closing the Journal generates no items")
+
+	# Repeated activations must not duplicate provider connections: one deferred
+	# refresh per change signal is the contract. The tab must be active first —
+	# closing the Journal deactivates tabs, which disconnects them by design.
+	journal.selectTab("inventory")
+	var tab = journal._tabInstances.get("inventory")
+	if tab != null:
+		var connections = party.inventoryChanged.get_connections().filter(
+			func(connection): return connection.callable.get_object() == tab)
+		check(connections.size() == 1, "the active inventory tab holds exactly one provider connection, got %d" % connections.size())
+		tab.setTabActive(false)
+		var afterDeactivate = party.inventoryChanged.get_connections().filter(
+			func(connection): return connection.callable.get_object() == tab)
+		check(afterDeactivate.is_empty(), "a deactivated inventory tab disconnects from the provider")
+	journal.close()
+	party.setInventoryManagementAllowed(false)
 
 
 func testSceneTreeSetup() -> void:

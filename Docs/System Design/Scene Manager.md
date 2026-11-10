@@ -90,6 +90,7 @@ func get_current_scene() -> Node
 
 - `context` is an optional `Dictionary` passed through to the new scene (e.g. `{ "location": "Clearwater Grove", "pregenerated": false }` from `enterLocation()`, or spawn data for the overworld). The manager sets matching properties / calls an optional `init(context)` method on the new scene root if it has one, replacing the current pattern of setting autoload state (`Locations.currentLocation`, `Overworld.spawnChunk`, `Overworld.spawnTile`) before switching.
 - Only one transition can run at a time; calls made while a transition is in progress are ignored (with a `push_warning`).
+- `_syncInventoryPolicy()` publishes the Inventory/Equipment mutation policy to `Party`: allowed only when `!transitioning` and the current scene key permits the Journal. It runs at startup, when a transition starts, and after successful completion/abort, so drops/equipment commands fail closed before scene flow resumes.
 
 ### 6. Transition flow
 

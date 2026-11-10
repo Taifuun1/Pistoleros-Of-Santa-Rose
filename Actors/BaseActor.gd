@@ -50,12 +50,7 @@ var weapon = {
 	"weapon": null,
 	"baseDamage": 0
 }
-var equipment = {
-	"hat": null,
-	"jacket": null,
-	"trousers": null,
-	"boots": null
-}
+var beltSpace = -1
 
 
 func init(actorData: Dictionary):
@@ -78,6 +73,7 @@ func init(actorData: Dictionary):
 	characterMagazine = actorData.get("magazine", null)
 	moves = actorData.get("moves", []).duplicate()
 	items = actorData.get("items", []).duplicate()
+	beltSpace = int(actorData.get("beltSpace", -1))
 	
 	weapon = actorData.weapon.duplicate()
 	if !weapon.has("baseDamage"):
@@ -96,4 +92,3 @@ func applyLoadoutLimits(beltSpace := -1, moveCap := 4) -> void:
 			"actorName": actorName, "count": items.size(), "beltSpace": beltSpace
 		}))
 		items = items.slice(0, beltSpace)
-	#equipment = actorData.equipment
