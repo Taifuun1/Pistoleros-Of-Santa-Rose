@@ -94,12 +94,12 @@ var data = {
 	# Unique encounters (by encounter data "name").
 	"shootout_encounter_tracks": {
 		"Testing Encounter": [
-			"Shootout/Dusty Showdown",
 			"Shootout/Last Bullet Canyon",
 			"Shootout/Pixel Duel",
 			"Shootout/Dusty Cartridge Duel",
 			"Shootout/Shootout1",
 			"Shootout/Duel de Chiptune",
+			"Shootout/Dusty Showdown",
 		],
 	},
 	# Fights tied to an Overworld zone (encounter data "zone"). Zone names match
