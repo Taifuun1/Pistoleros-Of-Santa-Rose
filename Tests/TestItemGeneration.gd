@@ -3,6 +3,8 @@ extends SceneTree
 ## Headless validation for the item generation system.
 ## Run with: godot --headless --script res://Tests/TestItemGeneration.gd
 
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
+
 var failures = 0
 
 
@@ -15,6 +17,7 @@ func _init() -> void:
 func _run() -> void:
 	seed(12345)
 	var generator = load("res://Globals/ItemGeneration.gd").new()
+	generator._loadData()
 
 	print("--- Rarity distribution over 1000 rolls ---")
 	var counts = {}
@@ -22,6 +25,37 @@ func _run() -> void:
 		var rarity = generator.rollRarity()
 		counts[rarity] = counts.get(rarity, 0) + 1
 	print(counts)
+
+	print("\n--- Stable definition ids are unique and non-empty ---")
+	var weaponIds = {}
+	for family in generator.weaponData.weaponFamilies:
+		for base in generator.weaponData.weaponFamilies[family]:
+			var weaponId = str(base.get("id", ""))
+			_check(weaponId != "", "weapon base missing id: %s" % base["name"])
+			_check(not weaponIds.has(weaponId), "duplicate weapon id: %s" % weaponId)
+			weaponIds[weaponId] = true
+	var equipmentIds = {}
+	for slot in generator.equipmentData.genericBases:
+		var genericId = str(generator.equipmentData.genericBases[slot].get("id", ""))
+		_check(genericId != "", "generic equipment missing id: %s" % slot)
+		_check(not equipmentIds.has(genericId), "duplicate equipment id: %s" % genericId)
+		equipmentIds[genericId] = true
+	for zoneKey in generator.equipmentData.zones:
+		for entry in generator.equipmentData.zones[zoneKey]["items"]:
+			var entryId = str(entry.get("id", ""))
+			_check(entryId != "", "zone equipment missing id: %s" % entry["name"])
+			_check(not equipmentIds.has(entryId), "duplicate equipment id: %s" % entryId)
+			equipmentIds[entryId] = true
+
+	print("\n--- Item catalog validates the production definitions ---")
+	var catalog = ItemCatalogScript.new()
+	var catalogErrors = catalog.validate()
+	_check(catalogErrors.is_empty(), "catalog errors: %s" % [catalogErrors])
+	var paregoric = catalog.getDefinition("paregoric")
+	_check(paregoric.get("stackLimit", 0) == 5, "Paregoric stack limit must be 5")
+	_check(paregoric.get("combatId", "") == "Paregoric", "Paregoric combatId mismatch")
+	_check(catalog.makeStackable("paregoric", 3).get("quantity", 0) == 3, "makeStackable quantity mismatch")
+	_check(catalog.makeStackable("missing", 1).is_empty(), "unknown stackable should return {}")
 
 	print("\n--- One weapon per forced rarity ---")
 	for rarity in ["common", "uncommon", "rare", "epic"]:
@@ -46,6 +80,8 @@ func _run() -> void:
 		var item = generator.generateLegendary(legendaryKey)
 		print(item["name"], " | ", item["rarityName"], " | stats: ", item["stats"])
 		_check(item["rarity"] == "legendary", "legendary rarity wrong: %s" % legendaryKey)
+		_check(item["definitionId"] == legendaryKey, "legendary definitionId mismatch: %s" % legendaryKey)
+		_check(item["quantity"] == 1, "legendary quantity must be one: %s" % legendaryKey)
 		_check(item["prefix"].is_empty() and item["suffix"].is_empty(), "legendary has affixes: %s" % legendaryKey)
 	_check(generator.generateLegendary("does_not_exist").is_empty(), "unknown legendary should return {}")
 
@@ -158,7 +194,11 @@ func _run() -> void:
 	_check(longNameLabel.get_line_count() <= 2, "name exceeds 2 lines (%s lines)" % longNameLabel.get_line_count())
 	_check(longNameLabel.get_parsed_text().ends_with("..."), "long name not truncated with ellipsis: %s" % longNameLabel.get_parsed_text())
 	_check(longNameLabel.get_content_height() <= longNameLabel.size.y + 0.5, "name text still cut off (content %s > height %s)" % [longNameLabel.get_content_height(), longNameLabel.size.y])
-	_check(testScene.itemStats.icon.size_flags_vertical == Control.SIZE_SHRINK_BEGIN, "icon not top-anchored")
+	# The sprite must stay pinned to the card art's icon frame (top-left) instead of
+	# floating down when the title row is tall.
+	var iconBox = testScene.itemStats.icon.get_parent()
+	_check(iconBox.size_flags_vertical == Control.SIZE_SHRINK_BEGIN, "icon box not top-anchored")
+	_check(testScene.itemStats.icon.size_flags_vertical == Control.SIZE_SHRINK_CENTER, "icon is centered inside its box")
 
 	# Name tooltip: shows the full, untruncated name on hover
 	longNameLabel.mouse_entered.emit()
@@ -187,6 +227,8 @@ func _checkItem(item: Dictionary, itemType: String, rarity: String) -> void:
 	_check(item["itemType"] == itemType, "itemType wrong: %s" % item["name"])
 	_check(item["rarity"] == rarity, "rarity wrong: %s" % item["name"])
 	_check(item.has("name") and item["name"] != "", "missing name")
+	_check(str(item.get("definitionId", "")) != "", "missing definitionId: %s" % item["name"])
+	_check(item.get("quantity", 0) == 1, "gear quantity must be one: %s" % item["name"])
 	var affixCount = int(not item["prefix"].is_empty()) + int(not item["suffix"].is_empty())
 	_check(affixCount == 2, "affix count %d != 2 for %s" % [affixCount, rarity])
 

@@ -10,7 +10,7 @@ var data = {
 	"money": { "min": 2, "max": 6, "chance": 0.8 },
 	"rolls": 1,
 	"entries": [
-		{ "kind": "consumable", "id": "Paregoric", "weight": 3 },
+		{ "kind": "consumable", "definitionId": "paregoric", "weight": 3 },
 		{ "kind": "weapon", "rarity": ["common"], "weight": 1 },
 		{ "kind": "equipment", "rarity": ["common"], "weight": 1 }
 	]

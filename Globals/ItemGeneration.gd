@@ -7,6 +7,7 @@ extends Node
 ## Items are plain dictionaries (project convention), e.g. a rolled weapon:
 ## {
 ##   "name": "Well-Kept Deadeye's Cattleman of the Quickdraw",
+##   "definitionId": "cattleman", "quantity": 1,
 ##   "itemType": "weapon", "family": "revolver"
 ##   "baseName": "Cattleman", "baseDamage": 7,
 ##   "rarity": "rare", "rarityName": "Well-Kept",
@@ -21,6 +22,7 @@ const AffixDataScript = preload("res://Data/Items/AffixData.gd")
 const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 const LegendaryDataScript = preload("res://Data/Items/LegendaryData.gd")
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 
 const RARITIES = {
 	"common": { "displayName": "Trail-Worn" },
@@ -35,9 +37,12 @@ var affixData
 var weaponData
 var equipmentData
 var legendaryData
+var itemCatalog
 
 
 func _loadData() -> void:
+	if itemCatalog == null:
+		itemCatalog = ItemCatalogScript.new()
 	if affixData == null:
 		affixData = AffixDataScript.new()
 		weaponData = WeaponDataScript.new()
@@ -68,6 +73,8 @@ func generateWeapon(options := {}) -> Dictionary:
 	var weaponBase = weaponBases[randi() % weaponBases.size()]
 
 	var item = {
+		"definitionId": weaponBase["id"],
+		"quantity": 1,
 		"itemType": "weapon",
 		"family": weaponFamily,
 		"baseName": weaponBase["name"],
@@ -90,17 +97,43 @@ func generateEquipment(options := {}) -> Dictionary:
 	var pool = []
 	if equipmentData.zones.has(zone):
 		for entry in equipmentData.zones[zone]["items"]:
-			pool.append({ "name": entry["name"], "slot": entry["slot"], "zone": zone })
+			var zoneEntry = {
+				"definitionId": entry["id"],
+				"name": entry["name"],
+				"slot": entry["slot"],
+				"zone": zone,
+			}
+			if entry.has("beltSpace"):
+				zoneEntry["beltSpace"] = int(entry["beltSpace"])
+			pool.append(zoneEntry)
 	for zoneKey in equipmentData.zones:
 		for entry in equipmentData.zones[zoneKey]["items"]:
 			if entry["dropsAnywhere"]:
-				pool.append({ "name": entry["name"], "slot": entry["slot"], "zone": zoneKey })
+				var anywhereEntry = {
+					"definitionId": entry["id"],
+					"name": entry["name"],
+					"slot": entry["slot"],
+					"zone": zoneKey,
+				}
+				if entry.has("beltSpace"):
+					anywhereEntry["beltSpace"] = int(entry["beltSpace"])
+				pool.append(anywhereEntry)
 	for slot in equipmentData.slots:
 		var generic = equipmentData.genericBases[slot]
-		pool.append({ "name": generic["name"], "slot": slot, "zone": "anywhere" })
+		var genericEntry = {
+			"definitionId": generic["id"],
+			"name": generic["name"],
+			"slot": slot,
+			"zone": "anywhere",
+		}
+		if generic.has("beltSpace"):
+			genericEntry["beltSpace"] = int(generic["beltSpace"])
+		pool.append(genericEntry)
 
 	var base = pool[randi() % pool.size()]
 	var item = {
+		"definitionId": base["definitionId"],
+		"quantity": 1,
 		"itemType": "equipment",
 		"slot": base["slot"],
 		"baseName": base["name"],
@@ -108,6 +141,8 @@ func generateEquipment(options := {}) -> Dictionary:
 		"stats": equipmentData.genericBases[base["slot"]]["baseStats"].duplicate(),
 		"zone": base["zone"],
 	}
+	if base.has("beltSpace"):
+		item["beltSpace"] = base["beltSpace"]
 	_rollRarityAndAffixes(item, options)
 	_assembleName(item)
 	return item
@@ -118,6 +153,8 @@ func generateLegendary(legendaryKey: String) -> Dictionary:
 		push_warning("ItemGeneration: unknown legendary '%s'" % legendaryKey)
 		return {}
 	var item = legendaryData.legendaries[legendaryKey].duplicate(true)
+	item["definitionId"] = legendaryKey
+	item["quantity"] = 1
 	item["rarity"] = "legendary"
 	item["rarityName"] = LEGENDARY_RARITY_NAME
 	item["prefix"] = {}
@@ -210,6 +247,7 @@ func _rollSprite(spritePool: Array) -> String:
 ## weighted entries from a loot table, then applies Rodeo loot modifiers
 ## (flat amounts first, multipliers after).
 func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
+	_loadData()
 	var loot = { "money": 0, "items": [] }
 	var amounts = modifiers.get("amounts", {})
 	var multipliers = modifiers.get("multipliers", {})
@@ -226,7 +264,12 @@ func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
 			continue
 		match entry.get("kind", ""):
 			"consumable":
-				loot.items.append({ "itemType": "consumable", "id": entry.get("id", ""), "name": entry.get("id", "") })
+				var consumableId = str(entry.get("definitionId", ""))
+				var consumable = itemCatalog.getDefinition(consumableId)
+				if consumable.is_empty() or consumable.get("itemType", "") != "consumable":
+					push_warning("ItemGeneration: unknown consumable definition '{definitionId}'".format({ "definitionId": consumableId }))
+					continue
+				loot.items.append(itemCatalog.makeStackable(consumableId, 1))
 			"weapon", "equipment":
 				var options = { "itemType": entry.kind }
 				var rarityPool = entry.get("rarity", [])
@@ -234,8 +277,15 @@ func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
 					options["rarity"] = rarityPool[randi() % rarityPool.size()]
 				loot.items.append(generateItem(options))
 			"resources":
+				var resourceId = str(entry.get("definitionId", ""))
+				var resource = itemCatalog.getDefinition(resourceId)
+				if resource.is_empty() or resource.get("itemType", "") != "resources":
+					push_warning("ItemGeneration: unknown resource definition '{definitionId}'".format({ "definitionId": resourceId }))
+					continue
 				var amount = int(entry.get("amount", 0)) + int(amounts.get("resources", 0))
-				loot.items.append({ "itemType": "resources", "amount": maxi(0, int(round(amount * float(multipliers.get("resources", 1.0))))) })
+				amount = maxi(0, int(round(amount * float(multipliers.get("resources", 1.0)))))
+				if amount > 0:
+					loot.items.append(itemCatalog.makeStackable(resourceId, amount))
 			_:
 				push_warning("ItemGeneration: unknown loot entry kind '{kind}'".format({ "kind": entry.get("kind", "") }))
 	return loot

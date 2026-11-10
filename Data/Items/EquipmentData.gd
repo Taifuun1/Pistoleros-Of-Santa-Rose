@@ -16,12 +16,12 @@ var slots = ["headwear", "bandana", "duster", "belt", "trousers", "justins"]
 
 ## Generic equipment used when no zone-tied item is rolled.
 var genericBases = {
-	"headwear": { "name": "John B.", "baseStats": { "style": 1 } },
-	"bandana": { "name": "Bandana", "baseStats": {} },
-	"duster": { "name": "Duster", "baseStats": { "style": 2, "sand": 2 } },
-	"belt": { "name": "Belt", "baseStats": {} },
-	"trousers": { "name": "Trousers", "baseStats": { "style": 1, "sand": 1 } },
-	"justins": { "name": "Justins", "baseStats": { "sand": 1 } },
+	"headwear": { "id": "john_b", "name": "John B.", "baseStats": { "style": 1 } },
+	"bandana": { "id": "bandana", "name": "Bandana", "baseStats": {} },
+	"duster": { "id": "duster", "name": "Duster", "baseStats": { "style": 2, "sand": 2 } },
+	"belt": { "id": "belt", "name": "Belt", "baseStats": {} },
+	"trousers": { "id": "trousers", "name": "Trousers", "baseStats": { "style": 1, "sand": 1 } },
+	"justins": { "id": "justins", "name": "Justins", "baseStats": { "sand": 1 } },
 }
 
 var spritePools = {
@@ -144,78 +144,78 @@ var zones = {
 	"grassy_plains": {
 		"displayName": "Grassy Plains / Forest",
 		"items": [
-			{ "name": "Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Green Hollow Bandana", "slot": "bandana", "dropsAnywhere": false },
-			{ "name": "Meadowlark Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "prairie_rider_duster", "name": "Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "green_hollow_bandana", "name": "Green Hollow Bandana", "slot": "bandana", "dropsAnywhere": false },
+			{ "id": "meadowlark_boots", "name": "Meadowlark Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
 	"hilly_mining": {
 		"displayName": "Hilly Mining Area",
 		"items": [
-			{ "name": "Prospector Britches", "slot": "trousers", "dropsAnywhere": false },
-			{ "name": "Silver Vein Belt", "slot": "belt", "dropsAnywhere": false },
-			{ "name": "Coal-Dusted Stetson", "slot": "headwear", "dropsAnywhere": false },
+			{ "id": "prospector_britches", "name": "Prospector Britches", "slot": "trousers", "dropsAnywhere": false },
+			{ "id": "silver_vein_belt", "name": "Silver Vein Belt", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "coal_dusted_stetson", "name": "Coal-Dusted Stetson", "slot": "headwear", "dropsAnywhere": false },
 		],
 	},
 	"snowy_mountain": {
 		"displayName": "Snowy Mountain",
 		"items": [
-			{ "name": "Angora Winter Chaps", "slot": "trousers", "dropsAnywhere": false },
-			{ "name": "Frostbit Duster", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Snowshoe Trail Boots", "slot": "justins", "dropsAnywhere": false },
-			{ "name": "Ice-Crusted Bandolier", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "angora_winter_chaps", "name": "Angora Winter Chaps", "slot": "trousers", "dropsAnywhere": false },
+			{ "id": "frostbit_duster", "name": "Frostbit Duster", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "snowshoe_trail_boots", "name": "Snowshoe Trail Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "ice_crusted_bandolier", "name": "Ice-Crusted Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
 	"desert_prairie": {
 		"displayName": "Desert Prairie",
 		"items": [
-			{ "name": "Sandstorm Veil", "slot": "bandana", "dropsAnywhere": false },
-			{ "name": "Sun-Bleached Stetson", "slot": "headwear", "dropsAnywhere": false },
-			{ "name": "Dust Devil Duster", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Cracked-Leather Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "sandstorm_veil", "name": "Sandstorm Veil", "slot": "bandana", "dropsAnywhere": false },
+			{ "id": "sun_bleached_stetson", "name": "Sun-Bleached Stetson", "slot": "headwear", "dropsAnywhere": false },
+			{ "id": "dust_devil_duster", "name": "Dust Devil Duster", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "cracked_leather_boots", "name": "Cracked-Leather Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
 	"pine_forest": {
 		"displayName": "Pine Forest",
 		"items": [
-			{ "name": "Woodsman Flannel Coat", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Pine Pitch Stetson", "slot": "headwear", "dropsAnywhere": false },
-			{ "name": "Needle-Stitched Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "woodsman_flannel_coat", "name": "Woodsman Flannel Coat", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "pine_pitch_stetson", "name": "Pine Pitch Stetson", "slot": "headwear", "dropsAnywhere": false },
+			{ "id": "needle_stitched_boots", "name": "Needle-Stitched Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
 	"swamp": {
 		"displayName": "Swamp",
 		"items": [
-			{ "name": "Mudder Work Boots", "slot": "justins", "dropsAnywhere": false },
-			{ "name": "Gator-Hide Belt", "slot": "belt", "dropsAnywhere": false },
-			{ "name": "Swamp Rat Poncho", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Mossy Bandolier", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "mudder_work_boots", "name": "Mudder Work Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "gator_hide_belt", "name": "Gator-Hide Belt", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "swamp_rat_poncho", "name": "Swamp Rat Poncho", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "mossy_bandolier", "name": "Mossy Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
 	"canyon": {
 		"displayName": "Canyon",
 		"items": [
-			{ "name": "Echo Walker Boots", "slot": "justins", "dropsAnywhere": false },
-			{ "name": "Red Rock Duster", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Canyon Wind Bandana", "slot": "bandana", "dropsAnywhere": false },
+			{ "id": "echo_walker_boots", "name": "Echo Walker Boots", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "red_rock_duster", "name": "Red Rock Duster", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "canyon_wind_bandana", "name": "Canyon Wind Bandana", "slot": "bandana", "dropsAnywhere": false },
 		],
 	},
 	"ghost_town": {
 		"displayName": "Ghost Town",
 		"items": [
-			{ "name": "Undertaker Black Coat", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Hangman Neckerchief", "slot": "bandana", "dropsAnywhere": false },
-			{ "name": "Phantom Rider Spurs", "slot": "justins", "dropsAnywhere": false },
-			{ "name": "Six Feet Under Belt", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "undertaker_black_coat", "name": "Undertaker Black Coat", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "hangman_neckerchief", "name": "Hangman Neckerchief", "slot": "bandana", "dropsAnywhere": false },
+			{ "id": "phantom_rider_spurs", "name": "Phantom Rider Spurs", "slot": "justins", "dropsAnywhere": false },
+			{ "id": "six_feet_under_belt", "name": "Six Feet Under Belt", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
 	"town": {
 		"displayName": "Town",
 		"items": [
-			{ "name": "Gambler Waistcoat", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Saloon-Keeper Vest", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Preacher Frock Coat", "slot": "duster", "dropsAnywhere": false },
-			{ "name": "Marshal Badge Belt", "slot": "belt", "dropsAnywhere": false },
+			{ "id": "gambler_waistcoat", "name": "Gambler Waistcoat", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "saloon_keeper_vest", "name": "Saloon-Keeper Vest", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "preacher_frock_coat", "name": "Preacher Frock Coat", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "marshal_badge_belt", "name": "Marshal Badge Belt", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
 }

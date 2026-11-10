@@ -5,6 +5,7 @@ extends SceneTree
 
 const LootGeneratorScript = preload("res://Globals/ItemGeneration.gd")
 const ItemGenerationScript = preload("res://Globals/ItemGeneration.gd")
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 
 const KNOWN_KINDS = ["consumable", "weapon", "equipment", "resources"]
 const KNOWN_RARITIES = ["common", "uncommon", "rare", "epic"]
@@ -26,12 +27,18 @@ func loadFolder(folder: String) -> Dictionary:
 		var entryData = entry.get("data")
 		if entryData != null:
 			data[entryData.name] = entryData
+		if entry is Node:
+			entry.free()
 	return data
 
 
 func _run() -> void:
 	seed(12345)
 	var lootGenerator = LootGeneratorScript.new()
+	var catalog = ItemCatalogScript.new()
+	lootGenerator.itemCatalog = catalog
+	var catalogErrors = catalog.validate()
+	_check(catalogErrors.is_empty(), "item catalog errors: %s" % [catalogErrors])
 	var itemNames = loadFolder("res://Data/Shootout/Items").keys()
 
 	print("--- Loot table files are valid ---")
@@ -46,8 +53,14 @@ func _run() -> void:
 		for entry in table.get("entries", []):
 			_check(KNOWN_KINDS.has(entry.get("kind", "")), "%s: unknown kind %s" % [tableName, entry.get("kind", "")])
 			_check(int(entry.get("weight", 0)) > 0, "%s: entry weight must be positive" % tableName)
-			if entry.get("kind", "") == "consumable":
-				_check(itemNames.has(entry.get("id", "")), "%s: unknown consumable %s" % [tableName, entry.get("id", "")])
+			if entry.get("kind", "") in ["consumable", "resources"]:
+				var definitionId = str(entry.get("definitionId", ""))
+				_check(catalog.hasDefinition(definitionId), "%s: unknown item definition %s" % [tableName, definitionId])
+				if catalog.hasDefinition(definitionId):
+					var definition = catalog.getDefinition(definitionId)
+					_check(definition.itemType == entry.kind, "%s: definition type mismatch for %s" % [tableName, definitionId])
+					if entry.kind == "consumable":
+						_check(itemNames.has(definition.combatId), "%s: unknown combat item %s" % [tableName, definition.combatId])
 			for rarity in entry.get("rarity", []):
 				_check(KNOWN_RARITIES.has(rarity), "%s: unknown rarity %s" % [tableName, rarity])
 
@@ -68,20 +81,47 @@ func _run() -> void:
 			inRange = false
 	_check(inRange, "100 money rolls all within min/max")
 
+	print("\n--- Unknown stackable definitions are rejected ---")
+	var unknownTable = { "name": "T", "rolls": 1, "money": {}, "entries": [
+		{ "kind": "resources", "definitionId": "missing_resource", "amount": 1, "weight": 1 }
+	] }
+	var unknownLoot = lootGenerator.generateLoot(unknownTable, {})
+	_check(unknownLoot.items.is_empty(), "unknown resource should not produce loot")
+
+	var testCatalog = ItemCatalogScript.new()
+	testCatalog.definitions["test_resource"] = {
+		"definitionId": "test_resource",
+		"itemType": "resources",
+		"name": "Test Resource",
+		"category": "loot",
+		"description": "Test-only resource.",
+		"stackLimit": 20,
+		"droppable": true,
+		"sprite": "",
+	}
+	lootGenerator.itemCatalog = testCatalog
+
 	print("\n--- Weighted entries respect their weights ---")
 	var weightTable = { "name": "T", "rolls": 300, "money": {}, "entries": [
-		{ "kind": "consumable", "id": "Paregoric", "weight": 9 },
-		{ "kind": "resources", "amount": 1, "weight": 1 }
+		{ "kind": "consumable", "definitionId": "paregoric", "weight": 9 },
+		{ "kind": "resources", "definitionId": "test_resource", "amount": 1, "weight": 1 }
 	] }
-	var counts = { "Paregoric": 0, "resources": 0 }
-	for i in 1:
-		var rolls = lootGenerator.generateLoot(weightTable, {}).items
-		for item in rolls:
-			if item.itemType == "consumable":
-				counts.Paregoric += 1
-			else:
-				counts.resources += 1
-	_check(counts.Paregoric > counts.resources * 4, "9:1 weight leans heavily toward Paregoric, got %s" % [counts])
+	var counts = { "paregoric": 0, "test_resource": 0 }
+	var rolls = lootGenerator.generateLoot(weightTable, {}).items
+	for item in rolls:
+		counts[item.definitionId] += 1
+		_check(item.has("quantity") and item.quantity > 0, "stackable loot needs a positive quantity")
+	_check(counts.paregoric > counts.test_resource * 4, "9:1 weight leans heavily toward Paregoric, got %s" % [counts])
+
+	print("\n--- Resource loot keeps definition ids and quantities ---")
+	var resourceTable = { "name": "T", "rolls": 2, "money": {}, "entries": [
+		{ "kind": "resources", "definitionId": "test_resource", "amount": 2, "weight": 1 }
+	] }
+	var resourceLoot = lootGenerator.generateLoot(resourceTable, { "multipliers": { "resources": 1.5 } })
+	_check(resourceLoot.items.size() == 2, "two resource rolls produce two stacks")
+	for item in resourceLoot.items:
+		_check(item.itemType == "resources" and item.definitionId == "test_resource", "resource identity lost: %s" % [item])
+		_check(item.quantity == 3, "resource amount 2 * 1.5 should be 3, got %s" % [item.quantity])
 
 	print("\n--- Weapon entries honor their rarity pool ---")
 	var weaponTable = { "name": "T", "rolls": 5, "money": {}, "entries": [
@@ -96,6 +136,7 @@ func _run() -> void:
 	var empty = lootGenerator.generateLoot({ "name": "T", "rolls": 0, "entries": [] }, {})
 	_check(empty.money == 0 and empty.items.is_empty(), "no money config and no rolls means no loot")
 
+	lootGenerator.free()
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:
