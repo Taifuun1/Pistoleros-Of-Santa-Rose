@@ -1,15 +1,20 @@
 # Godot 4+ specific ignores
 .godot/
 
-# Local toolchain and exported builds
+# Local toolchain
 .tools/
-build/
+
+# Exports (see README.md); keep the platform folders, ignore their contents
+build/**
+!build/**/
+!build/**/.gitkeep
 
 # Godot-specific ignores
 .import/
 export.cfg
 *.tmp
-rcedit-x64.exe
+
+# Stray exports that belong in build/
 /Pistoleros of Santa Rose*
 
 # Imported translations (automatically generated from CSV files)
