@@ -82,6 +82,8 @@ func _ready() -> void:
 	await testMapControllerFocusHandoff()
 	await testInventoryControllerFocusHandoff()
 	await testInventoryNoSideEffects()
+	await testCharacterControllerFocusHandoff()
+	await testCharacterProductionRefresh()
 	await testSceneTreeSetup()
 
 	# Free the real/fake tabs the test owns and release the music autoload's
@@ -322,6 +324,11 @@ func testRealTabs() -> void:
 			check(tab.find_child("StateView", true, false) != null, "the quests tab has its empty/unavailable state view")
 			check(tab.find_child("StateTabSprite", true, false) != null, "the quests tab identifies its empty state with its tab sprite")
 			check(tab.get_child_count() > 0, "the quests tab shows its empty/unavailable state")
+		elif tabId == "character":
+			check(tab.find_child("ContentView", true, false) != null, "the character tab has its read-only content view")
+			check(tab.find_child("StateView", true, false) != null, "the character tab has its unavailable state view")
+			check(tab.find_child("StateTabSprite", true, false) != null, "the character tab identifies its empty state with its tab sprite")
+			check(tab.get_child_count() > 0, "the character tab shows its content or empty/unavailable state")
 		else:
 			check(tab.find_child("TabSprite", true, false) != null, "the %s tab identifies its empty state with its tab sprite" % tabId)
 			check(tab.get_child_count() > 0, "the %s tab shows its empty/unavailable state" % tabId)
@@ -518,6 +525,157 @@ func testInventoryNoSideEffects() -> void:
 		check(afterDeactivate.is_empty(), "a deactivated inventory tab disconnects from the provider")
 	journal.close()
 	party.setInventoryManagementAllowed(false)
+
+
+## Real-shell Character controller handoff (Docs/System Design/Journal/
+## Character.md, patch 3): the tab bar enters the selected member, right enters
+## the stat scroller, and ui_cancel backs out to the shell before closing.
+func testCharacterControllerFocusHandoff() -> void:
+	print("--- Character controller focus handoff ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	journal.selectTab("character")
+	journal.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var characterTab = journal._tabInstances.get("character")
+	check(characterTab != null, "the real character tab is active for the handoff test")
+	if characterTab == null:
+		journal.close()
+		return
+	var party = get_node("/root/Party")
+	check(characterTab.characterProvider == null, "the production character tab uses default provider resolution")
+	check(characterTab._connectedProvider == party, "the character tab resolves the real Party provider")
+	check(party.isCharacterDataAvailable(), "the production Party exposes character data")
+	check(characterTab._selectedMemberKey == "Walker Langley", "the character tab selects the real party member")
+	check(get_viewport().gui_get_focus_owner() == journal.tabBar, "the character handoff starts on the tab bar")
+	check(characterTab.getFocusTarget() == characterTab._memberButtons["Walker Langley"], "the character tab exposes its selected member")
+	check(characterTab.hpText.size.x >= 60.0 and characterTab.hpText.size.y <= 20.0, "the real Journal gives HP a readable single line, got %s" % characterTab.hpText.size)
+	check(characterTab.get_node("ContentView/IdentityPanel").size.y <= 50.0, "the real Journal keeps the identity header compact, got %s" % characterTab.get_node("ContentView/IdentityPanel").size)
+	check(characterTab.statsScroll.size.y >= 90.0, "the real Journal gives the stat scroller usable space, got %s" % characterTab.statsScroll.size)
+	check(characterTab._statValueLabels["maxHp"]["effective"].size.x >= 48.0, "the real Journal keeps the Effective column wide enough")
+	check(characterTab.find_child("EffectiveHeader", true, false).size.y <= 20.0, "the real Journal keeps the Effective header on one line")
+	await pressAction("ui_down")
+	check(get_viewport().gui_get_focus_owner() == characterTab._memberButtons["Walker Langley"], "D-pad down enters the member selector")
+	await pressAction("ui_right")
+	check(get_viewport().gui_get_focus_owner() == characterTab.statsScroll, "D-pad right enters the stat scroller")
+	await pressAction("ui_left")
+	check(get_viewport().gui_get_focus_owner() == characterTab._memberButtons["Walker Langley"], "D-pad left returns to the member")
+	await pressAction("ui_cancel")
+	check(journal.isOpen and get_viewport().gui_get_focus_owner() == journal.tabBar, "back returns character focus to the tab bar")
+	await pressAction("ui_cancel")
+	check(!journal.isOpen, "closing from shell chrome still closes the journal")
+
+
+## Real-shell Character production behavior (Docs/System Design/Journal/
+## Character.md, patch 3): real Party provider resolution, live and
+## activation-time refresh after a domain command, selection independence,
+## connection counting, and no authoritative writes from inspection.
+func testCharacterProductionRefresh() -> void:
+	print("--- Character: production refresh and no side effects ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	var party = get_node("/root/Party")
+	var partyBefore: Dictionary = party.party.duplicate(true)
+	var inventoryBefore: Array = party.inventory.duplicate(true)
+	var moneyBefore: int = int(party.money)
+	var nextIdBefore: int = int(party._nextInstanceNumber)
+
+	var second: Dictionary = party.party["Walker Langley"].duplicate(true)
+	second["actorName"] = "Second Member"
+	party.party["Second Member"] = second
+
+	journal.selectTab("inventory")
+	journal.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var inventoryTab = journal._tabInstances.get("inventory")
+	check(inventoryTab != null, "the real inventory tab is available for selection independence")
+	if inventoryTab != null:
+		inventoryTab._onMemberPressed("Second Member")
+		check(inventoryTab._selectedMemberKey == "Second Member", "Inventory can select a different member")
+	journal.selectTab("character")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var characterTab = journal._tabInstances.get("character")
+	check(characterTab != null, "the real character tab is available for production refresh")
+	if characterTab == null:
+		journal.close()
+		_restorePartyState(party, partyBefore, inventoryBefore, moneyBefore, nextIdBefore)
+		return
+	check(characterTab.characterProvider == null and characterTab._connectedProvider == party, "the real character tab uses the production Party provider")
+	check(characterTab._selectedMemberKey == "Walker Langley", "Character keeps its own selected member")
+	check(inventoryTab == null or inventoryTab._selectedMemberKey == "Second Member", "Character selection does not change the Inventory selection")
+	check(characterTab.getFocusTarget() == characterTab._memberButtons["Walker Langley"], "the production tab exposes the selected member as its focus target")
+
+	var connections = party.partyChanged.get_connections().filter(
+		func(connection): return connection.callable.get_object() == characterTab)
+	check(connections.size() == 1, "the active character tab holds exactly one provider connection, got %d" % connections.size())
+
+	var walker = party.party["Walker Langley"]
+	var injuryBefore = int(walker.injuryDamage)
+	party.applyFleeCost("Walker Langley")
+	var expectedFight = party.getFightData("Walker Langley")
+	var expectedMaxHp = int(expectedFight.maxHp)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(int(walker.injuryDamage) > injuryBefore, "the production command changed the Party injury state")
+	check(characterTab._statValueLabels["maxHp"]["effective"].get_parsed_text() == str(expectedMaxHp), "the active character tab renders the post-command projection")
+	check(characterTab.hpText.get_parsed_text() == "HP %d / %d" % [int(expectedFight.hp), expectedMaxHp], "identity HP uses the refreshed effective MxHP")
+
+	characterTab.statsScroll.scroll_vertical = 30
+	await get_tree().process_frame
+	journal.close()
+	journal.open()
+	journal.selectTab("inventory")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	party.applyFleeCost("Walker Langley")
+	var expectedAfterHidden = int(party.getFightData("Walker Langley").maxHp)
+	journal.selectTab("character")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(characterTab._statValueLabels["maxHp"]["effective"].get_parsed_text() == str(expectedAfterHidden), "activation re-reads statistics instead of showing stale cached values")
+	check(characterTab.statsScroll.scroll_vertical == 30, "stat scroll position survives tab switching, got %d" % characterTab.statsScroll.scroll_vertical)
+
+	var stableParty: Dictionary = party.party.duplicate(true)
+	var stableInventory: Array = party.inventory.duplicate(true)
+	var stableMoney: int = int(party.money)
+	var stableNextId: int = int(party._nextInstanceNumber)
+	for cycle in 3:
+		journal.selectTab("character")
+		await get_tree().process_frame
+		var tab = journal._tabInstances.get("character")
+		if tab == null:
+			check(false, "the character tab is available on inspection cycle %d" % cycle)
+			break
+		tab._onMemberPressed("Walker Langley")
+		tab.statsScroll.scroll_vertical = 10
+		tab._onMemberPressed("Second Member")
+		journal.selectTab("inventory")
+		await get_tree().process_frame
+		journal.close()
+		journal.open()
+	check(party.party == stableParty, "inspection and repeated open/close write no member state")
+	check(party.inventory == stableInventory, "inspection and repeated open/close write no inventory state")
+	check(int(party.money) == stableMoney, "inspection and repeated open/close write no money")
+	check(int(party._nextInstanceNumber) == stableNextId, "inspection and repeated open/close allocate no ids")
+
+	journal.selectTab("character")
+	await get_tree().process_frame
+	characterTab.setTabActive(false)
+	var afterDeactivate = party.partyChanged.get_connections().filter(
+		func(connection): return connection.callable.get_object() == characterTab)
+	check(afterDeactivate.is_empty(), "a deactivated character tab disconnects from the provider")
+	characterTab.setTabActive(true)
+	journal.close()
+	_restorePartyState(party, partyBefore, inventoryBefore, moneyBefore, nextIdBefore)
+
+
+func _restorePartyState(party, partyBefore: Dictionary, inventoryBefore: Array, moneyBefore: int, nextIdBefore: int) -> void:
+	party.party = partyBefore
+	party.inventory = inventoryBefore
+	party.money = moneyBefore
+	party._nextInstanceNumber = nextIdBefore
+	party.partyChanged.emit("")
 
 
 func testSceneTreeSetup() -> void:

@@ -8,6 +8,7 @@ extends JournalTab
 const ItemSlotScene = preload("res://UI/Journal/ItemSlotButton.tscn")
 const ItemStatsScene = preload("res://Nodes/Item Stats/ItemStats.tscn")
 const TextScene = preload("res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn")
+const PartyMemberArtScript = preload("res://UI/Journal/PartyMemberArt.gd")
 
 const STATE_UNAVAILABLE := "Inventory data unavailable"
 const STATE_NO_MEMBERS := "No party members"
@@ -39,8 +40,6 @@ const SLOT_ICONS = {
 ## cell clipped the widest art).
 const EQUIPMENT_SLOT_SIZE = Vector2(30, 28)
 const MEMBER_BUTTON_SIZE = Vector2(28, 28)
-const MEMBER_ICON_PATH = "res://Assets/Icons/{actorName}Icon.png"
-const MEMBER_ICON_FALLBACK = preload("res://Assets/Icons/PlaceholderIcon.png")
 const REASON_TEXT = {
 	"data_unavailable": STATE_UNAVAILABLE,
 	"management_unavailable": "Inventory management is unavailable here.",
@@ -336,16 +335,9 @@ func _buildMemberButtons() -> void:
 		_memberButtons[str(memberKey)] = button
 
 
-## Party portraits follow the animation naming (see Shootout/UI/TurnOrderStrip.gd):
-## the actor name without the turn index, capitalized without spaces, plus
-## "Icon". Actors without portrait art fall back to the placeholder icon.
+## Portrait lookup is shared with the Character tab (PartyMemberArt.gd).
 func _memberIcon(actorName: String) -> Texture2D:
-	var iconPath = MEMBER_ICON_PATH.format({
-		"actorName": actorName.rstrip("0123456789").capitalize().replace(" ", "")
-	})
-	if ResourceLoader.exists(iconPath):
-		return load(iconPath)
-	return MEMBER_ICON_FALLBACK
+	return PartyMemberArtScript.textureForActorName(actorName)
 
 
 func _buildEquipmentSlots() -> void:

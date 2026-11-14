@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://UI/Journal/Tabs/CharacterTab.gd" id="1_charactertab"]
+[ext_resource type="Script" path="res://UI/Journal/Tabs/CharacterTab.gd" id="1_character"]
+[ext_resource type="PackedScene" path="res://UI/Journal/TabSprite.tscn" id="2_tabsprite"]
+[ext_resource type="PackedScene" path="res://UI/RichTextLabel Extended 8px/RichTextLabelExtended8px.tscn" id="3_text"]
 
 [node name="CharacterTab" type="Control"]
 layout_mode = 3
@@ -9,4 +11,198 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_charactertab")
+script = ExtResource("1_character")
+
+[node name="ContentView" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="MemberScroll" type="ScrollContainer" parent="ContentView"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+focus_mode = 2
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="MemberButtons" type="HBoxContainer" parent="ContentView/MemberScroll"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="IdentityPanel" type="PanelContainer" parent="ContentView"]
+layout_mode = 2
+
+[node name="IdentityMargin" type="MarginContainer" parent="ContentView/IdentityPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="IdentityLayout" type="HBoxContainer" parent="ContentView/IdentityPanel/IdentityMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MemberIcon" type="TextureRect" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="IdentityTextBox" type="VBoxContainer" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="NameText" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout/IdentityTextBox" instance=ExtResource("3_text")]
+layout_mode = 2
+theme_override_constants/line_separation = 2
+
+[node name="ClassLevelText" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout/IdentityTextBox" instance=ExtResource("3_text")]
+layout_mode = 2
+theme_override_constants/line_separation = 2
+
+[node name="HpText" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout" instance=ExtResource("3_text")]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+autowrap_mode = 0
+
+[node name="DownedText" parent="ContentView/IdentityPanel/IdentityMargin/IdentityLayout" instance=ExtResource("3_text")]
+visible = false
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+autowrap_mode = 0
+
+[node name="BodyColumns" type="HBoxContainer" parent="ContentView"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="StatsPanel" type="PanelContainer" parent="ContentView/BodyColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.58
+
+[node name="StatsMargin" type="MarginContainer" parent="ContentView/BodyColumns/StatsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="StatsLayout" type="VBoxContainer" parent="ContentView/BodyColumns/StatsPanel/StatsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="StatsHeader" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout" instance=ExtResource("3_text")]
+layout_mode = 2
+text = "Stats"
+
+[node name="ColumnHeader" type="HBoxContainer" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameHeader" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout/ColumnHeader" instance=ExtResource("3_text")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BaseHeader" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout/ColumnHeader" instance=ExtResource("3_text")]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Base"
+horizontal_alignment = 2
+
+[node name="EffectiveHeader" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout/ColumnHeader" instance=ExtResource("3_text")]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Effective"
+horizontal_alignment = 2
+
+[node name="StatsScroll" type="ScrollContainer" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="StatRows" type="VBoxContainer" parent="ContentView/BodyColumns/StatsPanel/StatsMargin/StatsLayout/StatsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="DetailPanel" type="PanelContainer" parent="ContentView/BodyColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.42
+
+[node name="DetailMargin" type="MarginContainer" parent="ContentView/BodyColumns/DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="DetailLayout" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="DetailScroll" type="ScrollContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="DetailContent" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="RodeoNameText" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+
+[node name="RodeoDescriptionText" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ConditionsHeader" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+text = "Conditions"
+
+[node name="ConditionRows" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent"]
+layout_mode = 2
+
+[node name="ModifiersHeader" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+text = "Modifiers"
+
+[node name="ModifierRows" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent"]
+layout_mode = 2
+
+[node name="StateView" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StateLayout" type="VBoxContainer" parent="StateView"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="StateTabSprite" parent="StateView/StateLayout" instance=ExtResource("2_tabsprite")]
+layout_mode = 2
+
+[node name="StateMessageLabel" parent="StateView/StateLayout" instance=ExtResource("3_text")]
+layout_mode = 2
+text = "Character data unavailable"
+horizontal_alignment = 1
+autowrap_mode = 3

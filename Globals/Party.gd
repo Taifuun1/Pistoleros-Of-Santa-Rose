@@ -8,6 +8,8 @@ extends Node
 
 signal inventoryChanged
 signal equipmentChanged(memberKey: String)
+## Empty memberKey means the whole party changed (fight results, town reset, Vamoose).
+signal partyChanged(memberKey: String)
 
 const InventoryRulesScript = preload("res://Globals/InventoryRules.gd")
 const CharacterStatCalculatorScript = preload("res://Globals/CharacterStatCalculator.gd")
@@ -37,12 +39,14 @@ var inventory = [{
 }]
 var inventoryManagementAllowed := false
 var classesData = {}
+var rodeosData = {}
 var questInProgress = false
 
 var _inventoryRules
 var _statCalculator
 var _itemCatalog
 var _inventoryDataAvailable := false
+var _characterDataAvailable := false
 var _nextInstanceNumber := 1
 
 var party = {
@@ -114,7 +118,9 @@ func _ready() -> void:
 	var catalog = ItemCatalogScript.new()
 	var shootoutGlobals = get_node_or_null("/root/Shootout")
 	var classDefinitions = shootoutGlobals.classesData if shootoutGlobals != null else {}
+	var rodeoDefinitions = shootoutGlobals.rodeosData if shootoutGlobals != null else {}
 	configureInventory(catalog, classDefinitions)
+	configureCharacterData(classDefinitions, rodeoDefinitions)
 
 
 ## Test/headless initialization seam: installs the catalog and class definitions
@@ -127,6 +133,76 @@ func configureInventory(catalog, classDefinitions := {}) -> void:
 	_itemCatalog = catalog
 	classesData = classDefinitions
 	_inventoryDataAvailable = _itemCatalog != null and _itemCatalog.validate().is_empty()
+
+
+## Test/headless initialization seam for the Journal Character tab: installs
+## immutable class/Rodeo read data independently of inventory availability.
+func configureCharacterData(classDefinitions: Dictionary, rodeoDefinitions: Dictionary) -> void:
+	_ensureStatCalculator()
+	classesData = classDefinitions.duplicate(true)
+	rodeosData = rodeoDefinitions.duplicate(true)
+	_characterDataAvailable = true
+
+
+func isCharacterDataAvailable() -> bool:
+	return _characterDataAvailable and _statCalculator != null
+
+
+## Read-only character-sheet projection (Docs/System Design/Journal/
+## Character.md). Returns fresh deep copies in authoritative party order and
+## never reads inventory, mutates members, or performs combat work.
+func getCharacterJournalSnapshot() -> Dictionary:
+	var snapshot = { "level": level, "members": [] }
+	if !isCharacterDataAvailable():
+		return snapshot
+	for memberKey in party:
+		var member = party[memberKey]
+		var key = str(memberKey)
+		if key.is_empty() or !(member is Dictionary):
+			push_warning("Party: ignored invalid character member '%s'." % key)
+			continue
+		var projection = _statCalculator.projectCharacter(member, _classDataFor(member))
+		if !(projection is Dictionary) or !(projection.get("statRows", null) is Array) or !(projection.get("modifiers", null) is Array):
+			push_warning("Party: ignored invalid character projection for '%s'." % key)
+			continue
+		snapshot.members.append({
+			"key": key,
+			"actorName": str(member.get("actorName", key)),
+			"characterClass": str(member.get("characterClass", "")),
+			"downed": bool(member.get("downed", false)),
+			"hp": int(projection.get("hp", 0)),
+			"maxHp": int(projection.get("maxHp", 0)),
+			"statRows": projection.get("statRows", []).duplicate(true),
+			"modifiers": projection.get("modifiers", []).duplicate(true),
+			"rodeo": _projectRodeo(member.get("rodeo", null)),
+		})
+	return snapshot
+
+
+## Display metadata only; never scales, registers, or triggers a Rodeo.
+func _projectRodeo(rodeoValue):
+	if rodeoValue == null:
+		return null
+	var key = str(rodeoValue)
+	if key.strip_edges().is_empty():
+		return null
+	var definition = _findRodeoDefinition(key)
+	if definition == null:
+		return { "key": key, "available": false, "name": key, "description": "" }
+	return {
+		"key": key,
+		"available": true,
+		"name": str(definition.get("name", key)),
+		"description": str(definition.get("description", "")),
+	}
+
+
+func _findRodeoDefinition(rodeoKey: String):
+	for dataName in rodeosData:
+		if str(dataName).to_lower() == rodeoKey.to_lower():
+			var definition = rodeosData[dataName]
+			return definition if definition is Dictionary else null
+	return null
 
 
 func isInventoryDataAvailable() -> bool:
@@ -306,6 +382,7 @@ func equipItem(memberKey: String, instanceId: String) -> Dictionary:
 
 	inventoryChanged.emit()
 	equipmentChanged.emit(memberKey)
+	partyChanged.emit(memberKey)
 	return {
 		"success": true,
 		"reason": "",
@@ -356,10 +433,12 @@ func getFightData(actorName: String) -> Dictionary:
 ## for the end screen so capacity overflow cannot be lost silently.
 func applyFightResults(results: Dictionary) -> Dictionary:
 	var lootResult = {}
+	var changed = false
 	for member in party.values():
 		var debuffs = []
 		for debuff in member.get("knockoutDebuffs", []):
 			debuff["shootoutsLeft"] = int(debuff.get("shootoutsLeft", KNOCKOUT_SHOOTOUTS)) - 1
+			changed = true
 			if debuff.shootoutsLeft > 0:
 				debuffs.append(debuff)
 		member["knockoutDebuffs"] = debuffs
@@ -368,6 +447,7 @@ func applyFightResults(results: Dictionary) -> Dictionary:
 	for actorName in results.get("party", {}):
 		if !party.has(actorName):
 			continue
+		changed = true
 		var state = results.party[actorName]
 		var member = party[actorName]
 		member["hp"] = maxi(0, int(state.get("hp", 0)))
@@ -376,7 +456,9 @@ func applyFightResults(results: Dictionary) -> Dictionary:
 		if member.downed:
 			member["knockoutDebuffs"] = makeKnockoutDebuffs()
 		if results.get("fled", false) and !member.downed:
-			applyFleeCost(actorName)
+			_applyFleeCost(actorName)
+	if changed:
+		partyChanged.emit("")
 	return { "loot": lootResult }
 
 
@@ -405,32 +487,60 @@ func makeKnockoutDebuffs() -> Array:
 
 ## Fleeing costs a portion of MxHp (modeled as journey injury).
 func applyFleeCost(actorName: String) -> void:
+	if _applyFleeCost(actorName):
+		partyChanged.emit(actorName)
+
+
+## Batch-safe flee mutation: returns whether the member's injury actually changed.
+func _applyFleeCost(actorName: String) -> bool:
 	if !party.has(actorName):
-		return
+		return false
 	var member = party[actorName]
 	var base = int(_calculateStats(member).get("baseMaxHp", member.get("baseMaxHp", member.get("hp", 1))))
 	var rate = maxi(1, int(member.get("injuryRate", DEFAULT_INJURY_RATE)))
-	member["injuryDamage"] = int(member.get("injuryDamage", 0)) + int(ceil(base * FLEE_MXHP_LOSS * rate))
+	var amount = int(ceil(base * FLEE_MXHP_LOSS * rate))
+	if amount <= 0:
+		return false
+	member["injuryDamage"] = int(member.get("injuryDamage", 0)) + amount
+	return true
 
 
 ## Town entry: injuries reset.
 func resetInjury() -> void:
+	var changed = false
 	for member in party.values():
+		if int(member.get("injuryDamage", 0)) != 0 or bool(member.get("downed", false)):
+			changed = true
 		member["injuryDamage"] = 0
 		member["downed"] = false
+	if changed:
+		partyChanged.emit("")
 
 
 ## Camp items: reduce journey injuries.
 func reduceInjury(amount: int) -> void:
+	if amount <= 0:
+		return
+	var changed = false
 	for member in party.values():
-		member["injuryDamage"] = maxi(0, int(member.get("injuryDamage", 0)) - amount)
+		var before = int(member.get("injuryDamage", 0))
+		var after = maxi(0, before - amount)
+		if after != before:
+			changed = true
+			member["injuryDamage"] = after
+	if changed:
+		partyChanged.emit("")
 
 
 ## Full party down: lose half of all loot (money pouch; the loot hook lands
 ## with Rewards) and return where the party is thrown to.
 func vamoose() -> String:
 	money = int(floor(money / 2.0))
+	var changed = false
 	for member in party.values():
+		changed = true
 		member["downed"] = true
 		member["knockoutDebuffs"] = makeKnockoutDebuffs()
+	if changed:
+		partyChanged.emit("")
 	return "quest_checkpoint" if questInProgress else "town"

@@ -2,7 +2,7 @@
 
 The Journal is the game's central information and management interface: Overworld map, quests, character stats, inventory/equipment, and settings in one tabbed shell.
 
-This is a high-level design overview. Each tab is a separate feature with its own implementation and detailed design. **Status: shell implemented — `UI/Journal/Journal.tscn` with lazy tabs, modal/pause coordination and `TOGGLE_JOURNAL`, integrated into `SceneManager`; the five tabs are intentional empty/unavailable states and the Overworld map does not exist yet.**
+This is a high-level design overview. Each tab is a separate feature with its own implementation and detailed design. **Status: shell, Overworld Map, Quests, Inventory, and Character are implemented; Character's automated integration and full-suite verification pass, with only its manual 640×360 visual/controller review pending. Settings remains an intentional empty/unavailable state.**
 
 ## Goals
 
@@ -17,6 +17,7 @@ This is a high-level design overview. Each tab is a separate feature with its ow
 - The Journal shell, `TOGGLE_JOURNAL` action, lazy tab framework and shared modal/pause coordinator are implemented (`UI/Journal/`, the `JournalLayer` in `Nodes/Scene Manager/`, `Globals/ModalPauseCoordinator.gd`, `Tests/TestJournal.gd`). The shell's keyboard/controller focus handoff is implemented too: the tab bar moves down into a tab's exposed focus target (the Map tab's map clip or the Inventory tab's member selector), and `ui_cancel` backs out to the tab bar before closing. The Map tab renders the generated Overworld map, the Quests tab renders its read-only master/detail view, the Inventory tab manages the live party inventory/equipment, and the Character/Settings tabs show intentional empty/unavailable states.
 - `Globals/Party.gd` owns party members, persistent HP/injuries, money, the shared capacity-limited inventory, canonical seven-slot equipment, atomic equip swaps, and shared effective-stat previews (`Globals/InventoryRules.gd`, `Globals/CharacterStatCalculator.gd`, `Tests/TestInventory.gd`, `Tests/TestEquipmentStats.gd`, `Tests/TestShootoutLoot.gd`). `UI/Journal/Tabs/InventoryTab.*` consumes that provider through `UI/Journal/ItemSlotButton.*` and `Nodes/Item Stats/ItemStats.tscn`, covered by `Tests/TestInventoryTab.*`. The command surface is `addItem(s)`/`dropItem()`/`equipItem()`/`applyLoot()`/`getEquipmentPreview()`, all returning a stable reason code on failure; `SceneManager._syncInventoryPolicy()` publishes whether the current scene may mutate (Overworld and normal Locations yes, Shootouts and transitions no).
 - The Inventory tab is fully implemented for the first iteration (patch 5 of [Inventory & Equipment](Inventory%20and%20Equipment.md)): shared rich-text controls, nine-patch item card with whole-scale sprite fitting, icon member/slot buttons, one-row equipment grid, quantity-confirmed dropping, and a scene-owned Shootout result panel that holds `shootoutEnded` until overflow is acknowledged. Opening and closing the Journal performs no RNG rolls, id allocation, item generation or state writes (`Tests/TestJournal.gd::testInventoryNoSideEffects`). Unsupported affix mechanics remain combat gaps (see that doc's "Remaining combat gaps").
+- The Character tab is implemented (patch 2 of [Character](Character.md)): `CharacterStatCalculator.projectCharacter()` supplies the ordered Base/Effective catalog and persistent modifier projection, `Party` exposes deep-copied snapshots plus `partyChanged` notifications independently of inventory availability, and `UI/Journal/Tabs/CharacterTab.*` renders the read-only sheet through the shared `UI/Journal/PartyMemberArt.gd` portrait lookup (`Tests/TestCharacterSheet.gd`, `Tests/TestCharacterTab.*`).
 - `Globals/Quests.gd` owns validated quest definitions/catalog and authoritative runtime state, projections and current-marker APIs (`Data/Quests/`, `Tests/TestQuests.gd`). The Quests tab reads it through an injectable provider, the shell forwards `showOnMapRequested` requests to MapTab's exact quest/objective marker path, and Pistoleros Regroup progresses through end-of-cutscene quest shots across the five prologue Location scenes (`Tests/TestQuestsTab.gd`, `Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`, `Tests/TestQuestTriggers.gd`). `Globals/Locations.gd::currentQuest` remains a string used for scene selection.
 - Settings and save management do not yet have an authoritative settings/save service.
 - Existing popup scenes establish reusable UI conventions (`PanelContainer`, `ScrollContainer`, shared theme, close button), while `SceneManager` provides a persistent root above changing gameplay scenes.
@@ -70,11 +71,52 @@ Pause ownership needs a small shared modal/pause coordinator rather than every p
 | --- | --- | --- |
 | **Map** | Generated Overworld map, player marker, Location POIs, current quest key-point markers; pan/zoom and marker inspection | [Overworld Map](Overworld%20Map.md); Overworld position provider; quest map-marker API |
 | **Quests** | Active/current and completed quests, progress history, what happened, and the next objective | [Quests tab](Quests.md); real quest definitions/state and progress events; current quest targets shared with Map |
-| **Character** | Select a party member and inspect base/effective stats, HP/injuries, class, Rodeo, and relevant modifiers | `Party`; shared stat/equipment calculation so values match Shootouts |
+| **Character** | Select a party member and inspect the full combat stat catalog, base/effective values, HP/injuries, class, Rodeo, and relevant persistent modifiers | [Character tab](Character.md); `Party`; shared stat/equipment calculation so values match Shootout setup |
 | **Inventory & Equipment** | Shared limited inventory, stacking/unstackable items, supplies/loot/equipment, dropping, character selection, one-click valid-slot equipment swaps, stat comparison | [Inventory & Equipment tab](Inventory%20and%20Equipment.md); `Party.inventory`; item instance model; equipment/slot and inventory command APIs |
 | **Settings** | Audio/video, gameplay options, input/accessibility as needed, and save management | Persistent settings service; save service; apply/revert and confirmation flows |
 
 The tab designs own their detailed layouts and sprites. The Journal overview only reserves consistent header, tab navigation, scrolling, tooltips, confirmation, empty-state, and controller-focus behavior.
+
+## Character tab
+
+**Status: high-level design approved; implementation pending.** The planned implementation replaces the intentional unavailable state with a read-only character sheet. Its code-level provider, scene, and testing contracts are defined in the [Character tab design](Character.md).
+
+### First-iteration scope
+
+- Select any current party member through the same icon-button convention as Inventory. Preserve selection by stable member key across refreshes while that member remains present; otherwise choose the first valid member. Character and Inventory selections are independent.
+- Show a static character icon, name, class, shared party level, current/effective HP, and downed state. Do not render a model in this iteration; optional model presentation is a future enhancement.
+- Show the **full combat stat catalog** in grouped, scrollable Base/Effective rows: MxHP; Six Shootin', High Tailin', and Taffyin'; Lead by weapon family; Explosive by damage type; Lasso; Style and Sand; bleed and poison resistances; weapon family/damage; and belt space.
+- Show the current Rodeo's name and full authored description. Exact level-scaled numbers are deferred until a shared Rodeo projection/formatter can supply them without duplicating combat scaling logic.
+- Explain persistent conditions and modifier sources: journey injury and its MxHP penalty, knockout debuffs and remaining Shootouts, relevant class contributions, and supported equipped-item modifiers. Equipment management remains in Inventory.
+- Keep the tab read-only. Active Move/belt-loadout inspection or editing, healing, equipment actions, shared cross-tab member selection, and a **Manage equipment** shortcut are outside this iteration.
+
+### Layout and interaction
+
+Use the existing 560×280 Journal panel and shared rich-text controls. A horizontal member selector and compact identity header sit above two scrolling areas: the full stat table and the Rodeo/conditions/modifiers details. Stat names and both values remain visible without horizontal scrolling; long descriptions and modifier lists scroll vertically rather than shrink the font.
+
+```text
+[Walker] [Member...]                         Party level 1
+[Icon] Walker Langley — Gunslinger          HP 12 / 12  [Downed?]
+┌ Stats: Base | Effective ────────┐ ┌ Rodeo ───────────────────┐
+│ Core / Offense / Defense        │ │ Name + full description  │
+│ Resistances / Weapon / Belt     │ │ Injuries and knockouts   │
+│ (vertical scroll)               │ │ Class and gear modifiers │
+└─────────────────────────────────┘ └──────────────────────────┘
+```
+
+`getFocusTarget()` returns the selected member button. Member buttons and both ScrollContainers support mouse and keyboard/controller navigation; `ui_cancel` follows the shell's existing content-to-tab-bar behavior. Tooltips can supplement stat explanations, but required values, Rodeo text, conditions, and modifier details cannot be hover-only. There are no secondary panels or close guards.
+
+### Data semantics and lifecycle
+
+`Party` remains authoritative and supplies a dedicated, deep-copied character-sheet projection through an injectable provider. Character data availability is independent of inventory/item-catalog validity. The UI does not read `Party.party`, class/Rodeo registries, Inventory tabs, or live Shootout actors directly.
+
+**Base** is the member's stored unequipped, un-debuffed value, with class belt space and any legacy unequipped weapon handled explicitly. **Effective** is the persistent fight-start projection returned by the same `CharacterStatCalculator` path as `Party.getFightData()`: supported equipment, journey injuries, knockout debuffs, and belt bonuses are included. Current HP is displayed separately. Conditional Rodeo bonuses, transient combat effects, class-only attack additions such as `explosiveBase`, and live in-fight HP are not silently folded into these cells; applicable class contributions appear as modifiers instead. Unsupported item affixes must not be presented as active stat modifiers.
+
+The provider emits a party/character change notification after committed equipment, HP/injury, knockout, Rodeo, class, level, or membership changes. Only the active tab listens; activation always re-reads the snapshot, and hidden tabs do no polling. Opening, selecting, scrolling, and closing the tab perform no gameplay mutation, RNG, id allocation, or calculation write-back.
+
+A valid empty party shows **No party members**. A missing/unreadable provider or wholly invalid snapshot shows **Character data unavailable**. Preserve valid members when siblings are malformed, use the existing placeholder portrait for missing art, and withhold only affected fields for missing class/Rodeo definitions rather than fabricating zeroes or sample data. Distinguish no Rodeo, no injuries, and no persistent modifiers from unavailable data.
+
+Acceptance requires full stat/modifier parity with the shared projection, selection/focus/scroll preservation, no stale data after domain changes, no hidden-tab work or duplicate connections, and manual mouse/keyboard/controller review at 640×360 with long content.
 
 ## State and cross-tab contracts
 
@@ -94,7 +136,7 @@ Expected asset groups:
 - Journal frame/background and tab icons: Map, Quests, Character, Inventory/Equipment, Settings.
 - Map base generated from chunk data; separate Location, player, and current-quest icons.
 - Quest state/current objective icons.
-- Character portraits/icons, optional model presentation, and stat icons.
+- Character portraits/icons and stat icons. Character uses a static icon in the first iteration; rendered-model presentation is a follow-up.
 - Item/equipment slot, stack, selected-character, and comparison indicators.
 - Standard focused/hover/disabled/confirm states and any settings/save icons.
 
@@ -119,7 +161,7 @@ Suggested order:
 1. Shell, modal/pause coordination, input/focus, lazy tabs, and empty states.
 2. [Overworld Map](Overworld%20Map.md), including generated base data and player/POI markers; quest markers follow the quest API.
 3. [Quests](Quests.md), with shared objective/map-target contracts.
-4. Character stats using the same effective-stat calculations as combat.
+4. [Character](Character.md), with the full base/effective combat stat catalog using the same effective-stat calculations as combat.
 5. Inventory and equipment, after their capacity/item/slot rules are specified.
 6. Settings and save management, reusing applicable settings UI in the main menu.
 
@@ -141,8 +183,5 @@ Suggested order:
 - Controller glyph/focus conventions and whether tab shortcuts should be global or remappable. The shell's content-focus handoff is decided (tab bar ↔ `getFocusTarget()`, `ui_cancel` backs out); glyph art and global/remappable tab shortcuts remain open.
 - Which settings apply immediately versus through Apply/Revert, and the save-management flow.
     - Resolution is managed by Godot, so is there need for apply functionality? Immediate apply seems sensible
-- Whether Character shows a static portrait, rendered model, or only stats when space is limited.
-    - Likely the character icon should be shown instead of the model, since pixel counts on the page mostly get taken by text
-    - If there's space, model can be shown
 - Final tab order and art direction; these do not block the shell or Map implementation.
     - Tab order should be: Map, Inventory, Quests, Character, Settings

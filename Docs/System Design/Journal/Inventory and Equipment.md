@@ -2,7 +2,7 @@
 
 The Journal's Inventory & Equipment tab manages the party's shared carried items and each party member's equipped gear. It makes capacity and stacking visible, explains item effects, supports deliberate dropping, and provides a one-action equipment swap with an accurate stat preview.
 
-**Status: patch 5 implemented — the Inventory & Equipment tab is complete for the first iteration.** The live feature covers the shared capacity-limited inventory, canonical seven-slot equipment with atomic swaps, the projected-stat preview, dropping with confirmation, and capacity-aware Shootout loot with an explicit overflow acknowledgment. The full automated suite passes (`Tests/RunAll.gd`, 37 tests) and the 640×360 visual review is recorded in [Patch 5](#patch-5--full-verification-and-documentation). Unsupported affix/ability mechanics remain documented combat gaps, not UI gaps.
+**Status: patch 5 implemented — the Inventory & Equipment tab is complete for the first iteration.** The live feature covers the shared capacity-limited inventory, canonical seven-slot equipment with atomic swaps, the projected-stat preview, dropping with confirmation, and capacity-aware Shootout loot with an explicit overflow acknowledgment. The full automated suite passes (`Tests/RunAll.gd`, 39 tests) and the 640×360 visual review is recorded in [Patch 5](#patch-5--full-verification-and-documentation). Unsupported affix/ability mechanics remain documented combat gaps, not UI gaps.
 
 ## First-iteration decisions
 
@@ -630,7 +630,7 @@ Review status: **resolved.** Three review findings were raised against the first
 
 #### Full-suite result
 
-`godot --headless --script res://Tests/RunAll.gd` → **37/37 tests pass**. The one long-standing failure (`TestActorShadow`, the VERTICAL directional-coverage padding) was a stale expectation, not a product bug: `f775b0d` shipped the VERTICAL geometry as `+3` width padding and a `-3` bottom-line offset, while the test still asserted `+5`/`-2`. The test now asserts the shipped values, so the suite is a usable gate rather than a permanently red run.
+`godot --headless --script res://Tests/RunAll.gd` → **39/39 tests pass**. The one long-standing failure (`TestActorShadow`, the VERTICAL directional-coverage padding) was a stale expectation, not a product bug: `f775b0d` shipped the VERTICAL geometry as `+3` width padding and a `-3` bottom-line offset, while the test still asserted `+5`/`-2`. The test now asserts the shipped values, so the suite is a usable gate rather than a permanently red run.
 
 #### Manual review at 640×360
 
