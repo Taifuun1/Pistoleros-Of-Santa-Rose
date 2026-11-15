@@ -16,61 +16,63 @@ overview_image_size = Vector2i(192, 384)
 chunk_grid = Rect2i(0, 0, 12, 24)
 cell_min = Vector2i(-2, -2)
 cell_max = Vector2i(765, 1533)
-source_fingerprint = "37f1216ea41ec555932de18c1edc05e1"
+source_fingerprint = "03b15cce47aae74820556b54ba81dd3d"
 locations = Array[Dictionary]([{
-"cell": Vector2i(69, 1434),
+"cell": Vector2i(71, 1437),
 "chunk": Vector2i(1, 22),
 "display_name": "Donnafolk Caves",
 "icon": "location",
 "id": "Donnafolk Caves",
-"image_position": Vector2(284, 1436),
-"tile": Vector2i(7, 28)
+"image_position": Vector2(292, 1439),
+"tile": Vector2i(9, 31)
 }, {
-"cell": Vector2i(106, 1484),
+"cell": Vector2i(108, 1486),
 "chunk": Vector2i(1, 23),
 "display_name": "Bandit Camp",
 "icon": "location",
 "id": "Bandit Camp",
-"image_position": Vector2(432, 1486),
-"tile": Vector2i(44, 14)
+"image_position": Vector2(440, 1488),
+"tile": Vector2i(46, 16)
 }, {
-"cell": Vector2i(169, 1099),
+"cell": Vector2i(171, 1101),
 "chunk": Vector2i(2, 17),
 "display_name": "Twin Creek Mines",
 "icon": "location",
 "id": "Twin Creek Mines",
-"image_position": Vector2(684, 1101),
-"tile": Vector2i(43, 13)
+"image_position": Vector2(692, 1103),
+"tile": Vector2i(45, 15)
 }, {
-"cell": Vector2i(232, 937),
+"cell": Vector2i(234, 939),
 "chunk": Vector2i(3, 14),
 "display_name": "Gold Run",
-"icon": "location",
+"icon": "secret_location",
 "id": "Gold Run",
-"image_position": Vector2(936, 939),
-"tile": Vector2i(42, 43)
+"image_position": Vector2(944, 941),
+"map_visibility": "secret",
+"secret_id": "Gold Run",
+"tile": Vector2i(44, 45)
 }, {
-"cell": Vector2i(530, 1122),
+"cell": Vector2i(532, 1124),
 "chunk": Vector2i(8, 17),
 "display_name": "Lazysprings",
 "icon": "location",
 "id": "Lazysprings",
-"image_position": Vector2(2128, 1124),
-"tile": Vector2i(20, 36)
+"image_position": Vector2(2136, 1126),
+"tile": Vector2i(22, 38)
 }, {
-"cell": Vector2i(535, 1211),
+"cell": Vector2i(537, 1213),
 "chunk": Vector2i(8, 18),
 "display_name": "Clearwater Grove",
 "icon": "location",
 "id": "Clearwater Grove",
-"image_position": Vector2(2148, 1213),
-"tile": Vector2i(25, 61)
+"image_position": Vector2(2156, 1215),
+"tile": Vector2i(27, 63)
 }, {
-"cell": Vector2i(673, 1218),
+"cell": Vector2i(675, 1220),
 "chunk": Vector2i(10, 19),
 "display_name": "Clearsprings",
 "icon": "location",
 "id": "Clearsprings",
-"image_position": Vector2(2700, 1220),
-"tile": Vector2i(35, 4)
+"image_position": Vector2(2708, 1222),
+"tile": Vector2i(37, 6)
 }])

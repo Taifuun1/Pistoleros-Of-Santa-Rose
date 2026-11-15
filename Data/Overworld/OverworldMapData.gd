@@ -38,8 +38,15 @@ const ORIENTATION_UNSET := -1
 ## committed manifest stale (--check fails).
 @export var source_fingerprint: String = ""
 ## Normalized Location manifest entries: { "id", "display_name", "chunk",
-## "tile", "cell", "image_position", "icon" }.
+## "tile", "cell", "image_position", "icon" }. Discovery metadata is optional and
+## sparse: a Location is hidden on the map only when it carries
+## "map_visibility": "secret" together with its "secret_id". Missing metadata
+## means "always" (the historical behavior).
 @export var locations: Array[Dictionary] = []
+
+const VISIBILITY_ALWAYS := "always"
+const VISIBILITY_SECRET := "secret"
+const SUPPORTED_VISIBILITIES := [VISIBILITY_ALWAYS, VISIBILITY_SECRET]
 
 
 ## True when the committed data matches a freshly generated manifest. Texture
@@ -70,3 +77,22 @@ func resolveLocation(targetId: String) -> Dictionary:
 		if location["id"] == targetId:
 			return location
 	return {}
+
+
+## The Location a secret id reveals, matched on the authored secret_id. A map
+## never reveals a Location that is not authored as secret.
+func resolveSecretLocation(secretId: String) -> Dictionary:
+	if secretId == "":
+		return {}
+	for location in locations:
+		if str(location.get("secret_id", "")) == secretId:
+			return location
+	return {}
+
+
+static func locationVisibility(location: Dictionary) -> String:
+	return str(location.get("map_visibility", VISIBILITY_ALWAYS))
+
+
+static func isSecretLocation(location: Dictionary) -> bool:
+	return locationVisibility(location) == VISIBILITY_SECRET

@@ -190,15 +190,31 @@ func _collectLocations(chunkScripts: Dictionary, report: Dictionary) -> Array:
 				continue
 			var anchorTile: Vector2i = tiles[0]
 			var cell := coordinates.chunkTileToCell(chunk, anchorTile)
-			locations.append({
+			# Optional discovery metadata: sparse so always-visible Locations keep
+			# the previous entry shape, and validated so a half-authored secret
+			# never reaches the runtime filter.
+			var visibility := str(entry.get("map_visibility", ""))
+			var secretId := str(entry.get("secret_id", ""))
+			if visibility != "" and !OverworldMapData.SUPPORTED_VISIBILITIES.has(visibility):
+				report["errors"].append("location '{name}' (chunk {chunk}) has unknown map_visibility '{value}'".format({ "name": locationName, "chunk": chunk, "value": visibility }))
+				continue
+			if (visibility == OverworldMapData.VISIBILITY_SECRET) != (secretId != ""):
+				report["errors"].append("location '{name}' (chunk {chunk}) needs both map_visibility 'secret' and a secret_id".format({ "name": locationName, "chunk": chunk }))
+				continue
+			var locationRecord := {
 				"id": locationName,
 				"display_name": locationName,
 				"chunk": chunk,
 				"tile": anchorTile,
 				"cell": cell,
 				"image_position": projection.cellToImage(cell),
-				"icon": "location",
-			})
+				"icon": "secret_location" if visibility == OverworldMapData.VISIBILITY_SECRET else "location",
+			}
+			if visibility != "" and visibility != OverworldMapData.VISIBILITY_ALWAYS:
+				locationRecord["map_visibility"] = visibility
+			if secretId != "":
+				locationRecord["secret_id"] = secretId
+			locations.append(locationRecord)
 	return locations
 
 

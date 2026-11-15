@@ -68,7 +68,13 @@ func testReaderScripts() -> void:
 	var lazysprings: Dictionary = reader.readChunk(Vector2i(8, 17), load(WorldData.getChunkPath(Vector2i(8, 17))))["locations"]
 	_check(lazysprings.has("Lazysprings"), "chunk (8,17) carries Lazysprings")
 	if lazysprings.has("Lazysprings"):
-		_check(lazysprings["Lazysprings"]["tiles"][0] == Vector2(20, 36) and lazysprings["Lazysprings"]["pregenerated"] == true, "Lazysprings anchor tile (20,36) is passed through unchanged")
+		# Compare against the script's own data: the reader's contract is
+		# pass-through, so a legitimate world-data edit must not fail this test.
+		var script = load(WorldData.getChunkPath(Vector2i(8, 17)).get_basename() + ".gd")
+		var authored = script.new()
+		var authoredTiles: PackedVector2Array = authored.locations["Lazysprings"]["tiles"]
+		authored.free()
+		_check(lazysprings["Lazysprings"]["tiles"] == authoredTiles and lazysprings["Lazysprings"]["pregenerated"] == true, "Lazysprings anchor tile %s is passed through unchanged" % authoredTiles[0])
 	var spawnChunk: Dictionary = reader.readChunk(Vector2i(8, 16), load(WorldData.getChunkPath(Vector2i(8, 16))))
 	_check(spawnChunk["spawnPoints"].has("Fluffy Rabbit") and spawnChunk["locations"].is_empty(), "chunk (8,16) carries spawnPoints but no locations")
 	var plainChunk: Dictionary = reader.readChunk(Vector2i(8, 12), load(WorldData.getChunkPath(Vector2i(8, 12))))
