@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Nodes/Interaction/LocationInteractionDirector.gd" id="1_director"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_theme"]
+
+[node name="LocationInteractionDirector" type="Node"]
+script = ExtResource("1_director")
+
+[node name="Prompt" type="Label" parent="."]
+visible = false
+z_index = 10
+theme = ExtResource("2_theme")
+mouse_filter = 2

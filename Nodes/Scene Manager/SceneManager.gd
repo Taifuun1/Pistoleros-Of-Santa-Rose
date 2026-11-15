@@ -21,6 +21,8 @@ const SCENES := {
 	"pregenerated_location": "res://Location/Locations/{location}/{location}.tscn",
 	# WFC-generated location; the file name strips whitespace.
 	"wfc_location": "res://Location/Location Generation/{location}/{file}.tscn",
+	# Generic vendor room shell; loads the interior from VendorCatalog.
+	"vendor_room": "res://Location/Vendors/VendorRoom.tscn",
 }
 
 ## Scene loaded on game start.
@@ -37,22 +39,29 @@ var transitioning := false
 @onready var fadeRect: ColorRect = $TransitionLayer/FadeRect
 @onready var loadingScreen: Control = $TransitionLayer/LoadingScreen
 @onready var journal: Journal = $JournalLayer/Journal
+@onready var vendorMenu: Control = $VendorLayer/VendorMenu
 
 ## Per-scene Journal availability policy (Journal.md): the Overworld and
 ## normal Locations initially. Cutscenes, Shootouts, minigames and the main
-## menu stay blocked until an explicit decision extends this list.
-@export var journalAllowedScenes: Array[String] = ["overworld", "location", "pregenerated_location", "wfc_location"]
+## menu stay blocked until an explicit decision extends this list. Vendor rooms
+## allow the Journal while the VendorMenu itself is closed.
+@export var journalAllowedScenes: Array[String] = ["overworld", "location", "pregenerated_location", "wfc_location", "vendor_room"]
 
 var _pauseCoordinator: ModalPauseCoordinator
+## Parent Location + safe door position captured when entering a vendor room.
+var _vendorReturnContext := {}
 
 
 func _ready() -> void:
 	# Start from a black screen so the initial scene fades in.
 	fadeRect.modulate.a = 1.0
 	# The Journal is a persistent modal owned by the layer below the
-	# transitions; its open/close and pause policy live here.
+	# transitions; its open/close and pause policy live here. The VendorMenu
+	# shares the same pause coordinator and its own layer.
 	_pauseCoordinator = ModalPauseCoordinator.new(get_tree())
 	journal.pauseCoordinator = _pauseCoordinator
+	vendorMenu.pauseCoordinator = _pauseCoordinator
+	vendorMenu.musicProvider = get_node_or_null("/root/MusicPlayer")
 	scene_change_started.connect(_on_scene_change_started)
 	_syncInventoryPolicy()
 	if initialScene != "":
@@ -120,7 +129,7 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	else:
 		if requestError != OK:
 			push_error("SceneManager: could not start loading '{path}' (error {error}).".format({ "path": scenePath, "error": requestError }))
-			await _abortTransition()
+			await _abortTransition(sceneKey)
 			return
 		# Poll the load; show the loading screen only if it takes a while.
 		var previousMsec := Time.get_ticks_msec()
@@ -137,13 +146,13 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 		loadingScreen.hide()
 		if status != ResourceLoader.THREAD_LOAD_LOADED:
 			push_error("SceneManager: failed to load '{path}'.".format({ "path": scenePath }))
-			await _abortTransition()
+			await _abortTransition(sceneKey)
 			return
 		scenePacked = ResourceLoader.load_threaded_get(scenePath)
 
 	if scenePacked == null:
 		push_error("SceneManager: failed to load '{path}'.".format({ "path": scenePath }))
-		await _abortTransition()
+		await _abortTransition(sceneKey)
 		return
 
 	var newScene: Node = scenePacked.instantiate()
@@ -156,6 +165,9 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	# and cutscenes drive their own music (see Globals/MusicPlayer.gd).
 	MusicPlayer.on_scene_changed(sceneKey)
 	currentSceneKey = sceneKey
+	# A successful transition away from a vendor room completes the return.
+	if sceneKey != "vendor_room" and !_vendorReturnContext.is_empty():
+		_vendorReturnContext = {}
 
 
 	await _fadeIn()
@@ -180,8 +192,12 @@ func _fadeIn() -> void:
 	fadeRect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-func _abortTransition() -> void:
+func _abortTransition(failedSceneKey := "") -> void:
 	loadingScreen.hide()
+	# A failed vendor-room entry must not leave a stale return context behind;
+	# a failed return keeps the vendor room and its context intact.
+	if failedSceneKey == "vendor_room":
+		_vendorReturnContext = {}
 	await _fadeIn()
 	transitioning = false
 	_syncInventoryPolicy()
@@ -196,23 +212,103 @@ func _syncInventoryPolicy() -> void:
 
 
 func canOpenJournal() -> bool:
-	return !transitioning and journalAllowedScenes.has(currentSceneKey)
+	return !transitioning and journalAllowedScenes.has(currentSceneKey) and !vendorMenu.isOpen
 
 
 func toggleJournal() -> void:
+	if vendorMenu.isOpen:
+		return
 	if journal.isOpen:
 		journal.close()
 	elif canOpenJournal():
 		journal.open()
 
 
+## Captures the parent Location + safe exterior position and enters a vendor
+## room. Returns false without transitioning for invalid vendors, nested rooms,
+## modals or blocked scenes.
+func enterVendorRoom(vendorId: String, returnPosition := Vector2.ZERO) -> bool:
+	if transitioning or currentSceneKey == "vendor_room":
+		return false
+	if !journalAllowedScenes.has(currentSceneKey) or currentSceneKey == "overworld":
+		return false
+	if journal.isOpen or vendorMenu.isOpen:
+		return false
+	var vendor = _vendorDefinition(vendorId)
+	if vendor.is_empty():
+		return false
+	var roomScene = str(vendor.get("roomScene", ""))
+	if roomScene == "" or !ResourceLoader.exists(roomScene):
+		return false
+	_vendorReturnContext = {
+		"sceneKey": currentSceneKey,
+		"location": _duplicateLocationValue(Locations.currentLocation),
+		"playerPosition": returnPosition,
+	}
+	change_scene("vendor_room", { "vendorId": vendorId })
+	return true
+
+
+## Restores the captured parent Location and safe door position. The context is
+## cleared only after the parent scene loads successfully.
+func exitVendorRoom() -> bool:
+	if transitioning or currentSceneKey != "vendor_room" or _vendorReturnContext.is_empty():
+		return false
+	var returnSceneKey = str(_vendorReturnContext.get("sceneKey", ""))
+	if returnSceneKey == "":
+		return false
+	var returnPosition = _vendorReturnContext.get("playerPosition", Vector2.ZERO)
+	var returnLocation = _vendorReturnContext.get("location", "")
+	if returnLocation is Dictionary:
+		returnLocation = returnLocation.duplicate(true)
+		returnLocation["playerPosition"] = returnPosition
+		Locations.currentLocation = returnLocation
+		change_scene(returnSceneKey, { "location": Locations.currentLocation })
+		return true
+	if str(returnLocation) == "":
+		return false
+	Locations.currentLocation = str(returnLocation)
+	change_scene(returnSceneKey, { "location": Locations.currentLocation, "playerPosition": returnPosition })
+	return true
+
+
+func openVendor(vendorId: String) -> bool:
+	if transitioning or currentSceneKey != "vendor_room" or journal.isOpen or vendorMenu.isOpen:
+		return false
+	return vendorMenu.open(vendorId)
+
+
+func closeVendor() -> void:
+	vendorMenu.close()
+
+
+func canOpenVendor() -> bool:
+	return !transitioning and currentSceneKey == "vendor_room" and !journal.isOpen and !vendorMenu.isOpen
+
+
+func _vendorDefinition(vendorId: String) -> Dictionary:
+	var vendors = get_node_or_null("/root/Vendors")
+	if vendors == null or !vendors.has_method("getVendorDefinition"):
+		return {}
+	return vendors.getVendorDefinition(vendorId)
+
+
+func _duplicateLocationValue(value):
+	return value.duplicate(true) if value is Dictionary else value
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("TOGGLE_JOURNAL"):
+		if vendorMenu.isOpen:
+			get_viewport().set_input_as_handled()
+			return
 		toggleJournal()
 		get_viewport().set_input_as_handled()
 
 
 func _on_scene_change_started(_sceneKey) -> void:
-	# The Journal is modal over gameplay; scene changes close it first.
+	# Modals are not allowed to survive a scene change.
+	if vendorMenu.isOpen:
+		vendorMenu.close()
 	if journal.isOpen:
 		journal.close()

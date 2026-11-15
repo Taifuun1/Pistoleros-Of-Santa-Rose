@@ -1,0 +1,326 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://UI/Vendors/VendorMenu.gd" id="1_vendormenu"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="2_theme"]
+
+[node name="VendorMenu" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_vendormenu")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.501961)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(560, 300)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="Layout" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Layout/Header"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Vendor"
+vertical_alignment = 1
+clip_text = true
+
+[node name="Money" type="Label" parent="Center/Panel/Margin/Layout/Header"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Money: 0"
+vertical_alignment = 1
+
+[node name="Capacity" type="Label" parent="Center/Panel/Margin/Layout/Header"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "0/0"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Center/Panel/Margin/Layout/Header"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+text = "Close"
+
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 3
+
+[node name="ShopView" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 3
+
+[node name="Tabs" type="TabBar" parent="Center/Panel/Margin/Layout/Content/ShopView"]
+layout_mode = 2
+
+[node name="ListScroll" type="ScrollContainer" parent="Center/Panel/Margin/Layout/Content/ShopView"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="RowList" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content/ShopView/ListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="ShopEmpty" type="Label" parent="Center/Panel/Margin/Layout/Content/ShopView"]
+visible = false
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Nothing here right now."
+
+[node name="DetailHost" type="MarginContainer" parent="Center/Panel/Margin/Layout/Content/ShopView"]
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+
+[node name="ActionsMargin" type="MarginContainer" parent="Center/Panel/Margin/Layout/Content/ShopView"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Actions" type="HBoxContainer" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DecrementButton" type="Button" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+text = "-"
+
+[node name="QuantityLabel" type="Label" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(28, 20)
+layout_mode = 2
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IncrementButton" type="Button" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+text = "+"
+
+[node name="TotalLabel" type="Label" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ActionButton" type="Button" parent="Center/Panel/Margin/Layout/Content/ShopView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+text = "Buy"
+
+[node name="BankView" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="CarriedHeader" type="Label" parent="Center/Panel/Margin/Layout/Content/BankView"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Carried gear"
+
+[node name="CarriedScroll" type="ScrollContainer" parent="Center/Panel/Margin/Layout/Content/BankView"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="CarriedList" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content/BankView/CarriedScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="StoredHeader" type="Label" parent="Center/Panel/Margin/Layout/Content/BankView"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Stored gear"
+
+[node name="StoredScroll" type="ScrollContainer" parent="Center/Panel/Margin/Layout/Content/BankView"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="StoredList" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content/BankView/StoredScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="BankEmpty" type="Label" parent="Center/Panel/Margin/Layout/Content/BankView"]
+visible = false
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Nothing stored."
+
+[node name="BankDetailHost" type="MarginContainer" parent="Center/Panel/Margin/Layout/Content/BankView"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+
+[node name="ActionsMargin" type="MarginContainer" parent="Center/Panel/Margin/Layout/Content/BankView"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Actions" type="HBoxContainer" parent="Center/Panel/Margin/Layout/Content/BankView/ActionsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DepositButton" type="Button" parent="Center/Panel/Margin/Layout/Content/BankView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "Store"
+
+[node name="WithdrawButton" type="Button" parent="Center/Panel/Margin/Layout/Content/BankView/ActionsMargin/Actions"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+text = "Withdraw"
+
+[node name="NewspaperView" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="ZoneLabel" type="Label" parent="Center/Panel/Margin/Layout/Content/NewspaperView"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="HeadlineLabel" type="Label" parent="Center/Panel/Margin/Layout/Content/NewspaperView"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ReportScroll" type="ScrollContainer" parent="Center/Panel/Margin/Layout/Content/NewspaperView"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ReportBody" type="VBoxContainer" parent="Center/Panel/Margin/Layout/Content/NewspaperView/ReportScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Status" type="Label" parent="Center/Panel/Margin/Layout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+autowrap_mode = 3
+clip_text = true
+
+[node name="ConfirmationOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ConfirmDim" type="ColorRect" parent="ConfirmationOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.501961)
+
+[node name="ConfirmCenter" type="CenterContainer" parent="ConfirmationOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ConfirmPanel" type="PanelContainer" parent="ConfirmationOverlay/ConfirmCenter"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="ConfirmMargin" type="MarginContainer" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="ConfirmLayout" type="VBoxContainer" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ConfirmTitle" type="Label" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin/ConfirmLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+text = "Sell this item?"
+
+[node name="ConfirmBody" type="Label" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin/ConfirmLayout"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ConfirmActions" type="HBoxContainer" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin/ConfirmLayout"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelButton" type="Button" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin/ConfirmLayout/ConfirmActions"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+text = "Cancel"
+
+[node name="ConfirmButton" type="Button" parent="ConfirmationOverlay/ConfirmCenter/ConfirmPanel/ConfirmMargin/ConfirmLayout/ConfirmActions"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+text = "Sell"
+

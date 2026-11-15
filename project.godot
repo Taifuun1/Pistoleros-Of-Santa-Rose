@@ -38,6 +38,8 @@ OverworldEvents="*uid://djd6u6g5vi3b4"
 Quests="*uid://svrthr53qbr0"
 ItemGeneration="*res://Globals/ItemGeneration.gd"
 MusicPlayer="*res://Globals/MusicPlayer.gd"
+Discovery="*res://Globals/Discovery.gd"
+Vendors="*res://Globals/Vendors.gd"
 
 [display]
 

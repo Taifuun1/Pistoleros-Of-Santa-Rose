@@ -1,0 +1,93 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Templates/6x8Floor.png" id="1_floor"]
+[ext_resource type="Texture2D" path="res://Assets/Indoor Objects/Counter3.png" id="2_counter"]
+[ext_resource type="Texture2D" path="res://Assets/Indoor Objects/Table2.png" id="3_table"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Vendor/VendorActor.tscn" id="4_vendor"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/HatIcon.png" id="5_icon"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h"]
+size = Vector2(196, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v"]
+size = Vector2(20, 122)
+
+[node name="LazyspringsOutfitter" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Floor" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("1_floor")
+
+[node name="Table" type="Sprite2D" parent="."]
+position = Vector2(-56, 22)
+texture = ExtResource("3_table")
+
+[node name="Counter" type="Sprite2D" parent="."]
+position = Vector2(0, -20)
+texture = ExtResource("2_counter")
+
+[node name="WallTop" type="StaticBody2D" parent="."]
+position = Vector2(0, -61)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallTop"]
+shape = SubResource("RectangleShape2D_h")
+
+[node name="Visual" type="ColorRect" parent="WallTop"]
+z_index = 5
+offset_left = -98.0
+offset_top = -10.0
+offset_right = 98.0
+offset_bottom = 10.0
+color = Color(0.231373, 0.164706, 0.117647, 1)
+
+[node name="WallBottom" type="StaticBody2D" parent="."]
+position = Vector2(0, 61)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallBottom"]
+shape = SubResource("RectangleShape2D_h")
+
+[node name="Visual" type="ColorRect" parent="WallBottom"]
+z_index = 5
+offset_left = -98.0
+offset_top = -10.0
+offset_right = 98.0
+offset_bottom = 10.0
+color = Color(0.231373, 0.164706, 0.117647, 1)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-92, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("RectangleShape2D_v")
+
+[node name="Visual" type="ColorRect" parent="WallLeft"]
+z_index = 5
+offset_left = -10.0
+offset_top = -61.0
+offset_right = 10.0
+offset_bottom = 61.0
+color = Color(0.231373, 0.164706, 0.117647, 1)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(92, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("RectangleShape2D_v")
+
+[node name="Visual" type="ColorRect" parent="WallRight"]
+z_index = 5
+offset_left = -10.0
+offset_top = -61.0
+offset_right = 10.0
+offset_bottom = 61.0
+color = Color(0.231373, 0.164706, 0.117647, 1)
+
+[node name="VendorActor" parent="." instance=ExtResource("4_vendor")]
+position = Vector2(0, -42)
+vendorId = "lazysprings_outfitter"
+interactionPrompt = "Talk to the Outfitter"
+iconTexture = ExtResource("5_icon")
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(0, 18)

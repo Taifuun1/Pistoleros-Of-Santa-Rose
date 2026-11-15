@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Location/Vendors/VendorRoom.gd" id="1_room"]
+[ext_resource type="PackedScene" path="res://Actors/Location/PlayerLocationActor.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://Nodes/Interaction/LocationInteractionDirector.tscn" id="3_director"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Vendor/VendorExit.tscn" id="4_exit"]
+[ext_resource type="Theme" uid="uid://c40khsw7ty1da" path="res://Assets/UI/UI.tres" id="5_theme"]
+
+[node name="VendorRoom" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_room")
+
+[node name="Room" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Actors" type="Node2D" parent="Entities"]
+y_sort_enabled = true
+
+[node name="PlayerActor" parent="Entities/Actors" instance=ExtResource("2_player")]
+position = Vector2(0, 18)
+
+[node name="Fallback" type="Label" parent="."]
+visible = false
+z_index = 20
+offset_left = -160.0
+offset_top = -80.0
+offset_right = 160.0
+offset_bottom = -56.0
+theme = ExtResource("5_theme")
+text = "Vendor room unavailable."
+horizontal_alignment = 1
+
+[node name="LocationInteractionDirector" parent="." instance=ExtResource("3_director")]
+
+[node name="VendorExit" parent="." instance=ExtResource("4_exit")]
+position = Vector2(0, 48)

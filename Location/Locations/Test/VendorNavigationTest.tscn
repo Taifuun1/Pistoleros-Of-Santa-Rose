@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Location/Locations/Test/VendorNavigationTest.gd" id="1_fixture"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Vendor/VendorDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://Nodes/Interaction/LocationInteractionDirector.tscn" id="3_director"]
+
+[node name="VendorNavigationTest" type="Node2D"]
+script = ExtResource("1_fixture")
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Actors" type="Node2D" parent="Entities"]
+
+[node name="Vendors" type="Node2D" parent="Entities"]
+
+[node name="GenericStoreDoor" parent="Entities/Vendors" instance=ExtResource("2_door")]
+position = Vector2(60, -20)
+vendorId = "lazysprings_general"
+interactionPrompt = "Enter Test Store"
+
+[node name="InteractionDirector" parent="Entities" instance=ExtResource("3_director")]

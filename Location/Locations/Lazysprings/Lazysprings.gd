@@ -1,1 +1,2 @@
-extends Node2D
+extends "res://Location/Locations/PregeneratedLocation.gd"
+

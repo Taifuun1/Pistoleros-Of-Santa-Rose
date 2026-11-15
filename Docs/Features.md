@@ -56,17 +56,35 @@ Markdown file for listing first-iteration features.
             - Save management
             - What other settings are needed?
 - Location vendors
+    - Vendors are separate rooms/areas that can be entered from a location
+    - The vendor is a character that can be interacted with, which opens the vendor menu
     - Vendors and buildings that can be entered need a floating icon
     - General store
         - Buy supplies for the next trip
+            - Consumables like explosives and potions
+            - One time boosts like magazines or cigar packs
+            - Maps that show secret items and Locations on the Overworld map
+        - Buy with money earned from the trail
+    - Gun store
+        - A selection of randomly rolled weapons
+        - Buy with money earned from the trail
+        - Sell weapons found on the trail
+        - Resets when leaving for the trail
+    - Equipment store
+        - A selection of randomly rolled equipment
+        - Buy with money earned from the trail
+        - Sell equipment found on the trail
+        - Resets when leaving for the trail
     - Bank
         - Store equipment from inventory for later use
+        - No resource cost to use
     - Newspaper office
         - Find info on enemy parties in the current Zone, and tips for Shootouts
+        - No resource cost to use
 - Generated map rework and iteration
-    - Larger areas
+    - Larger chunk areas
     - Fix apple pie pathfinding test not supposed to be there
-    - Placemenet bug where chunk is changed and the player is instantly thrown to the next chunk?
+    - Placement bug where chunk is changed and the player is instantly thrown to the next chunk?
     - Add minigames for herb picking
     - Add flavour and variety to chunks
         - Use bushes or empty tiles instead of just trees
@@ -75,3 +93,4 @@ Markdown file for listing first-iteration features.
         - Record the chunk vegetation to memory
     - Make the tight paths more visible, wider, and generally more passable
     - Map and map discovery as new chunks are explored
+        - Map can be abstract dots that connect to each other

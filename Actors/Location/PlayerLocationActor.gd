@@ -10,6 +10,7 @@ var paused = false
 func _ready():
 	# Drop shadow under the player (see Nodes/Actor Shadow/ActorShadow.gd).
 	ShadowScript.attachTo(self)
+	add_to_group("location_player")
 
 
 func get_input():

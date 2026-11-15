@@ -6,6 +6,13 @@
 [ext_resource type="Texture2D" uid="uid://1rqx6jgerjl1" path="res://Assets/Buildings/SaloonYellow.png" id="4_d1mob"]
 [ext_resource type="Texture2D" uid="uid://ovgkb26gsd27" path="res://Assets/Buildings/HouseYellow.png" id="5_mi1pj"]
 [ext_resource type="Texture2D" uid="uid://2e4e1cy6a25x" path="res://Assets/Buildings/GeneralStoreWithSignYellow.png" id="6_8lfk4"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Vendor/VendorDoor.tscn" id="7_door"]
+[ext_resource type="PackedScene" path="res://Nodes/Interaction/LocationInteractionDirector.tscn" id="8_director"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Trail/TrailDeparture.tscn" id="9_trail"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/RevolverIcon.png" id="10_revolver"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/HatIcon.png" id="11_hat"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/MoneyIcon.png" id="12_money"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/CardIcon.png" id="13_card"]
 
 [node name="Lazysprings" type="Node2D" unique_id=1488127855]
 y_sort_enabled = true
@@ -174,3 +181,40 @@ polygon = PackedVector2Array(0, 37, -72, 1, 0, -35, 72, 1)
 texture = ExtResource("5_mi1pj")
 offset = Vector2(18, -21)
 flip_h = true
+
+[node name="Vendors" type="Node2D" parent="Entities"]
+y_sort_enabled = true
+
+[node name="GeneralStoreDoor" parent="Entities/Vendors" instance=ExtResource("7_door")]
+position = Vector2(516, 212)
+vendorId = "lazysprings_general"
+interactionPrompt = "Enter General Store"
+
+[node name="GunsmithDoor" parent="Entities/Vendors" instance=ExtResource("7_door")]
+position = Vector2(429, 169)
+vendorId = "lazysprings_gunsmith"
+interactionPrompt = "Enter Gunsmith"
+iconTexture = ExtResource("10_revolver")
+
+[node name="OutfitterDoor" parent="Entities/Vendors" instance=ExtResource("7_door")]
+position = Vector2(672, 314)
+vendorId = "lazysprings_outfitter"
+interactionPrompt = "Enter Outfitter"
+iconTexture = ExtResource("11_hat")
+
+[node name="BankDoor" parent="Entities/Vendors" instance=ExtResource("7_door")]
+position = Vector2(588, 260)
+vendorId = "lazysprings_bank"
+interactionPrompt = "Enter Bank"
+iconTexture = ExtResource("12_money")
+
+[node name="GazetteDoor" parent="Entities/Vendors" instance=ExtResource("7_door")]
+position = Vector2(208, 514)
+vendorId = "lazysprings_gazette"
+interactionPrompt = "Enter Gazette"
+iconTexture = ExtResource("13_card")
+
+[node name="TrailDeparture" parent="Entities" instance=ExtResource("9_trail")]
+position = Vector2(121, 96)
+
+[node name="InteractionDirector" parent="Entities" instance=ExtResource("8_director")]

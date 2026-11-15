@@ -8,7 +8,7 @@ const SceneManagerScript = preload("res://Nodes/Scene Manager/SceneManager.gd")
 ## game runs). Falls back to a direct scene change when a scene is run
 ## directly (F6) without the scene manager.
 func changeScene(sceneKey: String, context := {}) -> void:
-	var sceneManager = get_tree().root.get_node_or_null("SceneManager")
+	var sceneManager = sceneManagerNode()
 	if sceneManager != null:
 		sceneManager.change_scene(sceneKey, context)
 		return
@@ -22,6 +22,38 @@ func changeScene(sceneKey: String, context := {}) -> void:
 		var locationName: String = context.get("location", Locations.currentLocation)
 		scenePath = scenePath.format({ "location": locationName, "file": locationName.replace(" ", "") })
 	get_tree().change_scene_to_file(scenePath)
+
+
+## Vendor navigation needs the SceneManager's captured return context (see
+## Docs/System Design/Location Vendors Implementation.md). Running a vendor
+## scene directly (F6) has no way back, so report that instead of loading the
+## room without a return path.
+func enterVendorRoom(vendorId: String, returnPosition := Vector2.ZERO) -> bool:
+	var sceneManager = sceneManagerNode()
+	if sceneManager == null or !sceneManager.has_method("enterVendorRoom"):
+		push_warning("HelperFunctions: vendor navigation is unsupported without the Scene Manager; enter the room from a Location.")
+		return false
+	return bool(sceneManager.enterVendorRoom(vendorId, returnPosition))
+
+
+func openVendor(vendorId: String) -> bool:
+	var sceneManager = sceneManagerNode()
+	if sceneManager == null or !sceneManager.has_method("openVendor"):
+		push_warning("HelperFunctions: vendor menus are unsupported without the Scene Manager.")
+		return false
+	return bool(sceneManager.openVendor(vendorId))
+
+
+func exitVendorRoom() -> bool:
+	var sceneManager = sceneManagerNode()
+	if sceneManager == null or !sceneManager.has_method("exitVendorRoom"):
+		push_warning("HelperFunctions: vendor room return is unsupported without the Scene Manager.")
+		return false
+	return bool(sceneManager.exitVendorRoom())
+
+
+func sceneManagerNode() -> Node:
+	return get_tree().root.get_node_or_null("SceneManager")
 
 
 func isOutSideTileMap(point):
