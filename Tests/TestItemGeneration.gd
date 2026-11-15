@@ -215,12 +215,61 @@ func _run() -> void:
 	_check(testScene.itemStats.custom_minimum_size.y >= contentMinHeight - 0.5, "ItemStats panel minimum height (%s) smaller than its content (%s)" % [testScene.itemStats.custom_minimum_size.y, contentMinHeight])
 	testScene.free()
 
+	_testInjectedRng(generator)
+
 	generator.free()
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:
 		print("\n%d CHECK(S) FAILED" % failures)
 	quit(failures)
+
+
+## Injected RNG: identical seeds roll identical items, different seeds generally
+## diverge, and the global RNG stream is left untouched. Null rng keeps the
+## existing global-RNG behavior.
+func _testInjectedRng(generator) -> void:
+	print("\n--- Injected RNG determinism ---")
+	var firstRng = RandomNumberGenerator.new()
+	firstRng.seed = 424242
+	var secondRng = RandomNumberGenerator.new()
+	secondRng.seed = 424242
+	var first = generator.generateItem({ "rng": firstRng })
+	var second = generator.generateItem({ "rng": secondRng })
+	_check(first == second, "identical injected seeds produce identical items")
+
+	var differentRng = RandomNumberGenerator.new()
+	differentRng.seed = 424243
+	var different = generator.generateItem({ "rng": differentRng })
+	_check(first != different, "different injected seeds generally diverge")
+
+	seed(9090)
+	var expectedGlobal = randi()
+	seed(9090)
+	var isolatedRng = RandomNumberGenerator.new()
+	isolatedRng.seed = 7
+	generator.generateWeapon({ "rng": isolatedRng })
+	generator.generateEquipment({ "rng": isolatedRng })
+	_check(randi() == expectedGlobal, "injected generation does not advance the global RNG")
+
+	var lootFirst = RandomNumberGenerator.new()
+	lootFirst.seed = 555
+	var lootSecond = RandomNumberGenerator.new()
+	lootSecond.seed = 555
+	var lootTable = {
+		"name": "T", "rolls": 3, "money": { "min": 1, "max": 10, "chance": 0.5 },
+		"entries": [
+			{ "kind": "weapon", "rarity": ["rare"], "weight": 1 },
+			{ "kind": "equipment", "rarity": ["uncommon"], "weight": 1 },
+		],
+	}
+	_check(generator.generateLoot(lootTable, {}, lootFirst) == generator.generateLoot(lootTable, {}, lootSecond), "identical injected loot seeds produce identical loot")
+
+	seed(12321)
+	var firstGlobal = generator.generateWeapon()
+	seed(12321)
+	var secondGlobal = generator.generateWeapon()
+	_check(firstGlobal == secondGlobal, "no-rng generation preserves deterministic global-RNG behavior")
 
 
 func _checkItem(item: Dictionary, itemType: String, rarity: String) -> void:

@@ -54,23 +54,25 @@ func _loadData() -> void:
 ## - zone: zone key from EquipmentData.gd (equipment only, default "anywhere")
 ## - family: "revolver"/"rifle"/"shotgun" (weapons only)
 ## - rarity: "common"/"uncommon"/"rare"/"epic" to force a rarity
+## - rng: RandomNumberGenerator for deterministic rolling (default global RNG)
 func generateItem(options := {}) -> Dictionary:
 	_loadData()
 	var itemType = options.get("itemType", "")
 	if itemType == "":
-		itemType = "weapon" if randf() < 0.5 else "equipment"
+		itemType = "weapon" if _randomFloat(_rngFromOptions(options)) < 0.5 else "equipment"
 	if itemType == "weapon":
 		return generateWeapon(options)
 	return generateEquipment(options)
 
 func generateWeapon(options := {}) -> Dictionary:
 	_loadData()
+	var rng = _rngFromOptions(options)
 	var weaponFamily = options.get("family", "")
 	if weaponFamily == "":
 		var familyKeys = weaponData.weaponFamilies.keys()
-		weaponFamily = familyKeys[randi() % familyKeys.size()]
+		weaponFamily = familyKeys[_randomIndex(rng, familyKeys.size())]
 	var weaponBases = weaponData.weaponFamilies[weaponFamily]
-	var weaponBase = weaponBases[randi() % weaponBases.size()]
+	var weaponBase = weaponBases[_randomIndex(rng, weaponBases.size())]
 
 	var item = {
 		"definitionId": weaponBase["id"],
@@ -79,7 +81,7 @@ func generateWeapon(options := {}) -> Dictionary:
 		"family": weaponFamily,
 		"baseName": weaponBase["name"],
 		"familyNoun": weaponFamily.capitalize(),
-		"sprite": _rollSprite(weaponBase["sprites"]),
+		"sprite": _rollSprite(weaponBase["sprites"], rng),
 		"stats": {},
 		"zone": options.get("zone", "anywhere"),
 	}
@@ -87,12 +89,13 @@ func generateWeapon(options := {}) -> Dictionary:
 	# WeaponData has no per-base damage values yet; roll the base damage from
 	# the family's damage range for the rolled rarity (PLACEHOLDER values, see
 	# AffixData.gd statValues).
-	item["baseDamage"] = _rollAffixValue(weaponFamily + "Damage", item["rarity"])
+	item["baseDamage"] = _rollAffixValue(weaponFamily + "Damage", item["rarity"], rng)
 	_assembleName(item)
 	return item
 
 func generateEquipment(options := {}) -> Dictionary:
 	_loadData()
+	var rng = _rngFromOptions(options)
 	var zone = options.get("zone", "anywhere")
 	var pool = []
 	if equipmentData.zones.has(zone):
@@ -130,14 +133,14 @@ func generateEquipment(options := {}) -> Dictionary:
 			genericEntry["beltSpace"] = int(generic["beltSpace"])
 		pool.append(genericEntry)
 
-	var base = pool[randi() % pool.size()]
+	var base = pool[_randomIndex(rng, pool.size())]
 	var item = {
 		"definitionId": base["definitionId"],
 		"quantity": 1,
 		"itemType": "equipment",
 		"slot": base["slot"],
 		"baseName": base["name"],
-		"sprite": _rollSprite(equipmentData.spritePools[base["slot"]]),
+		"sprite": _rollSprite(equipmentData.spritePools[base["slot"]], rng),
 		"stats": equipmentData.genericBases[base["slot"]]["baseStats"].duplicate(),
 		"zone": base["zone"],
 	}
@@ -188,19 +191,20 @@ func _questsAutoload():
 	return null
 
 func _rollRarityAndAffixes(item: Dictionary, options: Dictionary) -> void:
+	var rng = _rngFromOptions(options)
 	var rarityKey = options.get("rarity", "")
 	if rarityKey == "":
 		rarityKey = rollRarity()
 	item["rarity"] = rarityKey
 	item["rarityName"] = RARITIES[rarityKey]["displayName"]
 	# Every item always rolls two affixes: a prefix and a suffix.
-	item["prefix"] = _rollAffix("prefix", rarityKey)
-	item["suffix"] = _rollAffix("suffix", rarityKey)
+	item["prefix"] = _rollAffix("prefix", rarityKey, rng)
+	item["suffix"] = _rollAffix("suffix", rarityKey, rng)
 
 	for affix in [item["prefix"], item["suffix"]]:
 		item["stats"][affix["stat"]] = item["stats"].get(affix["stat"], 0) + affix["value"]
 
-func _rollAffix(affix: String, rarityKey: String) -> Dictionary:
+func _rollAffix(affix: String, rarityKey: String, rng: RandomNumberGenerator = null) -> Dictionary:
 	var pool = {}
 	if affix == "prefix":
 		for category in affixData.prefixes:
@@ -209,15 +213,15 @@ func _rollAffix(affix: String, rarityKey: String) -> Dictionary:
 	else:
 		pool = affixData.suffixes
 	var names = pool.keys()
-	var affixName = names[randi() % names.size()]
+	var affixName = names[_randomIndex(rng, names.size())]
 	var statKey = pool[affixName]
 	return {
 		"name": affixName,
 		"stat": statKey,
-		"value": _rollAffixValue(statKey, rarityKey),
+		"value": _rollAffixValue(statKey, rarityKey, rng),
 	}
 
-func _rollAffixValue(statKey: String, rarityKey: String) -> int:
+func _rollAffixValue(statKey: String, rarityKey: String, rng: RandomNumberGenerator = null) -> int:
 	var stat = affixData.stats[statKey]
 	if stat["kind"] == "flag":
 		return 1
@@ -226,7 +230,7 @@ func _rollAffixValue(statKey: String, rarityKey: String) -> int:
 	var bounds = stat["value"]
 	if bounds.has(rarityKey):
 		bounds = bounds[rarityKey]
-	return randi_range(bounds["min"], bounds["max"])
+	return _randomIntRange(rng, int(bounds["min"]), int(bounds["max"]))
 
 func _assembleName(item: Dictionary) -> void:
 	var itemName = item["rarityName"] + " "
@@ -237,29 +241,53 @@ func _assembleName(item: Dictionary) -> void:
 		itemName += " " + item["suffix"]["name"]
 	item["name"] = itemName
 
-func _rollSprite(spritePool: Array) -> String:
+func _rollSprite(spritePool: Array, rng: RandomNumberGenerator = null) -> String:
 	if spritePool.is_empty():
 		return ""
-	return spritePool[randi() % spritePool.size()]
+	return spritePool[_randomIndex(rng, spritePool.size())]
+
+
+## Accepted deterministic-RNG seam: options may carry
+## "rng": RandomNumberGenerator. Null keeps the existing global-RNG behavior.
+func _rngFromOptions(options: Dictionary) -> RandomNumberGenerator:
+	var rng = options.get("rng", null)
+	return rng if rng is RandomNumberGenerator else null
+
+
+func _randomFloat(rng: RandomNumberGenerator) -> float:
+	return rng.randf() if rng != null else randf()
+
+
+func _randomIndex(rng: RandomNumberGenerator, size: int) -> int:
+	if size <= 0:
+		return 0
+	return rng.randi_range(0, size - 1) if rng != null else randi() % size
+
+
+func _randomIntRange(rng: RandomNumberGenerator, from: int, to: int) -> int:
+	if from > to:
+		return from
+	return rng.randi_range(from, to) if rng != null else randi_range(from, to)
 
 
 ## Loot generation (Docs/System Design/Shootout/Rewards.md): rolls money and
 ## weighted entries from a loot table, then applies Rodeo loot modifiers
-## (flat amounts first, multipliers after).
-func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
+## (flat amounts first, multipliers after). An optional rng makes the whole
+## roll deterministic; null preserves the existing global-RNG behavior.
+func generateLoot(table: Dictionary, modifiers := {}, rng: RandomNumberGenerator = null) -> Dictionary:
 	_loadData()
 	var loot = { "money": 0, "items": [] }
 	var amounts = modifiers.get("amounts", {})
 	var multipliers = modifiers.get("multipliers", {})
 	var moneyData = table.get("money", {})
-	if !moneyData.is_empty() and randf() < float(moneyData.get("chance", 1.0)):
-		var money = randi_range(int(moneyData.get("min", 0)), int(moneyData.get("max", 0)))
+	if !moneyData.is_empty() and _randomFloat(rng) < float(moneyData.get("chance", 1.0)):
+		var money = _randomIntRange(rng, int(moneyData.get("min", 0)), int(moneyData.get("max", 0)))
 		money += int(amounts.get("money", 0))
 		loot.money = maxi(0, int(round(money * float(multipliers.get("money", 1.0)))))
 	else:
 		loot.money = maxi(0, int(round(int(amounts.get("money", 0)) * float(multipliers.get("money", 1.0)))))
 	for i in int(table.get("rolls", 0)):
-		var entry = rollWeightedEntry(table.get("entries", []))
+		var entry = rollWeightedEntry(table.get("entries", []), rng)
 		if entry == null:
 			continue
 		match entry.get("kind", ""):
@@ -272,9 +300,11 @@ func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
 				loot.items.append(itemCatalog.makeStackable(consumableId, 1))
 			"weapon", "equipment":
 				var options = { "itemType": entry.kind }
+				if rng != null:
+					options["rng"] = rng
 				var rarityPool = entry.get("rarity", [])
 				if !rarityPool.is_empty():
-					options["rarity"] = rarityPool[randi() % rarityPool.size()]
+					options["rarity"] = rarityPool[_randomIndex(rng, rarityPool.size())]
 				loot.items.append(generateItem(options))
 			"resources":
 				var resourceId = str(entry.get("definitionId", ""))
@@ -291,13 +321,13 @@ func generateLoot(table: Dictionary, modifiers := {}) -> Dictionary:
 	return loot
 
 
-func rollWeightedEntry(entries: Array):
+func rollWeightedEntry(entries: Array, rng: RandomNumberGenerator = null):
 	var total = 0
 	for entry in entries:
 		total += maxi(0, int(entry.get("weight", 0)))
 	if total == 0:
 		return null
-	var pick = randi() % total
+	var pick = (_randomIntRange(rng, 0, total - 1) if rng != null else randi() % total)
 	for entry in entries:
 		pick -= maxi(0, int(entry.get("weight", 0)))
 		if pick < 0:

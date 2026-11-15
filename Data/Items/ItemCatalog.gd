@@ -3,7 +3,7 @@ extends RefCounted
 ## Stackable item definitions shared by generation, loot and inventory.
 ## Design source: Docs/System Design/Journal/Inventory and Equipment.md
 
-const SUPPORTED_ITEM_TYPES = ["consumable", "resources"]
+const SUPPORTED_ITEM_TYPES = ["consumable", "resources", "map"]
 
 var definitions = {
 	"paregoric": {
@@ -16,6 +16,28 @@ var definitions = {
 		"stackLimit": 5,
 		"droppable": true,
 		"sprite": "res://Assets/Items/Paregoric.png",
+	},
+	"multi_heal": {
+		"definitionId": "multi_heal",
+		"itemType": "consumable",
+		"combatId": "multiHeal",
+		"name": "Doctor's Kit",
+		"category": "supplies",
+		"description": "Heals every living party member during a Shootout.",
+		"stackLimit": 3,
+		"droppable": true,
+		"sprite": "",
+	},
+	"canyon_cache_map": {
+		"definitionId": "canyon_cache_map",
+		"itemType": "map",
+		"name": "Canyon Cache Map",
+		"category": "maps",
+		"description": "Reveals the hidden Gold Run on the Overworld map.",
+		"stackLimit": 1,
+		"droppable": true,
+		"sprite": "res://Assets/Journal/MapIcon.png",
+		"effect": { "kind": "reveal_map", "mapId": "canyon_cache_map" },
 	},
 }
 
@@ -47,6 +69,15 @@ func validate() -> Array:
 			errors.append("item '%s': sprite does not exist" % key)
 		if definition.get("itemType", "") == "consumable" and str(definition.get("combatId", "")) == "":
 			errors.append("item '%s': consumable requires combatId" % key)
+		if definition.get("itemType", "") == "map":
+			var effect = definition.get("effect", null)
+			if !(effect is Dictionary):
+				errors.append("item '%s': map requires an effect Dictionary" % key)
+			else:
+				if str(effect.get("kind", "")) != "reveal_map":
+					errors.append("item '%s': unsupported map effect kind" % key)
+				if str(effect.get("mapId", "")) == "":
+					errors.append("item '%s': reveal_map requires mapId" % key)
 	return errors
 
 

@@ -6,7 +6,7 @@ class_name InventoryRules
 ## state; Party commits a successful plan.
 
 const GEAR_TYPES = ["weapon", "equipment"]
-const STACKABLE_TYPES = ["consumable", "resources"]
+const STACKABLE_TYPES = ["consumable", "resources", "map"]
 const EQUIPMENT_SLOTS = [
 	"weapon", "headwear", "bandana", "duster", "belt", "trousers", "justins",
 ]
@@ -134,6 +134,27 @@ func equipmentSlot(item: Dictionary) -> String:
 	return ""
 
 
+## Public complete-gear validation for commerce/transfer commands. Gear outside
+## the inventory (vendor offers, Bank rows, import payloads) uses the same rules
+## as an inventory entry, without requiring an instanceId.
+func isValidGear(value) -> bool:
+	if !(value is Dictionary):
+		return false
+	if !GEAR_TYPES.has(value.get("itemType", "")):
+		return false
+	return _isValidGearEntry(value)
+
+
+## Inventory/Bank row validation: complete gear plus a stable instance id.
+func isValidGearEntry(value) -> bool:
+	return isValidGear(value) and str((value as Dictionary).get("instanceId", "")) != ""
+
+
+## Keeps Party's allocation counter ahead of an imported/preserved id.
+func nextInstanceNumberAfter(instanceId: String, current: int) -> int:
+	return _nextNumberAfter(instanceId, current)
+
+
 func projectItem(item: Dictionary, catalog) -> Dictionary:
 	if item.is_empty() or catalog == null:
 		return {}
@@ -148,6 +169,10 @@ func projectItem(item: Dictionary, catalog) -> Dictionary:
 	for key in ["name", "itemType", "category", "description", "stackLimit", "droppable", "sprite", "combatId"]:
 		if definition.has(key):
 			projected[key] = definition[key]
+	# Out-of-combat effects (map reveals) come from the authoritative definition
+	# too: consumers of the projection must not have to reach into the catalog.
+	if definition.has("effect") and definition["effect"] is Dictionary:
+		projected["effect"] = (definition["effect"] as Dictionary).duplicate(true)
 	return projected
 
 

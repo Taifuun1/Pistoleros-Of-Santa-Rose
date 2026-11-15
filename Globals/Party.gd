@@ -7,6 +7,7 @@ extends Node
 ## Inventory and Equipment.md.
 
 signal inventoryChanged
+signal moneyChanged
 signal equipmentChanged(memberKey: String)
 ## Empty memberKey means the whole party changed (fight results, town reset, Vamoose).
 signal partyChanged(memberKey: String)
@@ -217,6 +218,7 @@ func getInventorySnapshot() -> Dictionary:
 	var snapshot = {
 		"capacity": INVENTORY_CAPACITY,
 		"used": inventory.size(),
+		"money": money,
 		"managementAllowed": inventoryManagementAllowed,
 		"items": [],
 		"members": [],
@@ -267,6 +269,170 @@ func addItems(items: Array) -> Dictionary:
 
 func addItem(item: Dictionary) -> Dictionary:
 	return addItems([item])
+
+
+## Atomic vendor purchase (Docs/System Design/Location Vendors Implementation.md,
+## patch 2): the whole batch must fit before money or inventory changes. Partial
+## acceptance is failure here, unlike loot overflow.
+func completePurchase(items: Array, totalPrice: int) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return _addFailure("data_unavailable")
+	if !inventoryManagementAllowed:
+		return _addFailure("management_unavailable")
+	if typeof(totalPrice) != TYPE_INT or totalPrice < 0:
+		return _addFailure("invalid_price")
+	if items.is_empty():
+		return _addFailure("invalid_item")
+	if money < totalPrice:
+		return _addFailure("insufficient_money")
+	var plan = _inventoryRules.planAdd(
+		inventory,
+		items,
+		INVENTORY_CAPACITY,
+		_itemCatalog,
+		_nextInstanceNumber
+	)
+	if !plan.success:
+		return _publicAddResult(plan)
+	var result = _publicAddResult(plan)
+	if !plan.overflow.is_empty():
+		result["success"] = false
+		result["reason"] = "insufficient_capacity"
+		return result
+	if plan.accepted.is_empty():
+		result["success"] = false
+		result["reason"] = "invalid_item"
+		return result
+	inventory = plan.inventory
+	_nextInstanceNumber = int(plan.nextInstanceNumber)
+	money -= totalPrice
+	inventoryChanged.emit()
+	moneyChanged.emit()
+	result["totalPrice"] = totalPrice
+	result["money"] = money
+	return result
+
+
+## Atomic vendor sale: removes exactly one carried gear instance and credits the
+## authoritative quote once. Specialist category/sellable policy lives in the
+## vendor service, not here.
+func completeSale(instanceId: String, unitPrice: int) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return { "success": false, "reason": "data_unavailable" }
+	if !inventoryManagementAllowed:
+		return { "success": false, "reason": "management_unavailable" }
+	if typeof(unitPrice) != TYPE_INT or unitPrice <= 0:
+		return { "success": false, "reason": "invalid_price" }
+	var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+	if index < 0:
+		return { "success": false, "reason": "unknown_item" }
+	var item = inventory[index]
+	if !_inventoryRules.isValidGearEntry(item):
+		return { "success": false, "reason": "not_equipment" }
+	var sold = item.duplicate(true)
+	inventory.remove_at(index)
+	money += unitPrice
+	inventoryChanged.emit()
+	moneyChanged.emit()
+	return {
+		"success": true,
+		"reason": "",
+		"instanceId": instanceId,
+		"definitionId": str(sold.get("definitionId", "")),
+		"item": sold,
+		"unitPrice": unitPrice,
+		"money": money,
+	}
+
+
+## Bank deposit source: removes one carried gear instance and returns a deep
+## copy with its complete rolled data and original instanceId.
+func transferGearOut(instanceId: String) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return { "success": false, "reason": "data_unavailable" }
+	if !inventoryManagementAllowed:
+		return { "success": false, "reason": "management_unavailable" }
+	var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+	if index < 0:
+		return { "success": false, "reason": "unknown_item" }
+	var item = inventory[index]
+	if !_inventoryRules.isValidGearEntry(item):
+		return { "success": false, "reason": "not_equipment" }
+	var stored = item.duplicate(true)
+	inventory.remove_at(index)
+	inventoryChanged.emit()
+	return { "success": true, "reason": "", "instanceId": instanceId, "item": stored }
+
+
+## Bank withdrawal sink: inserts complete gear unchanged, preserving its id. The
+## Bank service validates its own collection before calling this.
+func transferGearIn(item: Dictionary) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return { "success": false, "reason": "data_unavailable" }
+	if !inventoryManagementAllowed:
+		return { "success": false, "reason": "management_unavailable" }
+	if !_inventoryRules.isValidGearEntry(item):
+		return { "success": false, "reason": "invalid_item" }
+	var instanceId = str(item.get("instanceId", ""))
+	if hasInstanceId(instanceId):
+		return { "success": false, "reason": "duplicate_instance_id" }
+	if inventory.size() >= INVENTORY_CAPACITY:
+		return { "success": false, "reason": "insufficient_capacity" }
+	var stored = item.duplicate(true)
+	inventory.append(stored)
+	_nextInstanceNumber = _inventoryRules.nextInstanceNumberAfter(instanceId, _nextInstanceNumber)
+	inventoryChanged.emit()
+	return { "success": true, "reason": "", "instanceId": instanceId, "item": stored }
+
+
+## Exact one-unit consumption for supported out-of-combat effects. Not a generic
+## effect dispatcher; the caller validates the effect before consuming.
+func consumeItem(instanceId: String, expectedType: String) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return { "success": false, "reason": "data_unavailable" }
+	if !inventoryManagementAllowed:
+		return { "success": false, "reason": "management_unavailable" }
+	var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+	if index < 0:
+		return { "success": false, "reason": "unknown_item" }
+	var entry = inventory[index]
+	if str(entry.get("itemType", "")) != expectedType:
+		return { "success": false, "reason": "wrong_item_type" }
+	if int(entry.get("quantity", 0)) <= 0:
+		return { "success": false, "reason": "invalid_quantity" }
+	var definitionId = str(entry.get("definitionId", ""))
+	if int(entry.quantity) == 1:
+		inventory.remove_at(index)
+	else:
+		entry["quantity"] = int(entry.quantity) - 1
+	inventoryChanged.emit()
+	return {
+		"success": true,
+		"reason": "",
+		"instanceId": instanceId,
+		"definitionId": definitionId,
+		"quantity": 1,
+	}
+
+
+## True when a carried or equipped instance owns the id. Bank withdrawals use
+## this to reject an id that already exists anywhere in Party.
+func hasInstanceId(instanceId: String) -> bool:
+	if instanceId == "":
+		return false
+	if _inventoryRules.inventoryIndex(inventory, instanceId) >= 0:
+		return true
+	for member in party.values():
+		if !(member is Dictionary):
+			continue
+		var equipment = member.get("equipment", {})
+		if !(equipment is Dictionary):
+			continue
+		for slot in equipment:
+			var item = equipment[slot]
+			if item is Dictionary and str(item.get("instanceId", "")) == instanceId:
+				return true
+	return false
 
 
 func dropItem(instanceId: String, quantity: int) -> Dictionary:
@@ -467,6 +633,7 @@ func applyFightResults(results: Dictionary) -> Dictionary:
 ## applies independently when item data is invalid.
 func applyLoot(loot: Dictionary) -> Dictionary:
 	var moneyAdded = int(loot.get("money", 0))
+	var moneyBefore = money
 	money += moneyAdded
 	var items = loot.get("items", [])
 	var result = {}
@@ -475,6 +642,8 @@ func applyLoot(loot: Dictionary) -> Dictionary:
 	else:
 		result = _addFailure("invalid_item")
 	result["money"] = moneyAdded
+	if money != moneyBefore:
+		moneyChanged.emit()
 	return result
 
 
@@ -535,6 +704,7 @@ func reduceInjury(amount: int) -> void:
 ## Full party down: lose half of all loot (money pouch; the loot hook lands
 ## with Rewards) and return where the party is thrown to.
 func vamoose() -> String:
+	var moneyBefore = money
 	money = int(floor(money / 2.0))
 	var changed = false
 	for member in party.values():
@@ -543,4 +713,6 @@ func vamoose() -> String:
 		member["knockoutDebuffs"] = makeKnockoutDebuffs()
 	if changed:
 		partyChanged.emit("")
+	if money != moneyBefore:
+		moneyChanged.emit()
 	return "quest_checkpoint" if questInProgress else "town"

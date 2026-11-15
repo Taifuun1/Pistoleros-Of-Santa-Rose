@@ -119,3 +119,21 @@ var legendaries = {
 		"lore": "Half the duel is looking like you already won.",
 	},
 }
+
+# Authored base value per legendary id. VendorPricing requires an entry for
+# every legendary definition; values are balance placeholders.
+var baseValues = {
+	"widowmaker": 900,
+	"big_iron": 850,
+	"high_noon": 800,
+	"lawgivers_justice": 950,
+	"winchester_rotating_rifle": 900,
+	"buckshot": 850,
+	"buffalo_tamer": 900,
+	"coyotes_last_howl": 700,
+	"the_gamblers_deck": 750,
+	"miners_toolrack": 650,
+	"the_undertakers_coat": 800,
+	"pine_hill_spurs": 600,
+	"stylish_spurs": 600,
+}
