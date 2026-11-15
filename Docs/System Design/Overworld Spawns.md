@@ -2,7 +2,7 @@
 
 Zone-driven visual parties for the Overworld: weighted party selection, multi-actor groups, dynamic positions, and chunk-scoped cleanup.
 
-This is a design doc: it describes the intended design, and the implementation may lag behind it. The source feature is `Docs/Features and Issues.md` ("Rework Overworld spawns to be dynamic"). **Status: proposed; not implemented.**
+This is a design doc: it describes the intended design, and the implementation may lag behind it. The source feature is `Docs/Features and Issues.md` ("Rework Overworld spawns to be dynamic"). **Status: the shared `ZoneData.gd`/`OverworldZoneCatalog` catalog is implemented; the Zone-driven spawn director and visual-party system are proposed and not implemented.**
 
 ## Requirements
 
@@ -93,7 +93,7 @@ Keep `Overworld.overworldActorIdCount` if indexed actor names remain useful. Rem
 
 ## Single shared Zone dataset
 
-`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component**. Extract the existing `zones` and `default_zone` values from `MusicData` without changing their current geography:
+`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component** (implemented). The existing `zones` and `default_zone` values were extracted from `MusicData` without changing their current geography; canonical snake_case ids were applied while display names remain presentation data:
 
 ```gdscript
 # Data/Overworld/ZoneData.gd
@@ -102,8 +102,8 @@ extends RefCounted
 var data = {
     # Inclusive chunk-coordinate corners; first match wins.
     "zones": [
-        { "zone": "ghost town", "min": Vector2i(10, 0), "max": Vector2i(10, 3) },
-        # Move the remaining existing bands here unchanged.
+        { "zone": "ghost_town", "displayName": "Ghost Town", "min": Vector2i(10, 0), "max": Vector2i(10, 3) },
+        # Remaining bands follow with canonical ids and display names.
     ],
     "default_zone": "canyon",
 }
@@ -111,7 +111,7 @@ var data = {
 
 This is one shared dataset, not a spawn-specific copy:
 
-- `MusicData` must remove `zones` and `default_zone`. `MusicPlayer.zone_for_chunk()` delegates to `OverworldZoneCatalog`; only track lists remain in music data.
+- ✅ `MusicData` no longer contains `zones` or `default_zone`. `MusicPlayer.zone_for_chunk()` delegates to `OverworldZoneCatalog`; only track lists remain in music data.
 - `OverworldSpawnDirector` resolves Zones through the same catalog. `SpawnData` may key tables by Zone id, but must never contain chunk bounds, a default Zone, or another geometry fallback.
 - Every other current or future Zone consumer—encounters, item generation, quests, maps, and newspaper information—uses the same catalog and `ZoneData`. Consumers store/reference Zone ids, never their own copies of Zone dimensions.
 - Tests inject a replacement dataset into the catalog and pass that same catalog to every consumer under test. They must not maintain separate music/spawn Zone fixtures that can disagree.
@@ -124,7 +124,7 @@ func _init(zoneData: Dictionary = {}) -> void
 func zoneForChunk(chunk: Vector2i) -> String
 ```
 
-The production catalog loads `ZoneData.gd` by default. Update `Docs/System Design/Music player.md` to identify it as the source of Zone geography.
+The production catalog loads `ZoneData.gd` by default. `Docs/System Design/Music player.md` identifies it as the source of Zone geography, and `Tests/TestZoneCatalog.gd` covers band resolution, consumer-id alignment and malformed datasets.
 
 The spawn director resolves **each candidate anchor chunk's Zone**, rather than using only the player's current Zone. This lets parties just across a Zone boundary use their own table and avoids changing an existing party's definition when the player crosses a boundary.
 
@@ -266,6 +266,8 @@ An anchor is valid only when:
 Start with an allow-all-ground terrain policy for the existing rabbit content. Do **not** guess that atlas/source ids represent water or roads. When content needs terrain restrictions, add an explicit tile-classification table keyed by the merged tile's source/atlas identity and optional `terrain` tags on party definitions. Missing classification should reject the candidate with a useful content warning, not silently spawn in unsuitable terrain.
 
 Record Location-reserved chunk tiles while `setChunk()` already reads chunk `locations` data. At minimum, exclude the authored Location entry tiles. Expand this to full Location footprints if that metadata becomes available; do not perform physics overlap queries for these non-colliding visuals.
+
+A Location's `tiles[0]` is the entrance tile the player walks into, so it must be a **walkable** tile and it must sit on the town's entrance prop (the tileset source 0 cell the town art is drawn on) or one cell from it, where a collidable prop makes the tile itself impassable. All seven authored Locations were two cells up-left of their town art (the shared-coordinate migration left the anchors behind), which put the entry hitbox visibly off the town; `Tests/TestOverworldLocations.gd` lints walkability, the prop alignment and the committed manifest for every authored Location.
 
 ### Group offsets
 

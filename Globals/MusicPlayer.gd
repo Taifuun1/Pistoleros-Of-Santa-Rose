@@ -3,17 +3,19 @@ extends Node
 ## Global music player (Docs/System Design/Music player.md). Always loaded as
 ## an autoload so music keeps playing across scene changes. Track ids are the
 ## paths under Assets/Music without extension ("Overworld/Grasslands1"); the
-## what-to-play decisions come from Data/Music/MusicData.gd (zones, locations,
-## encounters, menus). Every switch crossfades (a switch from a silent state
-## begins the new song at full volume instead of fading in), and each song
-## fades out shortly before its end, blending into the next song of the
-## playlist or back to the beginning of the loop. Volume controls arrive with
-## the Settings implementation; everything plays on the Master bus.
+## what-to-play decisions come from Data/Music/MusicData.gd (locations,
+## encounters, menus), while Overworld Zone geography comes from the shared
+## OverworldZoneCatalog/ZoneData. Every switch crossfades (a switch from a
+## silent state begins the new song at full volume instead of fading in), and
+## each song fades out shortly before its end, blending into the next song of
+## the playlist or back to the beginning of the loop. Volume controls arrive
+## with the Settings implementation; everything plays on the Master bus.
 
 signal track_changed(trackId)
 
 const MUSIC_ROOT = "res://Assets/Music"
 const MUSIC_DATA_SCRIPT = "res://Data/Music/MusicData.gd"
+const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 
 # Fade used when switching music (scene change, zone change, popups).
 const DEFAULT_SWITCH_FADE = 1.5
@@ -26,6 +28,8 @@ const SILENT_VOLUME_DB = -60.0
 var tracks = {}
 # Mappings from Data/Music/MusicData.gd. Injectable for tests.
 var musicData = {}
+# Shared Overworld Zone lookup (Data/Overworld/ZoneData.gd). Injectable for tests.
+var zoneCatalog = null
 
 var switchFade = DEFAULT_SWITCH_FADE
 var tailFade = DEFAULT_TAIL_FADE
@@ -66,6 +70,8 @@ func _ready() -> void:
 		var dataInstance = load(MUSIC_DATA_SCRIPT).new()
 		musicData = dataInstance.data
 		dataInstance.free()
+	if zoneCatalog == null:
+		zoneCatalog = ZoneCatalogScript.new()
 	if tracks.is_empty():
 		_scanMusicFolder(MUSIC_ROOT, "")
 
@@ -91,17 +97,19 @@ func shutdown() -> void:
 	currentZone = ""
 	tracks.clear()
 	musicData.clear()
+	zoneCatalog = null
 
 
 func _exit_tree() -> void:
 	shutdown()
 
 
-## Test/override seam: inject the mapping data and the track registry instead
-## of loading MusicData / scanning the music folders.
-func init_music(data: Dictionary, trackRegistry: Dictionary) -> void:
+## Test/override seam: inject the mapping data, the track registry and the
+## shared Zone dataset (empty zoneData loads the production ZoneData).
+func init_music(data: Dictionary, trackRegistry: Dictionary, zoneData: Dictionary = {}) -> void:
 	musicData = data
 	tracks = trackRegistry
+	zoneCatalog = ZoneCatalogScript.new(zoneData)
 
 
 # ── Registry ─────────────────────────────────────────────────────────────────
@@ -273,8 +281,8 @@ func on_scene_changed(sceneKey: String) -> void:
 
 
 ## Hooked by the overworld whenever the player enters a new chunk: the chunk
-## resolves to a zone through the bands in MusicData, and only an actual zone
-## change restarts the music.
+## resolves to a Zone through the shared OverworldZoneCatalog, and only an
+## actual Zone change restarts the music.
 func on_overworld_chunk(chunk: Vector2i) -> void:
 	var zone = zone_for_chunk(chunk)
 	if zone == currentZone:
@@ -354,16 +362,13 @@ func shootout_tracks() -> Array:
 	return musicData.get("shootout_tracks", [])
 
 
-## The zone of an Overworld chunk: the first inclusive "min"/"max" corner band
-## containing it wins; anything outside falls back to the default zone.
+## The Zone of an Overworld chunk through the shared OverworldZoneCatalog
+## (Data/Overworld/ZoneData.gd): first inclusive min/max band wins, anything
+## outside falls back to the shared default Zone.
 func zone_for_chunk(chunk: Vector2i) -> String:
-	for band in musicData.get("zones", []):
-		if (
-			chunk.x >= int(band.min.x) and chunk.x <= int(band.max.x)
-			and chunk.y >= int(band.min.y) and chunk.y <= int(band.max.y)
-		):
-			return str(band.zone)
-	return str(musicData.get("default_zone", ""))
+	if zoneCatalog == null:
+		zoneCatalog = ZoneCatalogScript.new()
+	return zoneCatalog.zoneForChunk(chunk)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

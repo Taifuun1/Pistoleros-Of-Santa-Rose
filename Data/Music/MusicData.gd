@@ -2,39 +2,23 @@ extends Node
 
 
 # Music decisions (Docs/System Design/Music player.md). Track ids are paths
-# under Assets/Music without extension. The zone set unifies with
-# Docs/Weapons and affixes.md ("Zone-Tied Items"); the chunk bands over the
-# 12x24 chunk grid (x 0-11, y 0-23) are a provisional allocation — reshape
-# the "zones" list when the real geography is decided.
+# under Assets/Music without extension. Zone geography and canonical ids live
+# in Data/Overworld/ZoneData.gd; this file only maps those Zone ids to tracks.
 
 var data = {
-	# Overworld zones by inclusive chunk-coordinate corners. First match wins,
-	# so more specific bands go first.
-	"zones": [
-		{ "zone": "ghost town", "min": Vector2i(10, 0), "max": Vector2i(10, 3) },
-		{ "zone": "grassy plains", "min": Vector2i(0, 0), "max": Vector2i(1, 23) },
-		{ "zone": "pine forest", "min": Vector2i(2, 0), "max": Vector2i(3, 23) },
-		{ "zone": "hilly mining area", "min": Vector2i(4, 0), "max": Vector2i(5, 23) },
-		{ "zone": "snowy mountain", "min": Vector2i(6, 0), "max": Vector2i(7, 23) },
-		{ "zone": "canyon", "min": Vector2i(8, 0), "max": Vector2i(9, 23) },
-		{ "zone": "desert prairie", "min": Vector2i(10, 0), "max": Vector2i(11, 11) },
-		{ "zone": "swamp", "min": Vector2i(10, 12), "max": Vector2i(11, 23) },
-	],
-	# Zone for chunks outside every band (and while no chunk is known).
-	"default_zone": "canyon",
 	# Overworld ambience per zone; the lists loop with a fade before each song
 	# end blending into the next song.
 	"zone_tracks": {
-		"grassy plains": [
+		"grassy_plains": [
 			"Overworld/Grasslands1",
 			"Overworld/Grasslands2",
 			"Overworld/Grasslands3"
 		],
-		"hilly mining area": [
+		"hilly_mining": [
 			"Overworld/RockyHills1",
 			"Overworld/RockyHills2"
 		],
-		"desert prairie": [
+		"desert_prairie": [
 			"Overworld/Prairie1",
 			"Overworld/Prairie2",
 			"Overworld/Prairie3"
@@ -43,11 +27,11 @@ var data = {
 			"Overworld/WildWest1",
 			"Overworld/WildWest2"
 		],
-		"pine forest": [
+		"pine_forest": [
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Chill/Birdsong Window"
 		],
-		"snowy mountain": [
+		"snowy_mountain": [
 			"Thematic/Somber/Rockside Echo",
 			"Thematic/Chill/Chill1",
 			"Thematic/Chill/Chill2"
@@ -56,7 +40,7 @@ var data = {
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Mysterious/Dust on the Cartridge"
 		],
-		"ghost town": [
+		"ghost_town": [
 			"Thematic/Somber/Dusty Cartridge",
 			"Thematic/Somber/Rain Over Dusty Trail",
 			"Thematic/Somber/Rainy Saloon Loop"
@@ -102,17 +86,17 @@ var data = {
 			"Shootout/Dusty Showdown",
 		],
 	},
-	# Fights tied to an Overworld zone (encounter data "zone"). Zone names match
-	# the zone set above / Docs/Weapons and affixes.md.
+	# Fights tied to an Overworld zone (encounter data "zone"). Zone ids match
+	# Data/Overworld/ZoneData.gd.
 	"zone_shootout_tracks": {
-		"grassy plains": ["Shootout/Dusty Hex Duel"],
-		"hilly mining area": ["Shootout/Dusty Cartridge Duel"],
-		"desert prairie": ["Shootout/Clash on Beat One"],
-		"snowy mountain": ["Shootout/Wily Core"],
-		"pine forest": ["Shootout/Pixel Duel"],
+		"grassy_plains": ["Shootout/Dusty Hex Duel"],
+		"hilly_mining": ["Shootout/Dusty Cartridge Duel"],
+		"desert_prairie": ["Shootout/Clash on Beat One"],
+		"snowy_mountain": ["Shootout/Wily Core"],
+		"pine_forest": ["Shootout/Pixel Duel"],
 		"swamp": ["Shootout/Last Bullet Canyon"],
 		"canyon": ["Shootout/Steel Cannon Run"],
-		"ghost town": ["Shootout/Shootout2"],
+		"ghost_town": ["Shootout/Shootout2"],
 	},
 	# End-of-fight stingers for the Shootout end screen, keyed by the fight
 	# outcome. The victory jingle settles into a warm afterglow while the

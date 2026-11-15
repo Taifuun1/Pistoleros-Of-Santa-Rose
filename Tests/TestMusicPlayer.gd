@@ -7,6 +7,7 @@ extends SceneTree
 ## Run with: godot --headless --script res://Tests/TestMusicPlayer.gd
 
 const MusicPlayerScript = preload("res://Globals/MusicPlayer.gd")
+const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 
 var failures = 0
 
@@ -35,18 +36,23 @@ func makeMusicPlayer(data: Dictionary):
 	registry["b"] = makeSilence(0.7)
 	music.switchFade = 0.05
 	music.tailFade = 0.2
-	music.init_music(data, registry)
+	music.init_music(data, registry, makeZoneData())
 	root.add_child(music)
 	return music
 
 
-func makeData() -> Dictionary:
+func makeZoneData() -> Dictionary:
 	return {
 		"zones": [
-			{ "zone": "grasslands", "min": Vector2i(0, 0), "max": Vector2i(4, 4) },
-			{ "zone": "prairie", "min": Vector2i(5, 0), "max": Vector2i(9, 4) },
+			{ "zone": "grasslands", "displayName": "Grasslands", "min": Vector2i(0, 0), "max": Vector2i(4, 4) },
+			{ "zone": "prairie", "displayName": "Prairie", "min": Vector2i(5, 0), "max": Vector2i(9, 4) },
 		],
 		"default_zone": "prairie",
+	}
+
+
+func makeData() -> Dictionary:
+	return {
 		"zone_tracks": { "grasslands": ["grass"], "prairie": ["prairie_track"] },
 		# Both the real autoload default ("Clearwater Grove") and the fake
 		# ("Lazysprings") resolve to the same track so the check holds whether
