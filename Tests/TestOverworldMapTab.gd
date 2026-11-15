@@ -28,6 +28,30 @@ class FakeQuestStateSource:
 		questStateChanged.emit(questId)
 
 
+## Discovery stand-in: reveals are set by the test, markers are authored here.
+class FakeDiscovery:
+	extends Node
+
+	signal discoveryChanged
+
+	var revealed := {}
+	var markers := []
+
+	func isRevealed(targetId: String) -> bool:
+		return bool(revealed.get(targetId, false))
+
+	func getRevealedSecretMarkers() -> Array:
+		var result := []
+		for marker in markers:
+			if bool(revealed.get(marker["targetId"], false)):
+				result.append(marker.duplicate(true))
+		return result
+
+	func reveal(targetId: String) -> void:
+		revealed[targetId] = true
+		discoveryChanged.emit()
+
+
 func _ready() -> void:
 	coordinates = OverworldCoordinates.makeHeadless()
 	projection = OverworldMapProjection.cellForGrid(coordinates, Rect2i(0, 0, 2, 2), Vector2i(4, 4))
@@ -53,6 +77,7 @@ func _ready() -> void:
 	await testQuestStateSignalLifecycle()
 	await testMouseDragAndFocus()
 	await testPlayerPositionProvider()
+	await testSecretDiscovery()
 
 	print("TestOverworldMapTab: %d passed, %d failed" % [testsPassed, testsFailed])
 	coordinates.dispose()
@@ -616,6 +641,80 @@ func _joypadEvent(button: JoyButton) -> InputEventJoypadButton:
 ## spawn fallback, exact last-known retention, spawn reseeding (re-entry
 ## unification), live registration, and the tab's default provider wiring.
 ## Autoload state is saved and restored afterwards.
+func testSecretDiscovery() -> void:
+	print("\n--- Secret Locations and secret items ---")
+	var secretTab = MapTabScene.instantiate()
+	secretTab.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var secretMap := _makeFakeMapData()
+	var secretCell: Vector2i = coordinates.chunkTileToCell(Vector2i(0, 1), Vector2i(2, 3))
+	secretMap.locations.append({
+		"id": "Gamma", "display_name": "Gamma", "chunk": Vector2i(0, 1), "tile": Vector2i(2, 3),
+		"cell": secretCell, "image_position": projection.cellToImage(secretCell),
+		"icon": "secret_location", "map_visibility": "secret", "secret_id": "Gamma",
+	})
+	var discovery := FakeDiscovery.new()
+	discovery.markers = [{
+		"targetId": "cache_one", "kind": "secret_item", "displayName": "Buried cache",
+		"icon": "secret_item", "chunk": Vector2i(1, 1), "tile": Vector2i(3, 3),
+		"cell": coordinates.chunkTileToCell(Vector2i(1, 1), Vector2i(3, 3)),
+	}]
+	add_child(discovery)
+	secretTab.mapData = secretMap
+	secretTab.positionProvider = Callable(self, "_fakePositionProvider")
+	secretTab.questMarkerProvider = Callable(self, "_fakeQuestMarkerProvider")
+	secretTab.discoveryProvider = discovery
+	add_child(secretTab)
+	secretTab.setTabActive(true)
+	secretTab.refreshTab()
+	await get_tree().process_frame
+
+	check(secretTab._locationMarkers.has("Gamma"), "the secret Location still gets a marker")
+	check(!secretTab._locationMarkers["Gamma"].visible, "a secret Location stays hidden until revealed")
+	check(secretTab._locationMarkers["Alpha"].visible and secretTab._locationMarkers["Beta"].visible, "always-visible Locations are unaffected")
+	check(!secretTab._poiFocusOrder.has("Gamma"), "hidden Locations are excluded from POI cycling")
+	check(secretTab._poiFocusOrder.size() == 2, "the POI cycle lists only visible POIs")
+	check(secretTab.focusTarget("Gamma") == null or !secretTab._locationMarkers["Gamma"].visible, "a hidden secret cannot be focused")
+	check(secretTab._secretItemMarkers.is_empty(), "unrevealed secret items add no markers")
+
+	discovery.reveal("Gamma")
+	check(secretTab._locationMarkers["Gamma"].visible, "revealing the secret id shows the Location")
+	check(secretTab._poiFocusOrder.has("Gamma"), "the revealed Location joins the POI cycle")
+	check(secretTab._poiFocusOrder.size() == 3, "the POI cycle grows by exactly one marker")
+
+	discovery.reveal("cache_one")
+	await get_tree().process_frame
+	check(secretTab._secretItemMarkers.size() == 1, "a revealed secret item gets its own marker")
+	check(secretTab._poiFocusOrder.has("cache_one"), "the secret item joins the POI cycle")
+	secretTab.focusTarget("cache_one")
+	check(secretTab._selectionPanel.visible, "focusing a secret item selects it")
+
+	# Cycling must visit every visible POI exactly once and wrap around.
+	var visited := {}
+	for _step in secretTab._poiFocusOrder.size():
+		secretTab._focusRelativePoi(1)
+		var index: int = secretTab._poiFocusIndex
+		var targetId: String = secretTab._poiFocusOrder[index]
+		check(!visited.has(targetId), "POI cycling visits '%s' only once per lap" % targetId)
+		visited[targetId] = true
+	check(visited.size() == secretTab._poiFocusOrder.size(), "a full lap covers every visible POI")
+
+	# Deactivation must drop the discovery connection (and reconnection must not
+	# duplicate it).
+	secretTab.setTabActive(false)
+	check(!discovery.discoveryChanged.is_connected(Callable(secretTab, "_onDiscoveryChanged")), "deactivation disconnects the discovery signal")
+	secretTab.setTabActive(true)
+	var connections := 0
+	for connection in discovery.discoveryChanged.get_connections():
+		if connection["callable"].get_object() == secretTab:
+			connections += 1
+	check(connections == 1, "re-activation keeps exactly one discovery connection")
+
+	secretTab.setTabActive(false)
+	secretTab.queue_free()
+	discovery.queue_free()
+	await get_tree().process_frame
+
+
 func testPlayerPositionProvider() -> void:
 	print("--- Player position provider ---")
 	var overworldAutoload = get_tree().root.get_node_or_null("Overworld")

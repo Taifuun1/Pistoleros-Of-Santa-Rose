@@ -6,7 +6,7 @@ The Journal's Inventory & Equipment tab manages the party's shared carried items
 
 ## First-iteration decisions
 
-- Use one shared, limited party inventory for unequipped supplies, consumables, resources/loot, weapons, and equipment. Equipped items and money do not consume inventory slots.
+- Use one shared, limited party inventory for unequipped supplies, consumables, resources/loot, maps, weapons, and equipment. Equipped items and money do not consume inventory slots.
 - Start with the approved **24 occupied-stack slots** and **Paregoric stack limit 5** as initial balance values. `Party` exposes capacity and item definitions expose stack limits; the UI never hardcodes either.
 - Stack only items with the same stable definition id and compatible instance data. Weapons, armor, legendaries, and other rolled equipment are always unstackable.
 - Use seven fixed equipment slots: **Weapon**, **Headwear**, **Bandana**, **Duster**, **Belt**, **Trousers**, and **Justins**. Every class can use every equipment type; an item maps to exactly one slot.
@@ -54,8 +54,13 @@ The Journal's Inventory & Equipment tab manages the party's shared carried items
    - Confirm calls one domain command. Cancel, `ui_cancel`, Journal close, and tab switch before confirmation leave state unchanged.
    - Partial drops reduce quantity; full-stack drops remove the occupied slot. Item definitions may prohibit dropping for quest/story reasons, with that reason visible.
 
+5a. **Using items (out-of-combat effects)**
+   - Show **Use** beside Equip/Drop only when the projected item carries a supported out-of-combat effect (currently reveal maps). Equip and Drop keep going through `Party`; Use goes through an injectable `itemUseProvider`, which production resolves to the `Discovery` autoload, so reveal state never lives in the tab.
+   - The map confirmation names the item, lists the destinations it reveals and states that one copy will be consumed. Confirm sends one `useMap()` call; cancel, `ui_cancel`, tab switch or a domain rejection leave Party and discovery unchanged.
+   - Failures surface readable text: `already_revealed`, `already_owned`, `invalid_map`, `invalid_target`, `unknown_item`, `wrong_item_type` and `management_unavailable`. A blocked management context disables the action instead of consuming.
+
 6. **Acquisition and full-inventory behavior**
-   - Route loot and future vendor/quest grants through inventory commands rather than direct `inventory.append()` calls.
+   - Route loot and vendor/quest grants through inventory commands rather than direct `inventory.append()` calls.
    - Return accepted and overflow quantities/items to the caller. Never silently delete overflow, bypass capacity, or auto-drop equipped items to make room.
    - Money is applied independently of item capacity.
    - The Shootout result flow must show items left behind because of capacity and require explicit confirmation before leaving them. Deterministic acquisition order determines what fits; the first iteration does not add a loot-selection miniscreen.
@@ -182,7 +187,7 @@ No new autoload is required. `Party` instantiates one rules helper and one stat 
 
 ### Item definitions and generated items
 
-`ItemCatalog.gd` contains definitions keyed by `definitionId`. The first production definition is:
+`ItemCatalog.gd` contains definitions keyed by `definitionId`. The production catalog contains the functional Shootout consumables (`paregoric`, `multi_heal`) plus map items such as `canyon_cache_map` (Location vendors patch 1). A consumable definition looks like:
 
 ```gdscript
 var definitions = {
@@ -200,7 +205,7 @@ var definitions = {
 }
 ```
 
-`validate() -> Array[String]` requires unique/non-empty ids, a supported `itemType`, positive integer `stackLimit`, Boolean `droppable`, and valid display/category fields. Consumables require a `combatId`; a production-data test checks it against `Shootout.itemsData`. Resources require their own stable definition before a loot table can drop them. Gear remains unstackable even if it has catalog metadata.
+`validate() -> Array[String]` requires unique/non-empty ids, a supported `itemType`, positive integer `stackLimit`, Boolean `droppable`, and valid display/category fields. Consumables require a `combatId`; a production-data test checks it against `Shootout.itemsData`. Map items require a `reveal_map` effect with a non-empty `mapId` that resolves in `SecretMapData`. Resources require their own stable definition before a loot table can drop them. Gear remains unstackable even if it has catalog metadata.
 
 Add an `id` to every weapon base and generic/zone equipment base. `ItemGeneration` copies it to `definitionId` and adds `quantity: 1`; legendary keys become their `definitionId`. It also preserves an optional top-level `beltSpace` on generated belt items. Loot-table consumable/resource entries use `definitionId`, not display/combat names. Generated consumables/resources resolve their display fields through the catalog, while rolled weapons/equipment retain their complete generated Dictionary.
 
@@ -303,13 +308,14 @@ Result contract:
 }
 ```
 
-`projectItem()` deep-copies the instance and merges catalog display metadata (`name`, `category`, `description`, `stackLimit`, `droppable`, `sprite`, `combatId`). Gear always receives `stackLimit = 1`; its rolled fields override base display metadata. It never returns an internal nested Dictionary by reference.
+`projectItem()` deep-copies the instance and merges catalog display metadata (`name`, `category`, `description`, `stackLimit`, `droppable`, `sprite`, `combatId`) plus the definition's `effect` when it has one (a map's reveal must reach the Journal's **Use** action and `Discovery` through the read-only projection, not by reaching into the catalog). Gear always receives `stackLimit = 1`; its rolled fields override base display metadata. It never returns an internal nested Dictionary by reference.
 
 ### `Party` provider and command API
 
 ```gdscript
 signal inventoryChanged
 signal equipmentChanged(memberKey: String)
+signal moneyChanged
 
 const INVENTORY_CAPACITY = 24
 var classesData = {}                    # read-only Shootout class definitions
@@ -321,6 +327,12 @@ func getEquipmentPreview(memberKey: String, instanceId: String) -> Dictionary
 func setInventoryManagementAllowed(allowed: bool) -> void
 func addItems(items: Array) -> Dictionary
 func addItem(item: Dictionary) -> Dictionary
+func completePurchase(items: Array, totalPrice: int) -> Dictionary
+func completeSale(instanceId: String, unitPrice: int) -> Dictionary
+func transferGearOut(instanceId: String) -> Dictionary
+func transferGearIn(item: Dictionary) -> Dictionary
+func consumeItem(instanceId: String, expectedType: String) -> Dictionary
+func hasInstanceId(instanceId: String) -> bool
 func dropItem(instanceId: String, quantity: int) -> Dictionary
 func equipItem(memberKey: String, instanceId: String) -> Dictionary
 func applyLoot(loot: Dictionary) -> Dictionary

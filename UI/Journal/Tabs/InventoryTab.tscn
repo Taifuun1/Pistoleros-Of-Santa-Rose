@@ -154,6 +154,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Equip"
 
+[node name="UseButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Use"
+
 [node name="DropButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -273,3 +279,72 @@ layout_mode = 2
 text = "Inventory data unavailable"
 horizontal_alignment = 1
 autowrap_mode = 3
+
+[node name="UseOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="UseDim" type="ColorRect" parent="UseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="UseCenter" type="CenterContainer" parent="UseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="UsePanel" type="PanelContainer" parent="UseOverlay/UseCenter"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="UseMargin" type="MarginContainer" parent="UseOverlay/UseCenter/UsePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="UseLayout" type="VBoxContainer" parent="UseOverlay/UseCenter/UsePanel/UseMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="UseTitle" parent="UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+text = "Use this map?"
+horizontal_alignment = 1
+
+[node name="UseItemLabel" parent="UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout" instance=ExtResource("4_text")]
+layout_mode = 2
+autowrap_mode = 3
+horizontal_alignment = 1
+
+[node name="UseActions" type="HBoxContainer" parent="UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="CancelUseButton" type="Button" parent="UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout/UseActions"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+text = "Cancel"
+
+[node name="ConfirmUseButton" type="Button" parent="UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout/UseActions"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+text = "Use"

@@ -8,6 +8,7 @@ const InventoryTabScene = preload("res://UI/Journal/Tabs/InventoryTab.tscn")
 
 var failures := 0
 var provider: FakeProvider
+var useProvider: FakeUseProvider
 var tab
 
 
@@ -50,9 +51,28 @@ class FakeProvider:
 		inventoryChanged.emit()
 
 
+class FakeUseProvider:
+	extends Node
+
+	var previewResult: Dictionary = { "success": true, "reason": "", "mapId": "test_map", "targetNames": ["Gold Run", "Buried cache"] }
+	var useResult: Dictionary = { "success": true, "reason": "", "mapId": "test_map", "revealedIds": ["Gold Run", "Buried cache"], "consumed": true }
+	var previewCalls: Array = []
+	var useCalls: Array = []
+
+	func getMapUsePreview(instanceId: String) -> Dictionary:
+		previewCalls.append(instanceId)
+		return previewResult.duplicate(true)
+
+	func useMap(instanceId: String) -> Dictionary:
+		useCalls.append(instanceId)
+		return useResult.duplicate(true)
+
+
 func _ready() -> void:
 	provider = FakeProvider.new()
 	provider.snapshot = makeSnapshot()
+	useProvider = FakeUseProvider.new()
+	add_child(useProvider)
 	provider.previewResult = {
 		"success": true,
 		"reason": "",
@@ -70,6 +90,7 @@ func _ready() -> void:
 	tab.position = Vector2(40, 60)
 	tab.size = Vector2(560, 240)
 	tab.inventoryProvider = provider
+	tab.itemUseProvider = useProvider
 	add_child(tab)
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -79,12 +100,14 @@ func _ready() -> void:
 	await testSelectionFallback()
 	await testEquipAndComparison()
 	await testDropFlow()
+	await testMapUseFlow()
 	await testFocusAndLiveUpdates()
 	await testLongContentAndLayout()
 	await testEquipmentAndMemberPresentation()
 
 	tab.setTabActive(false)
 	tab.free()
+	useProvider.free()
 	provider.free()
 	print("\nTestInventoryTab: %d failure(s)" % failures)
 	get_tree().quit(failures)
@@ -292,6 +315,82 @@ func testDropFlow() -> void:
 	cancelEvent.pressed = true
 	tab._unhandled_input(cancelEvent)
 	check(!tab.dropOverlay.visible and providerDropCalls().size() == 1, "ui_cancel closes without a second command")
+
+
+func testMapUseFlow() -> void:
+	print("\n--- Map use (out-of-combat item effect) ---")
+	provider.snapshot = makeSnapshot()
+	provider.snapshot["items"].append({
+		"instanceId": "p_cache_map", "definitionId": "canyon_cache_map", "itemType": "map",
+		"quantity": 1, "stackLimit": 1, "droppable": true, "name": "Canyon Cache Map",
+		"category": "maps", "description": "Reveals the hidden Gold Run on the Overworld map.",
+		"sprite": "res://Assets/Journal/MapIcon.png",
+		"effect": { "kind": "reveal_map", "mapId": "canyon_cache_map" },
+	})
+	await refreshTab()
+	tab._onInventoryItemPressed("p_paregoric")
+	check(!tab.useButton.visible, "items without a supported effect show no Use action")
+	tab._onInventoryItemPressed("p_cache_map")
+	check(tab.useButton.visible and !tab.useButton.disabled, "a map shows an enabled Use action")
+	check(tab.canCloseTab(), "the tab is closable while no overlay is open")
+
+	tab._onUsePressed()
+	check(tab.useOverlay.visible and !tab.canCloseTab(), "Use opens a guarded confirmation")
+	check(tab.useItemLabel.get_parsed_text().contains("Canyon Cache Map"), "the confirmation names the map")
+	check(tab.useItemLabel.get_parsed_text().contains("Gold Run"), "the confirmation lists the map's reveals")
+	check(tab.useItemLabel.get_parsed_text().contains("One copy will be consumed"), "the confirmation states one copy is spent")
+	check(useProvider.previewCalls == ["p_cache_map"], "the preview resolves the selected instance")
+	tab._onUseCancelled()
+	await get_tree().process_frame
+	check(!tab.useOverlay.visible and useProvider.useCalls.is_empty(), "cancel consumes nothing")
+	check(tab.canCloseTab(), "cancel clears the modal guard")
+	check(get_viewport().gui_get_focus_owner() == tab._inventoryButtons["p_cache_map"], "cancel returns focus to the map")
+
+	tab._onUsePressed()
+	tab._onUseConfirmed()
+	check(useProvider.useCalls == ["p_cache_map"], "confirm sends exactly one use command")
+	check(!tab.useOverlay.visible, "a successful use closes the confirmation")
+	check(tab.feedbackLabel.get_parsed_text().contains("2 destinations revealed"), "the result reports the revealed count")
+
+	tab._onUsePressed()
+	useProvider.useResult = { "success": false, "reason": "already_revealed" }
+	tab._onUseConfirmed()
+	check(tab.feedbackLabel.get_parsed_text().contains("already fully revealed"), "domain failures map to readable text")
+	check(tab.useOverlay.visible, "a failed use keeps the confirmation open for a retry")
+	tab._onUseCancelled()
+	useProvider.useResult = { "success": true, "reason": "", "mapId": "test_map", "revealedIds": ["Gold Run"], "consumed": true }
+	await get_tree().process_frame
+
+	useProvider.previewResult = { "success": false, "reason": "already_revealed" }
+	tab._onUsePressed()
+	check(!tab.useOverlay.visible, "an unusable map never opens the confirmation")
+	check(tab.feedbackLabel.get_parsed_text().contains("already fully revealed"), "the preview reason is reported")
+	useProvider.previewResult = { "success": true, "reason": "", "mapId": "test_map", "targetNames": ["Gold Run", "Buried cache"] }
+
+	# A blocked inventory policy disables the action instead of consuming.
+	provider.snapshot["managementAllowed"] = false
+	await refreshTab()
+	tab._onInventoryItemPressed("p_cache_map")
+	check(tab.useButton.disabled, "Use is disabled when inventory changes are blocked")
+	tab._onUsePressed()
+	check(!tab.useOverlay.visible and useProvider.useCalls.size() == 2, "a blocked Use opens nothing and sends no command")
+
+	provider.snapshot = makeSnapshot()
+	provider.snapshot["items"].append({
+		"instanceId": "p_cache_map", "definitionId": "canyon_cache_map", "itemType": "map",
+		"quantity": 1, "stackLimit": 1, "droppable": true, "name": "Canyon Cache Map",
+		"category": "maps", "description": "", "sprite": "",
+		"effect": { "kind": "reveal_map", "mapId": "canyon_cache_map" },
+	})
+	await refreshTab()
+	var cancelEvent := InputEventAction.new()
+	cancelEvent.action = "ui_cancel"
+	cancelEvent.pressed = true
+	tab._onInventoryItemPressed("p_cache_map")
+	tab._onUsePressed()
+	tab._unhandled_input(cancelEvent)
+	check(!tab.useOverlay.visible, "ui_cancel closes the confirmation without a command")
+	provider.snapshot = makeSnapshot()
 
 
 func testFocusAndLiveUpdates() -> void:

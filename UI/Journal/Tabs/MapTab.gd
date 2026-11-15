@@ -17,6 +17,8 @@ const GENERATOR_COMMAND := "godot --headless --path . --script res://Tools/Gener
 const QUEST_CURRENT_ICON := preload("res://Assets/Journal/CurrentQuestIcon.png")
 const LOCATION_MARKER_COLOR := Color(0.96, 0.83, 0.55)
 const PLAYER_MARKER_COLOR := Color(0.85, 0.25, 0.15)
+const SECRET_LOCATION_MARKER_COLOR := Color(0.98, 0.66, 0.2)
+const SECRET_ITEM_MARKER_COLOR := Color(0.45, 0.86, 0.66)
 const MARKER_PIXELS := 12
 const PLAYER_REFRESH_SECONDS := 0.1
 const KEYBOARD_PAN_PIXELS := 48.0
@@ -38,6 +40,13 @@ var questMarkerProvider: Callable = Callable()
 ## Optional quest-state signal source injection for tests. Null resolves
 ## /root/Quests; only the active tab listens.
 var questStateSource: Node = null
+
+## Discovery service providing revealed secret ids and secret marker input.
+## Null resolves /root/Discovery; tests inject a fake.
+var discoveryProvider: Node = null
+## Optional separate node exposing the discoveryChanged signal (defaults to
+## discoveryProvider, following the questStateSource lifecycle).
+var discoveryStateSource: Node = null
 ## Data path is a var so failure states can be tested without the manifest.
 var mapDataPath := MAP_DATA_PATH
 var mapData: OverworldMapData = null
@@ -57,9 +66,11 @@ var _playerMarker: TextureButton = null
 var _playerPulse: Tween = null
 var _refreshTimer: Timer = null
 var _locationMarkers := {}
+var _secretItemMarkers := {}
 var _questMarkers := {}
 var _markerTextures := {}
 var _connectedQuestStateSource: Node = null
+var _connectedDiscoveryStateSource: Node = null
 ## Location ids in image order (left to right, then top to bottom) for
 ## keyboard/controller POI cycling.
 var _poiFocusOrder: Array = []
@@ -84,6 +95,7 @@ func refreshTab() -> void:
 		coordinates = OverworldCoordinates.makeHeadless()
 	if !_built:
 		_buildView()
+	_refreshDiscoveryMarkers()
 	_refreshQuestMarkers()
 	if active:
 		_startRuntime()
@@ -104,11 +116,11 @@ func setTabActive(tabActive: bool) -> void:
 func focusTarget(targetId: String) -> void:
 	if !_built:
 		return
-	var marker: TextureButton = _locationMarkers.get(targetId)
+	var marker: TextureButton = _poiMarker(targetId)
 	if marker == null:
 		return
 	_centerOnImagePosition(marker.get_meta("image_position"))
-	_selectMarker(marker, "Location")
+	_selectMarker(marker, _poiKindText(targetId))
 
 
 ## "Show on map" navigation path: focuses the exact quest/objective badge.
@@ -146,20 +158,49 @@ func getFocusTarget() -> Control:
 
 ## Locations in image order (left to right, then top to bottom) so keyboard and
 ## controller POI cycling is predictable and independent of authoring order.
+## Only POIs the player can currently see join the cycle: always-visible
+## Locations plus revealed secret Locations and secret items.
 func _buildPoiFocusOrder() -> void:
 	_poiFocusOrder = []
 	_poiFocusIndex = -1
 	if mapData == null:
 		return
+	var positions := {}
 	for location in mapData.locations:
+		var marker: TextureButton = _locationMarkers.get(location["id"])
+		if marker == null or !marker.visible:
+			continue
 		_poiFocusOrder.append(location["id"])
+		positions[location["id"]] = marker.get_meta("image_position")
+	for targetId in _secretItemMarkers:
+		var marker: TextureButton = _secretItemMarkers[targetId]
+		if marker == null or !is_instance_valid(marker):
+			continue
+		_poiFocusOrder.append(targetId)
+		positions[targetId] = marker.get_meta("image_position")
 	_poiFocusOrder.sort_custom(func(a, b):
-		var positionA: Vector2 = mapData.resolveLocation(a)["image_position"]
-		var positionB: Vector2 = mapData.resolveLocation(b)["image_position"]
+		var positionA: Vector2 = positions[a]
+		var positionB: Vector2 = positions[b]
 		if !is_equal_approx(positionA.x, positionB.x):
 			return positionA.x < positionB.x
 		return positionA.y < positionB.y
 	)
+
+
+## The marker a POI id currently resolves to, or null when it is not visible.
+func _poiMarker(targetId: String) -> TextureButton:
+	var locationMarker: TextureButton = _locationMarkers.get(targetId)
+	if locationMarker != null:
+		return locationMarker if locationMarker.visible else null
+	var secretMarker: TextureButton = _secretItemMarkers.get(targetId)
+	return secretMarker if secretMarker != null and is_instance_valid(secretMarker) else null
+
+
+func _poiKindText(targetId: String) -> String:
+	for location in mapData.locations:
+		if location["id"] == targetId:
+			return _locationKindText(location)
+	return "Secret cache"
 
 
 ## Cycle through the POIs and reuse focusTarget() so centering, selection and
@@ -230,6 +271,11 @@ func _isMapDataValid(data: OverworldMapData) -> bool:
 		if !mapProjection.hasCell(location["cell"]):
 			return false
 		if !location["image_position"].is_equal_approx(mapProjection.cellToImage(location["cell"])):
+			return false
+		# Optional discovery metadata must be coherent when present.
+		if location.has("map_visibility") and !OverworldMapData.SUPPORTED_VISIBILITIES.has(str(location["map_visibility"])):
+			return false
+		if OverworldMapData.isSecretLocation(location) and str(location.get("secret_id", "")) == "":
 			return false
 	return true
 
@@ -363,6 +409,7 @@ func _buildView() -> void:
 
 	for location in mapData.locations:
 		_addLocationMarker(location)
+	_refreshDiscoveryMarkers()
 	_playerMarker = _addMarker(_markerTexture("player"), Vector2.ZERO, "Last known position")
 	_playerMarker.visible = false
 	_buildPoiFocusOrder()
@@ -383,11 +430,81 @@ func _addControlButton(parent: Control, text: String, tooltip: String, handler: 
 	parent.add_child(button)
 
 
+## Every manifest Location gets a marker; secret ones stay hidden until their
+## secret id is revealed (visibility only, never a rebuild).
 func _addLocationMarker(location: Dictionary) -> void:
 	var imagePosition := projection.cellToImage(location["cell"])
-	var marker := _addMarker(_markerTexture("location"), imagePosition, location["display_name"])
-	marker.pressed.connect(_selectMarker.bind(marker, "Location"))
+	var kind := "secret_location" if OverworldMapData.isSecretLocation(location) else "location"
+	var marker := _addMarker(_markerTexture(kind), imagePosition, location["display_name"])
+	marker.pressed.connect(_selectMarker.bind(marker, _locationKindText(location)))
+	marker.set_meta("secret_id", str(location.get("secret_id", "")))
 	_locationMarkers[location["id"]] = marker
+
+
+func _locationKindText(location: Dictionary) -> String:
+	return "Secret location" if OverworldMapData.isSecretLocation(location) else "Location"
+
+
+## Secret visibility is a runtime decision: always-visible Locations stay put,
+## secret Locations appear once revealed, and revealed secret items get their own
+## markers. Reveals add information only; nothing is granted or moved.
+func _refreshDiscoveryMarkers() -> void:
+	if !_built or _markerLayer == null:
+		return
+	var discovery := _resolveDiscoveryProvider()
+	for location in mapData.locations:
+		var marker: TextureButton = _locationMarkers.get(location["id"])
+		if marker == null:
+			continue
+		marker.visible = _isLocationVisible(location, discovery)
+	for marker in _secretItemMarkers.values():
+		var oldMarker: TextureButton = marker
+		if is_instance_valid(oldMarker):
+			if oldMarker.get_parent() != null:
+				oldMarker.get_parent().remove_child(oldMarker)
+			oldMarker.free()
+	_secretItemMarkers = {}
+	if discovery == null or !discovery.has_method("getRevealedSecretMarkers"):
+		_buildPoiFocusOrder()
+		return
+	var secretMarkers = discovery.getRevealedSecretMarkers()
+	if !(secretMarkers is Array):
+		push_warning("Overworld map: discovery provider did not return an Array of markers.")
+		_buildPoiFocusOrder()
+		return
+	for markerValue in secretMarkers:
+		if !(markerValue is Dictionary):
+			continue
+		var secretMarker := markerValue as Dictionary
+		if str(secretMarker.get("kind", "")) != "secret_item":
+			continue
+		var targetId := str(secretMarker.get("targetId", ""))
+		var cell = secretMarker.get("cell", null)
+		if targetId == "" or typeof(cell) != TYPE_VECTOR2I or !projection.hasCell(cell):
+			push_warning("Overworld map: ignored secret marker '%s' with an invalid cell." % targetId)
+			continue
+		if _secretItemMarkers.has(targetId):
+			continue
+		var marker := _addMarker(_markerTexture("secret_item"), projection.cellToImage(cell), str(secretMarker.get("displayName", targetId)))
+		marker.pressed.connect(_selectMarker.bind(marker, "Secret cache"))
+		_secretItemMarkers[targetId] = marker
+	_buildPoiFocusOrder()
+
+
+func _isLocationVisible(location: Dictionary, discovery: Node) -> bool:
+	if !OverworldMapData.isSecretLocation(location):
+		return true
+	if discovery == null or !discovery.has_method("isRevealed"):
+		return false
+	return bool(discovery.isRevealed(str(location.get("secret_id", ""))))
+
+
+func _resolveDiscoveryProvider() -> Node:
+	if discoveryProvider != null:
+		return discoveryProvider
+	if !is_inside_tree():
+		return null
+	return get_tree().root.get_node_or_null("Discovery")
 
 
 func _addMarker(texture: Texture2D, imagePosition: Vector2, tooltip: String) -> TextureButton:
@@ -424,16 +541,38 @@ func _markerTexture(kind: String) -> Texture2D:
 	if kind == "quest_current":
 		_markerTextures[kind] = QUEST_CURRENT_ICON
 		return QUEST_CURRENT_ICON
+	if kind == "secret_item":
+		_markerTextures[kind] = _buildSecretItemTexture()
+		return _markerTextures[kind]
 	var color := LOCATION_MARKER_COLOR
 	if kind == "player":
 		color = PLAYER_MARKER_COLOR
+	elif kind == "secret_location":
+		color = SECRET_LOCATION_MARKER_COLOR
 	var image := Image.create(MARKER_PIXELS, MARKER_PIXELS, false, Image.FORMAT_RGBA8)
 	for y in MARKER_PIXELS:
 		for x in MARKER_PIXELS:
-			if absf(x - 5.5) + absf(y - 5.5) <= 5.9:
+			var distance := absf(x - 5.5) + absf(y - 5.5)
+			if kind == "secret_location":
+				# Hollow diamond: a revealed secret reads as a Location but is
+				# never mistaken for an always-visible one.
+				if distance <= 5.9 and distance > 3.0:
+					image.set_pixel(x, y, color)
+			elif distance <= 5.9:
 				image.set_pixel(x, y, color)
 	_markerTextures[kind] = ImageTexture.create_from_image(image)
 	return _markerTextures[kind]
+
+
+## Revealed secret items get their own square glyph so they are distinct from
+## Location markers at every zoom level.
+func _buildSecretItemTexture() -> Texture2D:
+	var image := Image.create(MARKER_PIXELS, MARKER_PIXELS, false, Image.FORMAT_RGBA8)
+	for y in MARKER_PIXELS:
+		for x in MARKER_PIXELS:
+			if absf(x - 5.5) <= 3.5 and absf(y - 5.5) <= 3.5:
+				image.set_pixel(x, y, SECRET_ITEM_MARKER_COLOR)
+	return ImageTexture.create_from_image(image)
 
 
 func _disposeView() -> void:
@@ -456,6 +595,7 @@ func _disposeView() -> void:
 	_playerMarker = null
 	_refreshTimer = null
 	_locationMarkers = {}
+	_secretItemMarkers = {}
 	_questMarkers = {}
 	_playerPulse = null
 	_dragging = false
@@ -476,6 +616,7 @@ func _startRuntime() -> void:
 		_playerPulse = create_tween().set_loops()
 		_playerPulse.tween_property(_playerMarker, "modulate:a", 0.55, 0.8).from(1.0).set_trans(Tween.TRANS_SINE)
 	_connectQuestStateSource(_resolveQuestStateSource())
+	_connectDiscoveryStateSource(_resolveDiscoveryStateSource())
 
 
 func _stopRuntime() -> void:
@@ -487,6 +628,7 @@ func _stopRuntime() -> void:
 	if _playerMarker != null:
 		_playerMarker.modulate.a = 1.0
 	_disconnectQuestStateSource()
+	_disconnectDiscoveryStateSource()
 
 
 func _connectQuestStateSource(source: Node) -> void:
@@ -513,6 +655,40 @@ func _disconnectQuestStateSource() -> void:
 func _onQuestStateChanged(_questId: String) -> void:
 	if _built and active:
 		_refreshQuestMarkers()
+
+
+## The discovery signal may be carried by a separate node; default to the
+## provider itself so a single injected service covers both roles.
+func _resolveDiscoveryStateSource() -> Node:
+	if discoveryStateSource != null:
+		return discoveryStateSource
+	return _resolveDiscoveryProvider()
+
+
+func _connectDiscoveryStateSource(source: Node) -> void:
+	if _connectedDiscoveryStateSource == source:
+		return
+	_disconnectDiscoveryStateSource()
+	if source == null or !source.has_signal("discoveryChanged"):
+		return
+	var callback := Callable(self, "_onDiscoveryChanged")
+	if !source.is_connected("discoveryChanged", callback):
+		source.connect("discoveryChanged", callback)
+	_connectedDiscoveryStateSource = source
+
+
+func _disconnectDiscoveryStateSource() -> void:
+	if _connectedDiscoveryStateSource == null:
+		return
+	var callback := Callable(self, "_onDiscoveryChanged")
+	if is_instance_valid(_connectedDiscoveryStateSource) and _connectedDiscoveryStateSource.is_connected("discoveryChanged", callback):
+		_connectedDiscoveryStateSource.disconnect("discoveryChanged", callback)
+	_connectedDiscoveryStateSource = null
+
+
+func _onDiscoveryChanged() -> void:
+	if _built and active:
+		_refreshDiscoveryMarkers()
 
 
 func _selectMarker(marker: TextureButton, kind: String) -> void:

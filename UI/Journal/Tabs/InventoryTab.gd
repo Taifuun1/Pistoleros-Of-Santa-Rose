@@ -49,12 +49,25 @@ const REASON_TEXT = {
 	"invalid_quantity": "Choose a valid quantity.",
 	"not_droppable": "That item cannot be dropped.",
 	"belt_loadout_too_large": "That belt cannot hold the current belt loadout.",
+	"already_revealed": "This map is already fully revealed.",
+	"already_owned": "You already carry an unused copy of this map.",
+	"invalid_map": "This map cannot be used.",
+	"invalid_target": "This map's destination is unavailable.",
+	"wrong_item_type": "That item cannot be used here.",
+	"command_in_progress": "Another action is already running.",
 }
+
+const SUPPORTED_USE_ITEM_TYPE := "map"
+const SUPPORTED_USE_EFFECT := "reveal_map"
+const STATE_USE_UNAVAILABLE := "That item has no use outside combat."
 
 ## Provider Node contract: isInventoryDataAvailable(), getInventorySnapshot(),
 ## getEquipmentPreview(memberKey, instanceId), equipItem(...), dropItem(...),
 ## inventoryChanged and equipmentChanged(memberKey). Null resolves /root/Party.
 var inventoryProvider: Node = null
+## Out-of-combat item use (map reveals). Null resolves /root/Discovery; a later
+## general item-use service can replace it without moving reveal state here.
+var itemUseProvider: Node = null
 
 var _snapshot: Dictionary = {}
 var _membersByKey: Dictionary = {}
@@ -74,6 +87,8 @@ var _dropInstanceId := ""
 var _dropQuantity := 0
 var _dropMaximum := 0
 var _dropInFlight := false
+var _useInstanceId := ""
+var _useInFlight := false
 var _commandInProgress := false
 var _focusWasInside := false
 var _focusKind := ""
@@ -96,6 +111,7 @@ var _detailScrollValue := 0
 @onready var comparisonRows: Control = $ContentView/RightPanel/RightMargin/RightLayout/DetailScroll/DetailContent/ComparisonRows
 @onready var feedbackLabel = $ContentView/RightPanel/RightMargin/RightLayout/FeedbackLabel
 @onready var equipButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/EquipButton
+@onready var useButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/UseButton
 @onready var dropButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/DropButton
 @onready var dropOverlay: Control = $DropOverlay
 @onready var dropItemLabel = $DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropItemLabel
@@ -105,6 +121,10 @@ var _detailScrollValue := 0
 @onready var allButton: Button = $DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/QuantityRow/AllButton
 @onready var cancelDropButton: Button = $DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropActions/CancelButton
 @onready var confirmDropButton: Button = $DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropActions/ConfirmButton
+@onready var useOverlay: Control = $UseOverlay
+@onready var useItemLabel = $UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout/UseItemLabel
+@onready var cancelUseButton: Button = $UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout/UseActions/CancelUseButton
+@onready var confirmUseButton: Button = $UseOverlay/UseCenter/UsePanel/UseMargin/UseLayout/UseActions/ConfirmUseButton
 @onready var stateView: Control = $StateView
 @onready var stateTabSprite: TabSprite = $StateView/StateLayout/StateTabSprite
 @onready var stateMessageLabel = $StateView/StateLayout/StateMessageLabel
@@ -115,7 +135,7 @@ func _ready() -> void:
 	# Shared label scenes carry their own placeholder text ("ABOBA!"); every label
 	# that starts empty is cleared here so it cannot show through before the tab
 	# writes real content.
-	for label in [capacityText, emptyInventoryLabel, memberStatsLabel, selectionLabel, feedbackLabel, dropItemLabel, quantityLabel]:
+	for label in [capacityText, emptyInventoryLabel, memberStatsLabel, selectionLabel, feedbackLabel, dropItemLabel, quantityLabel, useItemLabel]:
 		label.setRichTextLabel("")
 	_itemStats = ItemStatsScene.instantiate()
 	_itemStats.allowNameTruncation = false
@@ -123,12 +143,15 @@ func _ready() -> void:
 	_itemStats.visible = false
 	itemStatsHost.add_child(_itemStats)
 	equipButton.pressed.connect(_onEquipPressed)
+	useButton.pressed.connect(_onUsePressed)
 	dropButton.pressed.connect(_onDropPressed)
 	decrementButton.pressed.connect(_onDecrementPressed)
 	incrementButton.pressed.connect(_onIncrementPressed)
 	allButton.pressed.connect(_onAllPressed)
 	cancelDropButton.pressed.connect(_onDropCancelled)
 	confirmDropButton.pressed.connect(_onDropConfirmed)
+	cancelUseButton.pressed.connect(_onUseCancelled)
+	confirmUseButton.pressed.connect(_onUseConfirmed)
 	_showStateMessage(STATE_UNAVAILABLE)
 
 
@@ -163,6 +186,7 @@ func setTabActive(tabActive: bool) -> void:
 		_connectProvider(_resolveInventoryProvider())
 	else:
 		_closeDropOverlay(false)
+		closeUseOverlayIfVisible()
 		_disconnectProvider()
 
 
@@ -182,7 +206,7 @@ func getFocusTarget() -> Control:
 
 
 func canCloseTab() -> bool:
-	return !dropOverlay.visible
+	return !dropOverlay.visible and !useOverlay.visible
 
 
 func _exit_tree() -> void:
@@ -424,8 +448,11 @@ func _renderDetail() -> void:
 	_itemStats.visible = false
 	equipButton.disabled = true
 	dropButton.disabled = true
+	useButton.visible = false
+	useButton.disabled = true
 	equipButton.tooltip_text = ""
 	dropButton.tooltip_text = ""
+	useButton.tooltip_text = ""
 	if _selectedMemberKey == "":
 		selectionLabel.setRichTextLabel(STATE_NO_MEMBERS)
 		return
@@ -441,6 +468,11 @@ func _renderInventoryDetail(item: Dictionary) -> void:
 	_showItemDetails(item)
 	var itemType = str(item.get("itemType", ""))
 	var isGear = itemType in ["weapon", "equipment"]
+	# Use appears only for items with a supported out-of-combat effect.
+	var useSupported := _isUseSupported(item)
+	useButton.visible = useSupported
+	useButton.disabled = !useSupported or !bool(_snapshot.get("managementAllowed", false))
+	useButton.tooltip_text = ("Use %s" % str(item.get("name", ""))) if useSupported else ""
 	var stackLimit = int(item.get("stackLimit", 1))
 	var quantity = int(item.get("quantity", 1))
 	if quantity > 1 or stackLimit > 1:
@@ -613,6 +645,10 @@ func _onDropCancelled() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if useOverlay.visible and event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_onUseCancelled()
+		return
 	if dropOverlay.visible and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_onDropCancelled()
@@ -669,6 +705,101 @@ func _onInventoryItemPressed(instanceId: String) -> void:
 func _reasonText(reason: String) -> String:
 	return str(REASON_TEXT.get(reason, "That action could not be completed."))
 
+
+## An item is usable when it carries a supported out-of-combat effect; nothing
+## else in the catalog qualifies yet.
+func _isUseSupported(item: Dictionary) -> bool:
+	if str(item.get("itemType", "")) != SUPPORTED_USE_ITEM_TYPE:
+		return false
+	var effect = item.get("effect", null)
+	return effect is Dictionary and str(effect.get("kind", "")) == SUPPORTED_USE_EFFECT
+
+
+func _resolveItemUseProvider() -> Node:
+	if itemUseProvider != null:
+		return itemUseProvider
+	if !is_inside_tree():
+		return null
+	return get_tree().root.get_node_or_null("Discovery")
+
+
+## The confirmation names the map's reveals and states that one copy is spent.
+func _onUsePressed() -> void:
+	if _selectionSource != "inventory" or !_itemsById.has(_selectedInstanceId):
+		return
+	var item = _itemsById[_selectedInstanceId]
+	if !_isUseSupported(item):
+		feedbackLabel.setRichTextLabel(STATE_USE_UNAVAILABLE)
+		return
+	if !bool(_snapshot.get("managementAllowed", false)):
+		feedbackLabel.setRichTextLabel(REASON_TEXT["management_unavailable"])
+		return
+	var provider := _resolveItemUseProvider()
+	if provider == null or !provider.has_method("useMap"):
+		feedbackLabel.setRichTextLabel(STATE_UNAVAILABLE)
+		return
+	var preview = provider.getMapUsePreview(_selectedInstanceId) if provider.has_method("getMapUsePreview") else null
+	if !(preview is Dictionary) or !bool(preview.get("success", false)):
+		feedbackLabel.setRichTextLabel(_reasonText(str(preview.get("reason", "data_unavailable")) if preview is Dictionary else "data_unavailable"))
+		return
+	_useInstanceId = _selectedInstanceId
+	_useInFlight = false
+	useItemLabel.setRichTextLabel("%s\nReveals: %s\nOne copy will be consumed." % [
+		str(item.get("name", "")),
+		", ".join(_stringList(preview.get("targetNames", []))),
+	])
+	useOverlay.visible = true
+	cancelUseButton.grab_focus()
+
+
+func _stringList(values) -> Array:
+	var strings := []
+	if values is Array:
+		for value in values:
+			strings.append(str(value))
+	return strings
+
+
+func _onUseConfirmed() -> void:
+	if _useInFlight or _useInstanceId == "":
+		return
+	_useInFlight = true
+	var provider := _resolveItemUseProvider()
+	if provider == null or !provider.has_method("useMap"):
+		feedbackLabel.setRichTextLabel(STATE_UNAVAILABLE)
+		_closeUseOverlay(true)
+		return
+	var result = provider.useMap(_useInstanceId)
+	if result is Dictionary and bool(result.get("success", false)):
+		var revealed := _stringList(result.get("revealedIds", [])).size()
+		_closeUseOverlay(true)
+		feedbackLabel.setRichTextLabel("Map used: %d destination%s revealed." % [revealed, "" if revealed == 1 else "s"])
+	else:
+		var reason = str(result.get("reason", "data_unavailable")) if result is Dictionary else "data_unavailable"
+		feedbackLabel.setRichTextLabel(_reasonText(reason))
+		_useInFlight = false
+
+
+func _onUseCancelled() -> void:
+	_closeUseOverlay(true)
+
+
+func _closeUseOverlay(restoreFocus: bool) -> void:
+	useOverlay.visible = false
+	_useInFlight = false
+	_useInstanceId = ""
+	if restoreFocus and is_inside_tree():
+		if _itemsById.has(_selectedInstanceId):
+			_selectionSource = "inventory"
+			_focusKind = "inventory"
+			_focusWasInside = true
+		call_deferred("_restoreFocus")
+
+
+func closeUseOverlayIfVisible() -> void:
+	if useOverlay.visible:
+		_closeUseOverlay(false)
+
 func _wireFocusNeighbours() -> void:
 	var equipmentControls: Array = []
 	for slot in EQUIPMENT_SLOTS:
@@ -701,7 +832,20 @@ func _wireFocusNeighbours() -> void:
 		if index % 6 < 5 and index + 1 < inventoryControls.size():
 			button.focus_neighbor_right = button.get_path_to(inventoryControls[index + 1])
 	equipButton.focus_neighbor_top = equipButton.get_path_to(detailScroll)
+	useButton.focus_neighbor_top = useButton.get_path_to(detailScroll)
 	dropButton.focus_neighbor_top = dropButton.get_path_to(detailScroll)
+	# The action row's horizontal order depends on whether Use is shown for the
+	# current selection.
+	var actions: Array = []
+	if useButton.visible:
+		actions.append(useButton)
+	if equipButton.visible:
+		actions.append(equipButton)
+	actions.append(dropButton)
+	for index in actions.size():
+		var action: Button = actions[index]
+		action.focus_neighbor_left = action.get_path_to(actions[index - 1] if index > 0 else actions[actions.size() - 1])
+		action.focus_neighbor_right = action.get_path_to(actions[index + 1] if index + 1 < actions.size() else actions[0])
 
 
 func _captureViewState() -> void:
