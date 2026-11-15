@@ -1,0 +1,207 @@
+# Content and balance catalog
+
+This is the authoring map for the systems described in `Docs/System Design`, verified against the current implementation on 2026-11-15. It covers their directly connected narrative, event, item, and minigame content sources as well. Paths below use Godot's project-absolute `res://` form.
+
+Companion documents: [Implementation gaps](Implementation%20Gaps.md) records unfinished work; [System coherence](System%20Coherence.md) defines the contracts needed between these extension points.
+
+## Authoring rules
+
+- Most combat content is a GDScript exposing `var data = {...}`. `Globals/Shootout.gd::loadDataFolder()` loads only immediate `*.gd` children of each registered folder and keys entries by **`data.name`**, not filename. The legacy `Data/Shootout/Moves/Pistolero.gd` shape (`var moves`) is not registered and should not be copied.
+- Quest definitions are typed Resources (`.tres`), the Overworld map manifest is generated, and Party members are currently initialized in code. These are deliberately different workflows.
+- Stable ids connect systems. Zone ids, item `definitionId`s, item `instanceId`s, vendor ids, encounter paths/names, loot-table names, quest/objective ids, and Location ids must not be renamed casually.
+- A definition existing on disk does not make it reachable or functional. Encounters need a launcher/pool, items need an acquisition/loadout path, actors need data and animation scenes, and vendors need both catalog and scene placement.
+- Do not hand-edit `res://Data/Overworld/OverworldMapData.tres`, `res://Assets/Journal/OverworldMap.png`, or `res://Assets/Journal/OverworldMapOverview.png`; regenerate them after changing their sources.
+- Run focused content tests and then `godot --headless --path . --script res://Tests/RunAll.gd`. For map changes also run `godot --headless --path . --script res://Tools/GenerateOverworldMap.gd -- --check` after regenerating.
+
+## 1. Shared world, Zone, event, and narrative datasets
+
+| Source | Content and balance owned here | Consumers and authoring notes |
+|---|---|---|
+| `res://Data/Overworld/ZoneData.gd` | Eight canonical snake_case Zone ids, display names, inclusive chunk bands, first-match order, `default_zone` | Sole Zone-geometry source. Consumed through `res://Overworld/OverworldZoneCatalog.gd` by music, equipment, vendors, newspapers, and encounter pools; future spawns and launchers must use it too. Do not add chunk rectangles to consumers. |
+| `res://Data/Overworld/WorldData.gd` | 12×24 world grid, chunk-scene path format, chunk-map tile size, shared tileset path | Changes world topology and map generation. `HelperVariables.overworldChunkSize` separately owns the 64×64 tiles per chunk. |
+| `res://Overworld/Overworld Chunks/#{x}#{y}.tscn` | Terrain tiles for each chunk | Author in the Overworld tileset. 274 chunk scenes currently exist inside the declared grid; missing chunks are coverage holes, not automatic grid changes. |
+| `res://Overworld/Overworld Chunks/#{x}#{y}.gd` | Optional per-chunk `locations` and legacy `spawnPoints` Dictionaries | A Location entry has `tiles`, `pregenerated`, and optional `map_visibility: "secret"` plus `secret_id`. Keep its dictionary key stable: it becomes the map/quest/discovery Location id. Legacy `spawnPoints` uses actor `type`, first tile, percent `chance`, and `maximum`; it is scheduled for replacement, not the future party-table format. |
+| `res://Data/Overworld/MapTileStyles.gd` | Source/atlas tile to semantic feature and authored color/priority mappings; overrides | Affects the baked map only, not collision. Update alongside terrain art/tileset changes and keep `Journal/Tileset Classification.md` accurate. |
+| `res://Data/Overworld/OverworldMapData.gd` and generated `OverworldMapData.tres` | Manifest schema/validation plus generated projection, fingerprints, overview LOD and normalized Location entries | The `.tres` is read-only generated output. Location POIs, secret visibility and quest target resolution come from here; the `.gd` defines format version 2 and resolution rules. |
+| `res://Data/Overworld/SecretMapData.gd` | Map ids to ordered `targetIds`; secret Location or `secret_item` target definitions | Location targets resolve through the generated manifest. Secret-item targets instead carry `chunk` and `tile`. Reveal data grants no loot and moves no player; world content must be authored separately. |
+| `res://Data/Music/MusicData.gd` | Zone/Location/menu/shop/Shootout playlists, per-encounter and per-Zone combat music, outcome stingers | Track id is the OGG path below `res://Assets/Music` without `.ogg`. Encounter `music` overrides the encounter-name registry, then encounter `zone`, then the default fight playlist. Zone geography does not belong here. |
+| `res://Data/Events/GenericEvents.gd` and `GrasslandEvents.gd`, `ForestEvents.gd`, `DesertEvents.gd`, `SwampEvents.gd` | Event display name, body text, `image_type`, optional music, choice labels and string `result` ids | `Globals/OverworldEvents.gd` merges generic and biome pools uniformly. Result strings currently have no outcome implementation; adding choices alone only changes the popup. |
+| `res://Globals/OverworldEvents.gd` | Event cadence and a separate legacy biome-rectangle map | `MINIMUM_EVENT_DISTANCE = 1.0`, `EVENT_CHANCE_PER_TICK = 0.15`, and `biome_regions` are code-side balance/geography. The rectangles should be migrated to the canonical Zone catalog before expansion. |
+| `res://Data/Location Generation/*.gd` | Per-generated-Location `generationVariables`, weighted `chunkGenerationTypes.chance`, noise maps/cutoffs, tile transforms, interactable species/type/count/tile rules | Current production files cover Clearwater Grove, Donnafolk Cave, and West Field Mines. Operations are consumed by the Location generation/ChunkProcessor pipeline; validate every referenced noise resource and interactable animation. |
+| `res://Data/Quests/QuestDefinition.gd`, `QuestObjectiveDefinition.gd`, `QuestCatalog.gd` | Typed schemas for linear quests and objectives | Objective fields are `objective_id`, current/history text, and optional `map_target_id`. Definitions have `quest_id`, title, summary, sort order, and ordered objectives. |
+| `res://Data/Quests/Definitions/*.tres` and `QuestCatalog.tres` | Authored quests and catalog registration | A new quest needs both a definition Resource and a catalog entry. Only Pistoleros Regroup is currently registered. Map targets must name generated manifest Location ids. |
+| `res://Data/Cutscenes/{Arc}/{Name}.gd` | Cutscene setting/next Location, actors, ordered camera/wait/animation/move/dialog/particles/music/quest shots | Quest shots call `start` or `complete_objective` with canonical quest/objective ids. Ninety-three cutscene scripts currently exist; add corresponding setting scenes, actor animations, and played-cutscene/transition wiring where required. |
+| `res://Globals/Cutscene.gd` and `res://Globals/Locations.gd` | Current cutscene/Location selection, played-cutscene flags, trail departure counter, minigame points/materials | These are session-state owners, not general content catalogs. `departForTrail()` is the sole rolled-vendor-stock reset boundary. |
+
+## 2. Combat and actor datasets
+
+| Source | Content and balance owned here | Consumers and authoring notes |
+|---|---|---|
+| `res://Globals/Party.gd::party` | Live party members: HP/base HP, core/offense/defense/resistance stats, injury fields, Rodeo, class, four activated moves, belt item names, character Magazine, seven equipment slots | Party members referenced by an encounter use this live data. Only Walker Langley is currently initialized; adding a full party requires member data here, not only an actor file. |
+| `res://Data/Actors/{type}/{name}.gd` | Non-Party actor stats, HP, speeds, Rodeo/class/loadout/Magazine/weapon, optional `ai` block | Encounter names resolve to `res://Data/Actors/{type}/{ActorNameWithoutSpaces}.gd`. Current production actor files are Walker Langley and Squeky rat. Generic enemies need their own files and animations. |
+| `res://Data/Shootout/Classes/*.gd` | Class `name`, Magazine, `beltSpace`, Sand defense, explosive base, descriptive `abilities` list | Five classes exist. The `abilities` strings are descriptive, not registered Move ids; actual combat loadouts still come from actor/Party `moves`. |
+| `res://Data/Shootout/Moves/*.gd` | Move `name`, `category` (`ability`, `attack_ability`, `duck`), base amount/scaling, side, positions, effect operations, animations | Registered by exact `data.name`; actor `moves` must match it. Attack abilities advance the Cylinder; Ducks and utility abilities do not. |
+| `res://Data/Shootout/Items/*.gd` | Combat-item name, healing/amount/effects, side/positions, animations | `ItemCatalog.definitions[].combatId` must exactly match this `data.name` for carried consumables. Combat currently consumes names from an actor's belt array, not shared inventory stacks. |
+| `res://Data/Shootout/Rodeos/*.gd` | Passive `trigger`, conditions, effects, level `scaling` | Six definitions exist. Actor Rodeo lookup is case-normalized. Supported operations include stat/position/heal/loot/effect/cylinder/hit-quality behavior; unsupported operations warn and skip. |
+| `res://Data/Shootout/AI/*.gd` | Optional boss priority rules with HP conditions and act/target selectors | Loader support exists, but the directory and production boss scripts do not. Actor `ai` selects archetype, preferred columns, aggression, and script. |
+| `res://Data/Shootout/Encounters/*.gd` | Encounter name, dustup/showdown kind, flavor, background, optional zone/music, loot table/enablement, win condition, nested teams | Each actor entry lists unique positions 1–4. Party-named actors use live Party data; other actors load from `Data/Actors`. `loot: false` reserves payout for quest completion. The debug fallback is `RatAmbush.gd`. |
+| `res://Data/Shootout/EncounterPools/{zone}.gd` | Per-Zone weighted encounter paths and `newspaperPublic` flags | Filename is the canonical Zone id. The same pool is intended for gameplay selection and newspaper projection. Only `canyon.gd` is authored, with Canyon Rats weight 3 and Canyon Rat Nest weight 1. |
+| `res://Data/Shootout/EncounterPoolData.gd` | Pool loading, merging, public-entry filtering and cross-data validation | `loadProductionPools()` reads immediate pool scripts and uses each filename as its Zone id. Use `validateAuthoredPools()` for new content; malformed pool files/entries must not silently disappear. |
+| `res://Data/Shootout/LootTables/*.gd` | Table name, progression `band`, money chance/range, roll count, weighted consumable/gear/resource entries and rarity pools | `lootTable` on an encounter must match `data.name`. Stackables use `ItemCatalog.definitionId`. Only the early Rats table exists; band selection and encounter-Zone propagation are not implemented. |
+| `res://Globals/Shootout.gd` | Team/act constants, screen coordinates for four columns per side, flavor lists, data-folder registry | Add new data folders to `loadData()` when introducing a new content type. `shootoutPositions` is layout/balance code, not per-encounter data. |
+| `res://Globals/FrameData.gd` | Weapon-family animation hit frames | Revolver/rifle hit frame 5, scratch hit frame 3. Every new weapon/animation family needs a valid frame and matching animation content. |
+
+## 3. Items, equipment, vendors, and discovery
+
+| Source | Content and balance owned here | Consumers and authoring notes |
+|---|---|---|
+| `res://Data/Items/ItemCatalog.gd` | Stackable `consumable`, `resources`, and `map` definitions: stable id, type, combat id/effect, display data, stack limit, droppable flag, sprite | Shared by loot, inventory, vendors, and Discovery. Current definitions are Paregoric, Doctor's Kit (`multi_heal`), and Canyon Cache Map. Add a combat definition for every consumable and reveal data for every map. |
+| `res://Data/Items/WeaponData.gd` | Family Magazine patterns and position ranges, rollable weapon bases/sprites, per-base economic values | Weapon base damage is currently rolled from the family's `AffixData` range, not authored per base. Every new base needs a unique id, sprites, and `baseValues` entry. Family-level Magazine/range entries cover all bases in that family. |
+| `res://Data/Items/EquipmentData.gd` | Six non-weapon equipment slots, generic bases/base stats, slot sprite pools, Zone/town equipment, `dropsAnywhere`, optional `beltSpace`, economic values | Zone entries currently provide flavor/base identity; generation applies generic slot base stats. Every new definition needs a positive `baseValues` entry. Canonical Overworld equipment uses Zone ids from `ZoneData`. |
+| `res://Data/Items/AffixData.gd` | Per-rarity affix ranges, display metadata/kind/category, prefix and suffix pools | Every non-legendary generated item receives one prefix and one suffix. Many authored stats do not yet affect combat; see the gap register before adding more. Values are initial placeholders. |
+| `res://Data/Items/LegendaryData.gd` | Thirteen fixed legendary items, family/slot, base damage, stats, sprite/lore, economic values | Created explicitly through `ItemGeneration.generateLegendary(key)`; no production loot/quest award currently calls it. Fixed stats have the same supported-mechanics limits as affixes. |
+| `res://Globals/ItemGeneration.gd` | Rarity display names, base/affix assembly, loot rolling, optional injected RNG | Default rarity comes from `Quests.currentMainQuestLevel.rarity`, currently static common. Loot supports money, catalog consumables/resources, and generated gear. |
+| `res://Data/Vendors/VendorCatalog.gd` | Stable vendor id/kind/name, parent Location and Zone, interior scene, fixed offers/prices or rolled stock type/count | Current five vendors are all in Lazysprings. Kinds are `general`, `gun`, `equipment`, `bank`, `newspaper`. Catalog data alone does not place doors/NPCs. |
+| `res://Data/Vendors/VendorPricing.gd` | Rarity multipliers, value per affix point by kind, buy markup 1.0, sell ratio 0.25 | Base values live with item datasets. Sale ratio must remain between zero and one; tests should preserve the no-arbitrage bound. |
+| `res://Data/Vendors/NewspaperData.gd` | Zone headline/editorial, general tips, per-encounter tips keyed by encounter file basename | Contains prose only. Enemy composition is projected from shared encounter pools and actor data. Only canyon copy exists; tips for unpublished encounters fail validation. |
+| `res://Vendors/VendorStockGenerator.gd` | Deterministic rolled-stock seed composition and offer ids | Stock seed derives from base seed, explicit trail-departure id, and vendor id. Vendor Zone is passed into equipment generation. |
+| `res://Globals/Vendors.gd` | Shared Bank, stock persistence/reset, transaction guard, `MAX_PURCHASE_QUANTITY = 9999`, versioned snapshots | Runtime domain, not an authoring catalog. Purchases/sales/transfers revalidate through Party and InventoryRules. |
+| `res://Globals/Discovery.gd` | Revealed target ids, atomic map use, versioned discovery snapshots | A map can be consumed only after all targets validate. Reveal state and vendor stock are save-ready, but no application save service consumes them yet. |
+| `res://Globals/Party.gd` and `res://Globals/InventoryRules.gd` | 24 occupied-stack slots, stable instance allocation, stacking/capacity, atomic commerce/equipment rules | Equipped gear is outside carried inventory. Loot intentionally accepts partial overflow; commerce and transfers are all-or-nothing. |
+
+## 4. Scene and node extension points
+
+| Node/scene | How it carries content or balance |
+|---|---|
+| `res://Overworld/Overworld.tscn` | Current `Locations`, `Spawnpoints`, `Actors/Animals`, player, and 10-second legacy spawn timer. The dynamic-spawn design instead proposes `Actors/VisualSpawns/VisualParty*` and one `VisualSpawnTimer`; those nodes/director/data do not exist yet. |
+| `res://Actors/Shootout/ShootoutActor.tscn` | Shared fighter instance. Combat actors additionally need `res://Animations/{actorType}/{ActorNameWithoutSpaces}Animations.tscn`; weapon idle and `FrameData` hit frames must exist. No per-encounter scene subclass is needed. |
+| `res://Actors/Overworld/OverworldActor.tscn` | Shared visual actor. Requires `res://Animations/Overworld/{type}/{ActorNameWithoutSpaces}Animations.tscn` with `Idle`; missing animation aborts the spawn. |
+| `res://Shootout/Shootout.tscn` and `res://Shootout/UI/*.tscn` | Shared combat field, acts, turn strip, Cylinder/effect displays, HP and result UI. Encounter backgrounds/actors come from data; multi-target presentation and pre-transition Flair remain incomplete. |
+| `res://Nodes/Scene Manager/SceneManager.gd` and `.tscn` | `SCENES` registry, initial scene, fade/loading delays, allowed-Journal scenes, persistent Journal/Vendor layers. Add a registry key for a new scene type; a pre-transition FlairLayer is designed but absent. |
+| `res://UI/Journal/Journal.tscn` and `res://UI/Journal/Tabs/*.tscn` | Shared Map/Inventory/Quests/Character/Settings presentation. New domain content normally requires no new tab nodes; add only genuinely new interaction/views. Settings is intentionally unavailable. |
+| `res://Location/Entities/Vendor/VendorDoor.tscn` | Exterior entry. Set `vendorId`, optional `returnOffset`, prompt and kind icon. Place beneath a Location with a `LocationInteractionDirector`. |
+| `res://Location/Vendors/VendorRoom.tscn` | Generic shell with player, director, and `VendorExit`; loads the catalog interior and its `PlayerSpawn`. Reuse rather than duplicating this shell per shop. |
+| `res://Location/Vendors/Interiors/*.tscn` | Interior art/collision, `PlayerSpawn` Marker2D, and `VendorActor` with matching `vendorId`/prompt. The same vendor id must connect catalog, exterior door, and interior actor. |
+| `res://Location/Entities/Trail/TrailDeparture.tscn` | Explicit trail exit interaction. Calls `Locations.departForTrail()` exactly once before entering the Overworld; do not reroll stock on incidental scene entry. |
+| `res://Nodes/Interaction/LocationInteractionDirector.tscn` and `LocationInteractable.gd` | Closest-target selection, fresh INTERACT activation, prompt. New persistent Location interactions should derive from the base target and use `location_interactables`/`location_player` conventions, not the older self-freeing Interactable. |
+| `res://Location/Locations/{Name}/{Name}.tscn` | Pregenerated world content. Use `PregeneratedLocation.gd::initScene()` when vendor-safe player return positioning is needed. A secret Location still needs playable content after its marker is revealed. |
+| `res://Location/Locations/{Quest}/{Location}/*.tscn` and `res://Cutscenes/Cutscene.tscn` | Quest setting scenes, exits and cutscene triggers. Quest progress belongs in cutscene quest shots, while `Locations.currentQuest` currently selects the setting path. |
+| `res://Location/Location Generation/Wave Function Collapse/WFCInputCreation.tscn` and input template scenes | WFC source TileMaps used to build reusable models. Generated Location scenes assemble layout, solver, ChunkProcessor, player/exits and optional PlayerReveal. |
+| `res://Shaders/PlayerRevealController.tscn` and `RevealableObject.gd` | Add controller to a Location and initialize it with the player; mark occluding objects `revealable` or attach the component. Per-material radius, softness, minimum alpha and enabled state are presentation knobs. |
+| `res://UI/OverworldEvent/OverworldEventPopup.tscn` | Generic event presentation; no per-event scene needed. `image_type` maps to a shared icon. Outcome execution belongs outside this popup. |
+| `res://Minigames/Poker/Poker.tscn`, `res://Minigames/Poker/Card.tscn` | Four-seat layout, card slots and actions. `Globals/Poker.gd` owns 52 cards, AI personalities and default players; `Poker.gd` owns blind/timing/hand-size constants. New table sizes require both data and scene path changes. |
+| `res://Minigames/Bear Hunt/*.tscn` and `res://Minigames/Gold Rush/*.tscn` | Minigame-specific layouts and object scenes. Their scripts contain spawn/timing/speed/score constants; `Locations.minigamePoints` and `collectedPanningMaterials` carry results. |
+
+## 5. Balance knobs currently living in code
+
+These values are implemented and tunable, but changing them requires a code edit. Promote a value to a dataset only when content authors need to vary it by encounter, Zone, item, or difficulty; avoid creating a second copy of a shared constant.
+
+| Source | Implemented knobs |
+|---|---|
+| `res://Globals/Party.gd` | Inventory capacity 24; flee injury 20%; knockout duration 3 Shootouts; default injury rate 4; knockout debuffs High Tailin' −2 and Six Shootin' −1. |
+| `res://Shootout/ShootoutTurnManager.gd` | Initiative random roll 0–4; Showdown flee threshold turn 10. |
+| `res://Shootout/ShootoutCylinderManager.gd` | Miss/Graze/Hit/Critical multipliers 0/0.5/1/1.5; all-Hit fallback; Cylinder length 2–6. |
+| `res://Shootout/ShootoutEffectManager.gd` | Piercing/decrease stack limit 4; poison retains 65% per Round (35% wear-off); unconsumed marks expire after 2 Rounds. |
+| `res://Shootout/ShootoutEnemyAI.gd` | Pick from top 2 scored acts; kill bonus 50; archetype/scoring calculations and Dust-up/Showdown behavior currently shared. |
+| `res://Actors/BaseActor.gd` | Four-move cap, melee fallback base damage 2, unknown-class belt space −1 (uncapped). |
+| `res://Shootout/Shootout.gd` | Between-act pause 0.4 s, reposition slide 0.3 s, Rodeo beat 0.25 s, targeting tint; combat flow timings. |
+| `res://Globals/MusicPlayer.gd` | Playlist switch fade 1.5 s, tail fade 3 s, silent floor −60 dB. |
+| `res://Overworld/OverworldChunkStreamCache.gd` | Preload radius 2 chunks and merged-cell write budget 8192 operations per frame; performance rather than game difficulty. |
+| `res://Globals/Overworld.gd` | Initial spawn chunk `(8,12)` and tile `(40,38)`; live/last-known player provider state. |
+| `res://Globals/HelperVariables.gd` | 64×64 Overworld chunk tiles, 24×48 Location chunk tiles, 24×12 isometric tile size, adjacent directions; coordinate/layout constants shared by generation and placement. |
+| `res://Nodes/Scene Manager/SceneManager.gd` | Fade 0.3 s, loading-screen delay 0.2 s, main-menu initial scene, Journal scene allowlist. |
+| `res://Tools/OverworldMapBaker.gd` | Overview 4×4-cell blocks, 25% minimum fill, 30% area share for non-linear features; map readability tuning. |
+| `res://Shaders/PlayerRevealController.gd` | Runtime reveal radius 70, softness 10, minimum alpha 0. |
+| `res://Minigames/Poker/Poker.gd` | Blind 5, four-card flushes, five-card straights, animation/showdown timings. AI `raiseLimit` values live in `Globals/Poker.gd`. |
+| Bear Hunt and Gold Rush scripts | Durations, speeds, spawn intervals/caps, score values, drop rates and playfield bounds are constants in each minigame script, not a shared balance file. |
+
+## 6. Content addition recipes
+
+### Add an enemy and a regular Zone encounter
+
+1. Add `res://Data/Actors/{type}/{ActorName}.gd` with complete stats, weapon, class/Rodeo/loadout/Magazine and optional AI data. Add the matching Shootout animation scene and any required `FrameData` entry.
+2. Add a Move/Rodeo/combat-item definition first if the actor references a new one; ids must match `data.name` exactly.
+3. Add an encounter under `res://Data/Shootout/Encounters`, with unique positions and no more than four actors per side. Set kind, background, win condition, Zone/music and loot behavior explicitly.
+4. Add or reference a loot table. Add new item definitions/base values before referencing them.
+5. Register the encounter path and weight in `res://Data/Shootout/EncounterPools/{zone}.gd`. The filename must be a canonical Zone id.
+6. If it is public newspaper content, add matching `NewspaperData.zones[zone].encounterTips[EncounterFileBasename]`. Set `newspaperPublic: false` for secret encounters.
+7. Add validation for actor/animation references and pool selection. A production gameplay launcher still must be implemented before the pool can create real fights.
+
+### Add a Move, Duck, Rodeo, or boss AI rule
+
+1. Create the appropriate `data` script in Moves, Rodeos, or AI. Ducks stay in Moves with `category: "duck"`.
+2. Use only implemented effect/Rodeo operations and target selectors. Supply valid position ranges, amounts/durations/scaling, and animation paths where applicable.
+3. Reference the exact definition name from actor/Party data. Class `abilities` alone does not activate a Move.
+4. Add a manager/resolver test for every new operation, not only a data-load test. Test player and AI legality, death cleanup, and animation hit behavior.
+
+### Add a carried consumable or resource
+
+1. Add its stackable definition to `ItemCatalog`, including unique `definitionId`, stack limit, type, display data and sprite.
+2. For a consumable, add `Data/Shootout/Items/{Name}.gd` and set the catalog `combatId` to its exact `data.name`; implement effects and animations.
+3. Add acquisition through a loot-table `definitionId`, a fixed vendor offer, or a quest reward. Set prices/weights/quantities explicitly.
+4. Add it to a belt loadout only through the future shared-inventory belt workflow. The current actor `items` arrays are independent combat data and do not consume carried stacks.
+
+### Add a weapon or equipment base
+
+1. Add a unique base id/name/sprites to `WeaponData.weaponFamilies` or the appropriate generic/Zone pool in `EquipmentData`.
+2. Add its positive economic value to that file's `baseValues`. For equipment, specify slot, `dropsAnywhere`, Zone and optional `beltSpace` correctly.
+3. Tune family Magazine/range in `WeaponData`; add affix ranges/pools in `AffixData` only when their mechanics are supported. Add fixed legendary stats/lore/value to `LegendaryData` and an explicit award path.
+4. Verify the generator, inventory/equipment preview, combat projection, vendor quote, and save round-trip. Do not treat a generated affix's display text as proof that it works.
+
+### Add a quest and map objective
+
+1. Create a typed QuestDefinition Resource with ordered objective subresources and stable quest/objective ids.
+2. Register it in `QuestCatalog.tres`. Set `map_target_id` only to a stable Location id present in the generated map manifest.
+3. Add quest start and exact current-objective completion shots to the relevant cutscene scripts. Add the corresponding quest Location scenes/exits and cutscene triggers.
+4. If completion changes Party level, rarity, Rodeo, rewards, or the next quest arc, wire that through one progression service; these effects are not automatic today.
+5. Test unknown/duplicate/out-of-order triggers, Journal history, map marker identity, completion, and scene return. Add save migration once quest persistence exists.
+
+### Add a vendor building
+
+1. Add a `VendorCatalog` entry with stable vendor id, kind, parent Location id, canonical Zone id, interior scene, and valid fixed/rolled stock rules. Add fixed item prices or rolled count/type as appropriate.
+2. Create the interior with art/collision, `PlayerSpawn`, and `VendorActor.vendorId` matching the catalog. Reuse `VendorRoom.tscn` as the outer shell.
+3. Place `VendorDoor` in the parent Location with the same vendor id, safe return offset, prompt and icon. Ensure that Location has one interaction director and a grouped player.
+4. For gun/equipment stock, ensure every possible generated base and affix has pricing data. For newspapers, author the Zone pool and prose. Banks need no stock.
+5. Test door → room → NPC → menu → close → exit → same-door return, transaction atomicity, stock stability, departure-only reroll, and keyboard/controller layout. Add a `TrailDeparture` only where an explicit new trail cycle should begin.
+
+### Add a secret map and its destination
+
+1. Add the map item to `ItemCatalog` with `itemType: "map"`, stack limit 1, and `effect: {kind: "reveal_map", mapId: ...}`.
+2. Add the map/target ids to `SecretMapData`. For a secret Location, add `map_visibility: "secret"` and the same `secret_id` to its chunk script; for a secret item, author chunk/tile coordinates.
+3. Regenerate the map so the manifest contains the secret Location. Add a vendor offer or other acquisition path.
+4. Build the actual reachable destination/cache and its reward interaction. Discovery only reveals markers; it never grants the reward or makes an empty Location playable.
+5. Test invalid/already-revealed consumption, inventory capacity, marker projection, scene reachability, reward claim, and save restore.
+
+### Change a Zone, terrain, or music
+
+1. Edit Zone bands only in `ZoneData`; audit equipment, encounter pools, newspaper copy, vendor Zone ids and music for renamed ids. Keep first-match overlaps intentional.
+2. Author chunk terrain/scripts and update `WorldData` only when world topology changes. Add playable scenes for new Location entries.
+3. Update `MapTileStyles` and the tileset classification reference for changed tile art/semantics.
+4. Add the OGG and track id to the proper `MusicData` playlist. Do not reintroduce Zone rectangles into music or events.
+5. Regenerate both map textures/manifest, run the map `--check`, and verify music, encounters, equipment and newspapers at every changed boundary.
+
+### Add a generated Location
+
+1. Author input TileMaps and register them through the WFC input-creation scene so `WFCModelBuilder` can construct the immutable model.
+2. Add a `Data/Location Generation` file with generation variables, weighted chunk types, noise resources, transforms and interactable counts.
+3. Create the generated Location scene with layout/generation/ChunkProcessor, player, exits, collisions and any PlayerReveal setup. Add its Overworld chunk Location entry.
+4. Run solver and integration scenes, inspect border seams and reachability, and regenerate the Overworld map manifest.
+
+## 7. Designed surfaces that are not ready for content yet
+
+- `Data/Overworld/SpawnData.gd`, `OverworldSpawnDirector.gd`, and the `VisualSpawns` hierarchy are only specified in [Dynamic Overworld spawns](Overworld%20Spawns.md). Do not author the proposed party schema expecting it to run; the current system still uses legacy per-chunk `spawnPoints`.
+- [Flairs](Shootout/Flairs.md) specifies `Shootout.FLAIR_POOLS`, a `UI/Flair` scene and a SceneManager layer. None exists; current flavor text is an in-combat banner with separate pools.
+- Save management and Settings have no service/UI beyond disabled or unavailable placeholders. Versioned Vendors/Discovery snapshots are inputs to that future service, not proof of persistence.
+- Equipment-granted Moves, shared-inventory belt editing, quest reward execution, event outcome execution, and secret-cache rewards need their domain contracts before content can be considered functional.
+
+## 8. Content review checklist
+
+For every content addition, verify:
+
+1. **Identity:** stable ids are unique, correctly cased, and consistent across every reference.
+2. **Reachability:** a launcher, pool, acquisition path, scene entrance, or quest trigger can actually reach it.
+3. **Mechanics:** every displayed stat/effect/choice has a runtime implementation; no-op content is not presented as working.
+4. **Assets:** actor animations, icons, backgrounds, noise resources, music and hit frames exist and match naming conventions.
+5. **Cross-system behavior:** inventory capacity, Party ownership, Zone lookup, quest/map targets, prices, newspapers and return navigation remain coherent.
+6. **Persistence:** runtime state has a defined New Game/reset and save/import policy; transient visual parties and combat nodes are not serialized.
+7. **Validation:** focused tests cover malformed references and real behavior, the full suite passes, generated map outputs are current, and a 640×360 manual pass covers new UI/world content.
