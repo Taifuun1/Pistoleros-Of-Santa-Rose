@@ -15,12 +15,14 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (metadata, launcher and win conditions; region pools/ambush wiring is pending with the Location/Overworld systems):
+**Implemented** (metadata, launcher, win conditions and the shared per-Zone pool data/loader; launcher and ambush wiring from Location/Overworld triggers is still pending with those systems):
 
 - Encounter metadata: `name`, `kind` (`dustup`/`showdown`), `flavor`, `background`, `lootTable`, `winCondition` and nested `teams`; the legacy flat format still resolves (`data.get("teams", data)`). `RatAmbush` is the default/debug encounter with full metadata.
+- Shared Zone pools: `Data/Shootout/EncounterPoolData.gd` merges every authored `Data/Shootout/EncounterPools/<zone>.gd` file through `loadProductionPools()`, so one pool serves both the future encounter launcher and the vendor newspaper. The `canyon` pool and its real encounters (`CanyonRats`, `CanyonRatNest`, against the authored Squeky rat actor) are authored; other Zones still need their own pools and actors.
 - Launcher: callers set `Shootout.pendingEncounter` (a `res://` path) on the autoload before switching to the Shootout scene; `_ready()` consumes it (falling back to `RatAmbush` when null) and clears it.
 - Win conditions in `ShootoutTurnManager`: `rout` (default), `defeat_actor { actorName }` (ends when the named character dies), `survive_rounds { rounds }` (checked at round rebuilds), and `hp_below { target: "party"|"enemy", fraction | amount, stat? }` (the target side loses when its side-total current HP — or `stat: "maxHp"` — drops below the fraction of its maxHp total, or below an absolute amount; checked after damage resolves). Optional `winner` overrides the default winning side.
 - Flavor names: `Shootout.DUSTUP_FLAVORS`/`SHOWDOWN_FLAVORS`; a missing `flavor` picks one at random by `kind`, and `encounterName`/`flavorName` live on the shootout root ready for the start popup (see [Shootout UI](Shootout%20UI.md)).
+- Region-pool schema: `Data/Shootout/EncounterPoolData.gd` defines per-Zone weighted encounter references and newspaper visibility (patch 1 of [Location vendors](../Location%20Vendors%20Implementation.md)); `loadProductionPools()` merges the authored `Data/Shootout/EncounterPools/*.gd` files, so the launcher and the newspaper read the same pools. The Canyon Zone publishes a real pool (patch 6); every other Zone stays unavailable until its encounters are authored, and an unpublished Zone is never substituted with another one or with the debug `RatAmbush`.
 - Tests: `Tests/TestEncounters.gd` validates every encounter file (sides, position ranges, one actor per column, max 4 copies, win condition shape), the metadata/legacy defaults and all four win-condition behaviors.
 
 ## Design
@@ -104,7 +106,7 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 1. ✅ Encounter metadata + `teams` nesting (backwards compatible).
 2. ✅ `pendingEncounter` launcher.
 3. ✅ Win conditions.
-4. Region pools + ambush wiring (pending, with the Location/Overworld teams' systems).
+4. Region pools + ambush wiring: the shared Zone pool data and loader are implemented (`EncounterPoolData.loadProductionPools()`, authored `canyon` pool with `CanyonRats`/`CanyonRatNest`), so the newspaper reads real production data; the launcher/ambush wiring from Location/Overworld triggers and further Zone pools remain pending with those systems.
 5. First boss encounter content (pending).
 
 ## Open Questions
