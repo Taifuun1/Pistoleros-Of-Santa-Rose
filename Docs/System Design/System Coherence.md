@@ -145,12 +145,12 @@ The prologue needs one authored continuation contract: Littlehill Grove exit, La
 
 ## 7. Stats, effects, and combat-content coherence
 
-**Status: items 3–9 implemented in commit 4** (Zone-aware loot, authored-Move-only offense, per-actor `hp_below`, max-HP/Trail-gated attrition, combined bleed with stack-removing healing, and the Jammed payload + no-on-hit-effects-on-Miss rule). The supported-stat registry (items 1–2) and multi-target pipeline (item 4) remain open.
+**Status: items 3–9 implemented in commit 4 (item 5 follow-ups and item 6 boss content still open), and item 4 is implemented in commit 8** (Zone-aware loot, authored-Move-only offense, per-actor `hp_below`, max-HP/Trail-gated attrition, combined bleed with stack-removing healing, the Jammed payload + no-on-hit-effects-on-Miss rule, and the shared multi-target target-set pipeline). The supported-stat registry (items 1–2) remains open.
 
 1. Define a supported-stat registry shared by item generation, `CharacterStatCalculator`, combat reads, Journal provenance, and vendor valuation. A stat may be `fully_supported`, `display_only`, or `unsupported`; unsupported stats must not roll as if functional.
 2. Implement affix mechanics through existing modifier/effect seams rather than new per-item special cases. Equipment-granted Moves use canonical Move ids and loadout previews. Implement effect-driven stat modifiers and route every combat/UI/initiative read through `Shootout.getModifiedStat()`; include taunt's defensive buffs.
 3. Propagate encounter Zone into loot generation. Zone-tied equipment not dropping from Shootouts is not intentional: use `dropsAnywhere` and the selected Zone exactly as vendor generation does, subject to On-Trail loot eligibility.
-4. Implement multi-target resolution as a target-set pipeline shared by player and AI. Per-position taunt, effects, damage, death checks, animations and focus must see the same targets.
+4. ✅ Implement multi-target resolution as a target-set pipeline shared by player and AI (commit 8). Per-position taunt, effects, damage, death checks, animations and focus all see the same targets.
 5. Remove basic weapon attacks for both teams. Every offensive action is an authored Move; enemy AI must gather and score those Moves through the same legality rules as the player. Make encounter kind select authored AI behavior/difficulty and enemy stats.
 6. Make `hp_below` win conditions per-actor, including boss thresholds, rather than side-total HP. Boss scripts and unique Rodeos remain data-driven content.
 7. Apply the canonical `Death Injury and Retreat.md` model: fighters start each Shootout at max HP with no persistent knockout debuffs. MxHP attrition is enabled only On Trail and does not leak into Off-Trail fights or travel.
@@ -234,10 +234,10 @@ Production should fail closed for malformed content. Warn-and-skip remains usefu
 
 The concrete first delivery slice for phases 0–2 (authoritative Trail state, the encounter request/router, shared belt ownership, the decided combat rules, Vamoose/New Game, and the content lint and documentation closure) is tracked in the [First steps implementation plan](First%20Steps%20Implementation%20Plan.md).
 
-**Current delivery status (2026-11-16):** commits 1–7 are implemented and the full suite passes 59/59. The first-slice integration pass now ships the production quest-encounter trigger/result route, Journal quit-to-menu confirmation, standard controller bindings, and Overworld Zone-context invalidation. Step 5 and physical-controller acceptance still require a manual re-run; automated tests establish the production paths but do not record visual/controller feel. The ordered next mechanics steps are:
+**Current delivery status (2026-11-16):** commits 1–8 are implemented and the full suite passes 60/60. The first-slice integration pass ships the production quest-encounter trigger/result route, Journal quit-to-menu confirmation, standard controller bindings and Overworld Zone-context invalidation; the multi-target commit replaces the one-target handoff with one target-set pipeline shared by player and enemy AI. Step 5 and physical-controller acceptance still require a manual re-run; automated tests establish the production paths but do not record visual/controller feel. The ordered next mechanics steps are:
 
 0. ~~**First-slice integration pass:** quest-sourced encounter launch/result completion, production return-to-menu, gamepad bindings, and Overworld music-transition invalidation.~~ Implemented in commit 7.
-1. **Multi-target acts:** one target-set pipeline for player and AI resolution, per-position taunt, UI/animation/focus and death handling.
+1. ~~**Multi-target acts:** one target-set pipeline for player and AI resolution, per-position taunt, UI/animation/focus and death handling.~~ Implemented in commit 8.
 2. **Effect/stat seams:** data-driven effect modifiers, the supported-stat registry, taunt's defensive buffs and all combat reads through `Shootout.getModifiedStat()`.
 3. **Full save-service integration:** the remaining disk Save/Continue work and application-restart proof. The existing domain snapshots and New Game coordinator do not by themselves complete phase 2.
 

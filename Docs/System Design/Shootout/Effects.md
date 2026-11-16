@@ -30,7 +30,7 @@ This is a design doc: it describes the intended design, and the implementation m
 - `Shootout/ShootoutEffectManager.gd` — the full effect set: **combined-stack bleed** (every two total stacks deal one damage before resistance; healing and cleanses remove stacks through the same path), poison (per-stack stacking, round-start ticks, 35% wear-off at round end, optional `rounds` duration), mark (priming -> active after one Round, bonus damage + follow-up effects consume it, expiry, cleanse), damage-type mark (one Round), damage piercing/decrease (turn countdown, stack limit), silence (turn countdown), taunt (round countdown, per-position redirect) and the Cylinder effect type delegated to the cylinder manager.
 - Resistances are percentage potency reduction applied at tick time (`stats.resistances.bleed/poison`).
 - Damage pipeline hooks (`applyOutgoingModifiers`/`applyIncomingModifiers`) are live: piercing reclaims only the amount actually blocked by defense (decided cap), decrease subtracts flat, active marks add bonus damage and apply their follow-up effects, damage-type marks match the attack's weapon type.
-- Lifecycle wiring in `Shootout.gd`: `onTurnStart` before a turn (bleed kills are checked before the actor acts), `onTurnEnd` in `finishTurn()`, `onRoundEnd`/`onRoundStart` around the turn-order rebuild with a post-poison death sweep; taunt redirect for single-target acts for both sides in `resolveActOnce()`; multi-target redirect is next-slice work.
+- Lifecycle wiring in `Shootout.gd`: `onTurnStart` before a turn (bleed kills are checked before the actor acts), `onTurnEnd` in `finishTurn()`, `onRoundEnd`/`onRoundStart` around the turn-order rebuild with a post-poison death sweep; taunt redirect for both sides in the shared target-set pipeline (`resolveActTargetSet()`), including one redirected hit per protected position for multi-target acts.
 - Rodeo ops `apply_effect`, `cleanse_effect` and `modify_cylinder` route into the effect manager (warn-and-skip when it's absent).
 - Move/item `effects` lists are dispatched after instant damage/healing by the action resolver.
 - Tests: `Tests/TestEffects.gd` covers every behavior listed in the testing section below.
@@ -41,7 +41,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 1. Define the supported combat stat-path registry and modifier payload/order, preserving `Shootout.getModifiedStat()`'s Rodeo-first/effect-second order and rejecting unknown paths in content lint.
 2. Implement data-driven effect stat modifiers and route turn-manager initiative, action-resolver offense and UI display through the shared root helper.
-3. Add taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry and source/caster death. Multi-target taunt behavior itself belongs to the preceding multi-target commit.
+3. Add taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry and source/caster death. Multi-target redirect itself is implemented; its defensive affix bonuses belong here.
 4. Extend `TestEffects`, `TestDamage`, `TestTurnOrder` and `TestShootoutUI` for stacking, cleanse/expiry/death cleanup and preview/actual parity. Unsupported affixes and equipment-granted Moves remain separate later work.
 
 ## Design
@@ -73,7 +73,7 @@ Core API, consumed by the action resolver (moves/items apply effects), the cylin
 - `onTurnEnd(actorName)` — piercing/decrease/silence turn countdown.
 - `cleanse(targetName, effectType, amount)` — removes afflictions; `"random"` picks a random affliction (implements the Rodeo `cleanse_effect` op).
 - `getStatModifier(actorName, statName)` / `applyOutgoingModifiers()` / `applyIncomingModifiers()` — queries used by [Damage and Stats](Damage%20and%20Stats.md) (initiative/debuff modifiers, piercing vs defense, mark bonus damage on hit).
-- `redirectTaunt(actingSide, targetName)` — if the target's position is taunted, returns the caster's name instead (see [Positions and Targeting](Positions%20and%20Targeting.md)).
+- `redirectTaunt(actingSide, targetName)` / `redirectTauntSet(actingSide, targetNames)` — if a target's position is taunted, returns the caster instead; the set form preserves one redirect per protected position (see [Positions and Targeting](Positions%20and%20Targeting.md)).
 - `isSilenced(actorName)` — gates the Moves act menu and enemy AI (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
 - `unregisterActor(actorName)` — on death; also removes taunts whose caster died and marks sourced by the dead actor.
 
@@ -137,7 +137,7 @@ Move the reserved `cleanse_effect` op from warn-and-skip to `effectManager.clean
 1. ✅ Manager skeleton + hooks + `applyEffect`/`cleanse` with bleed and poison.
 2. ✅ Marks and damage-type marks + damage pipeline queries.
 3. ✅ Piercing/decrease + silence.
-4. ✅ Taunt redirect (single-target acts; multi-target acts follow with [Positions and Targeting](Positions%20and%20Targeting.md)).
+4. ✅ Taunt redirect, including the per-position multi-target set form.
 5. ✅ Rodeo ops and move/item `effects` dispatch (authoring effect-bearing content pending).
 6. UI icons (pending, see [Shootout UI](Shootout%20UI.md)).
 

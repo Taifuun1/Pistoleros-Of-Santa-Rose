@@ -30,70 +30,122 @@ func getDataSet(dataSet: String) -> Dictionary:
 		return globals.get(dataSet)
 	return {}
 
+## The shared target-set entry point (Docs/System Design/Shootout/Positions and
+## Targeting.md). The act's Cylinder roll, belt consumption and other per-act
+## costs happen exactly once, then the result applies to every living target in
+## order. Empty/dead-only sets consume nothing.
+func resolveActTargets(actType: String, actName: String, actingActor, targetActors: Array) -> void:
+	match actType:
+		"Attack":
+			resolveAttackTargets(actingActor, targetActors)
+		"Moves":
+			resolveMoveTargets(actName, actingActor, targetActors)
+		"Items":
+			resolveItemTargets(actName, actingActor, targetActors)
+
+
 func resolveAttack(actingActor, targetActor) -> void:
+	resolveAttackTargets(actingActor, [targetActor])
+
+
+func resolveAttackTargets(actingActor, targetActors: Array) -> void:
+	var targets = _livingTargetActors(targetActors)
+	if targets.is_empty():
+		return
+	# One Cylinder roll per act, not per target (the target set shares the shot).
 	var quality = getHitQuality(actingActor)
 	if quality is String:
-		resolveSpecialChamber(quality, actingActor, targetActor)
+		resolveSpecialChamber(quality, actingActor, targets[0])
 		return
 	if quality == CylinderManagerScript.CHAMBER_MISS:
 		# A Miss consumes the Chamber but no on-hit effects or marks.
-		applyHitDamage(targetActor, 0, quality)
+		for targetActor in targets:
+			applyHitDamage(targetActor, 0, quality)
 		advanceCylinder(actingActor)
 		return
-	var damage = calculateAttackDamage(actingActor, targetActor, quality)
-	applyHitDamage(targetActor, damage, quality)
+	for targetActor in targets:
+		var damage = calculateAttackDamage(actingActor, targetActor, quality)
+		applyHitDamage(targetActor, damage, quality)
 	advanceCylinder(actingActor)
 
 func resolveMove(moveName: String, actingActor, targetActor) -> void:
+	resolveMoveTargets(moveName, actingActor, [targetActor])
+
+func resolveMoveTargets(moveName: String, actingActor, targetActors: Array) -> void:
 	var moveData = getDataSet("movesData").get(moveName, null)
 	if moveData == null:
 		push_warning("ShootoutActionResolver: unknown move '{moveName}'".format({ "moveName": moveName }))
+		return
+	var targets = _livingTargetActors(targetActors)
+	if targets.is_empty():
 		return
 	var amount = int(moveData.get("baseAmount", 0))
 	if moveData.has("scalingStat"):
 		amount += int(moveData.statScaling * actingActor.stats[moveData.scalingStat])
 	if moveData.get("category", "") == ATTACK_ABILITY_CATEGORY:
-		# Attack abilities use the Cylinder like basic attacks (decided).
+		# Attack abilities use the Cylinder like basic attacks (decided), and
+		# one roll covers the whole target set.
 		var quality = getHitQuality(actingActor)
 		if quality is String:
-			resolveSpecialChamber(quality, actingActor, targetActor)
+			resolveSpecialChamber(quality, actingActor, targets[0])
 			return
 		if quality == CylinderManagerScript.CHAMBER_MISS:
 			# No on-hit effects on a Miss for attack abilities either.
-			applyHitDamage(targetActor, 0, quality)
+			for targetActor in targets:
+				applyHitDamage(targetActor, 0, quality)
 			advanceCylinder(actingActor)
 			return
 		# Attack abilities roll quality on their own amount; weapon family
 		# defense rules don't apply (the ability amount isn't weapon damage).
 		var abilityDamage = maxi(0, roundi(amount * CylinderManagerScript.CHAMBER_DAMAGE_MULT[quality]))
-		applyHitDamage(targetActor, abilityDamage, quality)
+		for targetActor in targets:
+			applyHitDamage(targetActor, abilityDamage, quality)
 		advanceCylinder(actingActor)
 	elif moveData.get("category", "") == "duck":
 		# Ducks are defensive buffs: effects only, no damage (decided).
-		pass
+		for targetActor in targets:
+			applyActEffects(moveData.get("effects", []), targetActor, actingActor.name)
 	else:
 		# Non-attack abilities don't interact with the Cylinder at all (decided).
-		applyDamage(targetActor, amount)
-	applyActEffects(moveData.get("effects", []), targetActor, actingActor.name)
+		for targetActor in targets:
+			applyDamage(targetActor, amount)
+			applyActEffects(moveData.get("effects", []), targetActor, actingActor.name)
 
 func resolveItem(itemName: String, actingActor, targetActor) -> void:
+	resolveItemTargets(itemName, actingActor, [targetActor])
+
+func resolveItemTargets(itemName: String, actingActor, targetActors: Array) -> void:
 	var itemData = getDataSet("itemsData").get(itemName, null)
 	if itemData == null:
 		push_warning("ShootoutActionResolver: unknown item '{itemName}'".format({ "itemName": itemName }))
 		return
-	if targetActor == null:
-		# Invalid target: the act consumes nothing.
+	var targets = _livingTargetActors(targetActors)
+	if targets.is_empty():
+		# Invalid/empty target set: the act consumes nothing.
 		return
+	# One belt use pays for every legal target of a multi-heal.
 	if !_consumeBeltItem(actingActor, itemName):
 		return
 	var amount = int(itemData.get("baseAmount", 0))
 	var effectManager = shootout.get("effectManager")
-	if effectManager != null and effectManager.has_method("healActor"):
-		effectManager.healActor(targetActor.name, amount)
-	else:
-		targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
-		shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
-	applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)
+	for targetActor in targets:
+		if effectManager != null and effectManager.has_method("healActor"):
+			effectManager.healActor(targetActor.name, amount)
+		else:
+			targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
+			shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
+		applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)
+
+
+## Dead targets are dropped before any cost is charged. The same actor may
+## appear more than once when taunt redirects several protected positions to it
+## (Decided Open Question 4): each redirected position keeps its own hit.
+func _livingTargetActors(targetActors: Array) -> Array:
+	var living := []
+	for targetActor in targetActors:
+		if targetActor != null and is_instance_valid(targetActor) and int(targetActor.get("hp")) > 0:
+			living.append(targetActor)
+	return living
 
 
 ## Consumes one use. Party actors consume the matching reservation and report it

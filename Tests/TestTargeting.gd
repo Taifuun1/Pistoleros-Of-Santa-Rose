@@ -180,6 +180,43 @@ func _run() -> void:
 	_check(ctx.targeting.isValidTarget(enemyHeal, "Enemy Friend", "Enemy Healer"), "a friendly item cast by an enemy targets its own side")
 	_check(!ctx.targeting.isValidTarget(enemyHeal, "Player Target", "Enemy Healer"), "a friendly item cast by an enemy cannot target the player side")
 
+	print("\n--- Multi-target acts expand to ordered living sets ---")
+	ctx = makeFight()
+	ctx.fake.itemsData = { "MultiHeal": {
+		"name": "MultiHeal", "side": "player",
+		"positions": { "type": "multi", "targets": { "columns": [1, 2, 3, 4] } }
+	} }
+	var healer = addActor(ctx, "Healer", "player team", 2)
+	var hurtA = addActor(ctx, "HurtA", "player team", 1)
+	var hurtB = addActor(ctx, "HurtB", "player team", 3)
+	var deadAlly = addActor(ctx, "DeadAlly", "player team", 4)
+	deadAlly.hp = 0
+	addActor(ctx, "Enemy", "enemy team", 1)
+	var multiHeal = { "type": "Items", "name": "MultiHeal" }
+	var expanded = ctx.targeting.expandTargets(multiHeal, "HurtA", "Healer")
+	_check(expanded == ["HurtA", "Healer", "HurtB"], "multi-heal expands to every living ally in column order, got %s" % [expanded])
+	_check(!expanded.has("DeadAlly"), "multi-target expansion skips dead allies")
+	_check(!expanded.has("Enemy"), "multi-target expansion never crosses sides")
+	_check(ctx.targeting.expandTargets(multiHeal, "DeadAlly", "Healer").is_empty(), "an empty/dead-only multi set returns no targets")
+
+	ctx = makeFight()
+	ctx.fake.movesData = { "Sweep": {
+		"name": "Sweep", "category": "attack_ability", "side": "enemy",
+		"positions": { "type": "multi", "targets": { "columns": [1, 2, 3] } }
+	} }
+	var enemyShooter = addActor(ctx, "EnemyShooter", "enemy team", 1)
+	var playerOne = addActor(ctx, "PlayerOne", "player team", 1)
+	var playerTwo = addActor(ctx, "PlayerTwo", "player team", 2)
+	var playerThree = addActor(ctx, "PlayerThree", "player team", 3)
+	var playerFour = addActor(ctx, "PlayerFour", "player team", 4)
+	var sweep = { "type": "Moves", "name": "Sweep" }
+	expanded = ctx.targeting.expandTargets(sweep, "PlayerTwo", "EnemyShooter")
+	_check(expanded == ["PlayerOne", "PlayerTwo", "PlayerThree"], "multi-attack honors its authored target columns, got %s" % [expanded])
+	_check(!expanded.has("PlayerFour"), "multi-attack excludes an out-of-column target")
+	_check(!expanded.has("EnemyShooter"), "multi-attack never targets its own side")
+	_check(ctx.targeting.isMultiTargetAct(sweep), "the targeting manager identifies a multi act")
+	_check(!ctx.targeting.isMultiTargetAct({ "type": "Moves", "name": "Sharp Shot" }), "single moves stay single-target acts")
+
 	print("\n--- Position-conditional Rodeos follow repositioning ---")
 	ctx = makeFight()
 	var fake = ctx.fake

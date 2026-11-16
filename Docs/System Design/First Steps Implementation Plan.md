@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–7 implemented; the production integration blockers found during acceptance are closed, while the affected manual step 5 and controller/audio passes await reconfirmation.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Commit 7 wires the real Littlehill Grove quest trigger, central quest-result completion, production return-to-menu, gamepad bindings and Overworld Zone-context invalidation.
+**Status: commits 1–8 implemented; the production integration blockers found during acceptance are closed, while the affected manual step 5 and controller/audio passes await reconfirmation, and multi-target acts are covered by the full automated suite.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Commit 7 wires the real Littlehill Grove quest trigger, central quest-result completion, production return-to-menu, gamepad bindings and Overworld Zone-context invalidation. Commit 8 replaces the one-target act handoff with the shared target-set pipeline (expansion, per-position taunt, once-per-act costs, animation fan-out and AI set scoring).
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -40,6 +40,7 @@ This slice deliberately uses existing Walker, canyon rat, Paregoric and Lazyspri
 | 5 | Vamoose routing/loss and New Game reset | Correct destination/loss, Off-Trail restrictions restored, clean initial state |
 | 6 | Content lint, documentation and acceptance | Full automated suite plus manual vertical-slice run at 640×360 |
 | 7 | First-slice integration pass | Quest trigger/result lifecycle, production return-to-menu, gamepad bindings and music-transition invalidation |
+| 8 | Multi-target acts | One target-set pipeline for player/AI, per-position taunt, once-per-act costs, animation fan-out |
 
 Run focused tests after every commit and `godot --headless --path . --script res://Tests/RunAll.gd` before moving to the next commit. Keep the current uncommitted documentation updates separate from code commits unless a code change requires a doc update.
 
@@ -307,18 +308,18 @@ The immediate next slice after acceptance should be **multi-target acts plus eff
 
 **Exit gate:** automated tests now prove the production quest route, confirmed menu route, controller binding shapes and Zone-context invalidation. Physical controller, visual quest-trigger placement, 640×360 audio and live map-use confirmation remain the final manual gates.
 
+### ✅ Commit 8 — Multi-target acts
+
+**Implemented.** The one-target handoff in `Shootout.selectActor()`/`resolveWithFocus()` is replaced by one validated, ordered target-set pipeline shared by player acts and enemy AI. Open Question 4 is decided: a taunted caster takes one redirected hit per protected position.
+
+1. `ShootoutTargetingManager.expandTargets()` expands `positions.type: "multi"` into living targets on the authored side/columns in column/name order; single-target acts keep their one anchor. Dead/empty sets return no targets.
+2. `Shootout.resolveActTargetSet()` re-resolves per-position taunt with `redirectTauntSet()`, drops dead entries and calls `ShootoutActionResolver.resolveActTargets()`. Damage/healing, effects, death checks, focus and animations all consume the same resolved set, and the Cylinder/belt/turn cost is charged once per act.
+3. Armed moves/items tint every legal anchor for confirmation; `ShootoutAnimationSequencer` fans one effect step over each target and completes once. Enemy AI gathers one entry per multi act with its full `targetNames`, scores that set and executes the same dictionary.
+4. `Tests/TestTargeting`, `Tests/TestActs`, `Tests/TestEnemyAI`, `Tests/TestEffects`, `Tests/TestAnimationSequencer` and `Tests/TestMultiTargetFlow.tscn` cover expansion, per-position taunt, once-per-act costs, deaths/duplicates, AI set scoring and real-scene resolution.
+
+**Exit gate:** Doctor's Kit heals every legal living target from a single belt use, multi-target offense/support behave identically for both sides, and no effect or cost is applied twice.
+
 The next implementation gates remain:
-
-### Next commit 1 — Multi-target acts
-
-Keep the current single-target behavior intact while replacing the one-target handoff in `Shootout.selectActor()`/`resolveWithFocus()` with one validated, ordered target-set pipeline shared by player acts and enemy AI.
-
-1. Expand `positions.type: "multi"` into legal targets, including empty/dead-target handling and per-position taunt redirection. Resolve Open Question 4 in [Positions and Targeting](Shootout/Positions%20and%20Targeting.md) before implementing redirect stacking.
-2. Resolve damage, healing, effects, death checks, animations and focus against that same target set. Charge the Move, Cylinder and item use once per act, not once per target.
-3. Present the complete target set for confirmation and make enemy AI score the same resolved set rather than maintaining a second targeting path.
-4. Extend `TestTargeting`, `TestActs`, `TestEnemyAI` and a real encounter scene test for friendly/enemy multi-target acts, taunted subsets, deaths during resolution, cancelled acts and repeated input.
-
-**Exit gate:** Doctor's Kit really heals every legal living target, multi-target offense/support behaves identically for both sides, and no effect or cost is applied twice.
 
 ### Next commit 2 — Effect/stat seams
 

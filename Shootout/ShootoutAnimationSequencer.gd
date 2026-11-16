@@ -7,21 +7,42 @@ signal sequenceDone
 
 var steps = []
 var actingActor = null
+## Primary/first target, kept for single-target compatibility.
 var targetActor = null
+## Every target of the current act; one `selectedActor` animation step plays on
+## each of them.
+var targetActors: Array = []
 var running = false
 # The acting step resolves its turn through the armed frame hit; the
 # animation_finished hook below closes the sequence out when the animation ends.
 var awaitingActingHit = false
 var actingAnimationsNode = null
+# Target-effect steps wait for every target's effect, not only the first.
+var _pendingTargetEffects = 0
 
 
-func play(stepsInit: Array, actingActorInit: Node, targetActorInit: Node = null) -> void:
+func play(stepsInit: Array, actingActorInit: Node, targetActorInit = null) -> void:
 	clearActingCompletion()
 	steps = stepsInit.duplicate(true)
 	actingActor = actingActorInit
-	targetActor = targetActorInit
+	targetActors = normalizeTargets(targetActorInit)
+	targetActor = targetActors[0] if !targetActors.is_empty() else null
+	_pendingTargetEffects = 0
 	running = true
 	advance()
+
+
+## Accepts one actor or an ordered set. Dead/freed entries are dropped; the
+## caller decides their meaning before this point.
+static func normalizeTargets(value) -> Array:
+	var targets := []
+	if value is Array:
+		for target in value:
+			if target != null and is_instance_valid(target):
+				targets.append(target)
+	elif value != null and is_instance_valid(value):
+		targets.append(value)
+	return targets
 
 func advance() -> void:
 	if steps.is_empty():
@@ -49,18 +70,36 @@ func clearActingCompletion() -> void:
 
 func playTargetEffect(step: Dictionary) -> void:
 	var effectPath = step.get("path", "")
-	if targetActor == null or effectPath == "" or !ResourceLoader.exists(effectPath):
+	var targets := normalizeTargets(targetActors)
+	if targets.is_empty() or effectPath == "" or !ResourceLoader.exists(effectPath):
 		advance()
 		return
-	var effect = load(effectPath).instantiate()
-	targetActor.add_child(effect)
-	# Effect scenes default to the actor origin, which is the character's
-	# FEET (sprite offsets draw the body above it): anchor the effect above
-	# the drawn body instead (Docs/Features and Issues.md — centered on the
-	# body still covers the character).
-	effect.position = targetEffectAnchor(targetActor, effect)
-	effect.tree_exited.connect(advance)
-	effect.playAnimation("Effect")
+	_pendingTargetEffects = targets.size()
+	var spawned := 0
+	for target in targets:
+		if !target.is_inside_tree():
+			_pendingTargetEffects -= 1
+			continue
+		var effect = load(effectPath).instantiate()
+		target.add_child(effect)
+		# Effect scenes default to the actor origin, which is the character's
+		# FEET (sprite offsets draw the body above it): anchor the effect above
+		# the drawn body instead (Docs/Features and Issues.md — centered on the
+		# body still covers the character).
+		effect.position = targetEffectAnchor(target, effect)
+		effect.tree_exited.connect(_on_target_effect_exited)
+		effect.playAnimation("Effect")
+		spawned += 1
+	if spawned == 0 or _pendingTargetEffects <= 0:
+		advance()
+
+## One target effect finished. The step only advances after every target's
+## effect has left the tree, so a multi-target act stays on-screen as one beat.
+func _on_target_effect_exited() -> void:
+	_pendingTargetEffects -= 1
+	if _pendingTargetEffects <= 0:
+		_pendingTargetEffects = 0
+		advance()
 
 ## Where an act effect belongs: horizontally centered on the target's drawn
 ## body, with the effect's bottom sitting on the body's top line so the whole

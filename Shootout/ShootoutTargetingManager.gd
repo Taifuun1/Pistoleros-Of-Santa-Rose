@@ -9,6 +9,9 @@ const TEAM_ENEMY = "enemy team"
 const ACT_TYPE_ATTACK = "Attack"
 const ACT_TYPE_MOVES = "Moves"
 const ACT_TYPE_ITEMS = "Items"
+const TARGET_TYPE_SINGLE = "single"
+const TARGET_TYPE_MULTI = "multi"
+const DEFAULT_TARGET_COLUMNS := [1, 2, 3, 4]
 
 var turnManager
 var weaponRanges = {}
@@ -46,6 +49,106 @@ func getDataSet(dataSet: String) -> Dictionary:
 		if globals != null and globals.get(dataSet) is Dictionary:
 			return globals.get(dataSet)
 	return {}
+
+
+## The authored data entry backing an act, or null for basic Attacks/unknown ids.
+func getActData(act: Dictionary) -> Variant:
+	match str(act.get("type", "")):
+		ACT_TYPE_MOVES:
+			return getDataSet("movesData").get(str(act.get("name", "")), null)
+		ACT_TYPE_ITEMS:
+			return getDataSet("itemsData").get(str(act.get("name", "")), null)
+	return null
+
+
+## Ordered, living targets for one act. A single-target act returns exactly the
+## clicked/primary target. A `positions.type: "multi"` act expands to every
+## legal living actor on its target side and authored columns, sorted by column
+## then stable actor name. Dead actors and empty sets return [].
+func expandTargets(act: Dictionary, primaryTargetName: String, actingActorName: String) -> Array:
+	if primaryTargetName == "" or !isValidTarget(act, primaryTargetName, actingActorName):
+		return []
+	var actData = getActData(act)
+	if actData == null:
+		return [primaryTargetName]
+	var positions = actData.get("positions", {})
+	if str(positions.get("type", TARGET_TYPE_SINGLE)) != TARGET_TYPE_MULTI:
+		return [primaryTargetName]
+	var targetSide = getActSide(getDataSet(actDataSetName(act)), str(act.get("name", "")), actingActorName)
+	if targetSide == "":
+		return []
+	var allowedColumns = targetColumnsFor(positions)
+	var candidates := []
+	for actorName in livingActorsOfSide(targetSide):
+		var column = getActorColumn(actorName)
+		if !allowedColumns.is_empty() and !(column in allowedColumns):
+			continue
+		candidates.append({ "name": actorName, "column": column })
+	candidates.sort_custom(func(a, b) -> bool:
+		if int(a.column) != int(b.column):
+			return int(a.column) < int(b.column)
+		return str(a.name) < str(b.name)
+	)
+	var names := []
+	for candidate in candidates:
+		names.append(str(candidate.name))
+	# The primary target anchors the act's legal range. A multi act whose target
+	# columns exclude it is not a usable act for that click.
+	if !names.has(primaryTargetName):
+		return []
+	return names
+
+
+## True when the act's authored side is the side opposite the acting actor.
+func targetsOpposingSide(act: Dictionary, actingActorName: String) -> bool:
+	if str(act.get("type", "")) == ACT_TYPE_ATTACK:
+		return true
+	var dataSet = getDataSet(actDataSetName(act))
+	var targetSide = getActSide(dataSet, str(act.get("name", "")), actingActorName)
+	return targetSide != "" and targetSide != turnManager.sideOfActor(actingActorName)
+
+
+## True when the authored act expands to a target set.
+func isMultiTargetAct(act: Dictionary) -> bool:
+	var actData = getActData(act)
+	if actData == null:
+		return false
+	var positions = actData.get("positions", {})
+	return str(positions.get("type", TARGET_TYPE_SINGLE)) == TARGET_TYPE_MULTI
+
+
+## Authored target columns for a positions block; [] means unrestricted/all.
+func targetColumnsFor(positions: Dictionary) -> Array:
+	var targets = positions.get("targets", {})
+	if targets is Dictionary and targets.has("columns"):
+		var columns = targets.columns
+		return columns.duplicate() if columns is Array else []
+	if targets is Array:
+		return targets.duplicate()
+	return []
+
+
+## Living actors on one side, filtered from the turn manager registry. The
+## registry keeps dead actors until cleanup, so callers must never treat its
+## keys as live targets.
+func livingActorsOfSide(side: String) -> Array:
+	var living := []
+	if turnManager == null:
+		return living
+	for actorName in turnManager.shootoutActors.get(side, {}):
+		var actor = getActor(actorName)
+		if actor != null and int(actor.get("hp")) > 0:
+			living.append(actorName)
+	return living
+
+
+func actDataSetName(act: Dictionary) -> String:
+	match str(act.get("type", "")):
+		ACT_TYPE_MOVES:
+			return "movesData"
+		ACT_TYPE_ITEMS:
+			return "itemsData"
+	return ""
 
 func moveUsability(moveNames: Array, actingActorName: String, silenced: bool, dataSet: Dictionary) -> Dictionary:
 	var usability = {}

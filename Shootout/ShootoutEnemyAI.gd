@@ -85,14 +85,10 @@ func gatherLegalActs(actorName: String) -> Array:
 	# Moves (silence and column filtering included).
 	var silenced = isSilenced(actorName)
 	for moveName in targetingManager.usableMoves(actorList(actingActor, "moves"), actorName, silenced, dataSet("movesData")):
-		for targetName in livingActors():
-			if targetingManager.isValidTarget({ "type": "Moves", "name": moveName }, targetName, actorName):
-				legal.append({ "type": "Moves", "name": moveName, "targetName": targetName })
+		appendLegalActEntries(legal, { "type": "Moves", "name": moveName }, actorName, targetingManager)
 	# Items.
 	for itemName in actorList(actingActor, "items"):
-		for targetName in livingActors():
-			if targetingManager.isValidTarget({ "type": "Items", "name": itemName }, targetName, actorName):
-				legal.append({ "type": "Items", "name": itemName, "targetName": targetName })
+		appendLegalActEntries(legal, { "type": "Items", "name": itemName }, actorName, targetingManager)
 	# Repositioning is legal when the destination move can actually happen.
 	var turnManager = getManager("turnManager")
 	if turnManager != null:
@@ -102,6 +98,51 @@ func gatherLegalActs(actorName: String) -> Array:
 			if turnManager.canMoveActor(actorName, column + delta):
 				legal.append({ "type": "Reposition", "direction": direction })
 	return legal
+
+
+## Single-target acts keep one entry per legal target so scoring can choose the
+## best one. Multi acts collapse to one entry whose `targetNames` is the full
+## resolved set, so AI scores exactly what will resolve.
+func appendLegalActEntries(legal: Array, act: Dictionary, actorName: String, targetingManager) -> void:
+	if targetingManager.isMultiTargetAct(act):
+		var primaryTarget = firstLegalTarget(act, actorName, targetingManager)
+		if primaryTarget != "":
+			var expanded = targetingManager.expandTargets(act, primaryTarget, actorName)
+			if !expanded.is_empty():
+				legal.append({
+					"type": act.type,
+					"name": act.name,
+					"targetName": primaryTarget,
+					"targetNames": expanded,
+				})
+		return
+	for targetName in livingActors():
+		if targetingManager.isValidTarget(act, str(targetName), actorName):
+			legal.append({
+				"type": act.type,
+				"name": act.name,
+				"targetName": str(targetName),
+				"targetNames": [str(targetName)],
+			})
+
+
+## First legal anchor target for an act, in deterministic column/name order.
+## Multi acts expand from this anchor through `expandTargets`.
+func firstLegalTarget(act: Dictionary, actorName: String, targetingManager) -> String:
+	var candidates = []
+	for side in ["player team", "enemy team"]:
+		candidates.append_array(targetingManager.livingActorsOfSide(side))
+	candidates.sort_custom(func(a, b) -> bool:
+		var columnA = targetingManager.getActorColumn(str(a))
+		var columnB = targetingManager.getActorColumn(str(b))
+		if columnA != columnB:
+			return columnA < columnB
+		return str(a) < str(b)
+	)
+	for targetName in candidates:
+		if targetingManager.isValidTarget(act, targetName, actorName):
+			return str(targetName)
+	return ""
 
 
 ## Adds a "score" to every legal act (archetype-weighted, see the design doc).
@@ -135,41 +176,55 @@ func scoreAct(act: Dictionary, actingActor) -> float:
 
 func scoreMove(act: Dictionary, actingActor) -> float:
 	var moveData = dataSet("movesData").get(act.name, {})
-	var target = getActor(act.targetName)
-	if target == null:
+	var targetNames = actTargetNames(act)
+	if targetNames.is_empty():
 		return 0.0
-	var score = 1.0
+	var score = 0.0
 	if moveData.get("category", "ability") == "duck":
-		score = 2.0 + woundedAllies(ownSide(actingActor.name)) * 2.0
+		var duckScore = 2.0 + woundedAllies(ownSide(actingActor.name)) * 2.0
 		if aiValue(actingActor, "archetype", "damage") == "tank":
-			score += 3.0
-		return score
-	if moveData.get("category", "") == "attack_ability" or moveData.get("baseAmount", 0) > 0:
-		var amount = int(moveData.get("baseAmount", 0))
-		if moveData.has("scalingStat"):
-			amount += int(moveData.statScaling * actingActor.stats[moveData.scalingStat])
-		score = float(amount) * 0.8
-		if amount >= target.hp:
-			score += KILL_BONUS * 0.5
-	for effect in moveData.get("effects", []):
-		score += effectScore(effect, actingActor, target)
+			duckScore += 3.0
+		return duckScore * targetNames.size()
+	for targetName in targetNames:
+		var target = getActor(str(targetName))
+		if target == null:
+			continue
+		if moveData.get("category", "") == "attack_ability" or moveData.get("baseAmount", 0) > 0:
+			var amount = int(moveData.get("baseAmount", 0))
+			if moveData.has("scalingStat"):
+				amount += int(moveData.statScaling * actingActor.stats[moveData.scalingStat])
+			score += float(amount) * 0.8
+			if amount >= target.hp:
+				score += KILL_BONUS * 0.5
+		for effect in moveData.get("effects", []):
+			score += effectScore(effect, actingActor, target)
 	return score
 
 func scoreItem(act: Dictionary, actingActor) -> float:
 	var itemData = dataSet("itemsData").get(act.name, {})
-	var target = getActor(act.targetName)
-	if target == null:
-		return 0.0
 	var score = 0.0
-	var amount = int(itemData.get("baseAmount", 0))
-	if amount > 0 and isAllied(actingActor.name, act.targetName):
-		# Heal-score by missing HP (design doc), so the support prefers the
-		# most wounded ally instead of tying every wounded target at the item
-		# amount.
-		score = float(target.maxHp - target.hp)
-	for effect in itemData.get("effects", []):
-		score += effectScore(effect, actingActor, target)
+	for targetName in actTargetNames(act):
+		var target = getActor(str(targetName))
+		if target == null:
+			continue
+		var amount = int(itemData.get("baseAmount", 0))
+		if amount > 0 and isAllied(actingActor.name, str(targetName)):
+			# Heal-score by missing HP (design doc), so the support prefers the
+			# most wounded ally instead of tying every wounded target at the item
+			# amount. A multi-heal sums every affected ally.
+			score += float(target.maxHp - target.hp)
+		for effect in itemData.get("effects", []):
+			score += effectScore(effect, actingActor, target)
 	return score
+
+
+## Every target of the scored act, including the full multi-target set.
+func actTargetNames(act: Dictionary) -> Array:
+	var names = act.get("targetNames", [])
+	if names is Array and !names.is_empty():
+		return names
+	var primary = str(act.get("targetName", ""))
+	return [primary] if primary != "" else []
 
 func effectScore(effect: Dictionary, actingActor, target) -> float:
 	match effect.get("op", "apply_effect"):
@@ -196,12 +251,18 @@ func livingActors(side := "") -> Array:
 	var turnManager = getManager("turnManager")
 	if turnManager == null:
 		return []
+	var names := []
 	if side != "":
-		return turnManager.shootoutActors.get(side, {}).keys()
-	var all = []
-	for actorSide in turnManager.shootoutActors:
-		all.append_array(turnManager.shootoutActors[actorSide].keys())
-	return all
+		names = turnManager.shootoutActors.get(side, {}).keys()
+	else:
+		for actorSide in turnManager.shootoutActors:
+			names.append_array(turnManager.shootoutActors[actorSide].keys())
+	var living := []
+	for actorName in names:
+		var actor = getActor(str(actorName))
+		if actor != null and int(actor.get("hp")) > 0:
+			living.append(actorName)
+	return living
 
 func ownSide(actorName: String) -> String:
 	var turnManager = getManager("turnManager")

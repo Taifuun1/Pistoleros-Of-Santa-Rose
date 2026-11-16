@@ -343,6 +343,18 @@ func redirectTaunt(actingSide: String, targetName: String) -> String:
 	return ""
 
 
+## Per-position taunt redirect for a whole target set (Decided Open Question 4):
+## each protected position redirects its own hit, so a caster protecting two hit
+## positions appears twice and takes two hits. Unprotected positions keep their
+## original target.
+func redirectTauntSet(actingSide: String, targetNames: Array) -> Array:
+	var resolved := []
+	for targetName in targetNames:
+		var redirect = redirectTaunt(actingSide, str(targetName))
+		resolved.append(redirect if redirect != "" else str(targetName))
+	return resolved
+
+
 # Columns currently held by other allies of the actor (taunt default).
 func allyPositions(actorName: String) -> Array:
 	var positions = []

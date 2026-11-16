@@ -21,6 +21,7 @@ class FakeActor:
 	var weapon = { "type": "lead", "weapon": "revolver", "baseDamage": 0 }
 	var moves = []
 	var items = []
+	var beltReservations = []
 	var characterClass = null
 	var characterMagazine = null
 
@@ -48,12 +49,13 @@ class FakeShootout:
 class FakeCylinder:
 	extends RefCounted
 	var quality
+	var advances = 0
 	func _init(qualityValue):
 		quality = qualityValue
 	func hitQuality(_actorName):
 		return quality
 	func advance(_actorName):
-		pass
+		advances += 1
 
 
 func _init() -> void:
@@ -89,6 +91,13 @@ func addActor(ctx: Dictionary, actorName: String, side: String, column: int) -> 
 
 
 func _run() -> void:
+	print("\n--- Production multi-target data ---")
+	var multiHealHolder = load("res://Data/Shootout/Items/MultiHeal.gd").new()
+	var multiHealData = multiHealHolder.data
+	_check(str(multiHealData.get("positions", {}).get("type", "")) == "multi", "Doctor's Kit production data is a multi-target item")
+	_check(multiHealData.get("positions", {}).get("targets", {}).get("columns", []) == [1, 2, 3, 4], "Doctor's Kit authors every ally column")
+	multiHealHolder.free()
+
 	print("--- Loadout limits: move cap and belt space ---")
 	var actorData = {
 		"actorName": "Test", "hp": 10, "walkingSpeed": 1, "runningSpeed": 1,
@@ -198,6 +207,53 @@ func _run() -> void:
 	ctx.turnManager.setActorPosition("Mover", 3)
 	usable = ctx.targeting.usableMoves(["Long Shot", "Sharp", "Duck Down"], "Mover", false, ctx.fake.movesData)
 	_check(usable == ["Long Shot", "Duck Down"], "column filter follows repositioning, got %s" % [usable])
+
+	print("\n--- Multi-target acts charge one cost and apply per target ---")
+	ctx = makeFight()
+	ctx.fake.itemsData = { "multiHeal": {
+		"name": "multiHeal", "side": "player", "baseAmount": 5,
+		"positions": { "type": "multi", "targets": { "columns": [1, 2, 3, 4] } }
+	} }
+	var multiHealer = addActor(ctx, "Healer", "player team", 1)
+	multiHealer.items = ["multiHeal"]
+	multiHealer.beltReservations = [{ "instanceId": "heal_stack", "combatId": "multiHeal", "quantity": 2 }]
+	var allyA = addActor(ctx, "AllyA", "player team", 2)
+	allyA.hp = 20
+	var allyB = addActor(ctx, "AllyB", "player team", 3)
+	allyB.hp = 30
+	ctx.resolver.resolveItemTargets("multiHeal", multiHealer, [multiHealer, allyA, allyB])
+	_check(multiHealer.hp == 35 and allyA.hp == 25 and allyB.hp == 35, "one multi-heal heals every target")
+	_check(multiHealer.items.is_empty() and multiHealer.beltReservations[0].quantity == 1, "a multi-target item consumes exactly one belt use")
+
+	ctx = makeFight()
+	ctx.fake.itemsData = { "multiHeal": { "name": "multiHeal", "side": "player", "baseAmount": 5,
+		"positions": { "type": "multi", "targets": { "columns": [1, 2, 3, 4] } } } }
+	var spareHealer = addActor(ctx, "SpareHealer", "player team", 1)
+	spareHealer.items = ["multiHeal"]
+	spareHealer.beltReservations = [{ "instanceId": "heal_stack", "combatId": "multiHeal", "quantity": 1 }]
+	var deadAlly = addActor(ctx, "DeadAlly", "player team", 2)
+	deadAlly.hp = 0
+	ctx.resolver.resolveItemTargets("multiHeal", spareHealer, [deadAlly])
+	_check(spareHealer.items.size() == 1 and spareHealer.beltReservations[0].quantity == 1, "a dead-only target set consumes nothing")
+
+	ctx = makeFight()
+	ctx.fake.movesData = { "Sweep": { "name": "Sweep", "category": "attack_ability", "baseAmount": 3, "side": "enemy" } }
+	var sweeper = addActor(ctx, "Sweeper", "enemy team", 1)
+	var sweepA = addActor(ctx, "SweepA", "player team", 1)
+	var sweepB = addActor(ctx, "SweepB", "player team", 2)
+	ctx.fake.cylinderManager = FakeCylinder.new(2)
+	ctx.resolver.resolveMoveTargets("Sweep", sweeper, [sweepA, sweepB])
+	_check(sweepA.hp == 27 and sweepB.hp == 27, "a multi attack ability hits every target")
+	_check(ctx.fake.cylinderManager.advances == 1, "a multi-target attack ability advances the Cylinder once")
+
+	ctx = makeFight()
+	ctx.fake.movesData = { "Sweep": { "name": "Sweep", "category": "attack_ability", "baseAmount": 3, "side": "enemy" } }
+	var duplicatingSweeper = addActor(ctx, "DuplicatingSweeper", "enemy team", 1)
+	var fragile = addActor(ctx, "Fragile", "player team", 1)
+	fragile.hp = 7
+	ctx.fake.cylinderManager = FakeCylinder.new(2)
+	ctx.resolver.resolveMoveTargets("Sweep", duplicatingSweeper, [fragile, fragile])
+	_check(fragile.hp == 1, "a target that appears twice takes both resolved hits (taunt-per-position rule)")
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

@@ -16,21 +16,21 @@ This is a design doc: it describes the intended design, and the implementation m
 
 **Implemented** (the decision pipeline, archetypes and boss scripts; content authoring of `ai` blocks and boss scripts is ongoing):
 
-- `Shootout/ShootoutEnemyAI.gd` replaces the random-target stub with `chooseAct()`: `gatherLegalActs()` uses the exact same validation as the player (targeting manager ranges, silence, usable-move filtering, `canMoveActor` for repositioning), `scoreActs()` grades every act/target pair, and `pickFromTop()` chooses randomly among the 2 best.
-- Scoring (placeholder weights): attack abilities and damage moves score their amount (with a kill bonus); affliction effects score on unafflicted targets; heals score on wounded allies; Ducks score with wounded allies (bonus for the tank archetype); items heal-score by missing HP; repositioning scores only when useful (preferred-column bonus).
+- `Shootout/ShootoutEnemyAI.gd` replaces the random-target stub with `chooseAct()`: `gatherLegalActs()` uses the exact same validation/expansion as the player (targeting manager ranges, silence, usable-move filtering, `canMoveActor` for repositioning, multi acts collapsed to one entry with their full `targetNames`), `scoreActs()` grades every act/target set, and `pickFromTop()` chooses randomly among the 2 best.
+- Scoring (placeholder weights): attack abilities and damage moves score their amount (with a kill bonus); affliction effects score on unafflicted targets; heals score on wounded allies; Ducks score with wounded allies (bonus for the tank archetype); items heal-score by missing HP; multi acts sum their target set; repositioning scores only when useful (preferred-column bonus).
 - Archetype weights via the optional `ai` block on actor data (`archetype`, `preferredColumns`, `aggression`, `script`); missing blocks fall back to the damage archetype defaults.
 - Boss scripts: `Data/Shootout/AI/*.gd` (`rules` list of `{ when: { hpBelow/hpAbove }, act: { type, name, targetName } }` with `self`/`lowestHpAlly`/`lowestHpEnemy` targets), loaded into `Shootout.aiData`; the first passing rule beats all scoring.
-- Enemy turns route through the same resolution path as player acts (`resolveActOnce` handles moves, items and repositioning uniformly), with taunt redirect on attack Moves.
-- Tests: `Tests/TestEnemyAI.gd` covers gathering/validation parity, silence, lethal-target preference, support healing, reposition fallback and boss-script priority.
+- Enemy turns route through the same target-set resolution path as player acts (`resolveActOnce` handles moves, items and repositioning uniformly), with per-position taunt redirect.
+- Tests: `Tests/TestEnemyAI.gd` covers gathering/validation parity, silence, lethal-target preference, support healing, reposition fallback, boss-script priority and multi-act set gathering/scoring.
 
 ## Design
 
 ### Decision pipeline
 
-`chooseAct(actorName) -> Dictionary` replaces `chooseTarget()`, returning a full act `{ "type", "name"?, "targetName" }`:
+`chooseAct(actorName) -> Dictionary` replaces `chooseTarget()`, returning a full act `{ "type", "name"?, "targetName", "targetNames"? }`:
 
-1. **Gather legal acts** — each known move usable from the current column (skipping abilities when silenced, see [Effects](Effects.md)); each remaining item; reposition forward/backward. This uses the exact same validation functions as the player UI so AI and player can never diverge. Basic weapon attacks do not exist; every attack is an authored Move.
-2. **Score each act+target pair** — weighted scoring:
+1. **Gather legal acts** — each known move usable from the current column (skipping abilities when silenced, see [Effects](Effects.md)); each remaining item; reposition forward/backward. Single-target acts produce one entry per legal target; `positions.type: "multi"` acts produce one entry with the full `targetNames` set. This uses the exact same validation/expansion functions as the player UI so AI and player can never diverge. Basic weapon attacks do not exist; every attack is an authored Move.
+2. **Score each act+target set** — weighted scoring; multi acts sum their resolved set:
    - Attack Moves: authored base amount plus scaling, with a kill bonus; cylinder/quality resolution happens at execution.
    - Affliction moves: value of the effect on targets that lack it; reduced value on already-afflicted targets.
    - Taunt/Ducks: high when allies are low HP or when the caster is the tank class; low when already taunting.

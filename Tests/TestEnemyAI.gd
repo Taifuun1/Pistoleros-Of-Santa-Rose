@@ -181,6 +181,42 @@ func _run() -> void:
 	boss.hp = 50
 	_check(ctx.enemyAI.chooseScriptedAct("Boss").is_empty(), "no rule applies above the HP threshold")
 
+	print("\n--- Multi-target acts gather and score as one resolved set ---")
+	ctx = makeFight()
+	ctx.fake.movesData = {
+		"Sweep": { "name": "Sweep", "category": "attack_ability", "side": "enemy", "baseAmount": 2,
+			"positions": { "type": "multi", "targets": { "columns": [1, 2, 3, 4] } } },
+	}
+	var sweeper = addActor(ctx, "Sweeper", "enemy team", 1)
+	sweeper.moves = ["Sweep"]
+	var sweepTargetA = addActor(ctx, "SweepTargetA", "player team", 1)
+	var sweepTargetB = addActor(ctx, "SweepTargetB", "player team", 2)
+	sweepTargetB.hp = 5
+	legal = ctx.enemyAI.gatherLegalActs("Sweeper")
+	var sweepActs = legal.filter(func(act): return act.type == "Moves" and act.name == "Sweep")
+	_check(sweepActs.size() == 1, "a multi act is gathered once, not once per target, got %d" % sweepActs.size())
+	if sweepActs.size() == 1:
+		_check(sweepActs[0].targetNames.size() == 2, "the gathered multi act carries its full target set, got %s" % [sweepActs[0].targetNames])
+		_check(sweepActs[0].targetName == "SweepTargetA", "the multi act keeps a deterministic anchor target")
+	var scoredSweep = ctx.enemyAI.scoreActs("Sweeper", legal)
+	_check(scoredSweep[0].targetNames.size() == 2, "AI scores the same resolved set it will execute")
+
+	ctx = makeFight()
+	ctx.fake.itemsData = { "multiHeal": { "name": "multiHeal", "side": "player", "baseAmount": 5,
+		"positions": { "type": "multi", "targets": { "columns": [1, 2, 3, 4] } } } }
+	var support = addActor(ctx, "Support", "enemy team", 1)
+	support.items = ["multiHeal"]
+	support.ai = { "archetype": "support", "aggression": 0.2 }
+	var woundedOne = addActor(ctx, "WoundedOne", "enemy team", 2)
+	woundedOne.hp = 10
+	var woundedTwo = addActor(ctx, "WoundedTwo", "enemy team", 3)
+	woundedTwo.hp = 15
+	legal = ctx.enemyAI.gatherLegalActs("Support")
+	var healActs = legal.filter(func(act): return act.type == "Items" and act.name == "multiHeal")
+	_check(healActs.size() == 1 and healActs[0].targetNames.size() == 3, "a multi-heal is gathered once with every wounded ally")
+	scoredSweep = ctx.enemyAI.scoreActs("Support", legal)
+	_check(scoredSweep[0].type == "Items" and scoredSweep[0].score > 60.0, "multi-heal scores the sum of missing ally HP, got %f" % scoredSweep[0].score)
+
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:

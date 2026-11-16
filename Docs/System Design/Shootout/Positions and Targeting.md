@@ -15,7 +15,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (steps 1-5 of the implementation order; single-target resolution only, with multi-target acts as the next implementation slice and UI grey-out polish pending):
+**Implemented** (steps 1-6 of the implementation order; the multi-target target-set pipeline is live, with UI grey-out polish still pending):
 
 - `Globals/Shootout.gd` `shootoutPositions` maps each team's columns 1-4 to screen coordinates; `Shootout.getPositionForColumn()` resolves them.
 - The turn manager is the single source of truth for positions: `getActorPosition()`, `placeActor()` (raw set + node move) and the occupancy-aware `setActorPosition()` — one actor per position (decided), the mover takes the spot and the displaced occupants shift one column toward the mover's vacated spot (squeeze repositioning; see Occupancy and displacement). The displaced chain fills exactly the vacated span, so a move inside the row never fails; only no-op targets and out-of-row requests do.
@@ -23,8 +23,9 @@ This is a design doc: it describes the intended design, and the implementation m
 - **Reposition act** (`Shootout.ACT_TYPE_REPOSITION`): a Reposition button in `ShootoutUI.tscn` opens a Forward/Backward picker in the acts panel; the Move costs the turn, never advances the Cylinder (decided), and fails without spending the Move only when the requested column clamps to a no-op (the row's front or back edge). `Shootout.repositionActor()` commits the squeeze repositioning and slides every fighter the move touched to their new spot.
 - Move acts are filtered to those usable from the acting character's current column; silenced actors lose abilities but keep Ducks (see [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
 - The Rodeo manager reads positions live through the turn manager: position-conditional Rodeos (Happy Shot) track repositioning, adjacency targeting (Camaradería) uses live columns, and `move_position` (Leaders Duck) routes through the occupancy-aware mover.
-- Taunt redirect is handled at resolution in `Shootout.resolveActOnce()` (see [Effects](Effects.md)); tests cover it there.
-- Tests: `Tests/TestTargeting.gd` covers squeeze repositioning (one-column swaps, multi-column line shuffles, forward moves in a full row, bounds), move/weapon ranges, item permissiveness and position-conditional Rodeos.
+- Taunt redirect is resolved per affected position inside the shared target-set pipeline (see [Effects](Effects.md)); tests cover single- and multi-target redirects.
+- **Multi-target acts:** `ShootoutTargetingManager.expandTargets()` turns `positions.type: "multi"` into an ordered, living target set (authored columns, column/name order); `Shootout.resolveActTargetSet()` drops dead entries, applies per-position taunt redirect and calls the resolver once. `ShootoutActionResolver.resolveActTargets()` charges the Cylinder roll / belt use / effects once per act, then applies the result to every target. The same set drives field highlights, focus (anchor target), animation fan-out and enemy AI scoring.
+- Tests: `Tests/TestTargeting.gd` covers squeeze repositioning (one-column swaps, multi-column line shuffles, forward moves in a full row, bounds), move/weapon ranges, item permissiveness, multi-set expansion/dead/side filtering and position-conditional Rodeos. `Tests/TestActs`, `Tests/TestEnemyAI`, `Tests/TestEffects`, `Tests/TestAnimationSequencer` and `Tests/TestMultiTargetFlow.tscn` cover once-per-act costs, per-position taunt, AI set scoring and real-scene resolution.
 
 ## Design
 
@@ -71,25 +72,28 @@ Decided rule: a position holds **at most one** living actor per side — the cha
 With the effect system (see [Effects](Effects.md)):
 
 - Taunt is stored on the caster with its protected `positions` and `roundsLeft`.
-- `ShootoutTargetingManager.isValidTarget()` stays pure validation; redirect happens at resolution: `Shootout.selectActor()` / enemy AI target choice call `effectManager.redirectTaunt(actingSide, targetName)`, which swaps the target to the taunt caster when the chosen target stands in a taunted position.
-- Multi-target acts re-resolve each affected position individually, per Open Question 11 in `Docs/Combat.md`.
+- `ShootoutTargetingManager.isValidTarget()` stays pure validation; redirect happens in the resolution pipeline: `Shootout.resolveActTargetSet()` calls `effectManager.redirectTauntSet(actingSide, targetNames)`, which swaps every protected position to the taunt caster.
+- Multi-target acts re-resolve each affected position individually (Open Question 4 below is decided).
 
-### Next slice — multi-target acts
+### Multi-target target sets — implemented
 
-Current resolution is single-target: `Shootout.selectActor()` stores one actor and `resolveWithFocus()` calls the resolver once. The next implementation commit must replace that handoff with one validated, ordered target-set pipeline shared by player and AI:
+`ShootoutTargetingManager.expandTargets()` is the single expansion point for player clicks and AI acts:
 
-1. Expand `positions.type: "multi"` into legal targets, with explicit empty/dead-target behavior and once-per-act Move/Cylinder/item costs.
-2. Re-resolve taunt for each affected position. First decide Open Question 4 below: whether a caster hit through several protected positions takes each redirected hit once per position or only once per act. Do not encode an accidental answer in the pipeline.
-3. Feed the same target set to damage/healing, effects, death checks, animations/focus and UI confirmation. Enemy AI must score that resolved set rather than duplicate target expansion.
-4. Prove friendly and enemy acts, partially taunted sets, targets dying mid-resolution, cancellation/repeated input and no double consumption in `TestTargeting`, `TestActs`, `TestEnemyAI` and a real encounter scene test. Doctor's Kit must heal every legal living target.
+1. `positions.type: "multi"` expands to every living actor on the authored target side and columns, ordered by column then stable name. `single` (default) returns exactly the clicked/anchor target. Dead actors and empty sets return `[]` before any cost is charged.
+2. `ShootoutEffectManager.redirectTauntSet()` re-resolves taunt for each affected position. A caster hit through several protected positions appears once per position and takes each redirected hit (Open Question 4 decided below).
+3. `Shootout.resolveActTargetSet()` feeds the same set through damage/healing, effects, death checks, focus and animation. `ShootoutActionResolver.resolveActTargets()` charges the Cylinder roll, belt use and act cost once, then applies the result per target. Enemy AI gathers one entry per multi act with that full `targetNames` set and scores the set it will execute.
+4. Field highlights show every legal anchor for the armed move/item; clicking any anchor confirms the complete set.
 
 ## Files to create / modify
 
 **Modify**
 
-- `Shootout/ShootoutTurnManager.gd` — `getActorPosition()` / `setActorPosition()` (moves the node; keeps the registry authoritative).
-- `Shootout/ShootoutTargetingManager.gd` — column-range validation, weapon range check.
-- `Shootout/Shootout.gd` — reposition act handling, act-list usability filtering, taunt redirect call in `selectActor()`.
+- `Shootout/ShootoutTargetingManager.gd` — column-range validation, weapon range check, and `expandTargets()` multi-set expansion.
+- `Shootout/Shootout.gd` — target-set selection/resolution (`resolveActTargetSet()`), act feedback filtering, animation/focus/death fan-out.
+- `Shootout/ShootoutActionResolver.gd` — once-per-act target-set resolution (`resolveActTargets()`) with single-target wrappers preserved.
+- `Shootout/ShootoutAnimationSequencer.gd` — one target-effect step fans out over the whole set and completes once.
+- `Shootout/ShootoutEffectManager.gd` — `redirectTauntSet()` per-position redirect.
+- `Shootout/ShootoutEnemyAI.gd` — gather one multi act with its full `targetNames`, score the resolved set.
 - `Shootout/ShootoutRodeoManager.gd` — `move_position` goes through `turnManager.setActorPosition()`; reads positions from the turn manager.
 - `Shootout/UI/ShootoutUI.gd` + `ShootoutButton.tscn` — Reposition button with forward/backward choice; greyed-out unusable moves.
 - `Globals/Shootout.gd` — `ACT_TYPE_REPOSITION`.
@@ -102,6 +106,8 @@ Current resolution is single-target: `Shootout.selectActor()` stores one actor a
 - Repositioning moves the actor, costs the Move, respects bounds and occupancy, and does not advance the Cylinder (once [Cylinders](Cylinders.md) lands).
 - One-column moves swap the two fighters; multi-column moves shuffle the in-between line toward the vacated spot (examples 1 and 2 in `Docs/Features and Issues.md`).
 - Taunt redirects attacks on protected positions to the caster, per position for multi-target acts, and expires.
+- A multi act expands to its authored, living target set only; dead/empty sets charge nothing, and once-per-act costs (Cylinder/belt) are verified in `TestActs`/`TestMultiTargetFlow`.
+- Enemy AI gathers/scored the same target set, and animation fan-out + real-scene resolution are pinned.
 - Position-conditional Rodeos (Happy Shot) update when the actor is repositioned or displaced.
 
 ## Implementation order
@@ -111,11 +117,12 @@ Current resolution is single-target: `Shootout.selectActor()` stores one actor a
 3. ✅ Reposition act (UI + flow).
 4. ✅ Occupancy/displacement rules in `setActorPosition()`; Leaders Duck routes through it.
 5. ✅ Taunt redirect (with [Effects](Effects.md)).
-6. UI polish: greyed-out unusable moves with reasons (pending, see [Shootout UI](Shootout%20UI.md)); **next:** the multi-target target-set pipeline described above.
+6. ✅ Multi-target target-set pipeline (expansion, per-position taunt, once-per-act costs, animation fan-out and AI set scoring).
+7. UI polish: greyed-out unusable moves with reasons (pending, see [Shootout UI](Shootout%20UI.md)).
 
 ## Open Questions
 
 1. ~~Can two actors share a position?~~ — **decided**: no; the moving character takes the spot, displaced occupants shift toward the vacated spot (see Occupancy and displacement).
 2. Can repositioning move more than one column if the actor spends multiple Moves, or is it strictly one column per Move? (Per `Docs/Combat.md`: "moving between adjacent positions costs a Move" — assumed one column per Move.)
 3. Do ranged weapon attacks have per-weapon position tables distinct from the class table, or is the class table the only source? (First pass: per-weapon `ranges` in `WeaponData.gd` with placeholder values derived from the class table; weapons without entries are unrestricted.)
-4. When a multi-target act partially hits taunted positions, does the caster take all redirected hits (stacking damage) once or per protected position?
+4. ~~When a multi-target act partially hits taunted positions, does the caster take all redirected hits (stacking damage) once or per protected position?~~ — **decided**: per protected position. Each taunted position redirects its own resolved hit, so a caster protecting two hit positions takes two hits in the same act. `TestEffects`/`TestMultiTargetFlow` pin this behavior and the pipeline is forbidden from collapsing redirected duplicates.

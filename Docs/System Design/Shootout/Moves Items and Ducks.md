@@ -19,12 +19,13 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (loadouts, belt space, item consumption, Duck mechanics and silence/position filtering; equipment abilities and the out-of-combat activation UI are outside this doc):
+**Implemented** (loadouts, belt space, item consumption, Duck mechanics, silence/position filtering and multi-target act sets; equipment abilities and the out-of-combat activation UI are outside this doc):
 
 - Character loadouts are data-driven: actor data and `Party.party` carry `moves` (final activated list, max 4) and `items` (belt contents); `ActorBase.applyLoadoutLimits(beltSpace)` enforces the 4-move cap and the effective belt space with warn-and-truncate (belt space -1 = uncapped when class data is unknown). For Party actors, `CharacterStatCalculator` supplies class belt space plus equipped-belt bonuses; enemies retain class-data belt space. Class belt space comes from the class files in `Data/Shootout/Classes` (decided).
 - Move data carries `category`: `ability` (utility; blocked by silence), `attack_ability` (fires the weapon; advances the Cylinder — see [Cylinders](Cylinders.md)), `duck` (defensive buffs; effects only, no damage, never advances the Cylinder — decided).
 - Ducks live in `Data/Shootout/Moves/` with `category: "duck"` (decided) — first placeholders: Duck Down (self-taunt) and Hold Steady (heal over time).
-- Item use consumes exactly one instance from the belt at resolution time (unknown items are not consumed); the acts panel is rebuilt from the remaining list on open.
+- Item use consumes exactly one instance from the belt at resolution time (unknown items are not consumed), even when the item targets a multi-target set; the acts panel is rebuilt from the remaining list on open.
+- `positions.type: "multi"` acts (Doctor's Kit and future multi abilities) resolve as one ordered target set through `Shootout.resolveActTargetSet()`: one Move/item/Cylinder cost, per-target damage/healing/effects, dead/empty sets charge nothing.
 - Belt reductions cannot silently truncate the persistent loadout: an equipment swap that would leave more belt items than the projected `beltSpace` fails with **Belt loadout too large** (`belt_loadout_too_large`), shown next to the Equip action, and mutates nothing. The persistent belt arrays are neither copied into nor consumed from shared inventory by this iteration — they remain a separate, deliberately unexamined item source until belt editing is designed.
 - Effects can heal: `effect: "heal"` (instant) and `heal_over_time` (ticks at the actor's turn start for `turns`) in the effect manager; both are beneficial (never picked by random cleanses).
 - Filtering: `ShootoutTargetingManager.usableMoves()` drops moves unusable from the acting character's current column and (when silenced) everything except Ducks.

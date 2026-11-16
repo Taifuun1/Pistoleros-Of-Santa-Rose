@@ -64,8 +64,16 @@ func init(shootoutRoot, cameraNode, uiNode) -> void:
 	ui = uiNode
 
 ## Starts the act presentation: scale the affected fighters, blur the
-## background and lunge the acting fighter toward their target.
-func beginAct(actingActor, targetActor) -> void:
+## background and lunge the acting fighter toward their target. Accepts one
+## actor or the resolved target set; the first target provides the frame anchor
+## while animation/shake still react to every resolved hit.
+func beginAct(actingActor, targetSelection) -> void:
+	var targetActor = null
+	if targetSelection is Array:
+		if !targetSelection.is_empty():
+			targetActor = targetSelection[0]
+	elif targetSelection != null:
+		targetActor = targetSelection
 	focusedActors(actingActor, targetActor)
 	focused = true
 	hideCharacterUI()

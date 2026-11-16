@@ -203,6 +203,19 @@ func _run() -> void:
 	manager.applyEffect("Tank", { "op": "apply_effect", "effect": "taunt", "rounds": 2 }, "Tank")
 	_check(manager.redirectTaunt("enemy team", "Weak") == "Tank", "taunt without positions protects current ally positions")
 
+	# Decided Open Question 4: a target set redirects each protected position
+	# separately, so the caster appears once per hit position.
+	fake.turnManager.shootoutActors["player team"]["Weak2"] = { "actorPosition": 3 }
+	var weakTwo = FakeActor.new()
+	weakTwo.name = "Weak2"
+	weakTwo.actorName = "Weak2"
+	weakTwo.stats = weakTwo.stats.duplicate(true)
+	fake.actors["Weak2"] = weakTwo
+	manager.applyEffect("Tank", { "op": "apply_effect", "effect": "taunt", "positions": [2, 3], "rounds": 2 }, "Tank")
+	var redirected = manager.redirectTauntSet("enemy team", ["Weak", "Weak2", "Rat"])
+	_check(redirected == ["Tank", "Tank", "Rat"], "a multi-target set redirects once per protected position, got %s" % [redirected])
+	_check(manager.redirectTauntSet("player team", ["Weak", "Weak2"]) == ["Weak", "Weak2"], "friendly sets are never redirected")
+
 	print("\n--- Silence ---")
 	ctx = makeManager()
 	fake = ctx.fake

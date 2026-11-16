@@ -59,6 +59,7 @@ func _run() -> void:
 	await _test_unreachable_hit_frame_completes_via_sequence_done()
 	await _test_missing_animation_completes_immediately()
 	await _test_target_effect_spawns_above_the_character()
+	await _test_multi_target_effect_fans_out()
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
@@ -218,6 +219,43 @@ func _test_target_effect_spawns_above_the_character() -> void:
 	_check(done.count == 1, "the freed effect completes the sequence (done=%d)" % done.count)
 	sequencer.free()
 	target.free()
+	acting.free()
+
+
+## One `selectedActor` effect step fans out to every resolved target and the
+## sequence advances only after all effects have finished.
+func _test_multi_target_effect_fans_out() -> void:
+	var acting = FakeActingActor.new()
+	root.add_child(acting)
+	var targets := []
+	for index in 2:
+		var target = FakeActingActor.new()
+		var animations = Node2D.new()
+		animations.position = Vector2(index, 0)
+		var sprite = AnimatedSprite2D.new()
+		sprite.name = "AnimationSprite"
+		sprite.offset = Vector2(0, -15)
+		animations.add_child(sprite)
+		target.animationsNode = animations
+		root.add_child(target)
+		target.add_child(animations)
+		targets.append(target)
+	var sequencer = SequencerScript.new()
+	root.add_child(sequencer)
+	var done = Counter.new()
+	sequencer.sequenceDone.connect(done.bump)
+	sequencer.play([{ "target": "selectedActor", "path": "res://Animations/Shootout/Items/Paregoric.tscn" }], acting, targets)
+	for target in targets:
+		var hasEffect = false
+		for child in target.get_children():
+			if child.name == "Paregoric":
+				hasEffect = true
+		_check(hasEffect, "the multi-target effect step spawns one effect per target")
+	await create_timer(1.2).timeout
+	_check(done.count == 1, "the sequence completes once after every multi-target effect finishes (done=%d)" % done.count)
+	sequencer.free()
+	for target in targets:
+		target.free()
 	acting.free()
 
 

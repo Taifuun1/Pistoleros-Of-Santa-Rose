@@ -51,6 +51,9 @@ var effectManager
 
 var selectedAct = null
 var selectedActor = ""
+## Ordered names for the armed act's full target set; selectedActor stays the
+## clicked/anchor target for UI compatibility.
+var selectedTargets: Array = []
 # The enemy's act is chosen when their turn starts (not at the impact frame) so
 # the act focus can frame attacker and target together and so the decision
 # can't change mid-animation; resolveActOnce reuses it.
@@ -292,6 +295,30 @@ func getActor(actorName: String) -> Node:
 		return null
 	return actorsRoot.get_node_or_null(actorName)
 
+
+## Accepts one actor, an ordered actor set, or null; drops invalid entries but
+## preserves intentional duplicates from taunt redirects.
+func asActorArray(value) -> Array:
+	var actors := []
+	if value is Array:
+		for actor in value:
+			if actor != null and is_instance_valid(actor):
+				actors.append(actor)
+	elif value != null and is_instance_valid(value):
+		actors.append(value)
+	return actors
+
+
+## Resolves ordered target names to the live actor nodes. Unknown names are
+## skipped so a stale/dead identity can never crash a resolution.
+func targetNamesToActors(targetNames: Array) -> Array:
+	var actors := []
+	for targetName in targetNames:
+		var actor = getActor(str(targetName))
+		if actor != null:
+			actors.append(actor)
+	return actors
+
 func startCurrentTurn() -> void:
 	var actorName = turnManager.currentActorName()
 	var actor = getActor(actorName)
@@ -344,17 +371,23 @@ func executeEnemyTurn(actor) -> void:
 	# focus needs the target to frame attacker and target together, and the
 	# enemy's move/item animation steps play the same way the player's do.
 	pendingEnemyAct = enemyAI.chooseAct(actor.name)
-	var enemyTarget = getActor(pendingEnemyAct.get("targetName", ""))
-	playAct(actSteps(pendingEnemyAct.get("type", ""), pendingEnemyAct.get("name", "")), actor, enemyTarget)
+	var enemyTargets = targetNamesToActors(pendingEnemyAct.get("targetNames", []))
+	if enemyTargets.is_empty():
+		var primary = getActor(pendingEnemyAct.get("targetName", ""))
+		if primary != null:
+			enemyTargets = [primary]
+	playAct(actSteps(pendingEnemyAct.get("type", ""), pendingEnemyAct.get("name", "")), actor, enemyTargets)
 
 ## Single seam that starts an act. The focus (fighter zoom, background defocus,
 ## lunge) only runs when the sequence has something to show: an act with no
 ## animation steps resolves on the same frame it starts, so focusing it would
-## just flicker the presentation in and out.
-func playAct(steps: Array, actingActor, targetActor) -> void:
+## just flicker the presentation in and out. `targetActors` may be one actor or
+## the full ordered target set.
+func playAct(steps: Array, actingActor, targetActors) -> void:
+	var targets = asActorArray(targetActors)
 	if !steps.is_empty() and focusManager != null:
-		focusManager.beginAct(actingActor, targetActor)
-	animationSequencer.play(steps, actingActor, targetActor)
+		focusManager.beginAct(actingActor, targets)
+	animationSequencer.play(steps, actingActor, targets)
 
 func selectActor(actorName: String = "") -> void:
 	if !playerHasControl or !playerAction or selectedAct == null:
@@ -362,15 +395,21 @@ func selectActor(actorName: String = "") -> void:
 	var actingActorName = turnManager.currentActorName()
 	if !targetingManager.isValidTarget(selectedAct, actorName, actingActorName):
 		return
+	# One click confirms the whole legal set: a multi act expands to every valid
+	# living target now, and that same set drives animation, resolution and AI.
+	var targets = targetingManager.expandTargets(selectedAct, actorName, actingActorName)
+	if targets.is_empty():
+		return
 	var actingActor = getActor(actingActorName)
 	selectedActor = actorName
+	selectedTargets = targets.duplicate()
 	ui.hideActsPanel()
 	_clearTargetHighlights()
 	playerHasControl = false
 	ui.playerHasControl = false
 	actingActor.actorTurn.emit()
 	pendingResolution = true
-	playAct(buildActSteps(), actingActor, getActor(selectedActor))
+	playAct(buildActSteps(), actingActor, targetNamesToActors(selectedTargets))
 
 func buildActSteps() -> Array:
 	return actSteps(selectedAct.type, selectedAct.get("name", ""))
@@ -385,20 +424,38 @@ func actSteps(actType: String, actName: String) -> Array:
 			return Shootout.itemsData.get(actName, {}).get("animations", [])
 	return [{ "target": "actingActor" }]
 
-## Applies the act and reports to the focus manager whether the target actually
-## lost HP, so only a landed hit recoils (a Miss or a Reload/Jammed chamber
-## leaves the target standing still).
-func resolveWithFocus(actingActor, targetActor, actType: String, actName: String) -> void:
-	var hpBefore = int(targetActor.hp) if targetActor != null else 0
-	match actType:
-		Shootout.ACT_TYPE_ATTACK:
-			actionResolver.resolveAttack(actingActor, targetActor)
-		Shootout.ACT_TYPE_MOVES:
-			actionResolver.resolveMove(actName, actingActor, targetActor)
-		Shootout.ACT_TYPE_ITEMS:
-			actionResolver.resolveItem(actName, actingActor, targetActor)
+## Applies one act to an already-expanded target set. Taunt redirect resolves
+## per name/per protected position before anything is charged, dead entries are
+## dropped, and the resolver applies the act's result to the survivors once.
+## Returns the actors actually affected so the turn can check their deaths.
+func resolveActTargetSet(actType: String, actName: String, actingActor, targetActors: Array) -> Array:
+	var candidateNames := []
+	for targetActor in targetActors:
+		if targetActor != null and is_instance_valid(targetActor) and int(targetActor.get("hp")) > 0:
+			candidateNames.append(str(targetActor.name))
+	if candidateNames.is_empty():
+		return []
+	if targetingManager.targetsOpposingSide({ "type": actType, "name": actName }, actingActor.name):
+		candidateNames = effectManager.redirectTauntSet(turnManager.sideOfActor(actingActor.name), candidateNames)
+	var resolved := []
+	var hpBefore := {}
+	for targetName in candidateNames:
+		var targetActor = getActor(str(targetName))
+		if targetActor == null or int(targetActor.hp) <= 0:
+			continue
+		resolved.append(targetActor)
+		hpBefore[targetActor] = int(targetActor.hp)
+	if resolved.is_empty():
+		return []
+	actionResolver.resolveActTargets(actType, actName, actingActor, resolved)
+	var damaged := false
+	for targetActor in resolved:
+		if int(targetActor.hp) < int(hpBefore.get(targetActor, 0)):
+			damaged = true
+			break
 	if focusManager != null:
-		focusManager.onActResolved(actingActor, targetActor, targetActor != null and int(targetActor.hp) < hpBefore)
+		focusManager.onActResolved(actingActor, resolved[0], damaged)
+	return resolved
 
 func resolveActOnce() -> void:
 	if !pendingResolution or battleOver:
@@ -408,19 +465,15 @@ func resolveActOnce() -> void:
 	if actingActor == null:
 		# The acting actor vanished mid-turn (freed or unregistered): pass the
 		# turn instead of leaving the shootout waiting on them forever.
-		finishTurn(null)
+		finishTurn([])
 		return
-	var targetActor
+	var resolvedTargets := []
 	if playerAction:
-		if selectedAct.type == Shootout.ACT_TYPE_ATTACK:
-			var redirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), selectedActor)
-			if redirect != "":
-				selectedActor = redirect
-		targetActor = getActor(selectedActor)
-		if targetActor == null:
-			finishTurn(null)
+		if selectedAct == null:
+			finishTurn([])
 			return
-		resolveWithFocus(actingActor, targetActor, selectedAct.type, selectedAct.get("name", ""))
+		var targetNames = selectedTargets if !selectedTargets.is_empty() else [selectedActor]
+		resolvedTargets = resolveActTargetSet(selectedAct.type, selectedAct.get("name", ""), actingActor, targetNamesToActors(targetNames))
 	else:
 		# Enemy acts route through the same resolution path as player acts. The
 		# act was chosen when the turn started (so the focus could frame it);
@@ -430,32 +483,32 @@ func resolveActOnce() -> void:
 			enemyAct = enemyAI.chooseAct(turnManager.currentActorName())
 		if enemyAct.is_empty():
 			actingActor.actorTurn.emit()
-			finishTurn(null)
+			finishTurn([])
 			return
 		if enemyAct.type == Shootout.ACT_TYPE_REPOSITION:
 			var delta = -1 if enemyAct.direction == "forward" else 1
 			# Same Move animation as the UI picker: slide to the new column.
 			repositionActor(actingActor, turnManager.getActorPosition(actingActor.name) + delta)
 			actingActor.actorTurn.emit()
-			finishTurn(null)
-			return
-		var enemyTargetName = enemyAct.get("targetName", "")
-		if enemyAct.type == Shootout.ACT_TYPE_ATTACK:
-			var enemyRedirect = effectManager.redirectTaunt(turnManager.sideOfActor(turnManager.currentActorName()), enemyTargetName)
-			if enemyRedirect != "":
-				enemyTargetName = enemyRedirect
-		targetActor = getActor(enemyTargetName)
-		if targetActor == null:
-			# Invalid enemy target (e.g., a scripted act naming a missing
-			# actor): pass the turn instead of hanging the fight forever.
-			actingActor.actorTurn.emit()
-			finishTurn(null)
+			finishTurn([])
 			return
 		actingActor.actorTurn.emit()
-		resolveWithFocus(actingActor, targetActor, enemyAct.type, enemyAct.get("name", ""))
-	finishTurn(targetActor)
+		var enemyNames = enemyAct.get("targetNames", [])
+		if !(enemyNames is Array) or enemyNames.is_empty():
+			var primaryName = str(enemyAct.get("targetName", ""))
+			# A multi act must fall back through the same expansion, never to a
+			# single click target whose column the act doesn't allow.
+			enemyNames = targetingManager.expandTargets(enemyAct, primaryName, actingActor.name) \
+				if targetingManager.isMultiTargetAct(enemyAct) and primaryName != "" \
+				else [primaryName]
+		resolvedTargets = resolveActTargetSet(enemyAct.type, enemyAct.get("name", ""), actingActor, targetNamesToActors(enemyNames))
+	finishTurn(resolvedTargets)
 
-func finishTurn(targetActor) -> void:
+## Accepts one actor or the ordered resolved set; checks every distinct target
+## for death and keeps the first target as the Rodeo context.
+func finishTurn(targetActors) -> void:
+	var targets = asActorArray(targetActors)
+	var primaryTarget = targets[0] if !targets.is_empty() else null
 	var waitingForAnimation = animationSequencer != null and animationSequencer.running
 	if !waitingForAnimation and focusManager != null:
 		focusManager.endAct()
@@ -465,14 +518,19 @@ func finishTurn(targetActor) -> void:
 	# has already changed.
 	var turnEndContext = {
 		"actor": getActor(turnManager.currentActorName()),
-		"target": targetActor
+		"target": primaryTarget
 	}
-	if targetActor != null:
+	var checkedTargets := {}
+	for targetActor in targets:
+		if checkedTargets.has(targetActor):
+			continue
+		checkedTargets[targetActor] = true
 		turnManager.checkActorDead(targetActor)
 	turnManager.checkBattleEnd()
 	turnManager.advanceTurn()
 	selectedAct = null
 	selectedActor = ""
+	selectedTargets = []
 	pendingEnemyAct = {}
 	_clearTargetHighlights()
 	_hideRepositionMarkers()
@@ -724,7 +782,7 @@ func _on_shootout_ui_item(itemName: String) -> void:
 	if !playerHasControl:
 		return
 	selectedAct = { "name": itemName, "type": Shootout.ACT_TYPE_ITEMS }
-	_clearTargetHighlights()
+	_refreshTargetHighlights()
 
 ## The reposition picker replaced any armed data move: one armed thing at a
 ## time, so drop the move's target tints and mark the reachable columns.
@@ -739,17 +797,21 @@ func _on_shootout_ui_reposition_picker(pickerOpen: bool) -> void:
 
 ## --- armed-act field feedback ---
 
-## Valid targets of the armed data move tint warm on the field (the hover
+## Valid targets of the armed data move/item tint warm on the field (the hover
 ## outline stays independent: it works on a material, the tint on modulate).
+## For a multi act every legal anchor is tinted: clicking any one confirms the
+## complete target set that the act will resolve.
 func _refreshTargetHighlights() -> void:
 	_clearTargetHighlights()
-	if selectedAct == null or selectedAct.type != Shootout.ACT_TYPE_MOVES or !playerHasControl:
+	if selectedAct == null or !playerHasControl:
+		return
+	if selectedAct.type != Shootout.ACT_TYPE_MOVES and selectedAct.type != Shootout.ACT_TYPE_ITEMS:
 		return
 	var actingActorName = turnManager.currentActorName()
 	for actor in actorsRoot.get_children():
 		if !is_instance_valid(actor):
 			continue
-		if targetingManager.isValidTarget(selectedAct, str(actor.name), actingActorName):
+		if !targetingManager.expandTargets(selectedAct, str(actor.name), actingActorName).is_empty():
 			var animations = actor.getAnimations()
 			if animations != null:
 				animations.modulate = TARGET_TINT
