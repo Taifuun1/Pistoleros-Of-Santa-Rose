@@ -165,7 +165,10 @@ func testParty() -> void:
 	var beltOne = beltParty.addItem(_belt(1))
 	var beltOneId = beltOne.acceptedInstanceIds[0]
 	_check(beltParty.equipItem("Walker Langley", beltOneId).success, "belt with room is equipped")
-	beltParty.party["Walker Langley"].items = ["Paregoric", "Paregoric"]
+	beltParty.party["Walker Langley"].beltReservations = [
+		{ "instanceId": "reserved_a", "combatId": "Paregoric", "quantity": 1 },
+		{ "instanceId": "reserved_b", "combatId": "Paregoric", "quantity": 1 },
+	]
 	var beltZero = beltParty.addItem(_belt(0))
 	var beltZeroId = beltZero.acceptedInstanceIds[0]
 	preview = beltParty.getEquipmentPreview("Walker Langley", beltZeroId)
@@ -189,7 +192,9 @@ func _member() -> Dictionary:
 		"injuryDamage": 4,
 		"injuryRate": 4,
 		"knockoutDebuffs": [],
-		"items": ["Paregoric"],
+		"beltReservations": [
+			{ "instanceId": "test_reserved", "combatId": "Paregoric", "quantity": 1 },
+		],
 		"stats": {
 			"sixShootin": 3, "highTailin": 6, "taffyin": 2,
 			"damage": {

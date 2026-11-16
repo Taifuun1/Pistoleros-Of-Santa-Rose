@@ -16,6 +16,9 @@ const InventoryRulesScript = preload("res://Globals/InventoryRules.gd")
 const CharacterStatCalculatorScript = preload("res://Globals/CharacterStatCalculator.gd")
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const INVENTORY_CAPACITY = 24
+## Belt entries reference a carried consumable stack. Enemy actor belts are
+## separate content and stay name-based.
+const RESERVABLE_ITEM_TYPES = ["consumable"]
 
 # Placeholder: MxHP portion lost when fleeing a fight.
 const FLEE_MXHP_LOSS = 0.2
@@ -83,7 +86,12 @@ var party = {
 		"downed": false,
 		"characterClass": "Gunslinger",
 		"moves": ["Sharp Shot", "Hold Steady"],
-		"items": ["Paregoric"],
+		# Persistent belt reservations (Docs/System Design/System Coherence.md,
+		# belt transaction boundaries). Each entry references one carried stack;
+		# belt space counts entries, not reserved quantity.
+		"beltReservations": [
+			{ "instanceId": "starter_paregoric", "combatId": "Paregoric", "quantity": 1 },
+		],
 		"magazine": [1, 0, 2],
 		"equipment": {
 			"weapon": {
@@ -241,7 +249,8 @@ func getInventorySnapshot() -> Dictionary:
 			"key": memberKey,
 			"actorName": str(member.get("actorName", memberKey)),
 			"equipment": equipment,
-			"fightData": _calculateStats(member),
+			"belt": getBeltSnapshot(memberKey),
+			"fightData": _fightDataFor(member),
 		})
 	return snapshot
 
@@ -405,6 +414,7 @@ func consumeItem(instanceId: String, expectedType: String) -> Dictionary:
 		inventory.remove_at(index)
 	else:
 		entry["quantity"] = int(entry.quantity) - 1
+	_reconcileBeltReservations(false)
 	inventoryChanged.emit()
 	return {
 		"success": true,
@@ -456,6 +466,7 @@ func dropItem(instanceId: String, quantity: int) -> Dictionary:
 		inventory.remove_at(index)
 	else:
 		entry["quantity"] = int(entry.quantity) - quantity
+	_reconcileBeltReservations(false)
 	inventoryChanged.emit()
 	return {
 		"success": true,
@@ -487,6 +498,194 @@ func _addFailure(reason: String) -> Dictionary:
 	}
 
 
+## Persistent belt reservation (Docs/System Design/System Coherence.md, belt
+## transaction boundaries): references an owned consumable stack and reserves a
+## positive quantity no greater than the owned amount. Does not create items.
+func reserveBeltItem(memberKey: String, instanceId: String, quantity: int) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return _beltFailure("data_unavailable", memberKey)
+	if !inventoryManagementAllowed:
+		return _beltFailure("management_unavailable", memberKey)
+	if !party.has(memberKey):
+		return _beltFailure("unknown_member", memberKey)
+	if typeof(quantity) != TYPE_INT or quantity <= 0:
+		return _beltFailure("invalid_quantity", memberKey)
+	var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+	if index < 0:
+		return _beltFailure("unknown_item", memberKey)
+	var entry = inventory[index]
+	var projected = _inventoryRules.projectItem(entry, _itemCatalog)
+	if projected.is_empty():
+		return _beltFailure("data_unavailable", memberKey)
+	if !RESERVABLE_ITEM_TYPES.has(str(projected.get("itemType", ""))):
+		return _beltFailure("not_consumable", memberKey)
+	var combatId = str(projected.get("combatId", ""))
+	if combatId == "":
+		return _beltFailure("not_consumable", memberKey)
+	var member = party[memberKey]
+	var reservations := _memberReservations(member)
+	var existingIndex := _reservationIndex(reservations, instanceId)
+	var reservedQuantity := int(reservations[existingIndex].get("quantity", 0)) if existingIndex >= 0 else 0
+	var ownedQuantity := int(entry.get("quantity", 0))
+	if quantity > ownedQuantity - reservedQuantity:
+		return _beltFailure("exceeds_owned", memberKey)
+	var effectiveBeltSpace := int(_calculateStats(member).get("beltSpace", -1))
+	if existingIndex < 0 and effectiveBeltSpace >= 0 and reservations.size() >= effectiveBeltSpace:
+		return _beltFailure("belt_full", memberKey)
+	if existingIndex >= 0:
+		reservations[existingIndex]["quantity"] = reservedQuantity + quantity
+		reservations[existingIndex]["combatId"] = combatId
+	else:
+		reservations.append({ "instanceId": instanceId, "combatId": combatId, "quantity": quantity })
+	inventoryChanged.emit()
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"instanceId": instanceId,
+		"combatId": combatId,
+		"quantity": quantity,
+		"belt": getBeltSnapshot(memberKey),
+	}
+
+
+func unreserveBeltItem(memberKey: String, instanceId: String) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return _beltFailure("data_unavailable", memberKey)
+	if !inventoryManagementAllowed:
+		return _beltFailure("management_unavailable", memberKey)
+	if !party.has(memberKey):
+		return _beltFailure("unknown_member", memberKey)
+	var member = party[memberKey]
+	var reservations := _memberReservations(member)
+	var index := _reservationIndex(reservations, instanceId)
+	if index < 0:
+		return _beltFailure("unknown_reservation", memberKey)
+	reservations.remove_at(index)
+	inventoryChanged.emit()
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"instanceId": instanceId,
+		"belt": getBeltSnapshot(memberKey),
+	}
+
+
+## UI/read projection. Invalid reservations are reported but never mutate Party.
+func getBeltSnapshot(memberKey: String) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return _beltFailure("data_unavailable", memberKey)
+	if !party.has(memberKey):
+		return _beltFailure("unknown_member", memberKey)
+	var member = party[memberKey]
+	var effectiveBeltSpace := int(_calculateStats(member).get("beltSpace", -1))
+	var entries := []
+	for reservation in _memberReservationsReadonly(member):
+		if !(reservation is Dictionary):
+			continue
+		var instanceId := str(reservation.get("instanceId", ""))
+		var combatId := str(reservation.get("combatId", ""))
+		var reservedQuantity := int(reservation.get("quantity", 0))
+		var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+		var ownedQuantity := 0
+		var name := combatId
+		var itemType := ""
+		var combatMatches := false
+		if index >= 0:
+			ownedQuantity = int(inventory[index].get("quantity", 0))
+			var projected = _inventoryRules.projectItem(inventory[index], _itemCatalog)
+			if !projected.is_empty():
+				name = str(projected.get("name", combatId))
+				itemType = str(projected.get("itemType", ""))
+				combatMatches = str(projected.get("combatId", "")) == combatId
+		entries.append({
+			"instanceId": instanceId,
+			"combatId": combatId,
+			"quantity": reservedQuantity,
+			"ownedQuantity": ownedQuantity,
+			"name": name,
+			"itemType": itemType,
+			"valid": index >= 0 and reservedQuantity > 0 and reservedQuantity <= ownedQuantity and combatMatches,
+		})
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"beltSpace": effectiveBeltSpace,
+		"unlimited": effectiveBeltSpace < 0,
+		"used": entries.size(),
+		"entries": entries,
+	}
+
+
+func _beltFailure(reason: String, memberKey: String) -> Dictionary:
+	return {
+		"success": false,
+		"reason": reason,
+		"memberKey": memberKey,
+		"entries": [],
+	}
+
+
+func _memberReservations(member: Dictionary) -> Array:
+	if !(member.get("beltReservations") is Array):
+		member["beltReservations"] = []
+	return member.beltReservations
+
+
+func _memberReservationsReadonly(member: Dictionary) -> Array:
+	var reservations = member.get("beltReservations", [])
+	return reservations if reservations is Array else []
+
+
+func _reservationIndex(reservations: Array, instanceId: String) -> int:
+	for index in reservations.size():
+		var reservation = reservations[index]
+		if reservation is Dictionary and str(reservation.get("instanceId", "")) == instanceId:
+			return index
+	return -1
+
+
+## Fight start resolves each reservation into combat item names while retaining
+## the source instance id for the one-shot consumption write-back.
+func _fightDataFor(member: Dictionary) -> Dictionary:
+	var data := _calculateStats(member)
+	var projection := _combatBeltProjection(member, data)
+	data["items"] = projection.items
+	data["beltReservations"] = projection.reservations
+	return data
+
+
+func _combatBeltProjection(member: Dictionary, fightData: Dictionary) -> Dictionary:
+	var items := []
+	var resolved := []
+	var effectiveBeltSpace := int(fightData.get("beltSpace", -1))
+	for reservationValue in _memberReservationsReadonly(member):
+		if !(reservationValue is Dictionary):
+			continue
+		if effectiveBeltSpace >= 0 and resolved.size() >= effectiveBeltSpace:
+			break
+		var reservation: Dictionary = reservationValue
+		var instanceId := str(reservation.get("instanceId", ""))
+		var combatId := str(reservation.get("combatId", ""))
+		var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+		if index < 0:
+			push_warning("Party: belt reservation '%s' references a missing item." % instanceId)
+			continue
+		var projected = _inventoryRules.projectItem(inventory[index], _itemCatalog)
+		if projected.is_empty() or str(projected.get("combatId", "")) != combatId:
+			push_warning("Party: belt reservation '%s' no longer matches its combat item." % instanceId)
+			continue
+		var quantity := mini(int(reservation.get("quantity", 0)), int(inventory[index].get("quantity", 0)))
+		if quantity <= 0:
+			continue
+		resolved.append({ "instanceId": instanceId, "combatId": combatId, "quantity": quantity })
+		for _use in quantity:
+			items.append(combatId)
+	return { "items": items, "reservations": resolved }
+
+
 func getEquipmentPreview(memberKey: String, instanceId: String) -> Dictionary:
 	if !isInventoryDataAvailable():
 		return { "success": false, "reason": "data_unavailable" }
@@ -502,7 +701,7 @@ func getEquipmentPreview(memberKey: String, instanceId: String) -> Dictionary:
 	var member = party[memberKey]
 	var current = _calculateStats(member)
 	var projected = _calculateStats(member, slot, candidate)
-	var beltValid = int(projected.get("beltSpace", -1)) < 0 or member.get("items", []).size() <= int(projected.beltSpace)
+	var beltValid = int(projected.get("beltSpace", -1)) < 0 or _memberReservationsReadonly(member).size() <= int(projected.beltSpace)
 	return {
 		"success": true,
 		"reason": "" if beltValid else "belt_loadout_too_large",
@@ -533,7 +732,7 @@ func equipItem(memberKey: String, instanceId: String) -> Dictionary:
 
 	var member = party[memberKey]
 	var projected = _calculateStats(member, slot, candidate)
-	if int(projected.get("beltSpace", -1)) >= 0 and member.get("items", []).size() > int(projected.beltSpace):
+	if int(projected.get("beltSpace", -1)) >= 0 and _memberReservationsReadonly(member).size() > int(projected.beltSpace):
 		return { "success": false, "reason": "belt_loadout_too_large" }
 
 	if !(member.get("equipment") is Dictionary):
@@ -590,7 +789,9 @@ func effectiveMaxHp(member: Dictionary) -> int:
 ## The member's data prepared for a fight: effective MxHp, HP capped to it,
 ## equipment modifiers, and knockout debuffs applied to a copied stats block.
 func getFightData(actorName: String) -> Dictionary:
-	return _calculateStats(party[actorName])
+	if !party.has(actorName):
+		return {}
+	return _fightDataFor(party[actorName])
 
 
 ## Post-fight write-back: surviving HP, accumulated injuries, downed members
@@ -599,7 +800,10 @@ func getFightData(actorName: String) -> Dictionary:
 ## for the end screen so capacity overflow cannot be lost silently.
 func applyFightResults(results: Dictionary) -> Dictionary:
 	var lootResult = {}
+	var beltResult = _commitBeltConsumption(results.get("beltConsumed", []))
 	var changed = false
+	if _reconcileBeltReservations():
+		changed = true
 	for member in party.values():
 		var debuffs = []
 		for debuff in member.get("knockoutDebuffs", []):
@@ -625,7 +829,99 @@ func applyFightResults(results: Dictionary) -> Dictionary:
 			_applyFleeCost(actorName)
 	if changed:
 		partyChanged.emit("")
-	return { "loot": lootResult }
+	return { "loot": lootResult, "belt": beltResult }
+
+
+## Commits the Shootout's successful item records exactly once. Records are
+## `{instanceId, combatId, quantity}`; multiples for the same instance are summed
+## so a reservation quantity above one consumes the matching number of units.
+## Any invalid record rejects the whole batch without mutating inventory.
+func _commitBeltConsumption(records) -> Dictionary:
+	var empty := { "success": true, "reason": "", "consumed": [] }
+	if !(records is Array) or records.is_empty():
+		return empty
+	if !isInventoryDataAvailable():
+		return { "success": false, "reason": "data_unavailable", "consumed": [] }
+	var totals := {}
+	var expectedCombatIds := {}
+	for recordValue in records:
+		if !(recordValue is Dictionary):
+			return { "success": false, "reason": "invalid_item", "consumed": [] }
+		var record: Dictionary = recordValue
+		var instanceId := str(record.get("instanceId", ""))
+		var combatId := str(record.get("combatId", ""))
+		var quantity := int(record.get("quantity", 0))
+		if instanceId == "" or combatId == "" or quantity <= 0:
+			return { "success": false, "reason": "invalid_item", "consumed": [] }
+		if expectedCombatIds.has(instanceId) and expectedCombatIds[instanceId] != combatId:
+			return { "success": false, "reason": "invalid_item", "consumed": [] }
+		expectedCombatIds[instanceId] = combatId
+		totals[instanceId] = int(totals.get(instanceId, 0)) + quantity
+	var candidate = inventory.duplicate(true)
+	var consumed := []
+	for instanceId in totals:
+		var index = _inventoryRules.inventoryIndex(candidate, instanceId)
+		if index < 0:
+			return { "success": false, "reason": "unknown_item", "consumed": [] }
+		var entry = candidate[index]
+		var projected = _inventoryRules.projectItem(entry, _itemCatalog)
+		if projected.is_empty() or str(projected.get("combatId", "")) == "":
+			return { "success": false, "reason": "invalid_item", "consumed": [] }
+		var combatId := str(projected.get("combatId", ""))
+		if combatId != str(expectedCombatIds.get(instanceId, "")):
+			return { "success": false, "reason": "invalid_item", "consumed": [] }
+		var quantity := int(totals[instanceId])
+		if quantity > int(entry.get("quantity", 0)):
+			return { "success": false, "reason": "invalid_quantity", "consumed": [] }
+		if quantity == int(entry.quantity):
+			candidate.remove_at(index)
+		else:
+			entry["quantity"] = int(entry.quantity) - quantity
+		consumed.append({ "instanceId": instanceId, "combatId": combatId, "quantity": quantity })
+	inventory = candidate
+	inventoryChanged.emit()
+	return { "success": true, "reason": "", "consumed": consumed }
+
+
+## Removes reservations whose owned stack is gone and clamps over-reserved
+## quantities after consumption, drops, sales or imports. Unconsumed quantity
+## stays owned and reserved.
+func _reconcileBeltReservations(emitSignal := true) -> bool:
+	var changed := false
+	for memberKey in party:
+		var member = party[memberKey]
+		if !(member is Dictionary) or !(member.get("beltReservations") is Array):
+			continue
+		var kept := []
+		for reservationValue in member.beltReservations:
+			if !(reservationValue is Dictionary):
+				changed = true
+				continue
+			var reservation: Dictionary = reservationValue
+			var instanceId := str(reservation.get("instanceId", ""))
+			var combatId := str(reservation.get("combatId", ""))
+			var index = _inventoryRules.inventoryIndex(inventory, instanceId)
+			if index < 0:
+				changed = true
+				continue
+			var projected = _inventoryRules.projectItem(inventory[index], _itemCatalog)
+			if projected.is_empty() or str(projected.get("combatId", "")) != combatId:
+				changed = true
+				continue
+			var quantity := mini(int(reservation.get("quantity", 0)), int(inventory[index].get("quantity", 0)))
+			if quantity <= 0:
+				changed = true
+				continue
+			if quantity != int(reservation.get("quantity", 0)):
+				changed = true
+				reservation["quantity"] = quantity
+			kept.append(reservation)
+		if kept.size() != member.beltReservations.size():
+			changed = true
+		member["beltReservations"] = kept
+	if changed and emitSignal:
+		inventoryChanged.emit()
+	return changed
 
 
 ## Loot from a won fight (Docs/System Design/Shootout/Rewards.md): money goes

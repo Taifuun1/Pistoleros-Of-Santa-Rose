@@ -23,9 +23,13 @@ class FakeProvider:
 	var previewResult: Dictionary = {}
 	var equipResult: Dictionary = { "success": true, "slot": "duster", "returnedInstanceId": "" }
 	var dropResult: Dictionary = { "success": true, "quantity": 1 }
+	var reserveResult: Dictionary = { "success": true, "reason": "" }
+	var unreserveResult: Dictionary = { "success": true, "reason": "" }
 	var previewCalls: Array = []
 	var equipCalls: Array = []
 	var dropCalls: Array = []
+	var reserveCalls: Array = []
+	var unreserveCalls: Array = []
 	var snapshotCalls := 0
 
 	func isInventoryDataAvailable() -> bool:
@@ -46,6 +50,17 @@ class FakeProvider:
 	func dropItem(instanceId: String, quantity: int) -> Dictionary:
 		dropCalls.append([instanceId, quantity])
 		return dropResult.duplicate(true)
+
+	func getBeltSnapshot(_memberKey: String) -> Dictionary:
+		return { "success": true, "entries": [] }
+
+	func reserveBeltItem(memberKey: String, instanceId: String, quantity: int) -> Dictionary:
+		reserveCalls.append([memberKey, instanceId, quantity])
+		return reserveResult.duplicate(true)
+
+	func unreserveBeltItem(memberKey: String, instanceId: String) -> Dictionary:
+		unreserveCalls.append([memberKey, instanceId])
+		return unreserveResult.duplicate(true)
 
 	func emitInventoryChanged() -> void:
 		inventoryChanged.emit()
@@ -101,6 +116,7 @@ func _ready() -> void:
 	await testEquipAndComparison()
 	await testDropFlow()
 	await testMapUseFlow()
+	await testBeltAction()
 	await testFocusAndLiveUpdates()
 	await testLongContentAndLayout()
 	await testEquipmentAndMemberPresentation()
@@ -129,6 +145,7 @@ func makeSnapshot() -> Dictionary:
 			{
 				"instanceId": "p_paregoric", "definitionId": "paregoric", "itemType": "consumable",
 				"quantity": 3, "stackLimit": 5, "droppable": true, "name": "Paregoric",
+				"combatId": "Paregoric",
 				"category": "supplies", "description": "Restores HP in a Shootout.",
 				"sprite": "res://Assets/Items/Paregoric.png",
 			},
@@ -150,6 +167,13 @@ func makeSnapshot() -> Dictionary:
 			"fightData": {
 				"hp": 12, "maxHp": 12, "beltSpace": 1,
 				"stats": { "sixShootin": 3, "highTailin": 6, "taffyin": 2, "defense": { "style": 2, "sand": 1 } },
+			},
+			"belt": {
+				"beltSpace": 1, "used": 1,
+				"entries": [{
+					"instanceId": "p_paregoric", "combatId": "Paregoric", "quantity": 1,
+					"ownedQuantity": 3, "name": "Paregoric", "itemType": "consumable", "valid": true,
+				}],
 			},
 		}],
 	}
@@ -391,6 +415,42 @@ func testMapUseFlow() -> void:
 	tab._unhandled_input(cancelEvent)
 	check(!tab.useOverlay.visible, "ui_cancel closes the confirmation without a command")
 	provider.snapshot = makeSnapshot()
+
+
+func testBeltAction() -> void:
+	print("\n--- Belt assignment command ---")
+	provider.snapshot = makeSnapshot()
+	provider.reserveCalls.clear()
+	provider.unreserveCalls.clear()
+	await refreshTab()
+	tab._onInventoryItemPressed("p_paregoric")
+	check(tab.beltButton.visible and tab.beltButton.text == "From Belt", "a reserved consumable offers removal")
+	check(tab.selectionLabel.get_parsed_text().contains("Belt: 1 reserved."), "detail shows the reserved quantity")
+	tab._onBeltPressed()
+	check(provider.unreserveCalls.size() == 1 and provider.unreserveCalls[0] == ["walker", "p_paregoric"], "removal calls the Party unreserve command")
+
+	provider.snapshot = makeSnapshot()
+	provider.snapshot["members"][0]["belt"] = { "beltSpace": 1, "used": 0, "entries": [] }
+	await refreshTab()
+	tab._onInventoryItemPressed("p_paregoric")
+	check(tab.beltButton.visible and tab.beltButton.text == "To Belt", "an unreserved consumable offers assignment")
+	tab._onBeltPressed()
+	check(provider.reserveCalls.size() == 1 and provider.reserveCalls[0] == ["walker", "p_paregoric", 1], "assignment calls the Party reserve command with quantity 1")
+
+	provider.reserveResult = { "success": false, "reason": "belt_full" }
+	tab._onBeltPressed()
+	check(provider.reserveCalls.size() == 2, "a failed command is still a single call")
+	check(tab.feedbackLabel.get_parsed_text() == "That belt is full.", "a failed assignment shows the reason and mutates nothing")
+	provider.reserveResult = { "success": true, "reason": "" }
+
+	provider.snapshot = makeSnapshot()
+	provider.snapshot["managementAllowed"] = false
+	await refreshTab()
+	tab._onInventoryItemPressed("p_paregoric")
+	check(tab.beltButton.disabled, "belt editing fails closed when management is unavailable")
+
+	provider.snapshot = makeSnapshot()
+	await refreshTab()
 
 
 func testFocusAndLiveUpdates() -> void:

@@ -39,7 +39,7 @@ func _run() -> void:
 	party.inventory = []
 	party.money = 0
 	party._nextInstanceNumber = 1
-	for index in 23:
+	for index in 22:
 		party.inventory.append({
 			"instanceId": "full_%d" % index,
 			"definitionId": "paregoric",
@@ -47,11 +47,20 @@ func _run() -> void:
 			"quantity": 5,
 		})
 	party.inventory.append({
+		"instanceId": "belt_multi",
+		"definitionId": "multi_heal",
+		"itemType": "consumable",
+		"quantity": 2,
+	})
+	party.inventory.append({
 		"instanceId": "full_last",
 		"definitionId": "paregoric",
 		"itemType": "consumable",
 		"quantity": 4,
 	})
+	party.party["Walker Langley"]["beltReservations"] = [
+		{ "instanceId": "belt_multi", "combatId": "multiHeal", "quantity": 1 },
+	]
 
 	var shootout = ShootoutScript.new()
 	var ui = FakeUI.new()
@@ -67,6 +76,9 @@ func _run() -> void:
 		"outcome": "victory",
 		"party": {},
 		"rodeoLoot": {},
+		"beltConsumed": [
+			{ "instanceId": "belt_multi", "combatId": "multiHeal", "quantity": 1 },
+		],
 		"loot": {
 			"money": 4,
 			"items": [{ "definitionId": "paregoric", "itemType": "consumable", "quantity": 2 }],
@@ -81,12 +93,16 @@ func _run() -> void:
 	_check(lootResult.overflow[0].name == "Paregoric", "overflow keeps a display name")
 	_check(lootResult.money == 4 and party.money == 4, "money is applied once")
 	_check(party.inventory.size() == 24, "inventory remains at capacity")
+	var beltResult = ui.shownResults.beltResult
+	_check(beltResult.success and beltResult.consumed.size() == 1 and beltResult.consumed[0].quantity == 1, "one recorded belt use commits exactly once")
+	_check(_stackQuantity(party, "belt_multi") == 1, "the reserved stack loses one unit")
 
 	ui.acknowledge()
 	_check(endSignals.size() == 1, "acknowledgment emits the end signal once")
 	_check(ui.hideCount == 1, "acknowledgment hides the result screen")
 	var emittedResults = endSignals[0][1]
 	_check(emittedResults.lootResult.overflow.size() == 1, "emitted result retains overflow details")
+	_check(_stackQuantity(party, "belt_multi") == 1, "acknowledgment does not reapply belt consumption")
 	ui.acknowledge()
 	_check(endSignals.size() == 1, "repeated acknowledgment cannot emit again")
 
@@ -100,6 +116,13 @@ func _run() -> void:
 		print("TestShootoutLoot: ALL CHECKS PASSED")
 	else:
 		printerr("TestShootoutLoot: %d CHECK(S) FAILED" % failures)
+
+
+func _stackQuantity(partyNode, instanceId: String) -> int:
+	for entry in partyNode.inventory:
+		if str(entry.get("instanceId", "")) == instanceId:
+			return int(entry.get("quantity", 0))
+	return 0
 
 
 func _check(condition: bool, message: String) -> void:

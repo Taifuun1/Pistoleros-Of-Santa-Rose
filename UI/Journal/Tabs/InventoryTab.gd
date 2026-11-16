@@ -49,6 +49,10 @@ const REASON_TEXT = {
 	"invalid_quantity": "Choose a valid quantity.",
 	"not_droppable": "That item cannot be dropped.",
 	"belt_loadout_too_large": "That belt cannot hold the current belt loadout.",
+	"belt_full": "That belt is full.",
+	"not_consumable": "Only consumables can go on a belt.",
+	"exceeds_owned": "Not enough of that item is carried.",
+	"unknown_reservation": "That item is not assigned to this belt.",
 	"already_revealed": "This map is already fully revealed.",
 	"already_owned": "You already carry an unused copy of this map.",
 	"invalid_map": "This map cannot be used.",
@@ -63,6 +67,7 @@ const STATE_USE_UNAVAILABLE := "That item has no use outside combat."
 
 ## Provider Node contract: isInventoryDataAvailable(), getInventorySnapshot(),
 ## getEquipmentPreview(memberKey, instanceId), equipItem(...), dropItem(...),
+## getBeltSnapshot(memberKey), reserveBeltItem(...), unreserveBeltItem(...),
 ## inventoryChanged and equipmentChanged(memberKey). Null resolves /root/Party.
 var inventoryProvider: Node = null
 ## Out-of-combat item use (map reveals). Null resolves /root/Discovery; a later
@@ -112,6 +117,7 @@ var _detailScrollValue := 0
 @onready var feedbackLabel = $ContentView/RightPanel/RightMargin/RightLayout/FeedbackLabel
 @onready var equipButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/EquipButton
 @onready var useButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/UseButton
+@onready var beltButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/BeltButton
 @onready var dropButton: Button = $ContentView/RightPanel/RightMargin/RightLayout/Actions/DropButton
 @onready var dropOverlay: Control = $DropOverlay
 @onready var dropItemLabel = $DropOverlay/DropCenter/DropPanel/DropMargin/DropLayout/DropItemLabel
@@ -144,6 +150,7 @@ func _ready() -> void:
 	itemStatsHost.add_child(_itemStats)
 	equipButton.pressed.connect(_onEquipPressed)
 	useButton.pressed.connect(_onUsePressed)
+	beltButton.pressed.connect(_onBeltPressed)
 	dropButton.pressed.connect(_onDropPressed)
 	decrementButton.pressed.connect(_onDecrementPressed)
 	incrementButton.pressed.connect(_onIncrementPressed)
@@ -275,6 +282,10 @@ func _normalizeSnapshot(value: Dictionary) -> bool:
 			member["equipment"] = {}
 		if !(member.get("fightData", {}) is Dictionary):
 			member["fightData"] = {}
+		if !(member.get("belt", {}) is Dictionary):
+			member["belt"] = { "entries": [] }
+		if !(member.belt.get("entries", null) is Array):
+			member.belt["entries"] = []
 		_membersByKey[memberKey] = member
 	for itemValue in _snapshot.items:
 		if !(itemValue is Dictionary):
@@ -432,13 +443,15 @@ func _renderMemberSummary() -> void:
 	var defense = stats.get("defense", {}) if stats is Dictionary else {}
 	var beltSpace = int(fightData.get("beltSpace", -1))
 	var beltText = "unlimited" if beltSpace < 0 else str(beltSpace)
-	memberStatsLabel.setRichTextLabel("HP %d/%d | Six %d | High %d | Taffy %d | Style %d | Sand %d | Belt %s" % [
+	var beltUsed = int(_selectedMember().get("belt", {}).get("used", 0))
+	memberStatsLabel.setRichTextLabel("HP %d/%d | Six %d | High %d | Taffy %d | Style %d | Sand %d | Belt %d/%s" % [
 		int(fightData.get("hp", 0)), int(fightData.get("maxHp", 0)),
 		int(stats.get("sixShootin", 0)) if stats is Dictionary else 0,
 		int(stats.get("highTailin", 0)) if stats is Dictionary else 0,
 		int(stats.get("taffyin", 0)) if stats is Dictionary else 0,
 		int(defense.get("style", 0)) if defense is Dictionary else 0,
 		int(defense.get("sand", 0)) if defense is Dictionary else 0,
+		beltUsed,
 		beltText,
 	])
 
@@ -450,9 +463,12 @@ func _renderDetail() -> void:
 	dropButton.disabled = true
 	useButton.visible = false
 	useButton.disabled = true
+	beltButton.visible = false
+	beltButton.disabled = true
 	equipButton.tooltip_text = ""
 	dropButton.tooltip_text = ""
 	useButton.tooltip_text = ""
+	beltButton.tooltip_text = ""
 	if _selectedMemberKey == "":
 		selectionLabel.setRichTextLabel(STATE_NO_MEMBERS)
 		return
@@ -482,6 +498,7 @@ func _renderInventoryDetail(item: Dictionary) -> void:
 	dropButton.tooltip_text = "" if !dropButton.disabled else (
 		REASON_TEXT["management_unavailable"] if !managementAllowed else REASON_TEXT["not_droppable"]
 	)
+	_renderBeltAction(item, managementAllowed)
 	if !isGear:
 		selectionLabel.appendRichTextLabel("\n" + STATE_EQUIPMENT_ONLY)
 		equipButton.tooltip_text = STATE_EQUIPMENT_ONLY
@@ -509,6 +526,60 @@ func _renderInventoryDetail(item: Dictionary) -> void:
 	else:
 		equipButton.tooltip_text = "Equip to %s" % _selectedMember().get("actorName", _selectedMemberKey)
 		feedbackLabel.setRichTextLabel("")
+
+
+## Minimal belt assignment (commit 3): one button assigns/removes the selected
+## consumable for the selected member. Belt space and quantity validation stay in
+## the Party command.
+func _renderBeltAction(item: Dictionary, managementAllowed: bool) -> void:
+	if str(item.get("itemType", "")) != "consumable" or str(item.get("combatId", "")) == "":
+		return
+	beltButton.visible = true
+	var entry := _beltEntryFor(_selectedInstanceId)
+	if entry.is_empty():
+		beltButton.text = "To Belt"
+		beltButton.tooltip_text = "Assign %s to this member's belt." % str(item.get("name", ""))
+	else:
+		beltButton.text = "From Belt"
+		beltButton.tooltip_text = "%d reserved. Remove %s from this belt." % [
+			int(entry.get("quantity", 0)), str(item.get("name", ""))
+		]
+		selectionLabel.appendRichTextLabel("\nBelt: %d reserved." % int(entry.get("quantity", 0)))
+	beltButton.disabled = !managementAllowed
+	if !managementAllowed:
+		beltButton.tooltip_text = REASON_TEXT["management_unavailable"]
+
+
+func _beltEntryFor(instanceId: String) -> Dictionary:
+	var belt = _selectedMember().get("belt", {})
+	if !(belt is Dictionary):
+		return {}
+	for entryValue in belt.get("entries", []):
+		if entryValue is Dictionary and str(entryValue.get("instanceId", "")) == instanceId:
+			return entryValue
+	return {}
+
+
+func _onBeltPressed() -> void:
+	if _selectionSource != "inventory" or !_itemsById.has(_selectedInstanceId):
+		return
+	var provider := _resolveInventoryProvider()
+	if provider == null or !provider.has_method("reserveBeltItem") or !provider.has_method("unreserveBeltItem"):
+		feedbackLabel.setRichTextLabel(STATE_UNAVAILABLE)
+		return
+	_commandInProgress = true
+	var result = {}
+	if _beltEntryFor(_selectedInstanceId).is_empty():
+		result = provider.reserveBeltItem(_selectedMemberKey, _selectedInstanceId, 1)
+	else:
+		result = provider.unreserveBeltItem(_selectedMemberKey, _selectedInstanceId)
+	_commandInProgress = false
+	if result is Dictionary and bool(result.get("success", false)):
+		refreshTab()
+		feedbackLabel.setRichTextLabel("Removed from belt." if _beltEntryFor(_selectedInstanceId).is_empty() else "Assigned to belt.")
+	else:
+		var reason = str(result.get("reason", "data_unavailable")) if result is Dictionary else "data_unavailable"
+		feedbackLabel.setRichTextLabel(_reasonText(reason))
 
 
 func _renderEquipmentDetail() -> void:

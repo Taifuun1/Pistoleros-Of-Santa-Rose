@@ -82,7 +82,8 @@ func testParty(catalog) -> void:
 	starter.configureInventory(catalog)
 	_check(starter.isInventoryDataAvailable(), "valid catalog makes inventory available")
 	_check(starter.inventory.size() == 1 and starter.inventory[0].definitionId == "paregoric", "starter carries one shared Paregoric")
-	_check(starter.party["Walker Langley"].items == ["Paregoric"], "starter belt no longer exceeds Gunslinger belt space")
+	var starterBelt = starter.party["Walker Langley"].beltReservations
+	_check(starterBelt.size() == 1 and starterBelt[0].instanceId == "starter_paregoric" and starterBelt[0].combatId == "Paregoric", "starter belt is one reservation referencing the shared stack")
 	starter.free()
 
 	var party = PartyScript.new()

@@ -71,12 +71,44 @@ func resolveItem(itemName: String, actingActor, targetActor) -> void:
 	if itemData == null:
 		push_warning("ShootoutActionResolver: unknown item '{itemName}'".format({ "itemName": itemName }))
 		return
-	# Using an item consumes one instance from the belt (decided).
-	actingActor.items.erase(itemName)
+	if targetActor == null:
+		# Invalid target: the act consumes nothing.
+		return
+	if !_consumeBeltItem(actingActor, itemName):
+		return
 	var amount = int(itemData.get("baseAmount", 0))
 	targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
 	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
 	applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)
+
+
+## Consumes one use. Party actors consume the matching reservation and report it
+## for the one-shot Party write-back; enemy actor belts keep the legacy name-only
+## behavior. A reservation mismatch consumes nothing.
+func _consumeBeltItem(actingActor, itemName: String) -> bool:
+	var reservations = actingActor.get("beltReservations")
+	if reservations is Array and !reservations.is_empty():
+		for reservationValue in reservations:
+			if !(reservationValue is Dictionary):
+				continue
+			var reservation: Dictionary = reservationValue
+			if str(reservation.get("combatId", "")) != itemName or int(reservation.get("quantity", 0)) <= 0:
+				continue
+			reservation["quantity"] = int(reservation.quantity) - 1
+			_eraseOneBeltName(actingActor, itemName)
+			if shootout != null and shootout.has_method("recordBeltConsumption"):
+				shootout.recordBeltConsumption(str(reservation.get("instanceId", "")), itemName)
+			return true
+		push_warning("ShootoutActionResolver: '{itemName}' has no matching Party belt reservation.".format({ "itemName": itemName }))
+		return false
+	_eraseOneBeltName(actingActor, itemName)
+	return true
+
+
+func _eraseOneBeltName(actingActor, itemName: String) -> void:
+	var belt = actingActor.items
+	if belt is Array:
+		belt.erase(itemName)
 
 ## The full damage pipeline (Docs/System Design/Shootout/Damage and Stats.md):
 ## quality multiplier, weapon + offensive stat base, weapon family defense

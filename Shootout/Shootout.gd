@@ -76,6 +76,8 @@ var encounterTrailState: Dictionary = {}
 var lootGenerator
 # baseName -> { hp, injuryDamage, downed } for dead party members this fight.
 var partyFightState = {}
+# Successful Party belt-item uses recorded for the one-shot Party write-back.
+var consumedBeltItems = []
 # Field markers for the reposition picker (direction -> Sprite2D), parented
 # under Actors in front of the background but behind every fighter.
 var repositionMarkersRoot = null
@@ -268,10 +270,13 @@ func spawnActor(actorSide: String, actorType: String, actorName: String, actorPo
 	newShootoutActor.add_child(hpIndicator)
 	hpIndicator.init(newShootoutActor)
 	var classData = cylinderManager.classesData.get(newShootoutActor.characterClass, {})
-	var loadoutBeltSpace = int(classData.get("beltSpace", -1))
 	if Party.party.has(actorName):
-		loadoutBeltSpace = int(newShootoutActor.beltSpace)
-	newShootoutActor.applyLoadoutLimits(loadoutBeltSpace)
+		# Party fight data already trims reservations to the effective belt
+		# space. One reservation can hold quantity > 1, so belt space must not
+		# cap the projected item-name count.
+		newShootoutActor.applyLoadoutLimits(-1)
+	else:
+		newShootoutActor.applyLoadoutLimits(int(classData.get("beltSpace", -1)))
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))
 	newShootoutActor.actorUnhovered.connect(clearHoveredActorStats.bind(actorNameIndexed))
@@ -543,6 +548,7 @@ func _on_battle_ended(winningSide: String) -> void:
 		"fled": fled,
 		"outcome": fightOutcome(winningSide),
 		"party": buildPartyFightState(),
+		"beltConsumed": consumedBeltItems.duplicate(true),
 		"rodeoLoot": rodeoManager.consumeLootModifiers()
 	}
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
@@ -555,6 +561,7 @@ func _on_battle_ended(winningSide: String) -> void:
 func presentFightResults(results: Dictionary) -> void:
 	var applicationResult = Party.applyFightResults(results)
 	results["lootResult"] = applicationResult.get("loot", {})
+	results["beltResult"] = applicationResult.get("belt", {})
 	pendingEndResults = results
 	endScreenAcknowledged = false
 	# Outcome stinger for the end screen (MusicPlayer; the fight track stops
@@ -616,6 +623,12 @@ func recordActorDeath(actor) -> void:
 			"injuryDamage": injury if injury != null else 0,
 			"downed": true
 		}
+
+## Called only after a successful item resolution. Misses, cancelled acts,
+## unknown items and invalid targets never reach here.
+func recordBeltConsumption(instanceId: String, combatId: String) -> void:
+	consumedBeltItems.append({ "instanceId": instanceId, "combatId": combatId, "quantity": 1 })
+
 
 func buildPartyFightState() -> Dictionary:
 	var state = partyFightState.duplicate(true)

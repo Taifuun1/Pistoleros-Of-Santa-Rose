@@ -160,6 +160,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Use"
 
+[node name="BeltButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "To Belt"
+
 [node name="DropButton" type="Button" parent="ContentView/RightPanel/RightMargin/RightLayout/Actions"]
 layout_mode = 2
 size_flags_horizontal = 3

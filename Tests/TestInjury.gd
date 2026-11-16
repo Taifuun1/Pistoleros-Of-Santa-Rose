@@ -4,6 +4,7 @@ extends SceneTree
 ## Run with: godot --headless --script res://Tests/TestInjury.gd
 
 const PartyScript = preload("res://Globals/Party.gd")
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
 const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
 
@@ -72,6 +73,21 @@ func _run() -> void:
 	_check(fightData.stats.sixShootin == 2, "knockout debuff applied to fight stats, got %d" % fightData.stats.sixShootin)
 	_check(member.stats.sixShootin == 3, "source party stats are not mutated")
 	member.knockoutDebuffs = []
+
+	print("\n--- Belt use commits without touching fight state ---")
+	var catalog = ItemCatalogScript.new()
+	party.configureInventory(catalog)
+	party.inventory = [{
+		"instanceId": "injury_belt", "definitionId": "paregoric",
+		"itemType": "consumable", "quantity": 2,
+	}]
+	member["beltReservations"] = [{ "instanceId": "injury_belt", "combatId": "Paregoric", "quantity": 1 }]
+	var beltApplication = party.applyFightResults({
+		"party": {},
+		"beltConsumed": [{ "instanceId": "injury_belt", "combatId": "Paregoric", "quantity": 1 }],
+	})
+	_check(beltApplication.belt.success and party.inventory[0].quantity == 1, "one belt use decrements the carried stack")
+	_check(member.injuryDamage == 4, "the belt commit does not change fight injuries")
 
 	print("\n--- Post-fight write-back ---")
 	party.applyFightResults({ "party": { "Walker Langley": { "hp": 5, "injuryDamage": 6, "downed": false } }, "fled": false })

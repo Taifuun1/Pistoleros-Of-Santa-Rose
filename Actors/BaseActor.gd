@@ -39,8 +39,11 @@ var characterMagazine = null
 
 # Fight loadout (Docs/System Design/Shootout/Moves Items and Ducks.md):
 # activated moves (max 4) and the belt contents (capped by belt space).
+# Party actors carry beltReservations [{instanceId, combatId, quantity}] so a
+# successful item use can be written back once; enemy actor belts stay names.
 var moves = []
 var items = []
+var beltReservations = []
 
 # Damage taken this fight; written back as journey injury at fight end.
 var injuryDamage = 0
@@ -73,6 +76,7 @@ func init(actorData: Dictionary):
 	characterMagazine = actorData.get("magazine", null)
 	moves = actorData.get("moves", []).duplicate()
 	items = actorData.get("items", []).duplicate()
+	beltReservations = actorData.get("beltReservations", []).duplicate(true)
 	beltSpace = int(actorData.get("beltSpace", -1))
 	
 	weapon = actorData.weapon.duplicate()
