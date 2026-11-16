@@ -86,7 +86,11 @@ signal scene_changed(scene_key)
 func change_scene(scene_key: String, context := {}) -> void
 func change_scene_to_path(scene_path: String, context := {}) -> void
 func get_current_scene() -> Node
+func launchShootout(request_or_options) -> bool
+func hasPendingShootout() -> bool
 ```
+
+- `launchShootout()` owns validated encounter transitions: it builds/accepts an `EncounterRequest`, captures the launch origin, installs one pending request on the Shootout autoload, connects `shootoutEnded` before the scene enters the tree and restores the origin once after the result screen is acknowledged. Invalid requests, a second launch while pending and a failed Shootout load leave no stale request or return context; the `shootoutEnded` handler is consumed exactly once. See `Docs/System Design/Shootout/Encounters.md`.
 
 - `context` is an optional `Dictionary` passed through to the new scene (e.g. `{ "location": "Clearwater Grove", "pregenerated": false }` from `enterLocation()`, or spawn data for the overworld). The manager sets matching properties / calls an optional `init(context)` method on the new scene root if it has one, replacing the current pattern of setting autoload state (`Locations.currentLocation`, `Overworld.spawnChunk`, `Overworld.spawnTile`) before switching.
 - Only one transition can run at a time; calls made while a transition is in progress are ignored (with a `push_warning`).

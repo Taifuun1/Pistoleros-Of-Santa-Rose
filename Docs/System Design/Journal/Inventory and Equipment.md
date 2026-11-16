@@ -15,7 +15,7 @@ The Journal's Inventory & Equipment tab manages the party's shared carried items
 - Show both an item's own stats and the selected character's projected effective stats. Preview and Shootout setup use the same calculator.
 - Permit dropping some or all of a stack through one confirmation flow. Selection, inspection, comparison, and cancellation never mutate state.
 - For the first loot flow, deterministically take what fits and require confirmation before leaving overflow. Replace this with player-selected loot in a later iteration.
-- Keep per-character Shootout belt-loadout editing outside this iteration. An equipment swap that would make the current belt loadout invalid is rejected rather than silently truncating it.
+- Assign/remove one selected consumable to/from a character's Shootout belt from this tab (one To Belt/From Belt action). Rich belt editing (quantity pickers, drag-and-drop) stays deferred. An equipment swap that would make the current belt loadout invalid is rejected rather than silently truncating it.
 - Keep runtime state in `Party` across scene changes. Save/load persistence belongs to the future save service.
 
 ## Scope and requirements
@@ -72,7 +72,7 @@ The Journal's Inventory & Equipment tab manages the party's shared carried items
 
 ### Out of scope for this iteration
 
-- Using consumables outside combat, or assigning/moving consumables between shared inventory and per-character Shootout belts.
+- Using consumables outside combat, or rich belt editing beyond the single assign/remove action (quantity pickers, stack splitting, drag-and-drop).
 - Activating/deactivating class or equipment abilities and resolving equipment-granted ability loadouts.
 - Implementing combat mechanics for affixes that the Shootout pipeline does not yet support.
 - Direct unequipping, drag-and-drop, manual slot rearrangement, sorting, filtering, search, comparison across multiple characters, and equipped-item dropping.
@@ -113,7 +113,7 @@ The current `Party.party[*].weapon` combat shorthand and `ActorBase.equipment` k
 
 Equipment swaps validate the item, member, slot, management availability, and current belt loadout before changing either collection. On success, the old equipped item occupies the candidate's former inventory index, preserving used capacity and deterministic placement. Signals emit only after the complete swap.
 
-The legacy `Party.party[*].items` belt arrays remain Shootout loadout data for now; they are not silently copied into shared inventory. Belt editing and unifying those consumable references require a follow-up design. Until then, reducing effective belt space below the current loadout count fails the equipment command with **Belt loadout too large** instead of relying on `ActorBase.applyLoadoutLimits()` to truncate a fight copy.
+Party members own persistent `beltReservations` (`{instanceId, combatId, quantity}`) referencing carried consumable stacks; there is no independent name-based Party belt array. `reserveBeltItem()`/`unreserveBeltItem()` validate ownership, type, `combatId`, quantity, management policy and effective belt space atomically, and belt space counts entries rather than reserved quantity. Fight setup resolves reservations to combat names with their source `instanceId`; the Shootout records successful uses and `applyFightResults()` commits them once and reconciles stale reservations. Enemy actor `items` belts remain separate enemy content. Reducing effective belt space below the current reservation count fails the equipment command with **Belt loadout too large**.
 
 ## User experience
 
@@ -363,11 +363,11 @@ The UI treats snapshots as read-only even though Godot Dictionaries are referenc
 
 `addItem()` delegates to `addItems([item])`. `addItems()` calls `InventoryRules.planAdd()`, commits `inventory` and `_nextInstanceNumber` only on valid input, emits `inventoryChanged` once if anything was accepted, and returns the public result without the proposed internal inventory/counter fields. Capacity overflow is not a command error.
 
-`applyLoot()` adds money independently, calls `addItems(loot.get("items", []))`, and returns that result plus `money` (the amount just added). Invalid item data does not roll back money. `applyFightResults()` preserves its HP/injury/knockout behavior, calls `applyLoot()` when loot exists, and returns `{ "loot": lootResult }` for the Shootout result payload.
+`applyLoot()` adds money independently, calls `addItems(loot.get("items", []))`, and returns that result plus `money` (the amount just added). Invalid item data does not roll back money. `applyFightResults()` commits the Shootout's `beltConsumed` records exactly once, reconciles belt reservations, preserves its HP/injury/knockout behavior, calls `applyLoot()` when loot exists, and returns `{ "loot": lootResult, "belt": beltResult }` for the Shootout result payload.
 
 ### Drop and equip algorithms
 
-All player-command failures return `{ "success": false, "reason": "..." }` and emit no signals. Use reason codes `data_unavailable`, `management_unavailable`, `unknown_member`, `unknown_item`, `not_equipment`, `invalid_slot`, `invalid_quantity`, `not_droppable`, and `belt_loadout_too_large`.
+All player-command failures return `{ "success": false, "reason": "..." }` and emit no signals. Use reason codes `data_unavailable`, `management_unavailable`, `unknown_member`, `unknown_item`, `not_equipment`, `invalid_slot`, `invalid_quantity`, `not_droppable`, `belt_loadout_too_large`, `belt_full`, `not_consumable`, `exceeds_owned`, and `unknown_reservation`.
 
 `dropItem(instanceId, quantity)`:
 
@@ -703,7 +703,7 @@ Opening, closing and re-activating the Journal is read-only. `Tests/TestJournal.
 
 - **Player-selected loot:** replace deterministic take-what-fits with a result-screen choice of what to carry and what to leave. Retain the same capacity/overflow command results.
 - **Unequip and drag-and-drop:** intentionally out of scope for now. Unequip requires a free inventory slot and an explicit no-weapon combat rule; drag-and-drop must not bypass command validation or controller parity.
-- **Belt loadouts:** design shared-inventory ↔ belt assignment, combat consumption write-back, stack splitting/reservation, and belt-space changes together. The current arrays must not become an unexamined second item source.
+- **Belt loadouts:** shared-inventory ↔ belt assignment, one-shot combat consumption write-back and reservation reconciliation are implemented. Remaining: save/load snapshot coverage, Vamoose inventory-loss reconciliation, and richer quantity/drag-and-drop editing.
 - **Equipment abilities/affixes:** equipment-granted Move activation and unsupported affix mechanics need their combat designs before the UI can claim those effects are active.
 - **Persistence:** instance-id allocation, inventory/equipment serialization, starter migration, and New Game reset belong to the save-service design.
 - **Town-only switching:** remains a supported future policy change through `SceneManager._syncInventoryPolicy()`; it requires no Inventory tab or command-signature rewrite.

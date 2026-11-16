@@ -38,7 +38,7 @@ Encounter metadata controls selection:
 
 Add `Shootout.resolveFlairText(encounterData: Dictionary) -> String`. It uses the explicit override when present, otherwise picks uniformly from the resolved pool. Unknown or empty pools fall back to `dustup`; empty text falls back to `Shootout!`. Append `!` only when the selected string does not already end in one—the entries in `Names.md` already include their punctuation.
 
-`SceneManager` loads the same encounter resource that `Shootout._ready()` will consume through `Shootout.pendingEncounter`, falling back to the existing `RatAmbush.gd` debug encounter. Move the default encounter path to a shared `Shootout.DEFAULT_ENCOUNTER_PATH` constant so selection and combat initialization cannot disagree about the default. Loading the resource for the flair does **not** consume or clear `pendingEncounter`; the Shootout scene retains that responsibility.
+`SceneManager` resolves the encounter resource from the active `EncounterRequest` (the same request `Shootout._ready()` will consume), falling back to the direct-debug `RatAmbush.gd` when no request is pending. A shared `Shootout.DEFAULT_ENCOUNTER_PATH` constant is still the proposed way to keep selection and combat initialization from disagreeing about that debug default. Resolving the resource for the flair does **not** consume or clear the pending request; the Shootout scene retains that responsibility.
 
 Resolve and display the text exactly once. Remove the current `flavorName`/`pickFlavorName()` start-banner path from `Shootout/Shootout.gd`; otherwise a random override can be rolled twice and a second popup can appear after combat starts. Directly running `Shootout.tscn` in the editor remains a combat-debug path and does not synthesize a pre-transition flair.
 
@@ -61,7 +61,7 @@ if sceneKey == "shootout":
 await _swapScene(scenePath, context, sceneKey)
 ```
 
-`Shootout.loadPendingEncounterData()` is a small autoload helper shared by this code and `Shootout._ready()`: it resolves `pendingEncounter` or `DEFAULT_ENCOUNTER_PATH`, loads the data, and leaves consumption/reset of the pending path to the Shootout scene.
+`Shootout.loadPendingEncounterData()` is a small autoload helper shared by this code and `Shootout._ready()`: it resolves the active `EncounterRequest` (or the direct-debug default), loads the data, and leaves consumption/reset of the pending request to the Shootout scene.
 
 This preserves the existing order for non-Shootout scenes and gives Shootouts the following lifecycle:
 

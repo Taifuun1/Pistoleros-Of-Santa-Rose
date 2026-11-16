@@ -6,7 +6,7 @@ Snapshot of what the project tests today and where testing could be added next. 
 
 Two conventions coexist:
 
-1. **Headless script tests** in `Tests/` — `godot --headless --script res://Tests/TestX.gd` (SceneTree scripts; each prints check lines and exits non-zero on failure). `Tests/TestShootoutTurnTiming.gd` is the exception: it runs as a scene (`godot --headless res://Tests/TestShootoutTurnTiming.tscn`) because `Shootout.gd` needs the project autoloads.
+1. **Headless script tests** in `Tests/` — `godot --headless --script res://Tests/TestX.gd` (SceneTree scripts; each prints check lines and exits non-zero on failure). Scene-run exceptions such as `TestShootoutTurnTiming.gd`, `TestShootoutLoot.gd`, `TestVendorNavigation.gd` and `TestEncounterFlow.gd` run as scenes (`godot --headless res://Tests/TestX.tscn`) because they need the project autoloads or a live scene tree.
 2. **In-tree test scenes** — several systems keep their tests next to the code and run them as scenes or interactive tools:
    - `Location/Location Generation/Test/` — WFC solver + pipeline integration tests, a pathfinding sandbox, chunk-tile helper.
    - `Minigames/Poker/Test/` — hand evaluation + a multi-game flow simulation.
@@ -39,9 +39,11 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `TestInjury` | `Globals/Party.gd` + resolver | Death, injury, retreat/flee costs (Party's fight-results path) |
 | `TestLoot` | `Globals/ItemGeneration.gd` + `Data/Items/ItemCatalog.gd` | Catalog/table definition ids, stackable quantities, unknown-definition rejection, rewards and loot table ranges, rarity bands |
 | `TestInventory` | `Globals/InventoryRules.gd` + `Globals/Party.gd` | Atomic add planning, stack/capacity/id allocation, overflow, drops and policy failures, snapshot isolation, money independence, starter migration |
+| `TestBeltOwnership` | `Globals/Party.gd` belt commands + `ShootoutActionResolver.gd` | Reservation validation/capacity, starter migration, fight-data projection, one-shot combat use records and commit, unused reservations, atomic invalid records, reconciliation on drop/consumption |
 | `TestEquipmentStats` | `Globals/CharacterStatCalculator.gd` + `Globals/Party.gd` | Canonical equipment stats, HP/injury/knockout order, weapon-family damage, belt space, preview/commit parity, atomic replacement and full-inventory swaps |
 | `TestInventoryTab` | `UI/Journal/Tabs/InventoryTab.tscn` (scene-run) | Empty/unavailable states, member/equipment/item selection, shared rich-text rendering, nearest-cell selection fallback, comparison, one-command Equip/Drop, quantity confirmation, focus/signals, single-row greyed equipment slots and icon member buttons, nine-patch item card (icon box keeps its size, reflow at narrow widths), whole-scale sprite fitting at native scale (`TextureFit`), long content at 640×360 |
 | `TestShootoutLoot` | `Shootout/Shootout.gd` + `Party` (scene-run) | Accepted/overflow application, explicit end-screen acknowledgment, one-shot `shootoutEnded`, retained overflow payload |
+| `TestEncounterFlow` | `EncounterRequest`, `SceneManager` launcher/return, `EncounterPoolData.selectEncounter`, `OverworldEvents`/outcome resolver, real Shootout (scene-run) | Request validation/rejection, deterministic pooled selection, canonical Zone event pools, explicit `none`/`encounter` outcomes, legacy-choice unavailability, Overworld → canyon Shootout → exact origin return, double launch/result rejection and failed-load cleanup |
 | `TestItemGeneration` | `Globals/ItemGeneration.gd` | Stable definition ids, affixes, kinds, rarities, catalog validity, band sanity, injected-RNG determinism and global-RNG isolation |
 | `TestZoneCatalog` | `Data/Overworld/ZoneData.gd` + `Overworld/OverworldZoneCatalog.gd` | Production band geography, canonical Zone ids across music/equipment, injected datasets, malformed band/default lint |
 | `TestVendorData` | `Data/Vendors/` (incl. `NewspaperData.gd`), `Data/Overworld/SecretMapData.gd`, `Data/Shootout/EncounterPoolData.gd` | Item/map/Zone/vendor cross-data lint, real consumable combat ids, map manifest targets (only Locations authored as secret are revealable), authored Zone pools and newspaper copy (unknown Zone/encounter, empty headline/tip), encounter-pool schema, authored pricing values and no-arbitrage bounds |
@@ -80,7 +82,7 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `RobbingTest` | `Minigames/Gold Rush/Robbing.gd` | Simulated clicks, scoring, despawn, end condition |
 | `SceneManagerTest` | `Nodes/SceneManager/SceneManager.gd` | Scene switching, transition guard, fade state |
 
-**Rough coverage profile:** the Shootout simulation core (turns, targeting, acts, damage, effects, cylinders, rodeos, AI, encounters, loot, injury) is well covered by fast headless fakes. Presentation-adjacent logic (sequencer, focus, shadows, HP indicators, music) is covered at the unit level. Overworld streaming's pure cache/queue/eviction logic is covered by `TestOverworldChunkStream`; everything that is mostly *scene, input or asset plumbing* — the streaming scene wiring, cutscenes, minigames, UI widgets, dialogue/events — is thin or untested.
+**Rough coverage profile:** the Shootout simulation core (turns, targeting, acts, damage, effects, cylinders, rodeos, AI, encounters, loot, injury) is well covered by fast headless fakes. Presentation-adjacent logic (sequencer, focus, shadows, HP indicators, music) is covered at the unit level. Overworld streaming's pure cache/queue/eviction logic is covered by `TestOverworldChunkStream`; event request/outcome dispatch and the real Shootout launch/return loop are covered by `TestEncounterFlow`. Everything that is mostly *scene, input or asset plumbing* — the streaming scene wiring, cutscenes, minigames, remaining UI widgets, event cadence and the unimplemented event outcome kinds — is thin or untested.
 
 ## Gaps, prioritized
 
@@ -92,7 +94,7 @@ The most recently reworked, most concurrency-heavy logic in the game (background
 `Docs/System Design/Overworld Spawns.md` already plans `OverworldSpawnpoint` rework — testing the spawn-point path now would de-risk that.
 
 ### 2. Overworld event triggering (`Globals/OverworldEvents.gd`)
-Small but decision-heavy: distance accumulation, per-biome event pools (`Data/Events/*.gd` are plain data), random selection, cooldown/gating via `on_event_closed`. A headless test with an injected RNG over the real event data would catch "event pool typo silently never fires" bugs. `PlayerOverworldActor.process_event_result()` (applying event outcomes) is the companion seam.
+`TestEncounterFlow.tscn` now covers canonical Zone resolution, generic + Zone pool isolation, explicit `none`/`encounter` outcomes, deterministic pool selection and the production autoload dispatch path. Still untested: distance accumulation, cadence/chance with an injected RNG, cooldown/gating through `on_event_closed`, and the future loot/injury/quest/scene outcomes.
 
 ### 3. Cutscene playback engine (`Cutscenes/Cutscene.gd`)
 ~190 lines driving every story scene: shot sequencing, actor placement, waits, music hooks, fade handshakes. `TestQuestTriggers` now covers the quest shot's start/complete dispatch, non-blocking behavior, rejected actions, and the Pistoleros Regroup end shots/objective order. The rest of the interpreter (waits, music hooks, end signal) and a full data lint ("every referenced actor/scene/track exists") remain open.

@@ -7,13 +7,13 @@ This document defines what the implemented systems need in order to function as 
 A coherent first playable loop must satisfy all of these:
 
 1. New Game creates one clean, deterministic initial state.
-2. A town departure begins exactly one trail cycle and rerolls rolled vendor stock only at that boundary.
+2. A Trail begins only through an explicit action in a Town and rerolls rolled vendor stock once at that boundary. On Trail enables attrition, non-town Location access and loot; Off Trail disables those mechanics while preserving town-to-town Overworld travel and quest progression.
 3. Overworld travel uses the same Zone identity for music, events, encounters, equipment and newspapers.
 4. An event/Location/quest can launch a selected encounter and retain a typed return destination.
 5. Combat consumes and produces authoritative Party state exactly once, then returns to the correct origin, town, or checkpoint.
 6. Carried items, belts, equipment, money, Bank and rewards cannot become independent duplicated sources of ownership.
 7. Quest completion updates Journal/map state and any level/rarity/Rodeo/reward progression through one command path.
-8. Save/Continue and New Game restore/reset every persistent domain together; transient scene/visual state is excluded.
+8. Save/Continue and New Game restore/reset every persistent domain together, including On/Off Trail state; transient scene/visual state is excluded.
 9. Content validation rejects broken or no-op references before they reach production.
 
 ## 2. Canonical ownership and identity contracts
@@ -21,9 +21,10 @@ A coherent first playable loop must satisfy all of these:
 | Concern | Single owner/source | Required consumers and rule |
 |---|---|---|
 | Zone geometry and ids | `res://Data/Overworld/ZoneData.gd` through `OverworldZoneCatalog.zoneForChunk()` | Music, visual spawns, event pools, encounter selection, equipment generation, vendors and newspapers call the same lookup. Only ZoneData contains chunk bands/default fallback. |
+| On/Off Trail lifecycle | `Locations` owns the explicit state and `trailDepartureId`; all feature gates read that state | A Town action is the only start-of-Trail. Implement one explicit end-of-Trail transition; never infer either from scene presence. Access, attrition and loot check the state independently, while quest commands and town-to-town movement remain available Off Trail. |
 | World topology and coordinates | `WorldData`, `HelperVariables`, `OverworldCoordinates`, generated `OverworldMapData` | Streaming, Location collisions, player/map position, secret targets and spawn placement share conversions. Manifest is regenerated, never independently edited. |
 | Location identity | Stable key in each Overworld chunk script's `locations` Dictionary, propagated to map manifest | Scene loading, vendor `parentLocationId`, quest `map_target_id`, secret `secret_id`, and last-town/checkpoint records use that id. Display labels are not a second key. |
-| Party and item ownership | `Globals/Party.gd` plus `InventoryRules` | Party is authoritative for members, HP/injury, money, carried stacks, equipped gear and belt reservations. Vendors, combat, quests, Poker and minigames execute commands; none keeps a second ownership ledger. |
+| Party and item ownership | `Globals/Party.gd` plus `InventoryRules` | Party is authoritative for members, HP/attrition, money, carried stacks, equipped gear and belt reservations. Vendors, combat, quests, Poker and minigames execute commands; none keeps a second ownership ledger. |
 | Item definition vs instance | `ItemCatalog`/gear data owns `definitionId`; Party allocates unique `instanceId` | Loot, stock, Bank, equipment and saves preserve complete rolled instances and ids. Combat-item `combatId` references a combat definition, never an instance. |
 | Actor/class/act identity | Party `actorName` or `Data/Actors` path; exact class/Move/Rodeo `data.name` | Encounters reference actor content; class grants and loadouts reference validated Move ids. Indexed combat node names remain runtime-only and never leak into save/story ids. |
 | Encounter identity and selection | Encounter resource path plus canonical Zone pool entry; loot/music reference their own stable names | Newspapers and gameplay read the same pool. `RatAmbush` is debug-only in production flows. A request carries the selected path, Zone, progression context and origin. |
@@ -34,28 +35,31 @@ A coherent first playable loop must satisfy all of these:
 
 ## 3. Required end-to-end encounter lifecycle
 
-### A. Trail departure
+### A. On/Off Trail lifecycle and departure
 
-1. The player uses a deliberate `TrailDeparture` interaction.
-2. `Locations.departForTrail()` increments one departure id and emits once.
-3. Vendors synchronize stock to that id; ordinary Overworld entry, Vamoose, retreat, minigames and quest transitions do not reroll stock.
-4. Any belt reservation for the journey is committed before the scene transition. Failure leaves the player in town with a readable reason.
+1. The player starts Off Trail and may travel between Towns, use town services and advance Quests. Off-Trail travel does not grant loot, apply attrition, or allow entry into non-town Locations.
+2. A deliberate `TrailDeparture` action in a Town is the only way to start a Trail. It sets the authoritative state On Trail before the scene transition and calls `Locations.departForTrail()` once.
+3. Vendors synchronize stock to that departure id; incidental Overworld entry, Vamoose, retreat, minigames and quest transitions neither start a new Trail nor reroll stock.
+4. Any belt reservation for the journey is committed before departure. Failure leaves the player in town with a readable reason and does not start the Trail.
+5. Define one explicit end-of-Trail transition. Do not infer it from loading the Overworld, entering a vendor room, completing a quest or returning from combat. The chosen transition restores Off-Trail restrictions without erasing quest progress or blocking town-to-town travel.
 
 ### B. Overworld and Location triggers
 
 - Visual parties remain cosmetic and never call events or Shootouts.
 - OverworldEvents resolves the current chunk's canonical Zone and merges generic plus authored Zone event pools using injected/deterministic RNG where tests require it.
+- Location entrances validate the current Trail state before transition: Off Trail permits town Locations only and never gates town-to-town Overworld movement. Quest commands and quest-driven encounters may still advance Off Trail, but their rewards remain suppressed.
 - Location ambushes and quest triggers use predefined encounter resources; they do not compose a second incompatible party format.
-- Every result/ambush/quest trigger validates its encounter and return destination before closing UI or changing scenes.
+- Every result/ambush/quest trigger validates its encounter, Trail-state permissions and return destination before closing UI or changing scenes.
 
 ### C. Encounter request
 
-Replace the bare global `pendingEncounter` handoff with one request/context contract (the exact API may remain on the Shootout autoload if desired):
+**Status: implemented in commit 2.** The bare global `pendingEncounter` handoff is replaced by one validated `EncounterRequest` contract (encounter path, canonical Zone, source/sourceId, origin, progression, Trail snapshot and optional seed). `SceneManager.launchShootout()` owns validation, origin capture, result-handler connection and one-shot return; `Globals/Shootout.gd` only holds the single pending request that `Shootout._ready()` consumes once.
 
 | Field | Requirement |
 |---|---|
 | `encounterPath` | Existing `res://` encounter resource; no silent RatAmbush fallback for production. |
 | `zoneId` | Canonical Zone used for pool validation, music and Zone-aware loot. |
+| `trailState` | Authoritative On/Off Trail state and departure id captured at launch. It gates attrition and all rewards; it is not inferred from `origin.sceneKey`. |
 | `origin` | `{sceneKey, location, overworldPosition, questId/checkpointId}` sufficient to reconstruct the exact origin. |
 | `source` | `overworld_event`, `location_ambush`, or `quest`, plus the source/result id for diagnostics. |
 | `progression` | Explicit quest/loot band or a reference to the authoritative progression provider; never a copied level/rarity value that can go stale. |
@@ -65,36 +69,42 @@ The launcher validates the whole request, connects the result handler before com
 
 ### D. Combat commit and return
 
-1. The Shootout builds one results payload containing outcome, Party fight state, Rodeo modifiers and generated loot.
-2. `Party.applyFightResults()` is called exactly once. It commits HP/injury, belt consumption, money and capacity-aware loot, returning accepted/overflow details for the result screen.
+1. The Shootout builds one results payload containing outcome, Party fight state, Rodeo modifiers and generated loot. Attrition is recorded only while On Trail. Off-Trail fights still resolve and may advance Quests, but generate no money, items, resources or other loot.
+2. `Party.applyFightResults()` is called exactly once. It commits the canonical fight-start/max-HP model, any On-Trail attrition, belt consumption and capacity-aware rewards, returning accepted/overflow details for the result screen. Off-Trail reward payloads are empty by contract.
 3. The result screen delays `shootoutEnded` until overflow is acknowledged. The launcher consumes the signal once and disconnects before changing scenes.
 4. Route by outcome:
-   - **Victory:** apply encounter/quest completion commands as appropriate, then restore origin.
+   - **Victory:** apply encounter/quest completion commands as appropriate, suppressing every reward while Off Trail, then restore origin.
    - **Fled/non-wipe defeat:** restore origin without rerolling stock or silently granting victory rewards.
-   - **Vamoose:** call the single Vamoose command, apply the decided money/equipment loss, and restore last town or active quest checkpoint.
+   - **Vamoose:** call the single Vamoose command, remove half of money plus a deterministic balance-selected 10–20% of carried inventory, and restore last town or active quest checkpoint. Equipped items and Bank contents are outside this carried-inventory loss.
 5. A return failure keeps the results/context recoverable and logs a readable error; it must not reapply Party results or generate loot again.
-6. Entering a designated resupply town applies the chosen injury/HP recovery policy once. Ordinary vendor-room entry must not accidentally count as a new town arrival and repeatedly heal/reset progression.
+6. Entering a designated resupply town applies the chosen HP/attrition recovery policy once. Ordinary vendor-room entry must not accidentally count as a new town arrival, start a Trail, or repeatedly heal/reset progression.
 
 ### E. Required loop acceptance test
 
-Automate one real scene test for each source type: event, Location ambush and quest. Cover selected encounter identity, Zone propagation, one Party commit, victory/flee/Vamoose destinations, stock departure rules, overflow acknowledgment, double input, launch/load failure and no leaked modal/music/pause state.
+Automate one real scene test for each source type: event, Location ambush and quest. Cover selected encounter identity, Zone propagation, one Party commit, victory/flee/Vamoose destinations, stock departure rules, overflow acknowledgment, double input, launch/load failure and no leaked modal/music/pause state. Run the reward/access cases both On and Off Trail: Off Trail must permit quests and town-to-town travel while rejecting non-town Locations, attrition and every reward source.
+
+**Commit 2 progress:** `TestEncounterFlow.tscn` covers the event source: deterministic pool selection, request/Zone propagation, double-launch rejection, real Overworld → canyon Shootout → exact origin return, duplicate-result rejection and failed-load context cleanup. Location-ambush and quest sources, Vamoose destination behavior and reward/access On-vs-Off-Trail cases remain open.
 
 ## 4. Event outcome contract
+
+**Status: `text`/`none` and `encounter` implemented in commit 2.** `OverworldEventOutcomeResolver` validates explicit choice `outcome` descriptors, executes exactly one per choice, and the popup disables legacy result-only choices rather than treating them as no-ops. Loot, injury/recover, quest and scene outcomes remain unimplemented design.
 
 Replace arbitrary result strings passed to an actor `pass` method with validated outcome descriptors. Keep the presentation text in event data, but resolve each choice to a domain command before closing the popup.
 
 | Outcome kind | Required data and command |
 |---|---|
 | `encounter` | Encounter path/pool selector, canonical Zone, origin and source id; use the encounter lifecycle above. |
-| `loot` | Money/items/resource bundle resolved through Party capacity-aware commands, with explicit overflow presentation. |
-| `injury` / `recover` | Member/target and amount routed through the canonical HP/injury rule, not direct actor-field edits. |
-| `quest` | Quest id/objective action routed through Quests; no direct state Dictionary writes. |
-| `scene` | Typed scene/Location/checkpoint transition with a valid return policy. |
+| `loot` | Money/items/resource bundle resolved through Party capacity-aware commands, with explicit overflow presentation. Reject or return an empty reward while Off Trail; vendor purchases in Town are not loot. |
+| `injury` / `recover` | Member/target and amount routed through the canonical HP/attrition rule, not direct actor-field edits. Attrition mutations are rejected Off Trail; recovery follows the town/camp policy. |
+| `quest` | Quest id/objective action routed through Quests; no direct state Dictionary writes. Allowed On and Off Trail, with rewards suppressed Off Trail. |
+| `scene` | Typed scene/Location/checkpoint transition with a valid return policy. Off Trail permits town destinations but rejects non-town Location access. |
 | `text` / `none` | Deliberately flavor-only outcome, clearly marked so it is not an accidental no-op. |
 
 Validation must reject duplicate event ids, unknown outcome kinds/references and missing choice outcomes. Exactly one outcome executes per choice; closing without a choice remains dismissal, not a hidden default reward.
 
 ## 5. Inventory, equipment, and belt coherence
+
+**Status: the shared belt ownership and consumption boundary is implemented in commit 3.** Party members own `beltReservations` referencing carried stacks; fight setup resolves them to combat `combatId`s with source `instanceId`s; successful uses are recorded and committed once through `Party.applyFightResults()`, and unconsumed/stale reservations are reconciled. Save/load and Vamoose inventory-loss integration remain later commits.
 
 ### One ownership model
 
@@ -109,7 +119,7 @@ Validation must reject duplicate event ids, unknown outcome kinds/references and
 2. Fight setup resolves each reservation to its combat `combatId` and carries the originating instance id into the fight context.
 3. Successful item resolution records consumption once; misses, cancelled acts, unknown items and invalid targets consume nothing.
 4. Fight results commit recorded consumption to Party stacks exactly once alongside other results. Unconsumed reservations remain owned and become available again.
-5. Fleeing uses the same commit rule for items actually used. Vamoose applies its separately decided item-loss rule after consumption, without double-removing instances.
+5. Fleeing uses the same commit rule for items actually used. Vamoose then removes half of money and the selected 10–20% of remaining carried inventory without double-removing consumed instances; equipped items and Bank contents are not part of that carried-inventory selection.
 6. Changing a belt's capacity cannot invalidate an existing reservation silently; reject the equipment/loadout command atomically.
 
 Tests must prove no duplication across inventory ↔ belt ↔ Bank ↔ equipment, no free starter belt source, stack write-back on every outcome, and deterministic behavior after save/load.
@@ -125,10 +135,10 @@ Use one progression projection derived from authoritative main-quest completion.
 | Loot band | Encounter/pool selection chooses an eligible band and passes it with the encounter request; loot tables validate that band. |
 | Rodeo/story unlocks | Quest completion commands swap authored Rodeo ids through Party and refresh Journal/future fight setup. |
 | Stagecoach speed | Read the same Party level projection; no separate speed progression counter. |
-| Quest rewards | Typed, idempotent reward commands for money/items/legendaries/unlocks. Encounter `loot: false` routes payout here instead of paying nothing. |
+| Quest rewards | Typed, idempotent reward commands for money/items/legendaries/unlocks. Encounter `loot: false` routes payout here instead of paying nothing. Quest objectives can complete Off Trail, but those completions produce no money, items, resources or other loot while Off Trail. |
 | Map and Journal | The same Quests state produces current objective/history/markers. Map target ids resolve through the generated manifest. |
 
-Reward application needs an explicit inventory-full policy: use the existing accepted/overflow result and acknowledgment, a quest reward cache, or another designed recovery path. Never silently delete a unique/legendary reward. Replaying a cutscene or restoring a scene must not grant a completed objective's reward twice.
+Reward application first checks Trail eligibility, then inventory capacity. Off Trail produces no reward payload. On Trail, use the existing accepted/overflow result and acknowledgment, a quest reward cache, or another designed recovery path for a full inventory. Never silently delete a unique/legendary reward. Replaying a cutscene or restoring a scene must not grant a completed objective's reward twice.
 
 The prologue needs one authored continuation contract: Littlehill Grove exit, Lazysprings/next-arc destination, final objective completion, Party recruitment, level/reward changes, and the new value used for quest scene selection.
 
@@ -136,12 +146,14 @@ The prologue needs one authored continuation contract: Littlehill Grove exit, La
 
 1. Define a supported-stat registry shared by item generation, `CharacterStatCalculator`, combat reads, Journal provenance, and vendor valuation. A stat may be `fully_supported`, `display_only`, or `unsupported`; unsupported stats must not roll as if functional.
 2. Implement affix mechanics through existing modifier/effect seams rather than new per-item special cases. Equipment-granted Moves use canonical Move ids and loadout previews. Implement effect-driven stat modifiers and route every combat/UI/initiative read through `Shootout.getModifiedStat()`; include taunt's defensive buffs.
-3. Propagate encounter Zone into loot generation. Use `dropsAnywhere` and the selected Zone exactly as vendor generation does.
+3. Propagate encounter Zone into loot generation. Zone-tied equipment not dropping from Shootouts is not intentional: use `dropsAnywhere` and the selected Zone exactly as vendor generation does, subject to On-Trail loot eligibility.
 4. Implement multi-target resolution as a target-set pipeline shared by player and AI. Per-position taunt, effects, damage, death checks, animations and focus must see the same targets.
-5. Make encounter kind select authored AI behavior/difficulty and enemy stats. Boss scripts, per-actor win conditions and unique Rodeos remain data-driven content.
-6. Resolve the HP/knockout, bleed, Vamoose-scope, player-basic-attack, boss-HP and poker-rule conflicts in the gap register before tuning values. Tests must encode the chosen rules, not a mixture of old and new answers.
-7. Balance against reproducible metrics: 5–10 Round typical fights, 3–5 hits for regular enemies, 10+ for powerful enemies, and scarce meaningful healing. Record seed, Party, gear, encounter and outcome so changes are comparable.
-8. Give Jammed an explicit authored buff/debuff source and payload, and enforce the chosen no-on-hit-effects-on-Miss rule for attack abilities as well as basic attacks.
+5. Remove basic weapon attacks for both teams. Every offensive action is an authored Move; enemy AI must gather and score those Moves through the same legality rules as the player. Make encounter kind select authored AI behavior/difficulty and enemy stats.
+6. Make `hp_below` win conditions per-actor, including boss thresholds, rather than side-total HP. Boss scripts and unique Rodeos remain data-driven content.
+7. Apply the canonical `Death Injury and Retreat.md` model: fighters start each Shootout at max HP with no persistent knockout debuffs. MxHP attrition is enabled only On Trail and does not leak into Off-Trail fights or travel.
+8. Combine bleed stack counts so two stacks equal one damage, and make healing remove stacks. Replace the current highest-stack-only tick and encode stack conversion/healing in tests.
+9. Give Jammed an explicit authored buff/debuff source and payload, and enforce no-on-hit-effects-on-Miss for attack abilities as well as any weapon Move.
+10. Balance against reproducible metrics: 5–10 Round typical fights, 3–5 hits for regular enemies, 10+ for powerful enemies, and scarce meaningful healing. Record seed, Party, gear, encounter and outcome so changes are comparable. Vamoose uses half of money plus a balance-selected 10–20% of remaining carried inventory, excluding equipped items and Bank contents.
 
 ## 8. Save, Continue, and New Game contract
 
@@ -149,9 +161,9 @@ The prologue needs one authored continuation contract: Littlehill Grove exit, La
 
 The save service must define versioned export/import/reset behavior for:
 
-- Party members, level/progression inputs, HP/injury/knockout state, money, inventory, equipment, belt reservations and next instance number.
+- Party members, level/progression inputs, HP/attrition state, money, inventory, equipment, belt reservations and next instance number.
 - Quest runtime state, played cutscenes, current quest/Location selection, last town and quest checkpoints.
-- Exact Overworld live/last-known player position and trail departure id.
+- Exact Overworld live/last-known player position, authoritative On/Off Trail state and trail departure id.
 - Discovery reveals, vendor stock/Bank/departure synchronization and deterministic base seed.
 - Poker/minigame persistent results after their ownership is unified.
 - User settings once implemented, in a separate profile/settings payload if they should survive New Game.
@@ -165,7 +177,7 @@ Do not serialize active Shootout nodes, pending global encounter paths, transien
 3. Commit in dependency order: content/progression inputs, Party, Quests/Locations, Discovery, Vendors, position, then derived UI/music state. Reuse the validate-before-commit coordinator contract already audited for Vendors/Discovery.
 4. Recompute derived state rather than trusting duplicated cached values: equipment stats, current objective markers, current Zone, stock departure alignment and Journal projections.
 5. On any failure, preserve the previous valid session and report the error; never partially import money/items/quests.
-6. New Game calls every domain reset, closes modals, clears encounter/return context, restores the initial seed/Party/quest/position, and only then enters the initial scene.
+6. New Game calls every domain reset, closes modals, clears encounter/return context, restores the initial seed/Party/quest/position and initial Off-Trail state, and only then enters the initial scene.
 
 Enable Continue only after a valid save exists and an application-restart test passes. Add migration tests for starter items, instance-id allocation, changed content ids and older snapshot versions.
 
@@ -178,13 +190,13 @@ Implement the designed pure seeded director and thin Overworld adapter before au
 ### Vendors, newspapers, and secrets
 
 - Newspaper prose and enemy composition continue to use the same Zone pool as gameplay. If an encounter is not eligible in that Zone, it cannot appear in that Zone's report.
-- Fixed offers must resolve working mechanics. Add boosts/explosives/magazines/camp items only with their actual consumers.
-- A revealed secret is not complete until its world destination, reachable navigation and reward interaction exist. Reward claims need persistent one-shot state if they are unique.
-- Keep stock reset tied to explicit departure, and vendor-room return separate from town recovery and trail progression.
+- Fixed offers must resolve working mechanics. Add boosts/explosives/magazines/camp items only with their actual consumers. Vendor purchases in Town are allowed Off Trail because they are purchases, not loot.
+- A revealed secret is not complete until its world destination, reachable navigation and reward interaction exist. Reward claims need persistent one-shot state if they are unique, must be rejected Off Trail, and must not bypass the non-town Location gate.
+- Keep stock reset tied to explicit Trail start, and vendor-room return separate from town recovery and Trail state transitions.
 
 ### Poker and other minigames
 
-Decide whether poker uses Party money directly or a clearly defined buy-in/cash-out transaction; remove the independent PokerMoney source for production. Add SceneManager entry/return context, story-scoped table limits and persistence. Convert Bear Hunt/Gold Rush points/materials to Party resources through explicit capacity-aware result commands, or document why they are separate non-economic scores.
+Decide whether poker uses Party money directly or a clearly defined buy-in/cash-out transaction; remove the independent PokerMoney source for production. Add SceneManager entry/return context, story-scoped table limits and persistence. Record the unresolved four-card-flush/every-player-blind house-rule decision before economy balancing. Convert Bear Hunt/Gold Rush points/materials to Party resources through explicit capacity-aware result commands, or document why they are separate non-economic scores. Any conversion or reward payout is disabled Off Trail.
 
 ### Music, Settings, Flair, and presentation
 
@@ -205,8 +217,9 @@ Add a single production content-lint entry point, run before the full suite and 
 3. **Assets:** actor Overworld/Shootout animations, Move/item animations, sprites, backgrounds, OGGs, noise resources and FrameData hit frames exist.
 4. **Rules:** positions, team caps, Magazine lengths, win conditions, weights, stack limits, prices, sale ratio, AI selectors and progression bands are valid.
 5. **Functional support:** consumable combat ids, map effects, event outcomes, item stats/Move grants and quest rewards resolve implemented mechanics; unsupported content fails rather than shipping no-ops.
-6. **World reachability:** generated manifest targets, secret destinations, vendor interiors/doors and quest transitions exist. Regenerate map outputs and require `--check` to pass.
-7. **Persistence:** all persistent content state round-trips with stable ids and no duplication; transient content is absent.
+6. **Trail rules:** every Location entry and reward source declares/uses the shared Trail-state gate; Off-Trail quests and town travel remain available while non-town access, attrition and loot are rejected.
+7. **World reachability:** generated manifest targets, secret destinations, vendor interiors/doors and quest transitions exist. Regenerate map outputs and require `--check` to pass.
+8. **Persistence:** all persistent content state, including On/Off Trail state, round-trips with stable ids and no duplication; transient content is absent.
 
 Production should fail closed for malformed content. Warn-and-skip remains useful for isolated tooling/tests, but it must not turn a broken live encounter or paid item into silent empty behavior.
 
@@ -214,10 +227,10 @@ Production should fail closed for malformed content. Warn-and-skip remains usefu
 
 | Phase | Work | Exit gate |
 |---|---|---|
-| **0 — Rule decisions and lint foundation** | Resolve the specification conflicts; define supported-stat registry and canonical ids; add duplicate/reference/asset lint. Stop generating unsupported paid affixes or mark them unavailable honestly. | Conflicting docs have one answer; production content lint fails on deliberate broken fixtures and passes valid current content. |
-| **1 — Complete the playable encounter loop** | Implement encounter request/origin router, event outcome execution, Zone-aware pool selection, production launch/return, Vamoose/checkpoint handling, town recovery and scene-access migration. Add one canyon end-to-end path. | Event and direct Location/quest fights launch, apply Party results once, and return correctly for victory/flee/Vamoose; no debug fallback or soft lock. |
-| **2 — Unify inventory and progression** | Implement shared belt reservations/write-back, class/equipment Move grants, quest reward execution, one level/rarity/band projection, Zone-aware loot and full New Game/save coordinator. | Purchased consumables work in combat without duplication; quest completion updates all progression; application-restart restore is exact and atomic. |
-| **3 — Finish required combat mechanics** | Implement multi-target acts, supported affixes/equipment abilities, differentiated AI, per-actor boss conditions where required, and resolved HP/bleed/Vamoose rules. Add full Party/enemy content needed for representative fights. | Reproducible combat tests and scene tests pass for every shipped mechanic; no displayed stat is inert; target balance metrics can be measured. |
+| **0 — Apply decided rules and lint foundation** | Encode the canonical HP/knockout, bleed, no-basic-attack, per-actor boss-HP, Vamoose-scope and Zone-loot decisions; define the supported-stat registry and canonical ids; add duplicate/reference/asset lint. Stop generating unsupported paid affixes or mark them unavailable honestly. Keep Poker house rules explicitly open. | Decided rules have one implementation contract and tests; production content lint fails on deliberate broken fixtures and passes valid current content. |
+| **1 — Complete the playable encounter and Trail loop** | Implement authoritative On/Off Trail state and its start/end transitions, access/attrition/loot gates, encounter request/origin router, event outcome execution, Zone-aware pool selection, production launch/return, Vamoose/checkpoint handling, town recovery and scene-access migration. Add one canyon end-to-end path. | Event and direct Location/quest fights launch, apply Party results once, and return correctly for victory/flee/Vamoose. Off Trail permits quests and town-to-town travel but blocks non-town Locations, attrition and every reward source; no debug fallback or soft lock. |
+| **2 — Unify inventory and progression** | Implement shared belt reservations/write-back, class/equipment Move grants, Trail-aware quest reward execution, one level/rarity/band projection, Zone-aware loot and full New Game/save coordinator, including On/Off Trail state. | Purchased consumables work in combat without duplication; quests progress in either state while rewards pay only On Trail; application-restart restore is exact and atomic. |
+| **3 — Finish required combat mechanics** | Implement multi-target acts, supported affixes/equipment abilities, differentiated Move-only AI, per-actor boss conditions, and the decided max-HP/no-knockout, combined-bleed and Vamoose rules. Add full Party/enemy content needed for representative fights. | Reproducible combat tests and scene tests pass for every shipped mechanic and both Trail states; no basic attacks or displayed inert stats remain; target balance metrics can be measured. |
 | **4 — Expand coherent content** | Add other Zone actors/pools/loot/newspapers, bosses, quest arcs/map targets, prologue continuation, legendary awards, secret destinations/rewards, additional towns/vendors and general-store mechanics. | Every new entry is reachable, functional, lint-clean, persistent and represented in an end-to-end test or authored acceptance case. |
 | **5 — Ambient systems and acceptance** | Implement dynamic visual parties, Flair, Poker/economy integration, Settings, remaining WFC/Location content improvements, bespoke art and all manual UI/controller/visual passes. | Full automated suite and content lint pass; generated map is current; real 640×360 gameplay loops and ambient cleanup pass manual acceptance. |
 
@@ -230,6 +243,7 @@ A feature is complete only when all applicable statements are true:
 - Its content has a stable id and one authoritative dataset.
 - Its runtime entry point is reachable through SceneManager or a domain trigger, not only a test scene.
 - It consumes the canonical Zone/Party/Quest/Location providers rather than copying their state.
+- Its Location access, attrition and rewards obey the authoritative On/Off Trail state, while Off-Trail quests and town-to-town travel continue to work.
 - Its effects execute once and survive every cancellation, failure, scene exit and repeated-input path without duplication.
 - Its UI presents actual mechanics and handles empty/error/full states at 640×360 with mouse and keyboard/controller.
 - Its persistent state participates in New Game and validate-before-commit save restore; transient state is cleaned up.

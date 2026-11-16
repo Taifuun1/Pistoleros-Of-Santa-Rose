@@ -15,15 +15,15 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (metadata, launcher, win conditions and the shared per-Zone pool data/loader; launcher and ambush wiring from Location/Overworld triggers is still pending with those systems):
+**Implemented** (metadata, typed launcher/return router, deterministic pool selection, win conditions and the shared per-Zone pool data/loader; Location-ambush and quest callers are still pending with those systems):
 
 - Encounter metadata: `name`, `kind` (`dustup`/`showdown`), `flavor`, `background`, `lootTable`, `winCondition` and nested `teams`; the legacy flat format still resolves (`data.get("teams", data)`). `RatAmbush` is the default/debug encounter with full metadata.
-- Shared Zone pools: `Data/Shootout/EncounterPoolData.gd` merges every authored `Data/Shootout/EncounterPools/<zone>.gd` file through `loadProductionPools()`, so one pool serves both the future encounter launcher and the vendor newspaper. The `canyon` pool and its real encounters (`CanyonRats`, `CanyonRatNest`, against the authored Squeky rat actor) are authored; other Zones still need their own pools and actors.
-- Launcher: callers set `Shootout.pendingEncounter` (a `res://` path) on the autoload before switching to the Shootout scene; `_ready()` consumes it (falling back to `RatAmbush` when null) and clears it.
+- Shared Zone pools: `Data/Shootout/EncounterPoolData.gd` merges every authored `Data/Shootout/EncounterPools/<zone>.gd` file through `loadProductionPools()`, so one pool serves both the gameplay launcher and the vendor newspaper; `selectEncounter(zoneId, rng)` performs seeded weighted selection. The `canyon` pool and its real encounters (`CanyonRats`, `CanyonRatNest`, against the authored Squeky rat actor) are authored; other Zones still need their own pools and actors.
+- Launcher: `EncounterRequest` validates the encounter path, canonical Zone, source, origin, progression and Trail snapshot. `SceneManager.launchShootout()` installs one pending request, captures the origin, connects `shootoutEnded` before the scene enters the tree, restores the origin once and clears the context. `Shootout._ready()` consumes the request exactly once; a direct scene run uses the debug `RatAmbush`, while a malformed production request is rejected instead of silently falling back.
 - Win conditions in `ShootoutTurnManager`: `rout` (default), `defeat_actor { actorName }` (ends when the named character dies), `survive_rounds { rounds }` (checked at round rebuilds), and `hp_below { target: "party"|"enemy", fraction | amount, stat? }` (the target side loses when its side-total current HP — or `stat: "maxHp"` — drops below the fraction of its maxHp total, or below an absolute amount; checked after damage resolves). Optional `winner` overrides the default winning side.
 - Flavor names: `Shootout.DUSTUP_FLAVORS`/`SHOWDOWN_FLAVORS`; a missing `flavor` picks one at random by `kind`, and `encounterName`/`flavorName` live on the shootout root ready for the start popup (see [Shootout UI](Shootout%20UI.md)).
 - Region-pool schema: `Data/Shootout/EncounterPoolData.gd` defines per-Zone weighted encounter references and newspaper visibility (patch 1 of [Location vendors](../Location%20Vendors%20Implementation.md)); `loadProductionPools()` merges the authored `Data/Shootout/EncounterPools/*.gd` files, so the launcher and the newspaper read the same pools. The Canyon Zone publishes a real pool (patch 6); every other Zone stays unavailable until its encounters are authored, and an unpublished Zone is never substituted with another one or with the debug `RatAmbush`.
-- Tests: `Tests/TestEncounters.gd` validates every encounter file (sides, position ranges, one actor per column, max 4 copies, win condition shape), the metadata/legacy defaults and all four win-condition behaviors.
+- Tests: `Tests/TestEncounters.gd` validates every encounter file (sides, position ranges, one actor per column, max 4 copies, win condition shape), the metadata/legacy defaults and all four win-condition behaviors. `Tests/TestEncounterFlow.tscn` covers request validation, deterministic pool selection, canonical Zone event dispatch and the real Overworld → canyon Shootout → exact origin return path.
 
 ## Design
 
@@ -51,11 +51,12 @@ var data = {
 
 ### Encounter launcher
 
-The Shootout scene needs to receive its encounter instead of preloading one. Following the existing Scene Manager conventions (`Docs/System Design/Scene Manager.md`), the launcher:
+Implementation follows the Scene Manager conventions (`Docs/System Design/Scene Manager.md`):
 
-1. The caller (Overworld event result, Location ambush trigger, quest script) sets `Shootout.pendingEncounter = "res://Data/Shootout/Encounters/Name.gd"` on the autoload before switching scenes.
-2. `Shootout._ready()` loads `pendingEncounter` (falling back to a debug encounter when null, so the scene stays runnable from the editor).
-3. On `shootoutEnded`, the scene hands results (winning side, loot modifiers, surviving party HP) back through the Scene Manager to whoever launched it (see [Rewards](Rewards.md) and [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
+1. The caller (Overworld event outcome, Location ambush trigger, quest script) builds an `EncounterRequest` (or the options Dictionary that builds one) and calls `SceneManager.launchShootout(request)`.
+2. The Scene Manager validates the request, captures the origin, installs exactly one pending request and connects `shootoutEnded` before the Shootout scene enters the tree.
+3. `Shootout._ready()` consumes the pending request once. A null request means a direct debug run and uses `RatAmbush`; an invalid production request is rejected instead of substituting another encounter.
+4. After the result screen is acknowledged, `shootoutEnded` restores the launch origin exactly once and clears the request/context. Vamoose-specific destination/loss routing remains a later commit (see [Death Injury and Retreat](Death%20Injury%20and%20Retreat.md)).
 
 ### Ambushes and random encounters
 
@@ -82,14 +83,15 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 **Create**
 
 - `Data/Shootout/Encounters/**/*.gd` — real encounter files with metadata, organized per region.
-- `Tests/TestEncounters.gd`.
+- `Tests/TestEncounters.gd`, `Tests/TestEncounterFlow.tscn` (implemented).
 
 **Modify**
 
-- `Globals/Shootout.gd` — `pendingEncounter`, flavor-name lists, encounter pool loading if pooled.
-- `Shootout/Shootout.gd` — `init()` reads `teams` + metadata; `_ready()` uses `pendingEncounter`; win-condition checks; start popup with flavor name (see [Shootout UI](Shootout%20UI.md)).
-- `Shootout/ShootoutTurnManager.gd` — non-rout win conditions in `checkBattleEnd()`.
-- Location/Overworld/quest code — set `pendingEncounter` and launch via the Scene Manager.
+- `Shootout/EncounterRequest.gd` — validated launch contract (implemented).
+- `Globals/Shootout.gd` — single pending request handoff, flavor-name lists (implemented).
+- `Shootout/Shootout.gd` — `init()` reads `teams` + metadata; `_ready()` consumes the request once with a direct-debug fallback; win-condition checks; start popup with flavor name (see [Shootout UI](Shootout%20UI.md)).
+- `Nodes/Scene Manager/SceneManager.gd` — launch/return router (implemented).
+- Location/Overworld/quest code — build an `EncounterRequest` and launch through the Scene Manager.
 
 ## Testing
 
@@ -99,14 +101,14 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 - Old-format encounters (no metadata) still init with defaults.
 - Win conditions: `defeat_actor` ends the battle on the right death; `survive_rounds` triggers at the right round; `hp_below` triggers when the targeted side's total MxHP fraction drops below the threshold.
 - `Data/Shootout/SqueekyRat.gd` is removed and nothing references it.
-- `pendingEncounter` flow: set, launch, correct encounter inits; null falls back to the debug encounter.
+- Request flow: a validated `EncounterRequest` launches the requested encounter; null in a direct scene run falls back to the debug encounter; invalid requests and duplicate results launch/return nothing. `Tests/TestEncounterFlow.tscn` also covers deterministic pool selection and exact origin return.
 
 ## Implementation order
 
 1. ✅ Encounter metadata + `teams` nesting (backwards compatible).
-2. ✅ `pendingEncounter` launcher.
+2. ✅ Typed `EncounterRequest` launcher + SceneManager launch/return router.
 3. ✅ Win conditions.
-4. Region pools + ambush wiring: the shared Zone pool data and loader are implemented (`EncounterPoolData.loadProductionPools()`, authored `canyon` pool with `CanyonRats`/`CanyonRatNest`), so the newspaper reads real production data; the launcher/ambush wiring from Location/Overworld triggers and further Zone pools remain pending with those systems.
+4. Region pools + ambush wiring: the shared Zone pool data and loader are implemented (`EncounterPoolData.loadProductionPools()`, `selectEncounter()` and the authored `canyon` pool with `CanyonRats`/`CanyonRatNest`), and one Overworld event launches through it; Location-ambush wiring and further Zone pools remain pending with those systems.
 5. First boss encounter content (pending).
 
 ## Open Questions
