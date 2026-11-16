@@ -21,7 +21,7 @@ A coherent first playable loop must satisfy all of these:
 | Concern | Single owner/source | Required consumers and rule |
 |---|---|---|
 | Zone geometry and ids | `res://Data/Overworld/ZoneData.gd` through `OverworldZoneCatalog.zoneForChunk()` | Music, visual spawns, event pools, encounter selection, equipment generation, vendors and newspapers call the same lookup. Only ZoneData contains chunk bands/default fallback. |
-| On/Off Trail lifecycle | `Locations` owns the explicit state and `trailDepartureId`; all feature gates read that state | A Town action is the only start-of-Trail. Implement one explicit end-of-Trail transition; never infer either from scene presence. Access, attrition and loot check the state independently, while quest commands and town-to-town movement remain available Off Trail. |
+| On/Off Trail lifecycle | `Locations` owns the explicit state and `trailDepartureId`; all feature gates read that state | A Town action is the only start-of-Trail. A Town has two authored exits — the Off-Trail `TownExit` gate back to the Overworld and the `TrailDeparture` that starts a Trail — and one explicit end-of-Trail transition; never infer either from scene presence. Access, attrition and loot check the state independently, while quest commands and town-to-town movement remain available Off Trail. |
 | World topology and coordinates | `WorldData`, `HelperVariables`, `OverworldCoordinates`, generated `OverworldMapData` | Streaming, Location collisions, player/map position, secret targets and spawn placement share conversions. Manifest is regenerated, never independently edited. |
 | Location identity | Stable key in each Overworld chunk script's `locations` Dictionary, propagated to map manifest | Scene loading, vendor `parentLocationId`, quest `map_target_id`, secret `secret_id`, and last-town/checkpoint records use that id. Display labels are not a second key. |
 | Party and item ownership | `Globals/Party.gd` plus `InventoryRules` | Party is authoritative for members, HP/attrition, money, carried stacks, equipped gear and belt reservations. Vendors, combat, quests, Poker and minigames execute commands; none keeps a second ownership ledger. |
@@ -38,10 +38,11 @@ A coherent first playable loop must satisfy all of these:
 ### A. On/Off Trail lifecycle and departure
 
 1. The player starts Off Trail and may travel between Towns, use town services and advance Quests. Off-Trail travel does not grant loot, apply attrition, or allow entry into non-town Locations.
-2. A deliberate `TrailDeparture` action in a Town is the only way to start a Trail. It sets the authoritative state On Trail before the scene transition and calls `Locations.departForTrail()` once.
-3. Vendors synchronize stock to that departure id; incidental Overworld entry, Vamoose, retreat, minigames and quest transitions neither start a new Trail nor reroll stock.
-4. Any belt reservation for the journey is committed before departure. Failure leaves the player in town with a readable reason and does not start the Trail.
-5. Define one explicit end-of-Trail transition. Do not infer it from loading the Overworld, entering a vendor room, completing a quest or returning from combat. The chosen transition restores Off-Trail restrictions without erasing quest progress or blocking town-to-town travel.
+2. A Town has two authored exits, and they are separate commands. The `TownExit` gate returns to the Overworld through `Locations.enterOverworld()` without starting or ending a Trail, so the party can travel between Towns and reach quest Locations while Off Trail. The `TrailDeparture` marker is the only way to start a Trail.
+3. `TrailDeparture` sets the authoritative state On Trail before the scene transition and calls `startTrail()` once. Neither marker changes the Trail state, departure counter, vendor stock or rewards by itself, and neither may be inferred from scene presence.
+4. Vendors synchronize stock to that departure id; incidental Overworld entry, town-gate exits, Vamoose, retreat, minigames and quest transitions neither start a new Trail nor reroll stock.
+5. Any belt reservation for the journey is committed before departure. Failure leaves the player in town with a readable reason and does not start the Trail.
+6. Define one explicit end-of-Trail transition. Do not infer it from loading the Overworld, entering a vendor room, completing a quest or returning from combat. The chosen transition restores Off-Trail restrictions without erasing quest progress or blocking town-to-town travel.
 
 ### B. Overworld and Location triggers
 

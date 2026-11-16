@@ -27,6 +27,7 @@ This slice deliberately uses existing Walker, canyon rat, Paregoric and Lazyspri
 - Initial Vamoose inventory rule: **15% of occupied carried stacks, rounded up, minimum one when inventory is non-empty**. Equipped items and Bank contents are excluded. This is the initial balance value within the decided 10–20% range; keep it named and injectable for tests.
 - Item use is consumption, not loot. Consumption commits On or Off Trail; Off Trail only suppresses new rewards.
 - Recommended end-of-Trail policy: an explicit `Locations.enterTown(locationId)` domain command called on Overworld-to-resupply-town entry ends the Trail. Vendor-room return and generic scene loading do not call it. Confirm this policy in the first review; if changed, keep it behind the same single command.
+- **Post-commit-5 follow-up:** a Town also needs an Off-Trail way out. `res://Location/Entities/Town/TownExit.tscn` returns to the Overworld through `Locations.enterOverworld()` without starting or ending a Trail, so quest movement and town-to-town travel stay reachable Off Trail; `TrailDeparture` remains the only Trail start. See System Coherence §3.A.
 
 ## 3. Delivery sequence
 

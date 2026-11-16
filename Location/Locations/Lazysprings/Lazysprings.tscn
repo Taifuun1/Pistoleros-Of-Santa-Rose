@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" path="res://Assets/Icons/HatIcon.png" id="11_hat"]
 [ext_resource type="Texture2D" path="res://Assets/Icons/MoneyIcon.png" id="12_money"]
 [ext_resource type="Texture2D" path="res://Assets/Icons/CardIcon.png" id="13_card"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Town/TownExit.tscn" id="14_townexit"]
 
 [node name="Lazysprings" type="Node2D" unique_id=1488127855]
 y_sort_enabled = true
@@ -216,5 +217,8 @@ iconTexture = ExtResource("13_card")
 
 [node name="TrailDeparture" parent="Entities" instance=ExtResource("9_trail")]
 position = Vector2(121, 96)
+
+[node name="TownExit" parent="Entities" instance=ExtResource("14_townexit")]
+position = Vector2(121, 149)
 
 [node name="InteractionDirector" parent="Entities" instance=ExtResource("8_director")]
