@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–8 implemented; the production integration blockers found during acceptance are closed, while the affected manual step 5 and controller/audio passes await reconfirmation, and multi-target acts are covered by the full automated suite.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Commit 7 wires the real Littlehill Grove quest trigger, central quest-result completion, production return-to-menu, gamepad bindings and Overworld Zone-context invalidation. Commit 8 replaces the one-target act handoff with the shared target-set pipeline (expansion, per-position taunt, once-per-act costs, animation fan-out and AI set scoring).
+**Status: commits 1–9 implemented; the production integration blockers found during acceptance are closed, while the affected manual step 5 and controller/audio passes await reconfirmation, and multi-target acts plus the effect/stat seams are covered by the full automated suite.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Commit 7 wires the real Littlehill Grove quest trigger, central quest-result completion, production return-to-menu, gamepad bindings and Overworld Zone-context invalidation. Commit 8 replaces the one-target act handoff with the shared target-set pipeline (expansion, per-position taunt, once-per-act costs, animation fan-out and AI set scoring). Commit 9 adds the supported-stat registry, flat effect modifiers, taunt defensive buffs and one combat/UI stat read.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -41,6 +41,7 @@ This slice deliberately uses existing Walker, canyon rat, Paregoric and Lazyspri
 | 6 | Content lint, documentation and acceptance | Full automated suite plus manual vertical-slice run at 640×360 |
 | 7 | First-slice integration pass | Quest trigger/result lifecycle, production return-to-menu, gamepad bindings and music-transition invalidation |
 | 8 | Multi-target acts | One target-set pipeline for player/AI, per-position taunt, once-per-act costs, animation fan-out |
+| 9 | Effect/stat seams | Supported-stat registry, flat effect modifiers, taunt defensive buffs, shared combat/UI stat read |
 
 Run focused tests after every commit and `godot --headless --path . --script res://Tests/RunAll.gd` before moving to the next commit. Keep the current uncommitted documentation updates separate from code commits unless a code change requires a doc update.
 
@@ -321,14 +322,16 @@ The immediate next slice after acceptance should be **multi-target acts plus eff
 
 The next implementation gates remain:
 
-### Next commit 2 — Effect/stat seams
+### ✅ Commit 9 — Effect/stat seams
 
-1. Define the supported combat stat-path registry and one modifier payload/order. Preserve the existing `Shootout.getModifiedStat()` order (Rodeo first, effects second) and reject unknown stat paths in content lint.
-2. Implement the currently pass-through `ShootoutEffectManager.getStatModifier()` and route initiative, offensive damage and UI reads through the shared root helper instead of direct Rodeo-only reads.
-3. Implement taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry, death and cleanse behavior. Do not pull unsupported affixes or equipment abilities into this commit.
-4. Extend `TestEffects`, `TestDamage`, `TestTurnOrder` and `TestShootoutUI` for stacking order, lifecycle, preview/actual parity and both Trail states where relevant.
+**Implemented.**
 
-**Exit gate:** every displayed modified stat has a real consumer, initiative/damage/UI agree, and no direct stat read bypasses the shared modifier pipeline.
+1. `Globals/CombatStatRegistry.gd` is the single supported-stat source. It marks each path `fully_supported` / `display_only` / `unsupported`, flags flat vs percent, and only flat `fully_supported` paths may be targeted by `stat_modifier` effects. `TestContentLint` rejects unknown or non-flat effect stat paths with the same teeth as the other content rules.
+2. `ShootoutEffectManager.getStatModifier()` now sums flat `stat_modifier` instances; `onTurnEnd()` counts them down and a dead source removes them. Initiative (`ShootoutTurnManager.createTurnOrder`), offense/defense/ability scaling (`ShootoutActionResolver`), and the in-fight stat panels (`Shootout.actorStatsPayload`) all read `Shootout.getModifiedStat()` — Rodeo first, effects second. `CharacterStatCalculator` reads the registry's flat equipment affix list.
+3. Taunt payloads author `damageTakenReduction` and `mxHpHealPerTurn`. While taunting, incoming damage is reduced by the authored percent and the caster heals MxHP at its turn start; both share the taunt's Rounds lifecycle, expiry and death cleanup.
+4. `TestEffects`, `TestDamage`, `TestTurnOrder`, `TestContentLint` and `TestMultiTargetFlow` cover stacking order, expiry, taunt defensive buffs, shared-helper parity and lint rejection. Unsupported equipment affixes and equipment-granted Moves remain later work.
+
+**Exit gate:** every displayed modified stat has a real consumer, initiative/damage/UI agree, and no production stat read bypasses `Shootout.getModifiedStat()`.
 
 ### Next commit 3 — Full save-service integration
 

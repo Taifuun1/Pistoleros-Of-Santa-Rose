@@ -6,6 +6,8 @@ class_name CharacterStatCalculator
 ## given. Only combat modifiers already supported by the fight pipeline are
 ## applied; other authored affixes remain item text.
 
+const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
+
 const LEAD_FAMILIES = ["revolver", "rifle", "shotgun"]
 const EXPLOSIVE_TYPES = ["gunpowder", "liquid", "shrapnel"]
 const EQUIPMENT_SLOTS = [
@@ -61,12 +63,15 @@ func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "",
 		var itemStats = item.get("stats", {})
 		if !(itemStats is Dictionary):
 			continue
-		stats["sixShootin"] += int(itemStats.get("sixShootin", 0))
-		stats["highTailin"] += int(itemStats.get("highTailin", 0))
-		stats["taffyin"] += int(itemStats.get("taffyin", 0))
+		# Flat core stats share the supported-equipment registry so the calculator
+		# and combat read the same affix names.
+		for affix in CombatStatRegistryScript.FLAT_EQUIPMENT_AFFIXES:
+			if affix == "mxHp":
+				maxHpBonus += int(itemStats.get(affix, 0))
+			else:
+				stats[affix] += int(itemStats.get(affix, 0))
 		stats.defense.style += int(itemStats.get("style", 0))
 		stats.defense.sand += int(itemStats.get("sand", 0))
-		maxHpBonus += int(itemStats.get("mxHp", 0))
 
 	# Attrition is injected: Off Trail ignores accumulated journey injury for
 	# the effective MxHP projection. The calculator never reads Locations.

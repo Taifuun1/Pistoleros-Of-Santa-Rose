@@ -735,14 +735,14 @@ func actorStatsPayload(actor) -> Array:
 			"ChamberIndex": cylinderManager.getChamberIndex(actor.name)
 		},
 		{
-			"SixShootin": actor.stats.sixShootin,
-			"HighTailin": actor.stats.highTailin,
-			"Taffyin": actor.stats.taffyin,
-			"Revolver": actor.stats.damage.lead.revolver,
-			"Rifle": actor.stats.damage.lead.rifle,
-			"Shotgun": actor.stats.damage.lead.shotgun,
-			"Style": actor.stats.get("defense", {}).get("style", 0),
-			"Sand": actor.stats.get("defense", {}).get("sand", 0)
+			"SixShootin": getModifiedStat(actor, "sixShootin", actor.stats.sixShootin),
+			"HighTailin": getModifiedStat(actor, "highTailin", actor.stats.highTailin),
+			"Taffyin": getModifiedStat(actor, "taffyin", actor.stats.taffyin),
+			"Revolver": getModifiedStat(actor, "damage.lead.revolver", actor.stats.damage.lead.revolver),
+			"Rifle": getModifiedStat(actor, "damage.lead.rifle", actor.stats.damage.lead.rifle),
+			"Shotgun": getModifiedStat(actor, "damage.lead.shotgun", actor.stats.damage.lead.shotgun),
+			"Style": getModifiedStat(actor, "style", actor.stats.get("defense", {}).get("style", 0)),
+			"Sand": getModifiedStat(actor, "sand", actor.stats.get("defense", {}).get("sand", 0))
 		}
 	]
 

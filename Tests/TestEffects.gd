@@ -228,6 +228,39 @@ func _run() -> void:
 	manager.onTurnEnd("Weak")
 	_check(!manager.isSilenced("Weak"), "silence expires after its turns")
 
+	print("\n--- Flat stat modifiers stack and expire ---")
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "stat_modifier", "stat": "highTailin", "amount": 2, "turns": 2 }, "Rat")
+	_check(manager.getStatModifier("Weak", "highTailin", 6) == 8, "effect modifier adds to High Tailin")
+	_check(manager.getStatModifier("Weak", "sixShootin", 3) == 3, "an unrelated stat is unaffected")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "stat_modifier", "stat": "highTailin", "amount": 1, "turns": 3 }, "Rat")
+	_check(manager.getStatModifier("Weak", "highTailin", 6) == 9, "stat modifiers stack")
+	manager.onTurnEnd("Weak")
+	manager.onTurnEnd("Weak")
+	_check(manager.getStatModifier("Weak", "highTailin", 6) == 7, "the short-lived modifier expires, the longer one remains")
+	manager.onTurnEnd("Weak")
+	_check(manager.getStatModifier("Weak", "highTailin", 6) == 6, "all stat modifiers expire")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "stat_modifier", "stat": "damageTakenReduction", "amount": 10 }, "Rat")
+	_check(manager.getStatModifier("Weak", "highTailin", 6) == 6, "a percent path is rejected before it becomes a flat modifier")
+
+	print("\n--- Taunt defensive buffs ---")
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	fake.actors["Tank"].hp = 20
+	manager.applyEffect("Tank", { "op": "apply_effect", "effect": "taunt", "positions": [2], "rounds": 3, "damageTakenReduction": 50, "mxHpHealPerTurn": 3 }, "Tank")
+	_check(manager.tauntDamageReduction("Tank") == 50 and manager.tauntHealPerTurn("Tank") == 3, "authored taunt defensive buffs are readable")
+	manager.onTurnStart("Tank")
+	_check(fake.actors["Tank"].hp == 23, "taunting heals MxHp at the caster's turn start")
+	_check(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0) == 5.0, "incoming damage is reduced while taunting")
+	manager.onRoundEnd()
+	manager.onRoundEnd()
+	manager.onRoundEnd()
+	_check(manager.getTaunt("Tank").is_empty(), "taunt buffs expire with the taunt")
+	_check(manager.tauntDamageReduction("Tank") == 0 and manager.tauntHealPerTurn("Tank") == 0, "expired taunt grants no defensive buffs")
+
 	print("\n--- Cylinder effect delegates to the cylinder manager ---")
 	manager.applyEffect("Weak", { "op": "modify_cylinder", "chambers": [1], "amount": -1 }, "Rat")
 	_check(fake.cylinderManager.applied.size() == 1 and fake.cylinderManager.applied[0].modifier.amount == -1, "modify_cylinder delegates")

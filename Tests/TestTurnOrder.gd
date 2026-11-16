@@ -29,12 +29,26 @@ class FakeRodeoManager:
 		unregistered.append(actorName)
 
 
+class FakeEffectManager:
+	extends RefCounted
+	# actorName -> highTailin bonus
+	var highTailinModifiers = {}
+	func getStatModifier(actorName, statName, baseValue):
+		if statName == "highTailin" and highTailinModifiers.has(actorName):
+			return baseValue + highTailinModifiers[actorName]
+		return baseValue
+
+
 class FakeShootout:
 	extends Node
 	var actors = {}
 	var rodeoManager = FakeRodeoManager.new()
+	var effectManager = FakeEffectManager.new()
 	func getActor(actorName):
 		return actors.get(actorName, null)
+	func getModifiedStat(actor, statName, baseValue):
+		var value = rodeoManager.getStatModifier(actor, statName, baseValue)
+		return effectManager.getStatModifier(actor.actorName, statName, value)
 
 
 func _init() -> void:
@@ -108,6 +122,19 @@ func _run() -> void:
 			buffedFirst = false
 			break
 	_check(buffedFirst, "modified High Tailin' feeds the initiative roll")
+
+	print("\n--- Effect initiative modifiers apply after Rodeo ---")
+	manager = makeManager()
+	addActor(manager, "EffectBase", 5)
+	addActor(manager, "EffectBuffed", 1)
+	manager.shootout.effectManager.highTailinModifiers["EffectBuffed"] = 100
+	buffedFirst = true
+	for i in 30:
+		manager.createTurnOrder()
+		if manager.turnOrder[0] != "EffectBuffed":
+			buffedFirst = false
+			break
+	_check(buffedFirst, "effect-modified High Tailin' feeds the shared initiative roll")
 
 	print("\n--- Death removes actors from the fight ---")
 	manager = makeManager()

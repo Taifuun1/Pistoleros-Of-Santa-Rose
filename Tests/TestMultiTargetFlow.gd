@@ -116,6 +116,13 @@ func _run() -> void:
 	_check(empty.is_empty() and healer.items.size() == itemsBefore, "an empty/dead target set consumes no item")
 	_check(shootout.cylinderManager.getChamberIndex(healer.name) == chamberBefore, "an empty target set advances no Cylinder")
 
+	# Effect stat modifiers make the resolved and displayed values agree.
+	var displayBase = int(allyB.stats.highTailin)
+	shootout.effectManager.applyEffect(allyB.name, { "op": "apply_effect", "effect": "stat_modifier", "stat": "highTailin", "amount": 2, "turns": 2 }, healer.name)
+	_check(shootout.getModifiedStat(allyB, "highTailin", displayBase) == displayBase + 2, "the shared helper returns the effect-modified stat")
+	var payload = shootout.actorStatsPayload(allyB)
+	_check(int(payload[1].get("HighTailin", 0)) == displayBase + 2, "the stats panel shows the effect-modified stat")
+
 	globals.itemsData = originalItems
 	globals.movesData = originalMoves
 	shootout.queue_free()

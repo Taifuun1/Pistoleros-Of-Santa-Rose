@@ -81,7 +81,9 @@ func resolveMoveTargets(moveName: String, actingActor, targetActors: Array) -> v
 		return
 	var amount = int(moveData.get("baseAmount", 0))
 	if moveData.has("scalingStat"):
-		amount += int(moveData.statScaling * actingActor.stats[moveData.scalingStat])
+		var scalingPath := str(moveData.scalingStat)
+		var scalingBase := int(actingActor.stats.get(scalingPath, 0))
+		amount += int(moveData.statScaling * modifiedStat(actingActor, scalingPath, scalingBase))
 	if moveData.get("category", "") == ATTACK_ABILITY_CATEGORY:
 		# Attack abilities use the Cylinder like basic attacks (decided), and
 		# one roll covers the whole target set.
@@ -204,12 +206,23 @@ func offensiveStat(actingActor) -> float:
 		return 0.0
 	var base = float(actingActor.stats.damage[actingActor.weapon.type][actingActor.weapon.weapon])
 	if actingActor.weapon.type == "explosive":
-		return base + classExplosiveBase(actingActor)
+		base += classExplosiveBase(actingActor)
 	var statPath = "damage.{type}.{weapon}".format({
 		"type": actingActor.weapon.type,
 		"weapon": actingActor.weapon.weapon
 	})
-	return shootout.rodeoManager.getStatModifier(actingActor, statPath, base)
+	return modifiedStat(actingActor, statPath, base)
+
+
+## Shared stat read: the shootout root applies Rodeo modifiers first and effect
+## modifiers second. Headless fakes without the root helper fall back to Rodeo.
+func modifiedStat(actor, statPath: String, baseValue):
+	if shootout != null and shootout.has_method("getModifiedStat"):
+		return shootout.getModifiedStat(actor, statPath, baseValue)
+	var rodeoManager = shootout.get("rodeoManager")
+	if rodeoManager != null and rodeoManager.has_method("getStatModifier"):
+		return rodeoManager.getStatModifier(actor, statPath, baseValue)
+	return baseValue
 
 func classExplosiveBase(actingActor) -> int:
 	var cylinderManager = shootout.get("cylinderManager")
@@ -222,9 +235,15 @@ func classExplosiveBase(actingActor) -> int:
 
 func targetDefense(targetActor) -> Dictionary:
 	var stats = targetActor.get("stats")
+	var defense = {}
 	if stats is Dictionary:
-		return stats.get("defense", { "style": 0, "sand": 0 })
-	return { "style": 0, "sand": 0 }
+		defense = stats.get("defense", { "style": 0, "sand": 0 })
+	if !(defense is Dictionary):
+		defense = { "style": 0, "sand": 0 }
+	return {
+		"style": int(modifiedStat(targetActor, "style", int(defense.get("style", 0)))),
+		"sand": int(modifiedStat(targetActor, "sand", int(defense.get("sand", 0)))),
+	}
 
 # Weapon family rules (Docs/Combat.md): revolvers lose the higher of Style/Sand,
 # rifles gain Style but lose Sand, shotguns gain Sand but lose Style;

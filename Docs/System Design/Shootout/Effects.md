@@ -27,7 +27,9 @@ This is a design doc: it describes the intended design, and the implementation m
 
 **Implemented** (steps 1-5 of the implementation order; UI effect icons are pending with [Shootout UI](Shootout%20UI.md)):
 
-- `Shootout/ShootoutEffectManager.gd` — the full effect set: **combined-stack bleed** (every two total stacks deal one damage before resistance; healing and cleanses remove stacks through the same path), poison (per-stack stacking, round-start ticks, 35% wear-off at round end, optional `rounds` duration), mark (priming -> active after one Round, bonus damage + follow-up effects consume it, expiry, cleanse), damage-type mark (one Round), damage piercing/decrease (turn countdown, stack limit), silence (turn countdown), taunt (round countdown, per-position redirect) and the Cylinder effect type delegated to the cylinder manager.
+- `Shootout/ShootoutEffectManager.gd` — the full effect set: **combined-stack bleed** (every two total stacks deal one damage before resistance; healing and cleanses remove stacks through the same path), poison (per-stack stacking, round-start ticks, 35% wear-off at round end, optional `rounds` duration), mark (priming -> active after one Round, bonus damage + follow-up effects consume it, expiry, cleanse), damage-type mark (one Round), damage piercing/decrease (turn countdown, stack limit), silence (turn countdown), taunt (round countdown, per-position redirect plus authored defensive buffs), flat `stat_modifier` instances and the Cylinder effect type delegated to the cylinder manager.
+- Stat modifiers are flat and validated through the shared `Globals/CombatStatRegistry.gd`: only `fully_supported` flat paths (`sixShootin`, `highTailin`, `taffyin`, `style`, `sand`, `mxHp` and the Lead/Explosive damage paths) may be modified. `getStatModifier()` sums active instances, `onTurnEnd()` counts them down, and a dead source removes them.
+- Taunt's defensive buffs (`damageTakenReduction` percent incoming reduction, `mxHpHealPerTurn` flat turn-start heal) live on the taunt effect payload, share its Rounds lifecycle and expire/cleanse with the taunt (and with the caster's death).
 - Resistances are percentage potency reduction applied at tick time (`stats.resistances.bleed/poison`).
 - Damage pipeline hooks (`applyOutgoingModifiers`/`applyIncomingModifiers`) are live: piercing reclaims only the amount actually blocked by defense (decided cap), decrease subtracts flat, active marks add bonus damage and apply their follow-up effects, damage-type marks match the attack's weapon type.
 - Lifecycle wiring in `Shootout.gd`: `onTurnStart` before a turn (bleed kills are checked before the actor acts), `onTurnEnd` in `finishTurn()`, `onRoundEnd`/`onRoundStart` around the turn-order rebuild with a post-poison death sweep; taunt redirect for both sides in the shared target-set pipeline (`resolveActTargetSet()`), including one redirected hit per protected position for multi-target acts.
@@ -37,12 +39,12 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ### Next slice — effect/stat seams
 
-`getStatModifier()` is still a pass-through, and some combat consumers read only `rodeoManager.getStatModifier()` directly. The next implementation commit must:
+`getStatModifier()` and taunt's defensive buffs are implemented. Consumers now read the shared helper, and the content lint rejects unknown effect stat paths. Remaining work here is narrower:
 
-1. Define the supported combat stat-path registry and modifier payload/order, preserving `Shootout.getModifiedStat()`'s Rodeo-first/effect-second order and rejecting unknown paths in content lint.
-2. Implement data-driven effect stat modifiers and route turn-manager initiative, action-resolver offense and UI display through the shared root helper.
-3. Add taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry and source/caster death. Multi-target redirect itself is implemented; its defensive affix bonuses belong here.
-4. Extend `TestEffects`, `TestDamage`, `TestTurnOrder` and `TestShootoutUI` for stacking, cleanse/expiry/death cleanup and preview/actual parity. Unsupported affixes and equipment-granted Moves remain separate later work.
+1. ~~Define the supported combat stat-path registry and modifier payload/order.~~ Done: `Globals/CombatStatRegistry.gd`; `Stat_modifier` is flat-only and validated in `TestContentLint`.
+2. ~~Implement data-driven effect stat modifiers and route initiative, offense and UI through the shared root helper.~~ Done; turn/initiative, damage and the Shootout stat panels all call `Shootout.getModifiedStat()`.
+3. ~~Add taunt's authored defensive buffs with the same lifecycle as its redirect.~~ Done; they live on the taunt payload (Rounds/expiry/death).
+4. Future: author the actual `stat_modifier` and taunt-buff effect-bearing content, and add world-space effect icons. Unsupported equipment affixes and equipment-granted Moves remain separate later work.
 
 ## Design
 

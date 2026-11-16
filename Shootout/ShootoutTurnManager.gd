@@ -43,7 +43,13 @@ func createTurnOrder() -> void:
 			var actor = shootout.getActor(actorName)
 			if actor == null:
 				continue
-			var highTailin = shootout.rodeoManager.getStatModifier(actor, "highTailin", actor.stats.highTailin)
+			# Initiative reads the shared stat helper (Rodeo first, effect second)
+			# so any modifier source stays in one place.
+			var highTailin: float
+			if shootout.has_method("getModifiedStat"):
+				highTailin = shootout.getModifiedStat(actor, "highTailin", actor.stats.highTailin)
+			else:
+				highTailin = shootout.rodeoManager.getStatModifier(actor, "highTailin", actor.stats.highTailin)
 			initiatives.append({
 				"actorName": actorName,
 				"initiative": int(highTailin) + randi_range(0, RANDOM_ROLL_MAX),

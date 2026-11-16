@@ -18,7 +18,7 @@ This is a design doc: it describes the intended design, and the implementation m
 **Implemented** (steps 1-4 of the implementation order): per-Round re-roll with random roll and tie shuffle, plus Round/Turn counters shared with the Rodeo manager. `Shootout/ShootoutTurnManager.gd` implements:
 
 - `shootoutActors` registry (`{ team: { actorName: { actorPosition } } }`), filled by `registerActor()` from `Shootout.spawnActor()`.
-- `createTurnOrder()` collects every living actor's modified High Tailin' **through** `rodeoManager.getStatModifier()` (so always-on Rodeos already affect initiative), adds a `randi_range(0, RANDOM_ROLL_MAX)` roll (placeholder constant 4), and sorts descending with a random tiebreak for equal initiative. It also increments `roundNumber` on every rebuild after the first.
+- `createTurnOrder()` collects every living actor's modified High Tailin' through the shared `Shootout.getModifiedStat()` helper (Rodeo first, flat effect modifiers second), adds a `randi_range(0, RANDOM_ROLL_MAX)` roll (placeholder constant 4), and sorts descending with a random tiebreak for equal initiative. It also increments `roundNumber` on every rebuild after the first.
 - `advanceTurn()` / `currentActorName()` consume the order; `advanceTurn()` increments `turnNumber` (monotonic for the whole fight). `Shootout._on_actor_done()` rebuilds the order when empty, firing `round_end` / `round_start` Rodeo triggers around the rebuild.
 - `checkActorDead()` removes dead actors from the order and registry, unregisters their Rodeo and emits `battleEnded` via `checkBattleEnd()`.
 - The Rodeo manager no longer keeps its own round counter: `ShootoutRodeoManager.getRoundNumber()` reads the turn manager's counter (`context["round"]` for Rodeo triggers comes from it).
@@ -26,7 +26,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 Gaps vs. the design:
 
-1. **No item/effect modifiers** — only Rodeo modifiers feed initiative; effect-based modifiers come with [Effects](Effects.md).
+1. **Effect initiative modifiers implemented** — flat `stat_modifier` instances on `highTailin` feed the shared helper; authoring the actual effect-bearing content remains content work.
 
 ## Design
 
@@ -36,8 +36,8 @@ Each Round, for each living actor:
 
 ```
 initiative = modifiedHighTailin + randomRoll
-modifiedHighTailin = rodeoManager.getStatModifier(actor, "highTailin", actor.stats.highTailin)
-                     + effectManager.getStatModifier(actor, "highTailin")   # once Effects land
+modifiedHighTailin = shootout.getModifiedStat(actor, "highTailin", actor.stats.highTailin)
+                     # Rodeo first, then flat effect stat_modifier instances
 randomRoll = randi_range(0, RANDOM_ROLL_MAX)                                  # placeholder: 4
 ```
 

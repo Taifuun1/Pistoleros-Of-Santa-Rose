@@ -5,6 +5,8 @@ extends RefCounted
 ## marks, damage-type marks, damage piercing/decrease, taunt and silence,
 ## plus the Cylinder effect type delegated to the cylinder manager.
 
+const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
+
 const DAMAGE_NUMBER_OFFSET = Vector2(-4, -48)
 
 # Placeholder: damage piercing/decrease stack up to this many instances.
@@ -15,9 +17,9 @@ const POISON_WEAR_OFF = 0.65
 const MARK_EXPIRY_ROUNDS = 2
 
 const AFFLICTIONS = ["bleed", "poison", "mark", "damage_type_mark", "piercing", "decrease", "silence", "taunt"]
-# Beneficial effect types: heal instantly or over time (never picked by
-# random cleanses).
-const BENEFICIALS = ["heal", "heal_over_time"]
+# Beneficial effect types: heal instantly or over time, or a flat combat stat
+# modifier (never picked by random cleanses).
+const BENEFICIALS = ["heal", "heal_over_time", "stat_modifier"]
 
 var shootout
 
@@ -30,11 +32,12 @@ func init(shootoutRoot) -> void:
 
 
 func unregisterActor(actorName: String) -> void:
-	# Effects on the dead actor go away; marks they placed on others do too.
+	# Effects on the dead actor go away; marks and stat modifiers they placed on
+	# others do too.
 	effects.erase(actorName)
 	for otherName in effects.keys():
-		for markType in ["mark", "damage_type_mark"]:
-			for instance in effects[otherName].get(markType, []):
+		for effectType in ["mark", "damage_type_mark", "stat_modifier"]:
+			for instance in effects[otherName].get(effectType, []):
 				if instance.get("source", "") == actorName:
 					instance["expired"] = true
 		pruneExpired(otherName)
@@ -118,11 +121,25 @@ func applyAffliction(targetName: String, effect: Dictionary, sourceName: String)
 				"turnsLeft": int(effect.get("turns", 1)),
 				"source": sourceName
 			})
+		"stat_modifier":
+			var statPath := str(effect.get("stat", ""))
+			var statError := CombatStatRegistryScript.validateStatModifierPath(statPath)
+			if !statError.is_empty():
+				push_warning("ShootoutEffectManager: {statError}".format({ "statError": statError }))
+				return
+			ensureList(list, "stat_modifier").append({
+				"stat": statPath,
+				"amount": int(effect.get("amount", 0)),
+				"turnsLeft": int(effect.get("turns", -1)),
+				"source": sourceName,
+			})
 		"taunt":
 			list["taunt"] = [{
 				"casterName": targetName,
 				"positions": effect.get("positions", allyPositions(targetName)),
 				"roundsLeft": int(effect.get("rounds", 1)),
+				"damageTakenReduction": int(effect.get("damageTakenReduction", 0)),
+				"mxHpHealPerTurn": int(effect.get("mxHpHealPerTurn", 0)),
 				"source": sourceName
 			}]
 
@@ -198,6 +215,11 @@ func isSilenced(actorName: String) -> bool:
 ## Heal-over-time and combined bleed tick at the start of the actor's Turn.
 ## Every two bleed stacks deal one damage before resistance.
 func onTurnStart(actorName: String) -> void:
+	# Taunt's authored defensive upkeep heals the caster at the start of its
+	# turn while the taunt is active (before HoT/bleed resolution).
+	var tauntHeal = tauntHealPerTurn(actorName)
+	if tauntHeal > 0:
+		healActor(actorName, tauntHeal)
 	var keptHoT = []
 	for hot in getEffects(actorName, "heal_over_time"):
 		healActor(actorName, hot.amount)
@@ -261,7 +283,7 @@ func onTurnEnd(actorName: String) -> void:
 	if !effects.has(actorName):
 		return
 	var list = effects[actorName]
-	for effectType in ["piercing", "decrease", "silence"]:
+	for effectType in ["piercing", "decrease", "silence", "stat_modifier"]:
 		var kept = []
 		for instance in list.get(effectType, []):
 			if instance.turnsLeft > 0:
@@ -285,9 +307,34 @@ func pruneExpired(actorName: String) -> void:
 		effects.erase(actorName)
 
 
-## Stat query hook (reserved: no effect type modifies stats yet).
-func getStatModifier(_actorName: String, _statName: String, baseValue):
-	return baseValue
+## Flat combat stat modifier hook: sums authored stat_modifier instances for
+## the requested path on top of the caller's already-Rodeo-modified value.
+## Unknown/percent paths never enter `effects` because applyAffliction rejects
+## them against the shared CombatStatRegistry.
+func getStatModifier(actorName: String, statName: String, baseValue):
+	var value = baseValue
+	for modifier in getEffects(actorName, "stat_modifier"):
+		if str(modifier.get("stat", "")) == statName:
+			value += int(modifier.get("amount", 0))
+	return value
+
+
+## The first active taunt instance on a caster, or an empty Dictionary.
+func getTaunt(actorName: String) -> Dictionary:
+	var taunts = getEffects(actorName, "taunt")
+	return taunts[0] if !taunts.is_empty() else {}
+
+
+## Taunt defensive buffs (author on the taunt effect payload): percent incoming
+## damage reduction and flat MxHP healed at the caster's turn start.
+func tauntDamageReduction(actorName: String) -> int:
+	var taunt = getTaunt(actorName)
+	return int(taunt.get("damageTakenReduction", 0)) if !taunt.is_empty() else 0
+
+
+func tauntHealPerTurn(actorName: String) -> int:
+	var taunt = getTaunt(actorName)
+	return int(taunt.get("mxHpHealPerTurn", 0)) if !taunt.is_empty() else 0
 
 
 ## Outgoing damage hook: damage piercing adds back up to the amount actually
@@ -321,6 +368,9 @@ func applyIncomingModifiers(targetActor, damage: float, damageType := "", consum
 	for typeMark in getEffects(targetActor.name, "damage_type_mark"):
 		if typeMark.damageType == damageType:
 			result += typeMark.extraDamage
+	var tauntReduction = tauntDamageReduction(targetActor.name)
+	if tauntReduction > 0:
+		result = maxf(0.0, result * (1.0 - clampf(float(tauntReduction) / 100.0, 0.0, 0.9)))
 	pruneExpired(targetActor.name)
 	return result
 

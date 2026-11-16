@@ -30,12 +30,12 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 
 | Test | System under test | Covers |
 |---|---|---|
-| `TestTurnOrder` | `Shootout/ShootoutTurnManager.gd` | Initiative ordering, round cycling, turn bookkeeping |
+| `TestTurnOrder` | `Shootout/ShootoutTurnManager.gd` | Initiative ordering (Rodeo then effect modifiers), round cycling, turn bookkeeping |
 | `TestTargeting` | TurnManager + `ShootoutTargetingManager.gd` | Squeeze repositioning (swaps, line shuffles, bounds), move/weapon ranges, item permissiveness, multi-target set expansion/dead/side filtering, position-conditional Rodeos |
 | `TestActs` | `ShootoutActionResolver.gd` | Moves, items and ducks: costs, effects, stat gates; once-per-act multi-target costs and per-target application |
-| `TestDamage` | ActionResolver + CylinderManager | Damage pipeline: hit quality, base damage, multipliers |
+| `TestDamage` | ActionResolver + CylinderManager | Damage pipeline: hit quality, base damage, multipliers, Rodeo-then-effect modifier order and shared defense reads |
 | `TestCylinders` | `ShootoutCylinderManager.gd` | Cylinder advance, reload/jam, effect delegation |
-| `TestEffects` | `ShootoutEffectManager.gd` | Combined-stack bleed damage/resistance/healing/death tick, poison ticking, Mark, piercing, taunt redirect, silence, death cleanup |
+| `TestEffects` | `ShootoutEffectManager.gd` | Combined-stack bleed damage/resistance/healing/death tick, poison ticking, Mark, piercing, taunt redirect, silence, flat stat modifiers, taunt defensive buffs, death cleanup |
 | `TestInjury` | `Globals/Party.gd` + resolver | Max-HP fight starts, On/Off-Trail attrition and loot gating, town/camp recovery, retreat/flee costs, no persistent knockout/downed state |
 | `TestLoot` | `Globals/ItemGeneration.gd` + `Data/Items/ItemCatalog.gd` | Catalog/table definition ids, stackable quantities, unknown-definition rejection, rewards and loot table ranges, rarity bands, encounter-Zone equipment propagation and invalid-Zone fallback |
 | `TestInventory` | `Globals/InventoryRules.gd` + `Globals/Party.gd` | Atomic add planning, stack/capacity/id allocation, overflow, drops and policy failures, snapshot isolation, money independence, starter migration |
@@ -67,7 +67,7 @@ It discovers `Tests/Test*.gd` and `Tests/Test*.tscn` automatically (a test with 
 | `TestAnimationSequencer` | `ShootoutAnimationSequencer.gd` + `Animations.gd` | Back-to-back animation restarts (the turn soft lock), unreachable hit frames, missing animations, target-effect anchoring above the drawn body, one effect step fanning out to every target and completing once |
 | `TestShootoutFocus` | `ShootoutFocusManager.gd` + `Animations.gd` act motion | Lunge/recoil hold-until-settle, focus zoom, facing flips, fixed screen anchors, only-landed-hits-recoil |
 | `TestShootoutTurnTiming` | `Shootout/Shootout.tscn` (scene-run) | Turn cleanup is immediate; next-actor hand-off waits for the between-act pause |
-| `TestMultiTargetFlow` | `Shootout/Shootout.tscn` (scene-run) | Real-scene multi-target pipeline: Doctor's Kit heals every living ally from one belt use, armed multi acts preview every legal target, per-position taunt makes the caster take one hit per protected position, a multi attack advances the Cylinder once, and dead/empty sets consume nothing |
+| `TestMultiTargetFlow` | `Shootout/Shootout.tscn` (scene-run) | Real-scene multi-target pipeline: Doctor's Kit heals every living ally from one belt use, armed multi acts preview every legal target, per-position taunt makes the caster take one hit per protected position, a multi attack advances the Cylinder once, dead/empty sets consume nothing, and effect stat modifiers display the value combat resolves |
 | `TestShootoutUI` | `Shootout/UI/TurnOrderStrip.gd`, `ShootoutUI.tscn` | Turn order strip rendering, grey-out reasons for acts, armed-act selection tint, reposition picker states, scene wiring, acts row icons, effect/banner rich text, layout-stable stat panels (content fits the panel across HP digit-width changes, single-line title row, no name/HP overlap, effects flow horizontally, stats row keeps its height on the first and later hovers), scene-owned end-screen hierarchy and one-shot acknowledgment |
 | `TestHPIndicator` | `Nodes/HP Indicator/HPIndicator.tscn` | World-space HP bar fill clipping, low-HP tint |
 | `TestActorShadow` | `Nodes/Actor Shadow/ActorShadow.gd` | Shadow geometry on the feet line, sizing to the frame's visible (opaque) body with raw-frame fallback, HORIZONTAL/DIAGONAL/VERTICAL coverage geometry, re-measure on animation and horizontal-flip changes, sprite re-parenting, scene-created shadows |
@@ -135,9 +135,11 @@ The latest full `RunAll` run after the [First steps implementation plan](First%2
 
 The latest full `RunAll` run after the multi-target commit is **60/60**. It adds `Tests/TestMultiTargetFlow.tscn` (real-scene target-set resolution) and extends `TestTargeting` (expansion/dead/side filtering), `TestActs` (once-per-act multi costs), `TestEnemyAI` (multi-set gathering/scoring), `TestEffects` (per-position taunt set), and `TestAnimationSequencer` (effect fan-out). The previous pre-existing ObjectDB/RID/resource warnings are unchanged.
 
-Commit 8 closes the code-level quest, menu, controller-binding and music-transition gaps, so `Tools/VerticalSliceQA.gd` is no longer the acceptance substitute for return-to-menu. Its automated proof does not replace the required re-run of Off-Trail step 5, physical-gamepad movement/interaction/Journal navigation, post-return audio, and live map acquisition/use.
+The latest full `RunAll` run after the effect/stat commit is **60/60**. It extends `TestEffects` (flat stat modifiers + taunt defensive buffs, expiry/cleanup), `TestDamage` (Rodeo-then-effect modifier order and shared defense reads), `TestTurnOrder` (effect initiative through the shared helper), `TestContentLint` (unknown/non-flat effect stat paths), and `TestMultiTargetFlow` (resolved-vs-displayed stat parity). The previous pre-existing ObjectDB/RID/resource warnings are unchanged.
 
-The next implementation gates remain **effect/stat seams**, then **full save-service integration**. Multi-target acts are implemented: `TestTargeting`/`TestActs`/`TestEnemyAI` plus `TestMultiTargetFlow` (real scene) cover target-set expansion, per-position taunt, death/duplicate handling and once-per-act Cylinder/belt costs. Effect/stat work needs `TestEffects`/`TestDamage`/`TestTurnOrder`/`TestShootoutUI` to prove modifier order and preview/actual parity. Save work needs coordinated-restore, malformed-file rollback, migration and real application-restart coverage; snapshots and `TestNewGameReset` are not disk persistence.
+Commit 9 closes the code-level quest, menu, controller-binding and music-transition gaps, so `Tools/VerticalSliceQA.gd` is no longer the acceptance substitute for return-to-menu. Its automated proof does not replace the required re-run of Off-Trail step 5, physical-gamepad movement/interaction/Journal navigation, post-return audio, and live map acquisition/use.
+
+The next implementation gate remains **full save-service integration**. Multi-target acts and effect/stat seams are implemented; save work needs coordinated-restore, malformed-file rollback, migration and real application-restart coverage. Snapshots and `TestNewGameReset` are not disk persistence.
 
 ### Lower priority / consciously untested
 - **Visual/shader systems** — `Shaders/Blur`, `PlayerRevealController`/`RevealableObject`, outline shaders: headless asserts are mostly meaningless here; keep them manual/QA.

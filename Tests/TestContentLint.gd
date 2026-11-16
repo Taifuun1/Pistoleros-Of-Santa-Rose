@@ -11,6 +11,7 @@ const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 const EncounterPoolDataScript = preload("res://Data/Shootout/EncounterPoolData.gd")
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
+const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
 
 ## Every folder whose files expose a `data` Dictionary identified by `data.name`.
 const CONTENT_FOLDERS := [
@@ -88,6 +89,13 @@ func _testLintHasTeeth() -> void:
 
 	var definition := _rewardProducerOffenders("Producer.gd", "extends Node\nfunc generateLoot(_options):\n\treturn {}\n")
 	_check(definition.is_empty(), "a reward producer definition is not mistaken for a caller: %s" % [definition])
+
+	var badStat := _effectStatPathErrors({ "op": "apply_effect", "effect": "stat_modifier", "stat": "not_a_stat", "amount": 1 })
+	_check(badStat.size() == 1, "an unknown effect stat path is rejected: %s" % [badStat])
+	var percentStat := _effectStatPathErrors({ "op": "apply_effect", "effect": "stat_modifier", "stat": "damageTakenReduction", "amount": 10 })
+	_check(percentStat.size() == 1, "a percent path is not a flat stat modifier: %s" % [percentStat])
+	var validStat := _effectStatPathErrors({ "op": "apply_effect", "effect": "stat_modifier", "stat": "highTailin", "amount": 2 })
+	_check(validStat.is_empty(), "a supported flat stat path passes: %s" % [validStat])
 
 
 func _testDuplicateNames() -> void:
@@ -277,6 +285,13 @@ func _namesFor(records: Array) -> Dictionary:
 	return names
 
 
+func _effectStatPathErrors(effect: Dictionary) -> Array:
+	if str(effect.get("effect", "")) != "stat_modifier":
+		return []
+	var error := CombatStatRegistryScript.validateStatModifierPath(str(effect.get("stat", "")))
+	return [error] if !error.is_empty() else []
+
+
 func _validateEffectList(label: String, effects, allowedOps: Array, effectTypes: Array) -> void:
 	if !(effects is Array):
 		return
@@ -286,6 +301,8 @@ func _validateEffectList(label: String, effects, allowedOps: Array, effectTypes:
 			continue
 		var op := str(effect.get("op", ""))
 		_check(allowedOps.has(op), "%s: known effect op '%s'" % [label, op])
+		for statError in _effectStatPathErrors(effect):
+			_check(false, "%s: %s" % [label, statError])
 		var effectType := str(effect.get("effect", ""))
 		if effectType == "" or (op == "cleanse_effect" and effectType == "random"):
 			continue

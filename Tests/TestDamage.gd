@@ -37,17 +37,29 @@ class FakeRodeoManager:
 		return baseValue + modifiers.get(statName, 0)
 
 
+class FakeEffectManager:
+	extends RefCounted
+	# statName -> flat bonus
+	var modifiers = {}
+	func getStatModifier(_actorName, statName, baseValue):
+		return baseValue + modifiers.get(statName, 0)
+
+
 class FakeShootout:
 	extends Node2D
 	var actors = {}
 	var cylinderManager = null
 	var rodeoManager = FakeRodeoManager.new()
+	var effectManager = FakeEffectManager.new()
 	var movesData = {}
 	var damageNumbers = []
 	func getActor(actorName):
 		return actors.get(actorName, null)
 	func spawnDamageNumber(label, color, _position):
 		damageNumbers.append({ "label": str(label), "color": color })
+	func getModifiedStat(actor, statName, baseValue):
+		var value = rodeoManager.getStatModifier(actor, statName, baseValue)
+		return effectManager.getStatModifier(actor.name, statName, value)
 
 
 func _init() -> void:
@@ -151,6 +163,14 @@ func _run() -> void:
 	print("\n--- Rodeo stat modifiers feed the pipeline ---")
 	fake.rodeoManager.modifiers["damage.lead.revolver"] = 2
 	_check(attackDamage(shooter, target, 2) == 8, "modified stat: (10 + 2) - 4 = 8")
+
+	print("\n--- Effect stat modifiers stack after Rodeo ---")
+	fake.effectManager.modifiers["damage.lead.revolver"] = 3
+	_check(attackDamage(shooter, target, 2) == 11, "Rodeo then effect modifiers: (10 + 2 + 3) - 4 = 11")
+	fake.effectManager.modifiers["style"] = 2
+	var defenseRead = attackDamage(shooter, styleTarget, 2)
+	_check(defenseRead == 5, "target defense also reads the shared pipeline: (10+2+3) - max(8+2,1) = 5, got %d" % defenseRead)
+	fake.effectManager.modifiers.erase("style")
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
