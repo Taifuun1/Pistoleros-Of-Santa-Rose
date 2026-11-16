@@ -57,9 +57,16 @@ const EXPECTED_SHOTS := {
 		{ "action": "complete_objective", "objective_id": "find_manuel" },
 	],
 	"LittlehillGrove.gd": [
-		{ "action": "complete_objective", "objective_id": "find_morrison" },
 		{ "action": "complete_objective", "objective_id": "regroup_pistoleros_of_santa_rose" },
 	],
+}
+
+## The prologue objective cleared by the real Littlehill Grove Shootout trigger.
+const QUEST_ENCOUNTER := {
+	"objective_id": "find_morrison",
+	"encounter_path": "res://Data/Shootout/Encounters/LittlehillApproach.gd",
+	"zone_id": "pine_forest",
+	"trigger_path": "Interaction/LittlehillApproach",
 }
 
 ## Cutscene file order must match the quest's objective order.
@@ -181,8 +188,20 @@ func testProductionCutsceneShots(productionCatalog: QuestCatalog) -> void:
 
 	var expectedObjectiveOrder := []
 	for objective in definition.objectives:
-		expectedObjectiveOrder.append(objective.objective_id)
-	check(completedObjectiveIds == expectedObjectiveOrder, "cutscene shots complete objectives in production order, got %s" % [completedObjectiveIds])
+		if objective.objective_id != str(QUEST_ENCOUNTER["objective_id"]):
+			expectedObjectiveOrder.append(objective.objective_id)
+	check(definition.objectiveIndex(str(QUEST_ENCOUNTER["objective_id"])) >= 0, "the quest-encounter objective exists in the production quest")
+	check(completedObjectiveIds == expectedObjectiveOrder, "cutscene shots complete every objective except the Shootout-owned objective, got %s" % [completedObjectiveIds])
+	var shotTriggerIndex := 0
+	for index in expectedObjectiveOrder.size():
+		if definition.objectiveIndex(str(expectedObjectiveOrder[index])) < definition.objectiveIndex(str(QUEST_ENCOUNTER["objective_id"])):
+			shotTriggerIndex += 1
+	var productionProgressionOrder := completedObjectiveIds.duplicate()
+	productionProgressionOrder.insert(shotTriggerIndex, str(QUEST_ENCOUNTER["objective_id"]))
+	var definitionOrder := []
+	for objective in definition.objectives:
+		definitionOrder.append(objective.objective_id)
+	check(productionProgressionOrder == definitionOrder, "cutscene shots plus the quest trigger cover objectives in production order, got %s" % [productionProgressionOrder])
 
 
 func testLocationScenes() -> void:
@@ -218,6 +237,17 @@ func testLocationScenes() -> void:
 					var exitTo := exitToValue as Dictionary
 					check(str(exitTo.get("location", "")) == exitName, "location '%s' exit target is '%s'" % [locationName, exitName])
 					check(exitTo.has("playerPosition"), "location '%s' exit provides a player position" % locationName)
+
+		if locationName == "Littlehill Grove":
+			var director = instance.get_node_or_null("Interaction/LocationInteractionDirector")
+			check(director != null, "Littlehill Grove owns its interaction director")
+			var trigger = instance.get_node_or_null(str(QUEST_ENCOUNTER["trigger_path"]))
+			check(trigger != null, "Littlehill Grove owns the find-Morrison encounter trigger")
+			if trigger != null:
+				check(str(trigger.questId) == QUEST_ID, "the encounter trigger targets Pistoleros Regroup")
+				check(str(trigger.objectiveId) == str(QUEST_ENCOUNTER["objective_id"]), "the encounter trigger owns find_morrison")
+				check(str(trigger.encounterPath) == str(QUEST_ENCOUNTER["encounter_path"]), "the encounter trigger launches its authored encounter")
+				check(str(trigger.zoneId) == str(QUEST_ENCOUNTER["zone_id"]), "the encounter trigger carries its authored Zone")
 		instance.free()
 
 
@@ -233,6 +263,9 @@ func testFullProgression(productionCatalog: QuestCatalog) -> void:
 	var handler = CutsceneScript.new()
 
 	for fileName in EXPECTED_SHOT_FILES:
+		if fileName == "LittlehillGrove.gd":
+			check(Quests.getCurrentObjectiveId(QUEST_ID) == str(QUEST_ENCOUNTER["objective_id"]), "the Shootout objective precedes the final cutscene")
+			check(Quests.completeCurrentObjective(QUEST_ID, str(QUEST_ENCOUNTER["objective_id"])), "the quest-encounter result completes its objective")
 		var path: String = CUTSCENE_DIR + fileName
 		var cutsceneData = load(path).new().data
 		if !(cutsceneData is Dictionary):

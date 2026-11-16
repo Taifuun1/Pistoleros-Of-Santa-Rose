@@ -142,6 +142,23 @@ func hasActiveQuest() -> bool:
 	return false
 
 
+## The exact current objective id for a known active quest, or empty.
+func getCurrentObjectiveId(questId: String) -> String:
+	if !_dataAvailable or !_states.has(questId):
+		return ""
+	var definition: QuestDefinition = _definitions.get(questId, null)
+	if definition == null:
+		return ""
+	var objective := _currentObjectiveFor(definition, _states[questId])
+	return str(objective.objective_id) if objective != null else ""
+
+
+## Read-only domain query for world triggers. They must not infer quest state
+## from flags or mutate it from a projection.
+func isCurrentObjective(questId: String, objectiveId: String) -> bool:
+	return !objectiveId.is_empty() and getCurrentObjectiveId(questId) == objectiveId
+
+
 ## The authored map target of the highest-priority active quest's current
 ## objective, or "" when no checkpoint is available. Vamoose resolves its
 ## destination from this instead of a copied flag.

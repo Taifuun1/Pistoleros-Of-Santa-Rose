@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–6 implemented and verified; available manual vertical-slice acceptance is complete.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Manual acceptance recorded steps 1–4, 6 and 7 at 640×360; step 5 has no production quest-encounter entry point yet and remains verified only through the constructed automated request path.
+**Status: commits 1–7 implemented; the production integration blockers found during acceptance are closed, while the affected manual step 5 and controller/audio passes await reconfirmation.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Commit 7 wires the real Littlehill Grove quest trigger, central quest-result completion, production return-to-menu, gamepad bindings and Overworld Zone-context invalidation.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -39,6 +39,7 @@ This slice deliberately uses existing Walker, canyon rat, Paregoric and Lazyspri
 | 4 | Decided combat-rule migrations | Max-HP/no-knockout, combined bleed, no basic attacks, per-actor HP threshold, Zone loot |
 | 5 | Vamoose routing/loss and New Game reset | Correct destination/loss, Off-Trail restrictions restored, clean initial state |
 | 6 | Content lint, documentation and acceptance | Full automated suite plus manual vertical-slice run at 640×360 |
+| 7 | First-slice integration pass | Quest trigger/result lifecycle, production return-to-menu, gamepad bindings and music-transition invalidation |
 
 Run focused tests after every commit and `godot --headless --path . --script res://Tests/RunAll.gd` before moving to the next commit. Keep the current uncommitted documentation updates separate from code commits unless a code change requires a doc update.
 
@@ -247,7 +248,7 @@ Vamoose has one complete outcome path and New Game is clean even after purchases
 
 ### Manual vertical-slice acceptance
 
-**Status: available production checks performed.** Mouse/keyboard acceptance is recorded below. Controller acceptance remains open because movement, interaction and Journal actions do not yet have gamepad bindings.
+**Status: previous mouse/keyboard production checks are recorded; commit 7's changed paths require manual reconfirmation.** The affected quest trigger, music-return and controller checks now exist in product code, but automated tests do not substitute for running them at 640×360.
 
 At 640×360 with mouse and keyboard:
 
@@ -261,19 +262,18 @@ At 640×360 with mouse and keyboard:
    - Confirmed to work
 4. Confirm exact origin restoration, one carried-stack decrement and one On-Trail loot award.
    - Paregoric purchases share the existing stack, so buying one changes the one `starter_paregoric` stack from quantity 2 rather than creating a second row. That is expected stack behavior. Verify one `{ instanceId, combatId, quantity: 1 }` combat record and exactly one unit removed by Party; loot can also be a Paregoric, so use the authoritative consumption/accepted-loot details rather than net quantity alone.
-   - Confirmed except the victory stinger continuing after result confirmation; tracked in `Docs/Issues.md`.
+   - Previously confirmed except the victory-stinger continuation. Zone-context invalidation now forces the Overworld playlist on result return; re-run this check to close the manual defect.
 5. Complete the Off-Trail quest encounter and confirm no reward.
-   - **Blocked in production:** no quest caller creates an `EncounterRequest`, and no Shootout result command completes the quest/objective. `TestEncounterFlow.tscn` exercises only a constructed quest-sourced request. Do not mark this manual step passed until the quest trigger and result integration are wired.
+   - **Production path implemented:** Littlehill Grove's `QuestEncounterTrigger` starts `Littlehill Approach`, and the acknowledged victory result completes `find_morrison` through `Quests`. Re-run the 640×360 Off-Trail path; do not mark this manual step passed until the trigger, objective advance, exact return and empty reward payload are observed.
 6. Trigger Vamoose and verify destination, money/stack loss, no knockout debuff and Off-Trail restrictions.
    - Confirmed to work
 7. Return to the main menu and start New Game; verify all current state resets.
-   - **Controller blocker:** `MOVE_*`, `INTERACT` and `TOGGLE_JOURNAL` currently bind only keyboard events, so gameplay/controller acceptance cannot pass until their gamepad bindings are added.
-   - **Menu-route blocker:** gameplay has no production action that calls `change_scene("main_menu")`. Use `Ctrl+Shift+M` in the temporary QA helper for this check; the formal acceptance path should not be marked complete until a quit-to-menu/pause route ships in the product UI.
-   - State reset confirmed with the QA helper using mouse/keyboard.
+   - **Former blockers closed:** `MOVE_*`, `INTERACT` and `TOGGLE_JOURNAL` now include standard gamepad events; Journal → Settings provides the production confirmed **Quit to Main Menu** action, so the QA helper shortcut is no longer part of the acceptance path.
+   - State reset previously was confirmed with the QA helper. Re-run through the product Settings action, then verify New Game state with mouse/keyboard and controller.
 
 ### Current manual-acceptance status
 
-Steps 1–3, 6 and 7 passed the available mouse/keyboard acceptance path, with step 7 exercised through the QA helper because no production return-to-menu action exists. Step 4 passed its functional restoration, belt-consumption and loot checks; its victory-stinger continuation remains an open audio defect. Step 5 has no production quest-encounter entry point and remains covered only by the constructed `TestEncounterFlow.tscn` request. Controller acceptance remains open. Quest-encounter integration, return-to-menu, controller bindings, Overworld music transitions and map-reveal behavior are tracked in `Docs/Issues.md` and the gap register.
+Steps 1–3, 6 and the previous state-reset check passed with mouse/keyboard. Step 4 passed its functional restoration, belt-consumption and loot checks; its music-return behavior requires reconfirmation after commit 7. Step 5 now has a production trigger and central result route, but has not yet been re-run manually. Steps 7 and controller acceptance likewise require a new pass through product UI and a real gamepad. Map acquisition/use remains a separate open verification item.
 
 ### Documentation closure
 
@@ -292,19 +292,20 @@ Defer these until the vertical slice is stable:
 
 The immediate next slice after acceptance should be **multi-target acts plus effect/stat seams**, followed by **full save-service integration**. Expanding content before those foundations would repeat the ownership and no-op-content problems this plan is intended to solve.
 
-## 11. Next delivery sequence after commit 6
+## 11. ✅ Commit 7 — First-slice integration pass
 
-**Status:** the available 640×360 mouse/keyboard vertical-slice acceptance has been recorded. Step 5, controller checks and a production return-to-menu route remain incomplete; fix those acceptance follow-ups in a dedicated integration pass before broadening mechanics.
+**Implemented.** The acceptance follow-ups from commit 6 now ship through production routes rather than the local QA helper. Automated coverage is complete; the manual controller, quest and audio passes still need to be observed at 640×360 before their acceptance rows can be marked passed.
 
-### Next commit 0 — First-slice integration pass
+### Implementation
 
-1. Wire the quest encounter source end to end: one quest trigger creates a validated `source: "quest"` request carrying `questId`/`objectiveId`, and one authoritative post-victory command completes that objective. Commit Party/belt results once, suppress rewards Off Trail, and make repeated scene entry or result handling idempotent.
-2. Add a production return-to-menu or pause-menu route through `SceneManager`; do not rely on the QA helper to call `change_scene("main_menu")`.
-3. Add gamepad events to movement, interaction and Journal actions, then repeat controller navigation/UI focus at 640×360.
-4. Fix Overworld music re-entry by invalidating the prior Zone context when leaving a Location or Shootout, or by forcing the Overworld decision on return. This should resolve both the Lazysprings-exit track and continuing victory-stinger issues.
-5. Re-test map acquisition and use: purchasing alone must not reveal a target; using the map should consume one copy and reveal Gold Run deterministically, or expose a concrete UI/state defect.
+1. **Quest-encounter lifecycle:** Littlehill Grove instantiates a `LocationInteractionDirector` and a reusable `QuestEncounterTrigger`. The trigger appears only while `pistoleros_regroup:find_morrison` is the authoritative current objective, creates one validated `source: "quest"` request for authored `LittlehillApproach.gd`, and carries the objective identity in request `progression`. `SceneManager` stores the request in its one-shot Shootout context and only an acknowledged `outcome: "victory"` result calls `Quests.completeCurrentObjective()`. Non-victory, duplicate and out-of-order results cannot advance or regress progress; Party/belt commit and Off-Trail reward suppression remain owned by the existing one result path.
+2. **Prologue story adjustment:** the final Littlehill cutscene no longer completes `find_morrison` by shot. The Shootout clears that objective, then the cutscene completes the regroup objective. This gives the existing quest objective a playable trigger instead of adding a duplicate completion owner.
+3. **Return to menu:** Journal → Settings contains **Quit to Main Menu** and a confirmation dialog. The action calls `SceneManager.change_scene("main_menu")` through the shared route helper; it is not an unconditional process quit or QA shortcut.
+4. **Controller bindings:** `MOVE_UP`, `MOVE_DOWN`, `MOVE_LEFT` and `MOVE_RIGHT` accept both left-stick motion and D-pad button events. `INTERACT` accepts controller A, and `TOGGLE_JOURNAL` accepts Start. Existing keyboard bindings remain active.
+5. **Music transitions:** every `MusicPlayer.on_scene_changed()` call clears `currentZone`. Returning to the same Overworld Zone therefore forces the chunk-driven decision rather than retaining a Location track or victory stinger. `play_music()` and `stop_music()` also become no-ops after `shutdown()` so a late test transition cannot touch released players.
+6. **Map verification:** purchase alone still only places the item in Party inventory; Journal Inventory **Use** is the discovery command. Existing command/UI tests pass, while the reported real-play mismatch remains explicitly open for manual re-test.
 
-**Exit gate:** vertical-slice step 5 has a real production path and controller/menu acceptance can pass without the QA helper; music transitions and map use no longer require a helper workaround.
+**Exit gate:** automated tests now prove the production quest route, confirmed menu route, controller binding shapes and Zone-context invalidation. Physical controller, visual quest-trigger placement, 640×360 audio and live map-use confirmation remain the final manual gates.
 
 The next implementation gates remain:
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=4]
+[gd_scene load_steps=9 format=4]
 
 [ext_resource type="Script" uid="uid://ii52u1yme8jk" path="res://Location/Locations/BaseLocation.gd" id="1_25rci"]
 [ext_resource type="TileSet" uid="uid://jcv4fj5jci30" path="res://Tilesets/LocationTileset.tres" id="2_2ij2u"]
@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://cu6ur8rfrmofo" path="res://Nodes/Cutscene/Cutscene.tscn" id="4_t1esl"]
 [ext_resource type="PackedScene" uid="uid://plqhvmf2uttb" path="res://Nodes/Exit/Exit.tscn" id="5_yrrrn"]
 [ext_resource type="PackedScene" uid="uid://muesuexxtn5o" path="res://Cutscenes/Generic Cutscenes/Fade.tscn" id="6_sug1q"]
+[ext_resource type="PackedScene" path="res://Nodes/Interaction/LocationInteractionDirector.tscn" id="7_director"]
+[ext_resource type="PackedScene" path="res://Location/Entities/Quest/QuestEncounterTrigger.tscn" id="8_questencounter"]
 
 [node name="LittlehillGrove" type="Node2D"]
 script = ExtResource("1_25rci")
@@ -32,6 +34,13 @@ cutsceneName = "Littlehill Grove"
 polygon = PackedVector2Array(0, 0, 14, 0, 14, 100, 0, 100)
 
 [node name="Exits" type="Node2D" parent="."]
+
+[node name="Interaction" type="Node2D" parent="."]
+
+[node name="LocationInteractionDirector" parent="Interaction" instance=ExtResource("7_director")]
+
+[node name="LittlehillApproach" parent="Interaction" instance=ExtResource("8_questencounter")]
+position = Vector2(430, 300)
 
 [node name="Fade" parent="." instance=ExtResource("6_sug1q")]
 

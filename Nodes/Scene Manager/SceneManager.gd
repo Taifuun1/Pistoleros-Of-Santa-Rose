@@ -213,6 +213,7 @@ func _on_shootout_ended(_winningSide: String, results: Dictionary) -> void:
 	var shootoutGlobals = get_node_or_null("/root/Shootout")
 	if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
 		shootoutGlobals.clearPendingRequest()
+	_applyQuestEncounterResult(_shootoutContext.get("request", null), results)
 	var origin: Dictionary = _shootoutContext.get("origin", {})
 	if str(results.get("outcome", "")) == "vamoose" and _routeVamooseReturn():
 		_shootoutContext = {}
@@ -220,6 +221,30 @@ func _on_shootout_ended(_winningSide: String, results: Dictionary) -> void:
 	if !_restoreShootoutOrigin(origin):
 		push_warning("SceneManager: could not restore the Shootout origin; staying in the current scene.")
 		_shootoutContext = {}
+
+
+## Quest encounters commit through the one acknowledged Shootout result. The
+## request supplies the objective identity; Quests decides whether it is current.
+func _applyQuestEncounterResult(request, results: Dictionary) -> void:
+	if request == null or str(request.source) != "quest":
+		return
+	if str(results.get("outcome", "")) != "victory" or bool(results.get("fled", false)):
+		return
+	var progression = request.progression
+	if !(progression is Dictionary):
+		push_warning("SceneManager: quest encounter has invalid progression data.")
+		return
+	var questId := str(progression.get("questId", progression.get("quest_id", "")))
+	var objectiveId := str(progression.get("objectiveId", progression.get("objective_id", "")))
+	if questId.is_empty() or objectiveId.is_empty():
+		push_warning("SceneManager: quest encounter is missing its objective identity.")
+		return
+	var quests = get_node_or_null("/root/Quests")
+	if quests == null or !quests.has_method("completeCurrentObjective"):
+		push_warning("SceneManager: the Quests service is unavailable.")
+		return
+	if !bool(quests.call("completeCurrentObjective", questId, objectiveId)):
+		push_warning("SceneManager: quest encounter result rejected (%s:%s)." % [questId, objectiveId])
 
 
 ## Vamoose return (Docs/System Design/System Coherence.md, outcome routing):

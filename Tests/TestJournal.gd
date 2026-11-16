@@ -85,6 +85,7 @@ func _ready() -> void:
 	await testCharacterControllerFocusHandoff()
 	await testCharacterProductionRefresh()
 	await testSceneTreeSetup()
+	await testSettingsReturnToMenu()
 
 	# Free the real/fake tabs the test owns and release the music autoload's
 	# playbacks before quitting, so the process exits without node/RID/audio
@@ -685,4 +686,46 @@ func testSceneTreeSetup() -> void:
 	check(journal.get_parent() == journalLayer, "the journal is a persistent child of its layer")
 	check(sceneManager.process_mode == Node.PROCESS_MODE_ALWAYS, "SceneManager keeps processing while paused")
 	check(sceneManager.get_node("CurrentScene").process_mode == Node.PROCESS_MODE_PAUSABLE, "CurrentScene is explicitly pausable")
+
+
+## The production return-to-menu route lives in the real Settings tab. The test
+## first checks its confirmation behavior, then lets the tab use SceneManager.
+func testSettingsReturnToMenu() -> void:
+	print("--- Settings return-to-menu route ---")
+	journal.setTabDefinitions(Journal.DEFAULT_TABS.duplicate(true))
+	journal.selectTab("settings")
+	journal.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var settings = journal._tabInstances.get("settings")
+	check(settings != null, "the real Settings tab is active")
+	if settings == null:
+		journal.close()
+		return
+	check(settings.find_child("QuitToMenuButton", true, false) != null, "Settings exposes a production quit-to-menu action")
+	check(settings.getFocusTarget() != null, "the quit action is available to controller focus")
+	journal.tabBar.grab_focus()
+	await pressAction("ui_down")
+	check(get_viewport().gui_get_focus_owner() == settings.getFocusTarget(), "D-pad down enters the Settings action")
+
+	var routed := { "count": 0 }
+	settings.menuRouteProvider = func() -> void: routed["count"] += 1
+	settings.find_child("QuitToMenuButton", true, false).pressed.emit()
+	await get_tree().process_frame
+	var confirmation = settings.find_child("QuitConfirmation", true, false)
+	check(confirmation != null and confirmation.visible, "quitting first requests confirmation")
+	check(!settings.canCloseTab(), "the open confirmation blocks the Journal")
+	settings._hideConfirmation()
+	confirmation.hide()
+	check(settings.canCloseTab(), "cancelling the confirmation restores Journal navigation")
+
+	settings._returnToMainMenu()
+	check(int(routed["count"]) == 1, "the confirmed action routes through the tab's SceneManager provider")
+	settings.menuRouteProvider = func() -> void: sceneManager.call_deferred("change_scene", "main_menu")
+	settings._returnToMainMenu()
+	for _frame in 180:
+		if sceneManager.currentSceneKey == "main_menu":
+			break
+		await get_tree().process_frame
+	check(sceneManager.currentSceneKey == "main_menu", "the production Settings action returns to the main menu through SceneManager")
 	check(journal.process_mode == Node.PROCESS_MODE_ALWAYS, "the journal processes while the game is paused")

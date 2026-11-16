@@ -2,7 +2,7 @@
 
 The Journal's Quests tab tells the player which quests are active or completed, what has already happened, and what to do next. It also provides navigation from a current objective to the same quest target on the Overworld map.
 
-**Status: stages 1–4 implemented; stage 5 automated validation complete, manual visual/controller review pending.** Typed definitions/catalog live in `Data/Quests/`, and `Globals/Quests.gd` owns validated catalog loading, runtime state, journal projections and the current-marker API, covered by `Tests/TestQuests.gd`. `UI/Journal/Tabs/QuestsTab.*` renders the read-only Active/Completed master/detail view against an injectable provider (`Tests/TestQuestsTab.gd`/`.tscn`). The shell wires `showOnMapRequested` to `Journal.showOnMap()`, and MapTab uses the real `Quests.getCurrentMapMarkers()` provider with quest/objective marker identity and exact `focusQuestTarget()` selection (`Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`). `Pistoleros Regroup` is authored in `Data/Quests/Definitions/PistolerosRegroup.tres`, registered in `Data/Quests/QuestCatalog.tres`, and advanced by end-of-cutscene quest shots in the five Pistoleros Regroup data files, covered by `Tests/TestQuestTriggers.gd`/`.tscn`. All five prologue Location scenes now exist and are chained Finch Pond → Pine Meadows → Great Fall Ridge → Blackberry Retreat → Littlehill Grove; Littlehill Grove has no onward exit yet. `Globals/Locations.gd::currentQuest` still selects location content.
+**Status: stages 1–4 and the production quest-encounter integration are implemented; stage 5 automated validation is complete, while visual/controller reconfirmation remains.** Typed definitions/catalog live in `Data/Quests/`, and `Globals/Quests.gd` owns validated catalog loading, runtime state, journal projections, current-objective queries and the marker API, covered by `Tests/TestQuests.gd`. `UI/Journal/Tabs/QuestsTab.*` renders the read-only Active/Completed master/detail view against an injectable provider (`Tests/TestQuestsTab.gd`/`.tscn`). The shell wires `showOnMapRequested` to `Journal.showOnMap()`, and MapTab uses the real `Quests.getCurrentMapMarkers()` provider with quest/objective marker identity and exact `focusQuestTarget()` selection (`Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`). `Pistoleros Regroup` is authored in `Data/Quests/Definitions/PistolerosRegroup.tres`, registered in `Data/Quests/QuestCatalog.tres`, and advanced by four end-of-cutscene quest shots plus Littlehill Grove's real `QuestEncounterTrigger`, covered by `Tests/TestQuestTriggers.gd`/`.tscn`, `Tests/TestEncounterFlow.tscn` and `Tests/TestQuests.gd`. All five prologue Location scenes now exist and are chained Finch Pond → Pine Meadows → Great Fall Ridge → Blackberry Retreat → Littlehill Grove; Littlehill Grove has no onward exit yet. `Globals/Locations.gd::currentQuest` still selects location content.
 
 ## First-iteration decisions
 
@@ -203,6 +203,8 @@ func loadCatalog(catalog: QuestCatalog) -> bool
 func isQuestDataAvailable() -> bool
 func startQuest(questId: String) -> bool
 func completeCurrentObjective(questId: String, objectiveId: String) -> bool
+func getCurrentObjectiveId(questId: String) -> String
+func isCurrentObjective(questId: String, objectiveId: String) -> bool
 ```
 
 `_ready()` loads `CATALOG_PATH` once. `loadCatalog()` is the initialization/test seam: validate the complete catalog before exposing it. On success, populate definitions, clear runtime state, and set `_dataAvailable = true`; on failure, clear both and set it to `false`. A missing, wrongly typed, or invalid catalog is unavailable; do not run with a partially loaded story. An empty valid catalog is available and produces the **No quests yet** UI. Tests instantiate `Quests.gd` without adding it to the tree, then call `loadCatalog()` with an in-memory catalog, avoiding production autoload state.
@@ -220,6 +222,8 @@ A state entry has exactly this shape:
 `startQuest()` fails without changing state when data is unavailable, the definition is absent, or the quest is already known. On success it creates an active state at objective zero and emits `questStateChanged` once.
 
 `completeCurrentObjective()` requires an active state and an exact current-objective id match. On success it appends that id, then either advances `current_objective_id` or marks the final objective's quest completed and clears the current id. It emits once. Unknown, duplicate, out-of-order, and already-completed calls return `false` without mutation or a signal. These two methods are the only first-iteration mutation commands; there is no generic UI-accessible Dictionary editor.
+
+`getCurrentObjectiveId()` and `isCurrentObjective()` are read-only domain queries for world triggers. They derive from the same active state on every call, emit nothing and do not expose the mutable state Dictionary. A trigger may use them to decide whether it is live, but only the owning gameplay result may call `completeCurrentObjective()`.
 
 `Locations.currentQuest` remains a location scene-selection string. `Cutscene.playedCutscenes` is not objective state, and `currentMainQuestLevel` remains unchanged and outside the journal projection.
 
@@ -241,6 +245,10 @@ For the initial cutscene-driven slice, extend the existing shot interpreter in `
 ```
 
 The handler validates the action/required ids and calls only `Quests.startQuest()` or `Quests.completeCurrentObjective()`. A rejected command logs a content warning with its ids; it does not retry, mutate other state, or block the cutscene. Like the existing camera/music shots, the quest shot leaves `wait` and `playerAction` unchanged and returns without calling `advanceScene()` itself; the existing `_process` loop advances exactly once on the next tick after either success or rejection. It does not load scenes or change `Locations.currentQuest`. Other gameplay systems may call the same commands directly later; the Journal never emits these shots itself.
+
+Shootout-owned objectives use `Location/Entities/Quest/QuestEncounterTrigger.*` rather than a cutscene shot. The authored trigger carries stable quest/objective ids plus encounter path and canonical Zone, and remains activatable only while `Quests.isCurrentObjective()` reports the exact current objective. Activation asks `SceneManager.launchShootout()` to validate one `source: "quest"` request whose `progression` carries `questId` and `objectiveId`. SceneManager owns the result lifecycle: after Party/belt results have committed exactly once and the player acknowledges victory, its stored request calls `Quests.completeCurrentObjective()` once. Fleeing, defeat, Vamoose and invalid requests do not complete the objective. The trigger never edits quest state and the Journal never launches it.
+
+Littlehill Grove currently uses that boundary for `pistoleros_regroup:find_morrison`. Its final cutscene retains only the subsequent `regroup_pistoleros_of_santa_rose` shot, giving each objective one authoritative completion owner.
 
 ### Read APIs and projections
 
@@ -445,7 +453,7 @@ Implement as five reviewable patches. Stages 1–3 deliver the complete system a
 
 ### Stage 4 — Cutscene command shot and approved real quest slice ✅
 
-**Status: implemented.** Confirmed mapping: Finch Pond starts the quest; Pine Meadows → `find_gwyneth`; Great Fall Ridge → `find_aiyana`; Blackberry Retreat → `find_manuel`; Littlehill Grove → `find_morrison` then `regroup_pistoleros_of_santa_rose`. All five data files carry the end shots, the catalog loads the quest, and `Tests/TestQuestTriggers.tscn` passes. Great Fall Ridge's incorrect Pine Meadows cutscene reference, the stale `playedCutscenes` keys, and the missing Blackberry Retreat/Littlehill Grove Location scenes were repaired; the prologue now chains through all five locations.
+**Status: implemented, with Shootout-owned progression added by the first-slice integration pass.** Confirmed mapping: Finch Pond starts the quest; Pine Meadows → `find_gwyneth`; Great Fall Ridge → `find_aiyana`; Blackberry Retreat → `find_manuel`; Littlehill Grove's encounter trigger → `find_morrison`, then its cutscene → `regroup_pistoleros_of_santa_rose`. The other four progression boundaries remain end shots, while `find_morrison` is completed only by the acknowledged Shootout result. The catalog, prologue Location chain and `Tests/TestQuestTriggers.tscn` cover the resulting lifecycle.
 
 **Create / modify**
 

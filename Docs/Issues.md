@@ -9,13 +9,27 @@ Markdown file for listing issues that pop up.
 - Move and Flee icons should be positioned to the right always in Shootout UI
 - Move by clicking on the actor position instead of icons in the UI
 - Inventory party icons seems taller than the icon dimensions
-- Music doesn't change when leaving Lazysprings
-- Victory music continues after Shootout result confirmation; returning to the same Overworld Zone does not force the Overworld playlist back on
-- Movement, interaction and Journal actions lack gamepad bindings, blocking the controller portion of vertical-slice acceptance
-- Gameplay has no production UI route back to the main menu, so New Game after a live session can only be exercised through the temporary QA helper or process restart
-- Buying a map doesn't seem to reveal the location Gold Rush
+- Music transition and menu/controller integration fixes are in place, but their manual 640×360 audio and gamepad reconfirmation is pending
+- Buying a map doesn't seem to reveal Gold Run (purchase alone only adds the item; Inventory **Use** should consume one copy and reveal the target)
 
 ## Fixed
+
+- Fixed — Returning to the same Overworld Zone could continue Location or Shootout outcome music
+    - `MusicPlayer.on_scene_changed()` now invalidates `currentZone` for every scene transition, so an Overworld entry must re-resolve its chunk before selecting music
+    - `Tests/TestMusicPlayer.gd` proves Location/Shootout return reasserts the prior Zone playlist; manual 640×360 audio reconfirmation is still pending
+
+- Fixed — Movement, interaction and Journal actions had no gamepad events
+    - `MOVE_*` actions accept left-stick motion and D-pad buttons, `INTERACT` accepts A, and `TOGGLE_JOURNAL` accepts Start while retaining their keyboard bindings
+    - `Tests/TestInputMap.gd` gates the project binding shapes; real-controller responsiveness and UI focus still require manual acceptance
+
+- Fixed — Gameplay had no production UI route back to the main menu
+    - The Journal Settings tab now offers a confirmed **Quit to Main Menu** action that routes through `SceneManager.change_scene("main_menu")`
+    - `Tests/TestJournal.gd` covers controller focus, confirmation, cancellation and the production route
+
+- Fixed — Littlehill Grove had no production quest-encounter entry point
+    - `QuestEncounterTrigger` launches a validated `source: "quest"` request for the current `find_morrison` objective; SceneManager's acknowledged victory result is the sole command completing it
+    - The final Littlehill cutscene now advances only after that Shootout, and repeated/non-victory results cannot regress or duplicate progression
+    - `TestEncounterFlow.tscn` and `TestQuestTriggers.gd` cover the production path; manual Off-Trail step 5 still needs its 640×360 re-run
 
 - Fixed — Encounter-request Zone was not propagated to Shootout music, so Canyon fights could use the default shootout list
     - `Shootout.init()` now passes its validated request `encounterZoneId` to `MusicPlayer.on_shootout_started()` as the final Zone fallback when the encounter file itself omits `zone`; authored encounter data still wins over the request

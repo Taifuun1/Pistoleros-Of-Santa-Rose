@@ -186,6 +186,11 @@ func _test_zone_decisions(music) -> void:
 	_check(music.generation == generation, "chunks within the same zone keep the song running")
 	music.on_overworld_chunk(Vector2i(6, 1))
 	_check(music.currentTrackId == "prairie_track", "crossing into a new zone crossfades to its track list (got %s)" % music.currentTrackId)
+	music.currentZone = "grasslands"
+	music.on_scene_changed("location")
+	_check(music.currentZone == "", "leaving the Overworld invalidates its last Zone")
+	music.on_overworld_chunk(Vector2i(1, 3))
+	_check(music.currentTrackId == "grass", "returning to the same Zone reasserts its Overworld track")
 	music.stop_music(0.0)
 
 

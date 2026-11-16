@@ -84,7 +84,7 @@ The launcher validates the whole request, connects the result handler before com
 
 Automate one real scene test for each source type: event, Location ambush and quest. Cover selected encounter identity, Zone propagation, one Party commit, victory/flee/Vamoose destinations, stock departure rules, overflow acknowledgment, double input, launch/load failure and no leaked modal/music/pause state. Run the reward/access cases both On and Off Trail: Off Trail must permit quests and town-to-town travel while rejecting non-town Locations, attrition and every reward source.
 
-**Commit 2 and 5 progress:** `TestEncounterFlow.tscn` covers the event source: deterministic pool selection, request/Zone propagation, double-launch rejection, real Overworld → canyon Shootout → exact origin return, duplicate-result rejection and failed-load context cleanup. `TestVamooseFlow.tscn` covers the Vamoose outcome: last-Town interior return, non-town checkpoint Overworld-entrance return, one end-of-Trail/recovery pass, Off-Trail restriction restoration and no stock reroll. Location-ambush and quest sources (as launch callers) and reward/access On-vs-Off-Trail cases for those sources remain open.
+**Commit 2, 5 and 7 progress:** `TestEncounterFlow.tscn` covers the event source: deterministic pool selection, request/Zone propagation, double-launch rejection, real Overworld → canyon Shootout → exact origin return, duplicate-result rejection and failed-load context cleanup. `TestVamooseFlow.tscn` covers the Vamoose outcome: last-Town interior return, non-town checkpoint Overworld-entrance return, one end-of-Trail/recovery pass, Off-Trail restriction restoration and no stock reroll. The Littlehill Grove `QuestEncounterTrigger` now provides the production quest source; it creates one validated `source: "quest"` request, and SceneManager's one-shot acknowledged result is the sole caller that completes the exact current objective after victory. The real quest request/scene return path is automated. Location-ambush launch callers and reward/access On-vs-Off-Trail cases for the remaining source types remain open.
 
 ## 4. Event outcome contract
 
@@ -203,7 +203,9 @@ Decide whether poker uses Party money directly or a clearly defined buy-in/cash-
 
 ### Music, Settings, Flair, and presentation
 
-- Settings owns audio volumes and game options; MusicPlayer consumes them without changing playlist decision data.
+- Settings owns audio volumes and game options; MusicPlayer consumes them without changing playlist decision data. The Settings tab currently adds only the confirmed quit-to-menu route; audio and disk-save controls remain unavailable.
+- Every `MusicPlayer.on_scene_changed()` call invalidates the prior Overworld Zone. The Overworld must then re-request its chunk Zone, so returning to the same Zone starts Zone music rather than continuing a Location track or Shootout stinger.
+- Gameplay input actions carry keyboard and standard gamepad events together. Movement uses left stick plus D-pad, `INTERACT` uses A, and `TOGGLE_JOURNAL` uses Start; real-device 640×360 feel still requires manual acceptance.
 - Implement Flair in SceneManager's pre-swap transition with one shared encounter-loading/selection path, so text and combat cannot disagree. Remove the duplicate in-combat banner afterward.
 - Finish 640×360 keyboard/controller/visual reviews for Journal, vendors, Shootout, maps and new content. Automated layout assertions do not replace this gate.
 
@@ -232,9 +234,9 @@ Production should fail closed for malformed content. Warn-and-skip remains usefu
 
 The concrete first delivery slice for phases 0–2 (authoritative Trail state, the encounter request/router, shared belt ownership, the decided combat rules, Vamoose/New Game, and the content lint and documentation closure) is tracked in the [First steps implementation plan](First%20Steps%20Implementation%20Plan.md).
 
-**Current delivery status (2026-11-16):** commits 1–6 are implemented and the full suite passes 58/58. Available mouse/keyboard manual vertical-slice acceptance is recorded; quest-encounter integration, controller bindings, a production return-to-menu route and Overworld music transitions remain follow-ups. The ordered next mechanics steps are:
+**Current delivery status (2026-11-16):** commits 1–7 are implemented and the full suite passes 59/59. The first-slice integration pass now ships the production quest-encounter trigger/result route, Journal quit-to-menu confirmation, standard controller bindings, and Overworld Zone-context invalidation. Step 5 and physical-controller acceptance still require a manual re-run; automated tests establish the production paths but do not record visual/controller feel. The ordered next mechanics steps are:
 
-0. **First-slice integration pass:** quest-sourced encounter launch/result completion, production return-to-menu, gamepad bindings, and Overworld music-transition invalidation.
+0. ~~**First-slice integration pass:** quest-sourced encounter launch/result completion, production return-to-menu, gamepad bindings, and Overworld music-transition invalidation.~~ Implemented in commit 7.
 1. **Multi-target acts:** one target-set pipeline for player and AI resolution, per-position taunt, UI/animation/focus and death handling.
 2. **Effect/stat seams:** data-driven effect modifiers, the supported-stat registry, taunt's defensive buffs and all combat reads through `Shootout.getModifiedStat()`.
 3. **Full save-service integration:** the remaining disk Save/Continue work and application-restart proof. The existing domain snapshots and New Game coordinator do not by themselves complete phase 2.

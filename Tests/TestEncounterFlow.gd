@@ -16,6 +16,9 @@ const CoordinatesScript = preload("res://Overworld/OverworldCoordinates.gd")
 
 const CANYON_RATS := "res://Data/Shootout/Encounters/CanyonRats.gd"
 const CANYON_RAT_NEST := "res://Data/Shootout/Encounters/CanyonRatNest.gd"
+const LITTLEHILL_APPROACH := "res://Data/Shootout/Encounters/LittlehillApproach.gd"
+const PRODUCTION_QUEST_CATALOG := "res://Data/Quests/QuestCatalog.tres"
+const QUEST_ID := "pistoleros_regroup"
 
 var failures := 0
 var sceneManager: Node
@@ -41,6 +44,7 @@ func _run() -> void:
 	_testPoolSelection()
 	_testEventOutcomeDispatch()
 	await _testSceneRouter()
+	await _testQuestEncounterProgression()
 
 
 func _testRequestValidation() -> void:
@@ -265,6 +269,79 @@ func _testSceneRouter() -> void:
 	_check(globals.pendingRequest == null and !sceneManager.hasPendingShootout(), "a failed Shootout load clears request and context")
 
 
+func _testQuestEncounterProgression() -> void:
+	print("\n--- Quest encounter launch and objective progression ---")
+	var catalog = load(PRODUCTION_QUEST_CATALOG)
+	_check(catalog != null, "the production quest catalog loads")
+	_check(Quests.loadCatalog(catalog), "the production quest catalog is valid")
+	Quests.resetForNewGame()
+	_check(Quests.startQuest(QUEST_ID), "the prologue quest starts")
+	for objectiveId in ["find_gwyneth", "find_aiyana", "find_manuel"]:
+		_check(Quests.completeCurrentObjective(QUEST_ID, objectiveId), "%s advances the quest" % objectiveId)
+	_check(Quests.isCurrentObjective(QUEST_ID, "find_morrison"), "the Shootout objective is current")
+
+	var progression := {
+		"questId": QUEST_ID,
+		"objectiveId": "find_morrison",
+		"band": "early",
+	}
+	var requestOptions := {
+		"encounterPath": LITTLEHILL_APPROACH,
+		"zoneId": "pine_forest",
+		"source": "quest",
+		"sourceId": "%s:find_morrison" % QUEST_ID,
+		"origin": { "sceneKey": "overworld" },
+		"progression": progression,
+		"trailState": Locations.exportState(),
+		"seed": 357,
+	}
+	var trigger = load("res://Location/Entities/Quest/QuestEncounterTrigger.tscn").instantiate()
+	add_child(trigger)
+	trigger.playerNearby = true
+	_check(trigger.canActivate(), "the production trigger is active for its exact current objective")
+
+	var questRequest = RequestScript.make(requestOptions, ZoneCatalogScript.new(), Locations)
+	_check(questRequest.isValid(), "the quest encounter request validates")
+
+	sceneManager._applyQuestEncounterResult(questRequest, {
+		"winningSide": Shootout.TEAM_ENEMY, "fled": false, "outcome": "defeat", "party": {},
+	})
+	_check(Quests.isCurrentObjective(QUEST_ID, "find_morrison"), "a defeat leaves the objective current")
+	sceneManager._applyQuestEncounterResult(questRequest, {
+		"winningSide": Shootout.TEAM_PLAYER, "fled": true, "outcome": "fled", "party": {},
+	})
+	_check(Quests.isCurrentObjective(QUEST_ID, "find_morrison"), "a flight leaves the objective current")
+
+	sceneManager.change_scene("overworld")
+	_check(await _awaitSceneKey("overworld"), "the Overworld loads for the quest launch")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check(sceneManager.launchShootout(questRequest), "SceneManager launches the quest encounter")
+	_check(await _awaitSceneKey("shootout"), "the quest encounter scene loads")
+	var shootout = sceneManager.get_current_scene()
+	_check(shootout.encounterName == "Littlehill Approach", "the authored quest encounter initializes")
+	_check(shootout.encounterSource == "quest", "the Shootout keeps its quest source")
+	shootout.battleOver = true
+	shootout.presentFightResults({
+		"winningSide": Shootout.TEAM_PLAYER,
+		"fled": false,
+		"outcome": "victory",
+		"party": {},
+		"rodeoLoot": {},
+		"loot": { "money": 0, "items": [] },
+	})
+	shootout._on_end_screen_continue_pressed()
+	_check(await _awaitSceneKey("overworld"), "the quest result returns to the Overworld")
+	_check(Quests.getCurrentObjectiveId(QUEST_ID) == "regroup_pistoleros_of_santa_rose", "the acknowledged victory completes the quest objective")
+	_check(!Quests.isCurrentObjective(QUEST_ID, "find_morrison"), "the completed objective does not remain current")
+
+	# A repeated command is idempotent even when it bypasses the one-shot router.
+	Quests.completeCurrentObjective(QUEST_ID, "find_morrison")
+	_check(Quests.getCurrentObjectiveId(QUEST_ID) == "regroup_pistoleros_of_santa_rose", "a repeated quest-encounter result cannot regress progression")
+	_check(!trigger.canActivate(), "the completed quest trigger no longer activates")
+	trigger.free()
+
+
 func _seededRng(value: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = value
@@ -284,6 +361,7 @@ func _cleanup() -> void:
 	OverworldEvents.overworldProvider = null
 	OverworldEvents.resetEventState()
 	Locations.resetForNewGame()
+	Quests.resetForNewGame()
 	if is_instance_valid(sceneManager):
 		var manager = sceneManager
 		manager.queue_free()

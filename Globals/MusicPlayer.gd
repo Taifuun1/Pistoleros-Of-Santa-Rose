@@ -138,8 +138,11 @@ func resolveStream(trackId: String):
 # ── Playback ─────────────────────────────────────────────────────────────────
 
 ## Plays a track id or a list of track ids (looped), crossfading from whatever
-## was playing. An empty selection fades the music out.
+## was playing. An empty selection fades the music out. Calls made after
+## shutdown() are ignored because the owned player nodes no longer exist.
 func play_music(trackSelection, fadeSeconds := -1.0) -> void:
+	if players.size() < 2:
+		return
 	var ids = _selectionToIds(trackSelection)
 	if ids.is_empty():
 		stop_music(fadeSeconds)
@@ -156,6 +159,8 @@ func stop_music(fadeSeconds := -1.0) -> void:
 	currentTrackId = ""
 	playlist = []
 	playlistIndex = 0
+	if players.size() <= activePlayerIndex:
+		return
 	_fadeOutPlayer(players[activePlayerIndex], _fadeSeconds(fadeSeconds))
 
 
@@ -276,8 +281,11 @@ func _onTailFadeTimeout() -> void:
 
 ## Called by the scene manager once a scene switch applied its context. The
 ## overworld, shootouts and cutscenes drive their own music through their
-## dedicated handlers (zone chunks, encounter data, cutscene shots).
+## dedicated handlers (zone chunks, encounter data, cutscene shots). Any scene
+## change invalidates the last Overworld Zone so returning to the same Zone
+## reasserts its playlist instead of leaving a Location or stinger running.
 func on_scene_changed(sceneKey: String) -> void:
+	currentZone = ""
 	match sceneKey:
 		"main_menu":
 			play_music(menu_tracks())

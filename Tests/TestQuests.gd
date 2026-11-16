@@ -121,6 +121,12 @@ func testProductionCatalog() -> void:
 	_check(service.startQuest("pistoleros_regroup"), "the production quest starts")
 	var entry := _entryById(service.getQuestJournalEntries(), "pistoleros_regroup")
 	_check(entry["current_objective"]["objective_id"] == "find_gwyneth", "the production quest starts at find_gwyneth")
+	_check(service.getCurrentObjectiveId("pistoleros_regroup") == "find_gwyneth", "the service reports the exact current objective")
+	_check(service.isCurrentObjective("pistoleros_regroup", "find_gwyneth"), "the service confirms the current objective")
+	_check(!service.isCurrentObjective("pistoleros_regroup", "find_aiyana"), "the service rejects the next objective")
+	_check(!service.isCurrentObjective("missing_quest", "find_gwyneth"), "the service rejects an unknown quest")
+	_check(service.completeCurrentObjective("pistoleros_regroup", "find_gwyneth"), "the production first objective completes")
+	_check(service.getCurrentObjectiveId("pistoleros_regroup") == "find_aiyana", "the current-objective query advances")
 	_check(service.getCurrentMapMarkers().is_empty(), "the production quest has no map markers while all targets are empty")
 
 
