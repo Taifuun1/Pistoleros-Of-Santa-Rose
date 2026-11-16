@@ -235,7 +235,9 @@ func _testTownContent() -> void:
 	var reopened = vendors.getVendorSnapshot("lazysprings_gunsmith")
 	_check(reopened.offers == first.offers, "reopening the vendor keeps the same stock")
 	var bankBefore = vendors.getBankSnapshot().get("bank", []).size()
-	Locations.departForTrail()
+	Locations.enterTown("Lazysprings")
+	var trailStart: Dictionary = Locations.startTrail()
+	_check(bool(trailStart.get("success", false)), "the explicit Town command starts one Trail")
 	var after = vendors.getVendorSnapshot("lazysprings_gunsmith")
 	_check(after.offers.size() > 0 and after.offers != first.offers, "the explicit departure rolls new stock once")
 	_check(vendors.getBankSnapshot().get("bank", []).size() == bankBefore, "departure leaves the Bank untouched")
@@ -356,6 +358,7 @@ func _actionEvent(action: String) -> InputEventAction:
 func _cleanup() -> void:
 	get_tree().paused = false
 	Locations.currentQuest = "Pistoleros Regroup"
+	Locations.resetForNewGame()
 	Locations.currentLocation = "Clearwater Grove"
 	if is_instance_valid(sceneManager):
 		sceneManager.queue_free()

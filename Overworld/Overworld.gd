@@ -52,6 +52,9 @@ func _process(_delta):
 		loadingChunk = false
 
 func init() -> void:
+	# The Overworld is not a Town context: clear a stale Town flag so no Trail
+	# can be started from a scene without a departure interaction.
+	Locations.enterOverworld()
 	currentChunk = Overworld.spawnChunk
 	if !setChunk() and !streamCache.pendingChunkLoads.has(currentChunk):
 		streamCache.pendingChunkLoads.append(currentChunk)
@@ -120,7 +123,7 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> bool:
 	var locations = chunkRead["locations"]
 	for location in locations:
 		if !isOverworldObjectLoaded(location, "Locations"):
-			createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated)
+			createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated, bool(locations[location].get("isTown", false)))
 	var spawnPoints = chunkRead["spawnPoints"]
 	for actorName in spawnPoints:
 		if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
@@ -261,16 +264,25 @@ func unloadChunk(chunk: Vector2i) -> void:
 ### Location functions ###
 ##########################
 
-func enterLocation(body: Node2D, locationName: String, pregenerated: bool):
-	Locations.currentLocation = locationName
-	if body.name == "PlayerOverworldActor":
-		if pregenerated:
-			HelperFunctions.changeScene("pregenerated_location", { "location": locationName })
-		else:
-			HelperFunctions.changeScene("wfc_location", { "location": locationName })
+func enterLocation(body: Node2D, locationName: String, pregenerated: bool, isTown: bool):
+	if body.name != "PlayerOverworldActor":
+		return
+	# Off Trail only Towns are enterable. The player stays on the Overworld;
+	# leaving and re-entering the Location area retries after a Trail starts.
+	if !Locations.canAccessLocation(isTown):
+		push_warning("Overworld: '%s' is a non-town Location and requires an active Trail." % locationName)
+		return
+	if isTown:
+		Locations.enterTown(locationName)
+	else:
+		Locations.enterNonTownLocation(locationName)
+	if pregenerated:
+		HelperFunctions.changeScene("pregenerated_location", { "location": locationName })
+	else:
+		HelperFunctions.changeScene("wfc_location", { "location": locationName })
 
 
-func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool):
+func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool, isTown := false):
 	var area = Area2D.new()
 	area.name = locationName
 	$Locations.add_child(area)
@@ -278,7 +290,7 @@ func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array,
 	for tile in tiles:
 		area.add_child(createCollisionWithPosition(tile, chunkPosition))
 	
-	area.body_entered.connect(enterLocation.bind(locationName, pregenerated))
+	area.body_entered.connect(enterLocation.bind(locationName, pregenerated, isTown))
 
 func createSpawnPoint(actorName, actorType, spawnPosition, spawnChance, spawnMaximum):
 	var newSpawnPoint = spawnPointInstance.instantiate()

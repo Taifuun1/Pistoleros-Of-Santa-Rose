@@ -81,10 +81,11 @@ Markdown file for listing first-iteration features.
     - Newspaper office
         - Find info on enemy parties in the current Zone, and tips for Shootouts
         - No resource cost to use
-- Generated map rework and iteration
+- Generated Location map rework and iteration
     - Larger chunk areas
     - Fix apple pie pathfinding test not supposed to be there
     - Placement bug where chunk is changed and the player is instantly thrown to the next chunk?
+    - Fix camera not clamping to chunk borders
     - Add minigames for herb picking
     - Add flavour and variety to chunks
         - Use bushes or empty tiles instead of just trees
@@ -94,3 +95,8 @@ Markdown file for listing first-iteration features.
     - Make the tight paths more visible, wider, and generally more passable
     - Map and map discovery as new chunks are explored
         - Map can be abstract dots that connect to each other
+- On the Trail
+    - A run, called Trail, begins when the player begins it in a Town
+    - Being On the Trail means all mechanics, like MxHP attrition, are enabled
+    - Being Off the Trail means no attrition mechanics, Location access for non-town location, or loot from any source
+    - Player can still move on the Overworld between Towns and advance Quests

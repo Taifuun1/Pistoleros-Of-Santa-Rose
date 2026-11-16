@@ -5,6 +5,7 @@ var locations = {
 		"tiles": PackedVector2Array([
 			Vector2i(22, 38)
 		]),
-		"pregenerated": true
+		"pregenerated": true,
+		"isTown": true
 	}
 }
