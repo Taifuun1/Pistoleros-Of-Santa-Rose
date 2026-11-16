@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–3 implemented and verified; commits 4–6 remain proposed.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced the independent Party belt arrays with validated reservations, one-shot combat consumption write-back and a minimal Inventory belt action.
+**Status: commits 1–4 implemented and verified; commits 5–6 remain proposed.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -148,7 +148,9 @@ Create `res://Tests/TestBeltOwnership.gd` and extend `res://Tests/TestInventoryT
 
 The vertical-slice consumable is fully functional from Town purchase through combat write-back, with no independent Party belt item source.
 
-## 7. Commit 4 — Decided combat-rule migrations
+## 7. ✅ Commit 4 — Decided combat-rule migrations
+
+**Implemented.** Fight setup starts every member at effective max HP; persistent knockout/downed state is removed; `CharacterStatCalculator` takes an injected `applyAttrition` context and `Party.applyFightResults()` commits attrition, flee cost and loot only when the request is On Trail. Bleed uses combined stacks (two stacks per damage before resistance) and healing removes stacks through the cleanse path. Enemy AI only gathers authored Moves (basic Attack removed), the rat uses the new `Scratch` Move, and content validation requires every combat actor to own an offensive Move. `hp_below` targets a named base actor with `fraction`/`amount`, optional `stat` and `winner`. Jammed applies the class-authored payload, Miss applies no on-hit effects, and `generateLoot()` propagates the encounter's canonical Zone so `dropsAnywhere: false` works in combat.
 
 ### A. Max-HP and On-Trail attrition
 

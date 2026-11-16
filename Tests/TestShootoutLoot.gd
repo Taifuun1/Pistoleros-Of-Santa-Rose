@@ -106,6 +106,16 @@ func _run() -> void:
 	ui.acknowledge()
 	_check(endSignals.size() == 1, "repeated acknowledgment cannot emit again")
 
+	var moneyBefore = party.money
+	var inventoryBefore = party.inventory.duplicate(true)
+	var offTrail = party.applyFightResults({
+		"loot": { "money": 99, "items": [{ "definitionId": "paregoric", "itemType": "consumable", "quantity": 1 }] },
+		"trailState": { "onTrail": false },
+		"party": {},
+	})
+	_check(!offTrail.loot.has("money") or int(offTrail.loot.get("money", 0)) == 0, "Off-Trail loot result is empty")
+	_check(party.money == moneyBefore and party.inventory == inventoryBefore, "Off-Trail rewards are not applied")
+
 	var music = get_node_or_null("/root/MusicPlayer")
 	if music != null and music.has_method("shutdown"):
 		music.shutdown()

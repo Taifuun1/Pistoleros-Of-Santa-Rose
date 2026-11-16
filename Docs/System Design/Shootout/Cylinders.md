@@ -71,7 +71,7 @@ In `ShootoutActionResolver.resolveAttack()`:
 
 1. `quality = cylinderManager.hitQuality(actor)`.
 2. `reload` — spend the Move without attacking (play a reload animation, show a "Reload" damage-number label), still advance the Cylinder.
-3. `jammed` — attack fails; apply the Jammed buff/debuff defined on the weapon or class data, advance the Cylinder.
+3. `jammed` — attack fails; apply the Jammed buff/debuff authored on the acting actor's class data (`jammed: { target: "self"|"selectedActor", effects: [...] }`), advance the Cylinder.
 4. Numeric quality — multiply damage: Miss 0%, Graze 50%, Hit 100%, Critical Hit 150% (placeholder percentages from `Docs/Combat.md`), then continue the pipeline in [Damage and Stats](Damage%20and%20Stats.md). A Miss still advances the Cylinder.
 
 ### Cylinder effects and Rodeos

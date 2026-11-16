@@ -132,6 +132,27 @@ func _run() -> void:
 	for item in loot2.items:
 		_check(item.itemType == "weapon" and item.rarity == "common", "rolled weapon is common, got %s" % [item])
 
+	print("\n--- Zone-aware equipment loot ---")
+	var zoneTable = { "name": "Z", "rolls": 20, "money": {}, "entries": [
+		{ "kind": "equipment", "rarity": ["common"], "weight": 1 }
+	] }
+	var zoneRng = RandomNumberGenerator.new()
+	zoneRng.seed = 4242
+	var canyonLoot = lootGenerator.generateLoot(zoneTable, {}, zoneRng, "canyon")
+	_check(canyonLoot.items.size() == 20, "zone-aware generation rolls the requested count")
+	var sawCanyon = false
+	for item in canyonLoot.items:
+		_check(item.zone == "canyon" or item.zone == "anywhere", "no foreign-zone equipment drops, got %s" % item.zone)
+		if item.zone == "canyon":
+			sawCanyon = true
+	_check(sawCanyon, "at least one canyon-locked equipment base can drop in canyon")
+
+	var invalidRng = RandomNumberGenerator.new()
+	invalidRng.seed = 4242
+	var invalidLoot = lootGenerator.generateLoot(zoneTable, {}, invalidRng, "not_a_zone")
+	for item in invalidLoot.items:
+		_check(item.zone == "anywhere", "an unknown Zone fails closed to anywhere, got %s" % item.zone)
+
 	print("\n--- Empty tables generate nothing ---")
 	var empty = lootGenerator.generateLoot({ "name": "T", "rolls": 0, "entries": [] }, {})
 	_check(empty.money == 0 and empty.items.is_empty(), "no money config and no rolls means no loot")

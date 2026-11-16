@@ -22,8 +22,6 @@ const STAT_LABELS = {
 	"bleed": "Bleed",
 	"poison": "Poison",
 }
-## Top-level stats that calculate() actually applies knockout debuffs to.
-const KNOCKOUT_STATS = ["sixShootin", "highTailin", "taffyin"]
 ## Ordered rows for the Journal character sheet. `sentinel` marks the existing
 ## -1 "unknown stat" value that the UI projects as unavailable rather than -1.
 const STAT_ROWS = [
@@ -48,7 +46,7 @@ const STAT_ROWS = [
 ]
 
 
-func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "", replacementItem = null) -> Dictionary:
+func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "", replacementItem = null, context := {}) -> Dictionary:
 	var result = member.duplicate(true)
 	var stats = _normalizedStats(result.get("stats", {}))
 	result["stats"] = stats
@@ -70,14 +68,12 @@ func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "",
 		stats.defense.sand += int(itemStats.get("sand", 0))
 		maxHpBonus += int(itemStats.get("mxHp", 0))
 
-	for debuff in result.get("knockoutDebuffs", []):
-		var statName = str(debuff.get("stat", ""))
-		if stats.has(statName):
-			stats[statName] += int(debuff.get("amount", 0))
-
+	# Attrition is injected: Off Trail ignores accumulated journey injury for
+	# the effective MxHP projection. The calculator never reads Locations.
+	var injuryDamage = int(result.get("injuryDamage", 0)) if bool(context.get("applyAttrition", true)) else 0
 	var baseMaxHp = maxi(1, int(result.get("baseMaxHp", result.get("maxHp", result.get("hp", 1)))) + maxHpBonus)
 	var injuryRate = maxi(1, int(result.get("injuryRate", 4)))
-	var maxHp = maxi(1, baseMaxHp - int(floor(float(result.get("injuryDamage", 0)) / injuryRate)))
+	var maxHp = maxi(1, baseMaxHp - int(floor(float(injuryDamage) / injuryRate)))
 	result["baseMaxHp"] = baseMaxHp
 	result["maxHp"] = maxHp
 	result["hp"] = mini(int(result.get("hp", maxHp)), maxHp)
@@ -107,8 +103,8 @@ func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "",
 
 ## Pure Journal character-sheet projection. It uses the same calculate() result
 ## as fight setup, reports persisted Base values, and never mutates its inputs.
-func projectCharacter(member: Dictionary, classData: Dictionary) -> Dictionary:
-	var effective = calculate(member, classData)
+func projectCharacter(member: Dictionary, classData: Dictionary, context := {}) -> Dictionary:
+	var effective = calculate(member, classData, "", null, context)
 	var baseStats = _normalizedStats(member.get("stats", {}))
 	var baseWeapon = _baseWeapon(member)
 	var rows = []
@@ -239,7 +235,6 @@ func _projectModifiers(member: Dictionary, classData: Dictionary, effective: Dic
 	var injury = _injuryModifier(member, effective)
 	if !injury.is_empty():
 		modifiers.append(injury)
-	modifiers.append_array(_knockoutModifiers(member))
 	var classModifier = _classModifier(member, classData)
 	if !classModifier.is_empty():
 		modifiers.append(classModifier)
@@ -258,42 +253,6 @@ func _injuryModifier(member: Dictionary, effective: Dictionary) -> Dictionary:
 		"injury", "injury", "Journey injury", "",
 		[_effect("maxHp", STAT_LABELS["maxHp"], amount)], 0, detail
 	)
-
-
-func _knockoutModifiers(member: Dictionary) -> Array:
-	var modifiers = []
-	var grouped = {}
-	var order = []
-	var sourceIndex = 0
-	var debuffs = member.get("knockoutDebuffs", [])
-	if !(debuffs is Array):
-		return modifiers
-	for debuffValue in debuffs:
-		if !(debuffValue is Dictionary):
-			continue
-		var debuff = debuffValue as Dictionary
-		var stat = str(debuff.get("stat", ""))
-		if !KNOCKOUT_STATS.has(stat):
-			continue
-		var amount = _intValue(debuff.get("amount", 0))
-		var left = _intValue(debuff.get("shootoutsLeft", 0))
-		var signature = "%s:%d:%d" % [stat, amount, left]
-		if grouped.has(signature):
-			continue
-		grouped[signature] = {
-			"sourceIndex": sourceIndex,
-			"effects": [_effect(_statPath(stat), STAT_LABELS[stat], amount)],
-			"shootoutsLeft": left,
-		}
-		order.append(signature)
-		sourceIndex += 1
-	for signature in order:
-		var group = grouped[signature]
-		modifiers.append(_makeModifier(
-			"knockout", "knockout:%d" % int(group.sourceIndex), "Knockout", "",
-			group.effects, int(group.shootoutsLeft), ""
-		))
-	return modifiers
 
 
 func _classModifier(member: Dictionary, classData: Dictionary) -> Dictionary:

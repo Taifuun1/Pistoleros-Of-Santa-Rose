@@ -1,10 +1,10 @@
 extends Node
 
-## Party state (Docs/System Design/Shootout/Death Injury and Retreat.md):
-## one shared party level, persistent per-member HP, journey injuries, knockout
-## debuffs and the money pouch. All fighters post-fight state flows through
-## applyFightResults(). Inventories/equipment follow Docs/System Design/Journal/
-## Inventory and Equipment.md.
+## Party state (Docs/System Design/Shootout/Death Injury and Retreat.md): one
+## shared party level, journey injuries and the money pouch. Fighters start each
+## Shootout at effective max HP; persistent knockout/downed state is removed.
+## All fighters' post-fight state flows through applyFightResults().
+## Inventories/equipment follow Docs/System Design/Journal/Inventory and Equipment.md.
 
 signal inventoryChanged
 signal moneyChanged
@@ -22,16 +22,8 @@ const RESERVABLE_ITEM_TYPES = ["consumable"]
 
 # Placeholder: MxHP portion lost when fleeing a fight.
 const FLEE_MXHP_LOSS = 0.2
-# Placeholder: knockout debuff duration in Shootouts.
-const KNOCKOUT_SHOOTOUTS = 3
 # Placeholder: HP lost per point of MxHP lost to injuries.
 const DEFAULT_INJURY_RATE = 4
-
-# Knockout debuff package applied when a member goes down (placeholders).
-const KNOCKOUT_DEBUFFS = [
-	{ "stat": "highTailin", "amount": -2 },
-	{ "stat": "sixShootin", "amount": -1 }
-]
 
 var level = 1
 var money = 0
@@ -82,8 +74,6 @@ var party = {
 		"baseMaxHp": 12,
 		"injuryDamage": 0,
 		"injuryRate": 4,
-		"knockoutDebuffs": [],
-		"downed": false,
 		"characterClass": "Gunslinger",
 		"moves": ["Sharp Shot", "Hold Steady"],
 		# Persistent belt reservations (Docs/System Design/System Coherence.md,
@@ -130,6 +120,11 @@ func _ready() -> void:
 	var rodeoDefinitions = shootoutGlobals.rodeosData if shootoutGlobals != null else {}
 	configureInventory(catalog, classDefinitions)
 	configureCharacterData(classDefinitions, rodeoDefinitions)
+	# Single Town recovery boundary: recovery runs from the Locations command,
+	# not from scene loads or vendor-room returns.
+	var locations = get_node_or_null("/root/Locations")
+	if locations != null and locations.has_signal("townEntered"):
+		locations.townEntered.connect(_on_town_entered)
 
 
 ## Test/headless initialization seam: installs the catalog and class definitions
@@ -170,7 +165,7 @@ func getCharacterJournalSnapshot() -> Dictionary:
 		if key.is_empty() or !(member is Dictionary):
 			push_warning("Party: ignored invalid character member '%s'." % key)
 			continue
-		var projection = _statCalculator.projectCharacter(member, _classDataFor(member))
+		var projection = _statCalculator.projectCharacter(member, _classDataFor(member), _attritionContext())
 		if !(projection is Dictionary) or !(projection.get("statRows", null) is Array) or !(projection.get("modifiers", null) is Array):
 			push_warning("Party: ignored invalid character projection for '%s'." % key)
 			continue
@@ -178,8 +173,11 @@ func getCharacterJournalSnapshot() -> Dictionary:
 			"key": key,
 			"actorName": str(member.get("actorName", key)),
 			"characterClass": str(member.get("characterClass", "")),
-			"downed": bool(member.get("downed", false)),
-			"hp": int(projection.get("hp", 0)),
+			# Persistent downed/knockout state was removed; the field stays for
+			# Journal compatibility and is always false outside a fight.
+			"downed": false,
+			# HP is not carried between fights: the Journal shows effective max HP.
+			"hp": int(projection.get("maxHp", projection.get("hp", 0))),
 			"maxHp": int(projection.get("maxHp", 0)),
 			"statRows": projection.get("statRows", []).duplicate(true),
 			"modifiers": projection.get("modifiers", []).duplicate(true),
@@ -651,6 +649,9 @@ func _reservationIndex(reservations: Array, instanceId: String) -> int:
 ## the source instance id for the one-shot consumption write-back.
 func _fightDataFor(member: Dictionary) -> Dictionary:
 	var data := _calculateStats(member)
+	# Fighters always start a Shootout at effective max HP; HP is not carried
+	# between fights (Docs/System Design/System Coherence.md, max-HP migration).
+	data["hp"] = int(data.get("maxHp", data.get("hp", 1)))
 	var projection := _combatBeltProjection(member, data)
 	data["items"] = projection.items
 	data["beltReservations"] = projection.reservations
@@ -768,7 +769,20 @@ func _isValidEquipItem(item: Dictionary) -> bool:
 
 func _calculateStats(member: Dictionary, replacementSlot := "", replacementItem = null) -> Dictionary:
 	_ensureStatCalculator()
-	return _statCalculator.calculate(member, _classDataFor(member), replacementSlot, replacementItem)
+	return _statCalculator.calculate(member, _classDataFor(member), replacementSlot, replacementItem, _attritionContext())
+
+
+## Attrition is injected into the pure calculator (Docs/System Design/System
+## Coherence.md): Party resolves the authoritative Trail state, the calculator
+## never reads Locations. Missing Locations (headless fixtures) stays On Trail.
+func _attritionContext() -> Dictionary:
+	var locations = null
+	var mainLoop = Engine.get_main_loop()
+	if mainLoop is SceneTree and mainLoop.root != null:
+		locations = mainLoop.root.get_node_or_null("Locations")
+	if locations != null and locations.has_method("canApplyAttrition"):
+		return { "applyAttrition": bool(locations.canApplyAttrition()) }
+	return { "applyAttrition": true }
 
 
 func _classDataFor(member: Dictionary) -> Dictionary:
@@ -786,33 +800,27 @@ func effectiveMaxHp(member: Dictionary) -> int:
 	return int(_calculateStats(member).get("maxHp", 1))
 
 
-## The member's data prepared for a fight: effective MxHp, HP capped to it,
-## equipment modifiers, and knockout debuffs applied to a copied stats block.
+## The member's data prepared for a fight: effective MxHp, HP set to that max,
+## equipment modifiers and belt reservations projected to combat items.
 func getFightData(actorName: String) -> Dictionary:
 	if !party.has(actorName):
 		return {}
 	return _fightDataFor(party[actorName])
 
 
-## Post-fight write-back: surviving HP, accumulated injuries, downed members
-## gain knockout debuffs, one Shootout is consumed from existing debuffs, and
-## fleeing costs every survivor a portion of MxHp. Loot application is returned
-## for the end screen so capacity overflow cannot be lost silently.
+## Post-fight write-back. Attrition, flee MxHP cost and loot commit only when
+## the captured request is On Trail; Off-Trail fights and scene transitions must
+## not change MxHP or grant rewards. Fighters return to effective max HP after
+## the fight and keep no knockout/downed state. Loot is returned for the end
+## screen so capacity overflow cannot be lost silently.
 func applyFightResults(results: Dictionary) -> Dictionary:
+	var onTrail := _resultsGrantAttrition(results)
 	var lootResult = {}
 	var beltResult = _commitBeltConsumption(results.get("beltConsumed", []))
 	var changed = false
 	if _reconcileBeltReservations():
 		changed = true
-	for member in party.values():
-		var debuffs = []
-		for debuff in member.get("knockoutDebuffs", []):
-			debuff["shootoutsLeft"] = int(debuff.get("shootoutsLeft", KNOCKOUT_SHOOTOUTS)) - 1
-			changed = true
-			if debuff.shootoutsLeft > 0:
-				debuffs.append(debuff)
-		member["knockoutDebuffs"] = debuffs
-	if results.get("loot") is Dictionary:
+	if onTrail and results.get("loot") is Dictionary:
 		lootResult = applyLoot(results.loot)
 	for actorName in results.get("party", {}):
 		if !party.has(actorName):
@@ -820,16 +828,23 @@ func applyFightResults(results: Dictionary) -> Dictionary:
 		changed = true
 		var state = results.party[actorName]
 		var member = party[actorName]
-		member["hp"] = maxi(0, int(state.get("hp", 0)))
-		member["injuryDamage"] = int(member.get("injuryDamage", 0)) + int(state.get("injuryDamage", 0))
-		member["downed"] = member.hp <= 0
-		if member.downed:
-			member["knockoutDebuffs"] = makeKnockoutDebuffs()
-		if results.get("fled", false) and !member.downed:
-			_applyFleeCost(actorName)
+		if onTrail:
+			member["injuryDamage"] = int(member.get("injuryDamage", 0)) + int(state.get("injuryDamage", 0))
+			if results.get("fled", false):
+				_applyFleeCost(actorName)
+		# HP is not carried between fights: return at the new effective max.
+		member["hp"] = effectiveMaxHp(member)
 	if changed:
 		partyChanged.emit("")
 	return { "loot": lootResult, "belt": beltResult }
+
+
+## Production results carry the request's Trail snapshot; a missing key is a
+## legacy/direct-test call and keeps the previous On-Trail behavior.
+func _resultsGrantAttrition(results: Dictionary) -> bool:
+	if results.get("trailState") is Dictionary:
+		return bool(results.trailState.get("onTrail", false))
+	return true
 
 
 ## Commits the Shootout's successful item records exactly once. Records are
@@ -887,6 +902,8 @@ func _commitBeltConsumption(records) -> Dictionary:
 ## quantities after consumption, drops, sales or imports. Unconsumed quantity
 ## stays owned and reserved.
 func _reconcileBeltReservations(emitSignal := true) -> bool:
+	if !isInventoryDataAvailable():
+		return false
 	var changed := false
 	for memberKey in party:
 		var member = party[memberKey]
@@ -943,13 +960,6 @@ func applyLoot(loot: Dictionary) -> Dictionary:
 	return result
 
 
-func makeKnockoutDebuffs() -> Array:
-	var debuffs = []
-	for debuff in KNOCKOUT_DEBUFFS:
-		debuffs.append({ "stat": debuff.stat, "amount": debuff.amount, "shootoutsLeft": KNOCKOUT_SHOOTOUTS })
-	return debuffs
-
-
 ## Fleeing costs a portion of MxHp (modeled as journey injury).
 func applyFleeCost(actorName: String) -> void:
 	if _applyFleeCost(actorName):
@@ -970,14 +980,20 @@ func _applyFleeCost(actorName: String) -> bool:
 	return true
 
 
-## Town entry: injuries reset.
+## Town recovery command (single boundary): entering a Town restores injuries
+## and full effective MxHP once through the Locations command.
+func _on_town_entered(_locationId: String) -> void:
+	resetInjury()
+
+
+## Town entry: injuries reset to full effective MxHP.
 func resetInjury() -> void:
 	var changed = false
 	for member in party.values():
-		if int(member.get("injuryDamage", 0)) != 0 or bool(member.get("downed", false)):
+		if int(member.get("injuryDamage", 0)) != 0:
 			changed = true
-		member["injuryDamage"] = 0
-		member["downed"] = false
+			member["injuryDamage"] = 0
+		member["hp"] = effectiveMaxHp(member)
 	if changed:
 		partyChanged.emit("")
 
@@ -997,18 +1013,13 @@ func reduceInjury(amount: int) -> void:
 		partyChanged.emit("")
 
 
-## Full party down: lose half of all loot (money pouch; the loot hook lands
-## with Rewards) and return where the party is thrown to.
+## Full party down: lose half of the money pouch and return where the party is
+## thrown to. Persistent knockout/downed state no longer exists; carried-stack
+## loss and checkpoint/last-Town routing land in commit 5.
 func vamoose() -> String:
 	var moneyBefore = money
 	money = int(floor(money / 2.0))
-	var changed = false
-	for member in party.values():
-		changed = true
-		member["downed"] = true
-		member["knockoutDebuffs"] = makeKnockoutDebuffs()
-	if changed:
-		partyChanged.emit("")
 	if money != moneyBefore:
+		partyChanged.emit("")
 		moneyChanged.emit()
 	return "quest_checkpoint" if questInProgress else "town"

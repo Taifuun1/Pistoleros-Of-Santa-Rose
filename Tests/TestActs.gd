@@ -32,6 +32,7 @@ class FakeShootout:
 	var effectManager = null
 	var movesData = {}
 	var itemsData = {}
+	var cylinderManager = null
 	var damageNumbers = []
 	func _init():
 		actors = {}
@@ -42,6 +43,17 @@ class FakeShootout:
 		return Vector2(column * 10, 0)
 	func spawnDamageNumber(label, _color, _position):
 		damageNumbers.append(str(label))
+
+
+class FakeCylinder:
+	extends RefCounted
+	var quality
+	func _init(qualityValue):
+		quality = qualityValue
+	func hitQuality(_actorName):
+		return quality
+	func advance(_actorName):
+		pass
 
 
 func _init() -> void:
@@ -117,6 +129,32 @@ func _run() -> void:
 	_check(user.items.size() == 1, "unknown items are not consumed")
 	ctx.resolver.resolveItem("Paregoric", user, target)
 	_check(user.items.is_empty(), "second use empties the belt")
+
+	print("\n--- Healing removes bleed stacks ---")
+	ctx = makeFight()
+	ctx.fake.itemsData = { "Paregoric": { "name": "Paregoric", "side": "player", "baseAmount": 5 } }
+	var healer = addActor(ctx, "Healer", "player team", 1)
+	var wounded = addActor(ctx, "Wounded", "player team", 2)
+	wounded.hp = 20
+	ctx.effectManager.applyEffect("Wounded", { "op": "apply_effect", "effect": "bleed", "amount": 4 }, "Healer")
+	healer.items = ["Paregoric"]
+	ctx.resolver.resolveItem("Paregoric", healer, wounded)
+	_check(wounded.hp == 25, "item healing restores its amount, got %d" % wounded.hp)
+	_check(ctx.effectManager.getEffects("Wounded", "bleed").is_empty(), "healing removed the bleed stacks through cleanse")
+
+	print("\n--- Miss applies no on-hit effects ---")
+	ctx = makeFight()
+	ctx.fake.movesData = {
+		"Bleeding Shot": { "name": "Bleeding Shot", "category": "attack_ability", "side": "enemy",
+			"baseAmount": 4, "effects": [{ "op": "apply_effect", "effect": "bleed", "amount": 2 }] }
+	}
+	ctx.fake.cylinderManager = FakeCylinder.new(0)
+	var shooter = addActor(ctx, "Shooter", "enemy team", 1)
+	var victim = addActor(ctx, "Victim", "player team", 2)
+	var hpBefore = victim.hp
+	ctx.resolver.resolveMove("Bleeding Shot", shooter, victim)
+	_check(victim.hp == hpBefore, "a Miss deals no damage")
+	_check(ctx.effectManager.getEffects("Victim", "bleed").is_empty(), "a Miss applies no on-hit effects")
 
 	print("\n--- Ducks are buffs: no damage, effects only ---")
 	ctx = makeFight()

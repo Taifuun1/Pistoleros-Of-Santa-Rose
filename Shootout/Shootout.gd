@@ -549,6 +549,7 @@ func _on_battle_ended(winningSide: String) -> void:
 		"outcome": fightOutcome(winningSide),
 		"party": buildPartyFightState(),
 		"beltConsumed": consumedBeltItems.duplicate(true),
+		"trailState": encounterTrailState.duplicate(true),
 		"rodeoLoot": rodeoManager.consumeLootModifiers()
 	}
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
@@ -589,6 +590,9 @@ func generateLootForFight(rodeoLoot, winningSide: String) -> Dictionary:
 	var empty = { "money": 0, "items": [] }
 	if winningSide != Shootout.TEAM_PLAYER or fled or !encounterLootEnabled or lootTableName == "":
 		return empty
+	# Off-Trail fights produce no reward payload by contract.
+	if !bool(encounterTrailState.get("onTrail", false)):
+		return empty
 	var table = null
 	var globals = get_node_or_null("/root/Shootout")
 	if globals != null:
@@ -596,7 +600,7 @@ func generateLootForFight(rodeoLoot, winningSide: String) -> Dictionary:
 	if !(table is Dictionary):
 		push_warning("Shootout: unknown loot table {table}".format({ "table": lootTableName }))
 		return empty
-	return lootGenerator.generateLoot(table, rodeoLoot)
+	return lootGenerator.generateLoot(table, rodeoLoot, null, encounterZoneId)
 
 func fightOutcome(winningSide: String) -> String:
 	if fled:

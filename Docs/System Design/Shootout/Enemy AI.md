@@ -17,10 +17,10 @@ This is a design doc: it describes the intended design, and the implementation m
 **Implemented** (the decision pipeline, archetypes and boss scripts; content authoring of `ai` blocks and boss scripts is ongoing):
 
 - `Shootout/ShootoutEnemyAI.gd` replaces the random-target stub with `chooseAct()`: `gatherLegalActs()` uses the exact same validation as the player (targeting manager ranges, silence, usable-move filtering, `canMoveActor` for repositioning), `scoreActs()` grades every act/target pair, and `pickFromTop()` chooses randomly among the 2 best.
-- Scoring (placeholder weights): attacks score expected damage via a side-effect-free `estimateAttackDamage()` (full pipeline minus mark consumption, current Chamber aware) plus a kill bonus; attack abilities and damage moves score their amount; affliction effects score on unafflicted targets; heals score on wounded allies; Ducks score with wounded allies (bonus for the tank archetype); items heal-score by missing HP; repositioning scores only when useful (preferred-column bonus).
+- Scoring (placeholder weights): attack abilities and damage moves score their amount (with a kill bonus); affliction effects score on unafflicted targets; heals score on wounded allies; Ducks score with wounded allies (bonus for the tank archetype); items heal-score by missing HP; repositioning scores only when useful (preferred-column bonus).
 - Archetype weights via the optional `ai` block on actor data (`archetype`, `preferredColumns`, `aggression`, `script`); missing blocks fall back to the damage archetype defaults.
 - Boss scripts: `Data/Shootout/AI/*.gd` (`rules` list of `{ when: { hpBelow/hpAbove }, act: { type, name, targetName } }` with `self`/`lowestHpAlly`/`lowestHpEnemy` targets), loaded into `Shootout.aiData`; the first passing rule beats all scoring.
-- Enemy turns route through the same resolution path as player acts (`resolveActOnce` handles attacks, moves, items and repositioning uniformly), with taunt redirect on basic attacks.
+- Enemy turns route through the same resolution path as player acts (`resolveActOnce` handles moves, items and repositioning uniformly), with taunt redirect on attack Moves.
 - Tests: `Tests/TestEnemyAI.gd` covers gathering/validation parity, silence, lethal-target preference, support healing, reposition fallback and boss-script priority.
 
 ## Design
@@ -29,9 +29,9 @@ This is a design doc: it describes the intended design, and the implementation m
 
 `chooseAct(actorName) -> Dictionary` replaces `chooseTarget()`, returning a full act `{ "type", "name"?, "targetName" }`:
 
-1. **Gather legal acts** — basic attack (if the weapon can fire from the actor's current column at a living enemy column, per [Positions and Targeting](Positions%20and%20Targeting.md)); each known move usable from the current column (skipping abilities when silenced, see [Effects](Effects.md)); each remaining item; reposition forward/backward. This uses the exact same validation functions as the player UI so AI and player can never diverge.
+1. **Gather legal acts** — each known move usable from the current column (skipping abilities when silenced, see [Effects](Effects.md)); each remaining item; reposition forward/backward. This uses the exact same validation functions as the player UI so AI and player can never diverge. Basic weapon attacks do not exist; every attack is an authored Move.
 2. **Score each act+target pair** — weighted scoring:
-   - Attack: expected damage after the defender's known defense and the attacker's current Chamber (the AI "knows" Cylinders since the player can see them, Open Question 5 in `Docs/Combat.md`); bonus if it kills.
+   - Attack Moves: authored base amount plus scaling, with a kill bonus; cylinder/quality resolution happens at execution.
    - Affliction moves: value of the effect on targets that lack it; reduced value on already-afflicted targets.
    - Taunt/Ducks: high when allies are low HP or when the caster is the tank class; low when already taunting.
    - Heals/cleanses: high when an ally is below a health threshold or carries a strong bleed/poison.

@@ -68,30 +68,52 @@ func makeManager() -> Dictionary:
 
 
 func _run() -> void:
-	print("--- Bleed: highest ticks, stored stacks take over ---")
+	print("--- Bleed: combined stacks, two stacks per damage ---")
 	var ctx = makeManager()
 	var fake = ctx.fake
 	var manager = ctx.manager
-	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 2 }, "Rat")
-	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 5 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+	manager.onTurnStart("Weak")
+	_check(fake.actors["Weak"].hp == 30, "one bleed stack deals no damage")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+	manager.onTurnStart("Weak")
+	_check(fake.actors["Weak"].hp == 29, "two bleed stacks deal one damage, got %d" % (30 - fake.actors["Weak"].hp))
 	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 3 }, "Rat")
 	manager.onTurnStart("Weak")
-	_check(fake.actors["Weak"].hp == 25, "only the highest bleed ticks (5), got %d damage" % (30 - fake.actors["Weak"].hp))
-	manager.cleanse("Weak", "bleed", 1)
-	manager.onTurnStart("Weak")
-	_check(fake.actors["Weak"].hp == 22, "after cleansing the highest, the next stack ticks (3), got %d" % (25 - fake.actors["Weak"].hp))
+	_check(fake.actors["Weak"].hp == 27, "five bleed stacks deal floor(5/2) = 2 damage, got %d" % (29 - fake.actors["Weak"].hp))
 	manager.cleanse("Weak", "bleed", 2)
 	manager.onTurnStart("Weak")
-	_check(fake.actors["Weak"].hp == 22, "cleansed bleed stops ticking")
+	_check(fake.actors["Weak"].hp == 26, "cleansing two stacks leaves three, dealing one damage, got %d" % (27 - fake.actors["Weak"].hp))
+	manager.cleanse("Weak", "bleed", 3)
+	manager.onTurnStart("Weak")
+	_check(fake.actors["Weak"].hp == 26, "cleansed bleed stops ticking")
+	_check(manager.getEffects("Weak", "bleed").is_empty(), "cleansing every stack removes the effect")
 
-	print("\n--- Bleed resistance ---")
+	print("\n--- Bleed resistance and healing ---")
 	ctx = makeManager()
 	fake = ctx.fake
 	manager = ctx.manager
 	fake.actors["Weak"].stats.resistances.bleed = 0.5
 	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 4 }, "Rat")
 	manager.onTurnStart("Weak")
-	_check(fake.actors["Weak"].hp == 28, "50%% bleed resistance halves the tick (4 -> 2)")
+	_check(fake.actors["Weak"].hp == 29, "50%% bleed resistance halves the two damage to one, got %d" % (30 - fake.actors["Weak"].hp))
+	manager.healActor("Weak", 5)
+	_check(fake.actors["Weak"].hp == 30, "healing restores HP")
+	manager.onTurnStart("Weak")
+	_check(fake.actors["Weak"].hp == 30, "healing removed the bleed stacks through the cleanse path")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 5 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+	manager.cleanse("Weak", "bleed", 1)
+	_check(int(manager.getEffects("Weak", "bleed")[0].get("stacks", 0)) == 4, "cleanse removes from the largest stack entry")
+
+	print("\n--- Bleed death during the tick ---")
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	fake.actors["Weak"].hp = 1
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 2 }, "Rat")
+	manager.onTurnStart("Weak")
+	_check(fake.actors["Weak"].hp <= 0, "a bleed tick can drop the actor to zero for the death sweep")
 
 	print("\n--- Poison: stacks tick per Round and wear off ---")
 	ctx = makeManager()

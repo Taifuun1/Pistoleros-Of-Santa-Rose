@@ -77,7 +77,9 @@ func applyAffliction(targetName: String, effect: Dictionary, sourceName: String)
 	var list = effects[targetName]
 	match effectType:
 		"bleed":
-			ensureList(list, "bleed").append({ "amount": int(effect.get("amount", 0)), "source": sourceName })
+			# Combined-stack bleed (decided): each application adds stacks;
+			# every two total stacks deal one damage before resistance.
+			ensureList(list, "bleed").append({ "stacks": maxi(1, int(effect.get("amount", 1))), "source": sourceName })
 		"poison":
 			ensureList(list, "poison").append({
 				"amount": int(effect.get("amount", 0)),
@@ -151,15 +153,32 @@ func cleanse(targetName: String, effectType: String, amount := 1) -> void:
 		if stacks.is_empty():
 			continue
 		if type == "bleed":
-			var highestIndex = 0
-			for j in stacks.size():
-				if stacks[j].amount > stacks[highestIndex].amount:
-					highestIndex = j
-			stacks.remove_at(highestIndex)
+			_removeBleedStacks(stacks, 1)
 		else:
 			stacks.pop_front()
 		if stacks.is_empty():
 			list.erase(type)
+
+
+## Removes up to `amount` combined bleed stacks, largest entry first, and drops
+## empty entries. Healing routes through this same stack-cleanse path.
+func _removeBleedStacks(stacks: Array, amount: int) -> void:
+	var remaining = amount
+	while remaining > 0:
+		var targetIndex = -1
+		var targetStacks = 0
+		for index in stacks.size():
+			var count = int(stacks[index].get("stacks", 0))
+			if count > targetStacks:
+				targetStacks = count
+				targetIndex = index
+		if targetIndex < 0:
+			return
+		var removed = mini(remaining, targetStacks)
+		stacks[targetIndex]["stacks"] = targetStacks - removed
+		remaining -= removed
+		if int(stacks[targetIndex].stacks) <= 0:
+			stacks.remove_at(targetIndex)
 
 
 func randomAfflictionType(list: Dictionary) -> String:
@@ -176,8 +195,8 @@ func isSilenced(actorName: String) -> bool:
 	return !getEffects(actorName, "silence").is_empty()
 
 
-## Heal-over-time and bleed tick at the start of the actor's Turn (bleed: only
-## the highest stack; potency reduced by bleed resistance).
+## Heal-over-time and combined bleed tick at the start of the actor's Turn.
+## Every two bleed stacks deal one damage before resistance.
 func onTurnStart(actorName: String) -> void:
 	var keptHoT = []
 	for hot in getEffects(actorName, "heal_over_time"):
@@ -190,11 +209,13 @@ func onTurnStart(actorName: String) -> void:
 	var bleeds = getEffects(actorName, "bleed")
 	if bleeds.is_empty():
 		return
-	var highest = bleeds[0]
+	var totalStacks = 0
 	for bleed in bleeds:
-		if bleed.amount > highest.amount:
-			highest = bleed
-	dealEffectDamage(actorName, int(round(highest.amount * (1.0 - resistance(actorName, "bleed")))))
+		totalStacks += int(bleed.get("stacks", 0))
+	var baseDamage = int(floor(totalStacks / 2.0))
+	if baseDamage <= 0:
+		return
+	dealEffectDamage(actorName, int(round(baseDamage * (1.0 - resistance(actorName, "bleed")))))
 
 
 ## Poison ticks at the start of every Round on each afflicted actor.
@@ -371,8 +392,14 @@ func healActor(actorName: String, amount: int) -> void:
 	var actor = shootout.getActor(actorName) if shootout.has_method("getActor") else null
 	if actor == null:
 		return
+	# Healing also removes the authored number of bleed stacks through the
+	# shared cleanse path (Docs/System Design/System Coherence.md).
+	cleanse(actorName, "bleed", amount)
+	var before = int(actor.hp)
 	actor.hp = mini(actor.hp + amount, actor.maxHp)
-	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", actor.position + DAMAGE_NUMBER_OFFSET)
+	var healed = int(actor.hp) - before
+	if healed > 0:
+		shootout.spawnDamageNumber("+{amount}".format({ "amount": healed }), "green", actor.position + DAMAGE_NUMBER_OFFSET)
 
 
 func dealEffectDamage(actorName: String, damage: int) -> void:
@@ -394,8 +421,13 @@ func displayEffects(actorName: String) -> Array:
 		var stacks = effects[actorName][effectType]
 		if stacks.is_empty():
 			continue
-		if stacks.size() > 1:
-			lines.append("{type} x{count}".format({ "type": effectType, "count": stacks.size() }))
+		var count = stacks.size()
+		if effectType == "bleed":
+			count = 0
+			for bleed in stacks:
+				count += int(bleed.get("stacks", 0))
+		if count > 1:
+			lines.append("{type} x{count}".format({ "type": effectType, "count": count }))
 		else:
 			lines.append(effectType)
 	return lines

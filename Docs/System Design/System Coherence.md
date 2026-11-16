@@ -144,6 +144,8 @@ The prologue needs one authored continuation contract: Littlehill Grove exit, La
 
 ## 7. Stats, effects, and combat-content coherence
 
+**Status: items 3–9 implemented in commit 4** (Zone-aware loot, authored-Move-only offense, per-actor `hp_below`, max-HP/Trail-gated attrition, combined bleed with stack-removing healing, and the Jammed payload + no-on-hit-effects-on-Miss rule). The supported-stat registry (items 1–2) and multi-target pipeline (item 4) remain open.
+
 1. Define a supported-stat registry shared by item generation, `CharacterStatCalculator`, combat reads, Journal provenance, and vendor valuation. A stat may be `fully_supported`, `display_only`, or `unsupported`; unsupported stats must not roll as if functional.
 2. Implement affix mechanics through existing modifier/effect seams rather than new per-item special cases. Equipment-granted Moves use canonical Move ids and loadout previews. Implement effect-driven stat modifiers and route every combat/UI/initiative read through `Shootout.getModifiedStat()`; include taunt's defensive buffs.
 3. Propagate encounter Zone into loot generation. Zone-tied equipment not dropping from Shootouts is not intentional: use `dropsAnywhere` and the selected Zone exactly as vendor generation does, subject to On-Trail loot eligibility.

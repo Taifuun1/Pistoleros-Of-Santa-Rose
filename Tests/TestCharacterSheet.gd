@@ -19,7 +19,7 @@ func _run() -> void:
 	var calculator = CharacterStatCalculatorScript.new()
 	testStatCatalog(calculator)
 	testUnavailableValuesAndLegacyWeapon(calculator)
-	testInjuriesAndKnockouts(calculator)
+	testNoPersistentKnockout(calculator)
 	testPartySnapshot()
 	testNotifications()
 	if failures == 0:
@@ -87,7 +87,7 @@ func testStatCatalog(calculator) -> void:
 
 func testUnavailableValuesAndLegacyWeapon(calculator) -> void:
 	print("\n--- Calculator: unknown sentinels, empty data and legacy weapons ---")
-	var sparse = { "hp": 5, "stats": {}, "equipment": {}, "knockoutDebuffs": [] }
+	var sparse = { "hp": 5, "stats": {}, "equipment": {} }
 	var sheet = calculator.projectCharacter(sparse, {})
 	_check(sheet.statRows.size() == 18, "sparse members still project the full row catalog")
 	_check(_value(sheet, "stats.sixShootin", "base") == null and _value(sheet, "stats.sixShootin", "effective") == null, "unknown -1 core stats project as unavailable")
@@ -105,7 +105,6 @@ func testUnavailableValuesAndLegacyWeapon(calculator) -> void:
 			"damage": { "lead": { "revolver": 1, "rifle": 1, "shotgun": 1 } },
 			"defense": { "style": 2, "sand": 1 },
 		},
-		"knockoutDebuffs": [],
 		"weapon": { "type": "lead", "weapon": "revolver", "baseDamage": 3 },
 	}
 	sheet = calculator.projectCharacter(legacy, _classes().Gunslinger)
@@ -133,24 +132,17 @@ func testUnavailableValuesAndLegacyWeapon(calculator) -> void:
 	clean.injuryDamage = 0
 	_check(!_modifierKinds(calculator.projectCharacter(clean, _classes().Gunslinger)).has("injury"), "no injury modifier without journey damage")
 
-func testInjuriesAndKnockouts(calculator) -> void:
-	print("\n--- Calculator: knockout grouping and effective stats ---")
+func testNoPersistentKnockout(calculator) -> void:
+	print("\n--- Calculator: no persistent knockout modifiers ---")
 	var member = _member()
 	member.injuryDamage = 0
-	member.knockoutDebuffs = [
+	member["knockoutDebuffs"] = [
 		{ "stat": "sixShootin", "amount": -1, "shootoutsLeft": 3 },
 		{ "stat": "highTailin", "amount": -2, "shootoutsLeft": 3 },
-		{ "stat": "sixShootin", "amount": -1, "shootoutsLeft": 3 },
-		{ "stat": "mysteryStat", "amount": -5, "shootoutsLeft": 3 },
 	]
 	var sheet = calculator.projectCharacter(member, _classes().Gunslinger)
-	_check(_value(sheet, "stats.sixShootin", "effective") == 1, "duplicate knockout penalties both apply to Effective stats, got %s" % str(_value(sheet, "stats.sixShootin", "effective")))
-	_check(_value(sheet, "stats.highTailin", "effective") == 5, "second knockout penalty applies")
-	var knockouts = sheet.modifiers.filter(func(modifier): return modifier.kind == "knockout")
-	_check(knockouts.size() == 2, "identical knockout entries group and unsupported stats are skipped")
-	_check(int(knockouts[0].shootoutsLeft) == 3 and int(knockouts[1].shootoutsLeft) == 3, "knockout modifiers carry remaining Shootouts")
-	_check(knockouts[0].effects[0].path == "stats.sixShootin" and int(knockouts[0].effects[0].amount) == -1, "knockout reports the supported stat penalty")
-	_check(_modifierKinds(sheet).slice(0, 2) == ["knockout", "knockout"], "knockouts follow injury and precede class/equipment")
+	_check(_value(sheet, "stats.sixShootin", "effective") == 3, "knockout fields no longer change effective stats")
+	_check(!_modifierKinds(sheet).has("knockout"), "no knockout modifier kind is projected")
 
 func testPartySnapshot() -> void:
 	print("\n--- Party: character availability and snapshot ---")
@@ -257,16 +249,6 @@ func testNotifications() -> void:
 	_check(signals == [""], "one fight result emits one whole-party notification")
 	fight.free()
 
-	var ticking = _party()
-	ticking.party["Walker Langley"]["knockoutDebuffs"] = [
-		{ "stat": "sixShootin", "amount": -1, "shootoutsLeft": 2 },
-	]
-	signals = []
-	ticking.partyChanged.connect(func(key): signals.append(key))
-	ticking.applyFightResults({ "party": {}, "fled": false })
-	_check(signals == [""] and ticking.party["Walker Langley"].knockoutDebuffs[0].shootoutsLeft == 1, "knockout ticks emit one notification")
-	ticking.free()
-
 	var fleeing = _party()
 	signals = []
 	fleeing.partyChanged.connect(func(key): signals.append(key))
@@ -301,8 +283,9 @@ func testNotifications() -> void:
 	signals.clear()
 	condition.reduceInjury(1)
 	_check(signals.is_empty(), "zero-injury camp reduction emits nothing")
+	condition.money = 100
 	condition.vamoose()
-	_check(signals == [""] and condition.party["Walker Langley"].downed and condition.party["Walker Langley"].knockoutDebuffs.size() == 2, "Vamoose emits one whole-party notification")
+	_check(signals == [""] and condition.money == 50 and !condition.party["Walker Langley"].has("downed") and !condition.party["Walker Langley"].has("knockoutDebuffs"), "Vamoose emits once and creates no persistent knockout state")
 	condition.free()
 
 func _party():
@@ -341,8 +324,6 @@ func _member() -> Dictionary:
 		"baseMaxHp": 12,
 		"injuryDamage": 4,
 		"injuryRate": 4,
-		"knockoutDebuffs": [],
-		"downed": false,
 		"stats": {
 			"sixShootin": 3, "highTailin": 6, "taffyin": 2,
 			"damage": {

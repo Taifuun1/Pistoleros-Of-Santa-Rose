@@ -117,6 +117,7 @@ func _run() -> void:
 	addActor(ctx, "Victim", "player team", 1)
 	hunter.moves = ["Snipe", "Duck Down"]
 	var legal = ctx.enemyAI.gatherLegalActs("Hunter")
+	_check(legal.all(func(act): return act.type != "Attack"), "no basic Attack act is gathered")
 	for act in legal:
 		_check(!(act.type == "Moves" and act.get("name", "") == "Snipe"), "out-of-column move must not be gathered")
 	_check(legal.any(func(act): return act.type == "Moves" and act.name == "Duck Down"), "duck is legal for the enemy")
@@ -129,13 +130,18 @@ func _run() -> void:
 
 	print("\n--- Lethal attacks score above non-lethal ones ---")
 	ctx = makeFight()
+	ctx.fake.movesData = {
+		"Strike": { "name": "Strike", "category": "attack_ability", "side": "enemy", "baseAmount": 3,
+			"positions": { "actorUser": [1, 2, 3, 4], "targets": { "columns": [1, 2, 3, 4] } } },
+	}
 	var killer = addActor(ctx, "Killer", "enemy team", 1)
+	killer.moves = ["Strike"]
 	var weakling = addActor(ctx, "Weakling", "player team", 1)
 	var tank = addActor(ctx, "TankTarget", "player team", 2)
 	weakling.hp = 1
 	tank.hp = 50
 	var scored = ctx.enemyAI.scoreActs("Killer", ctx.enemyAI.gatherLegalActs("Killer"))
-	_check(scored[0].targetName == "Weakling", "the killable target is preferred, got %s" % scored[0].targetName)
+	_check(!scored.is_empty() and scored[0].type == "Moves" and scored[0].targetName == "Weakling", "the killable target is preferred, got %s" % [scored[0]])
 
 	print("\n--- Support archetype heals a wounded ally over attacking ---")
 	ctx = makeFight()

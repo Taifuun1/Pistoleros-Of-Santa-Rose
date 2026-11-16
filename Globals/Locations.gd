@@ -7,6 +7,9 @@ extends Node
 
 signal trailDeparted(departureId: int)
 signal trailStateChanged(onTrail: bool)
+## Emitted once per Town entry through enterTown(); recovery consumers listen
+## here instead of polling scene loads (vendor-room returns do not fire it).
+signal townEntered(locationId: String)
 
 const STATE_FORMAT_VERSION := 1
 
@@ -47,6 +50,7 @@ func enterTown(locationId: String) -> Dictionary:
 		onTrail = false
 		endedTrail = true
 		trailStateChanged.emit(false)
+	townEntered.emit(normalizedId)
 	return {
 		"success": true,
 		"reason": "",

@@ -46,12 +46,13 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_setTrail(true)
 	var party = PartyScript.new()
 	party.party = {
 		"Walker Langley": {
 			"actorName": "Walker Langley", "hp": 12, "baseMaxHp": 12,
 			"stats": { "sixShootin": 3, "highTailin": 6 },
-			"injuryDamage": 0, "injuryRate": 4, "knockoutDebuffs": [], "downed": false
+			"injuryDamage": 0, "injuryRate": 4
 		}
 	}
 	var member = party.party["Walker Langley"]
@@ -64,15 +65,13 @@ func _run() -> void:
 	_check(party.effectiveMaxHp(member) == 1, "injuries floor at 1 MxHp")
 	member.injuryDamage = 4
 
-	print("\n--- Fight data caps HP and applies knockout debuffs ---")
-	member.hp = 12
-	member.knockoutDebuffs = [{ "stat": "sixShootin", "amount": -1, "shootoutsLeft": 3 }]
+	print("\n--- Fight data starts at effective MxHp with no knockout state ---")
+	member.hp = 3
 	var fightData = party.getFightData("Walker Langley")
 	_check(fightData.maxHp == 11, "fight data carries the effective MxHp, got %d" % fightData.maxHp)
-	_check(fightData.hp == 11, "HP capped to effective MxHp, got %d" % fightData.hp)
-	_check(fightData.stats.sixShootin == 2, "knockout debuff applied to fight stats, got %d" % fightData.stats.sixShootin)
-	_check(member.stats.sixShootin == 3, "source party stats are not mutated")
-	member.knockoutDebuffs = []
+	_check(fightData.hp == 11, "HP starts at effective MxHp, got %d" % fightData.hp)
+	_check(fightData.stats.sixShootin == 3, "no knockout debuff changes fight stats")
+	_check(member.hp == 3 and !member.has("knockoutDebuffs") and !member.has("downed"), "source member keeps no persistent knockout/downed state")
 
 	print("\n--- Belt use commits without touching fight state ---")
 	var catalog = ItemCatalogScript.new()
@@ -89,29 +88,37 @@ func _run() -> void:
 	_check(beltApplication.belt.success and party.inventory[0].quantity == 1, "one belt use decrements the carried stack")
 	_check(member.injuryDamage == 4, "the belt commit does not change fight injuries")
 
-	print("\n--- Post-fight write-back ---")
-	party.applyFightResults({ "party": { "Walker Langley": { "hp": 5, "injuryDamage": 6, "downed": false } }, "fled": false })
-	_check(member.hp == 5, "surviving HP written back")
+	print("\n--- On-Trail write-back commits attrition at effective max HP ---")
+	party.applyFightResults({
+		"party": { "Walker Langley": { "hp": 0, "injuryDamage": 6 } },
+		"fled": false,
+		"trailState": { "onTrail": true },
+	})
 	_check(member.injuryDamage == 10, "fight injuries accumulate, got %d" % member.injuryDamage)
-	_check(!member.downed, "survivor is not downed")
-	party.applyFightResults({ "party": { "Walker Langley": { "hp": 0, "injuryDamage": 3, "downed": true } }, "fled": false })
-	_check(member.downed, "member at 0 HP is downed")
-	_check(member.knockoutDebuffs.size() == 2, "downed member gains the knockout debuff package")
-	_check(member.knockoutDebuffs[0].shootoutsLeft == 3, "knockout debuffs last 3 Shootouts")
+	_check(member.hp == party.effectiveMaxHp(member) and member.hp == 10, "the member returns at the new effective MxHP")
+	_check(!member.has("downed") and !member.has("knockoutDebuffs"), "no persistent downed/knockout state is created")
 
-	print("\n--- Knockout debuffs tick down per Shootout ---")
-	party.applyFightResults({ "party": {}, "fled": false })
-	_check(member.knockoutDebuffs[0].shootoutsLeft == 2, "one Shootout consumed")
-	party.applyFightResults({ "party": {}, "fled": false })
-	party.applyFightResults({ "party": {}, "fled": false })
-	_check(member.knockoutDebuffs.is_empty(), "knockout debuffs expire after 3 Shootouts")
+	print("\n--- Off-Trail fights never change MxHP, loot or flee cost ---")
+	_setTrail(false)
+	var moneyBefore = party.money
+	party.applyFightResults({
+		"party": { "Walker Langley": { "hp": 0, "injuryDamage": 5 } },
+		"fled": true,
+		"loot": { "money": 99, "items": [] },
+		"trailState": { "onTrail": false },
+	})
+	_check(member.injuryDamage == 10, "Off-Trail attrition and flee cost are rejected")
+	_check(member.hp == party.effectiveMaxHp(member), "Off-Trail returns at the full effective MxHP")
+	_check(party.money == moneyBefore, "Off-Trail loot is not applied")
+	_setTrail(true)
 
 	print("\n--- Injuries reset in town, camp items reduce them ---")
 	member.injuryDamage = 20
 	party.reduceInjury(5)
 	_check(member.injuryDamage == 15, "camp item reduces injuries")
 	party.resetInjury()
-	_check(member.injuryDamage == 0 and !member.downed, "town entry resets injuries and downed flags")
+	_check(member.injuryDamage == 0 and party.effectiveMaxHp(member) == 12, "town entry resets injuries to full MxHP")
+	_check(!member.has("downed") and !member.has("knockoutDebuffs"), "town reset creates no downed/knockout state")
 
 	print("\n--- Fleeing costs a portion of MxHp ---")
 	member.injuryDamage = 0
@@ -135,7 +142,7 @@ func _run() -> void:
 	party.questInProgress = false
 	_check(party.vamoose() == "town", "vamoose without a quest throws the party to town")
 	_check(party.money == 50, "vamoose halves the money pouch, got %d" % party.money)
-	_check(member.downed and member.knockoutDebuffs.size() == 2, "vamoose downs everyone with knockout debuffs")
+	_check(!member.has("downed") and !member.has("knockoutDebuffs"), "vamoose creates no persistent knockout/downed state")
 	party.questInProgress = true
 	_check(party.vamoose() == "quest_checkpoint", "vamoose during a quest throws the party to the checkpoint")
 
@@ -152,11 +159,48 @@ func _run() -> void:
 	resolver.applyDamage(target, 2)
 	_check(target.injuryDamage == 5, "all damage accumulates on the actor node, got %d" % target.injuryDamage)
 
+	print("\n--- Town entry is the single recovery boundary ---")
+	var locations = _locations()
+	var townEvents = []
+	if locations != null:
+		locations.townEntered.connect(func(locationId): townEvents.append(locationId))
+		locations.resetForNewGame()
+		locations.enterTown("Test Town")
+		_check(townEvents == ["Test Town"], "entering a Town emits the recovery boundary, got %s" % [townEvents])
+		locations.enterNonTownLocation("Test Cave")
+		_check(townEvents.size() == 1, "entering a non-town Location does not emit Town recovery")
+		locations.resetForNewGame()
+
+	_resetTrail()
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:
 		print("\n%d CHECK(S) FAILED" % failures)
 	quit(failures)
+
+
+func _locations():
+	var mainLoop = Engine.get_main_loop()
+	if mainLoop is SceneTree and mainLoop.root != null:
+		return mainLoop.root.get_node_or_null("Locations")
+	return null
+
+
+func _setTrail(onTrail: bool) -> void:
+	var locations = _locations()
+	if locations == null:
+		return
+	if onTrail:
+		locations.enterTown("Test Town")
+		locations.startTrail()
+	elif bool(locations.onTrail):
+		locations.endTrail()
+
+
+func _resetTrail() -> void:
+	var locations = _locations()
+	if locations != null:
+		locations.resetForNewGame()
 
 
 func _check(condition: bool, message: String) -> void:

@@ -194,9 +194,10 @@ func checkBattleEnd() -> void:
 			if roundNumber > int(winCondition.get("rounds", 0)):
 				endBattle(winCondition.get("winner", TEAM_PLAYER))
 		"hp_below":
-			var targetSide = TEAM_PLAYER if winCondition.get("target", "enemy") == "party" else TEAM_ENEMY
-			if sideBelowThreshold(targetSide, winCondition):
-				endBattle(TEAM_ENEMY if targetSide == TEAM_PLAYER else TEAM_PLAYER)
+			# Per-actor threshold (Docs/System Design/System Coherence.md): the
+			# named base actor crossing it ends the fight, not a side total.
+			if actorBelowThreshold(winCondition):
+				endBattle(hpBelowWinner(winCondition))
 
 func isBaseNameAlive(baseName: String) -> bool:
 	for actorSide in shootoutActors:
@@ -206,18 +207,39 @@ func isBaseNameAlive(baseName: String) -> bool:
 				return true
 	return false
 
-func sideBelowThreshold(actorSide: String, condition: Dictionary) -> bool:
-	var total = 0
-	var totalMax = 0
-	var useMax = condition.get("stat", "hp") == "maxHp"
-	for actorName in shootoutActors[actorSide]:
-		var actor = shootout.getActor(actorName)
-		if actor == null:
-			continue
-		totalMax += actor.maxHp
-		total += actor.maxHp if useMax else actor.hp
-	if totalMax == 0:
-		return true
+## Same identity rule as defeat_actor: base `actor.actorName`, never the indexed
+## node name. Unknown actors fail closed with a warning (content lint rejects
+## them before play).
+func actorBelowThreshold(condition: Dictionary) -> bool:
+	var baseName := str(condition.get("actorName", ""))
+	if baseName == "":
+		push_warning("ShootoutTurnManager: hp_below requires actorName.")
+		return false
+	var entry := findActorByBaseName(baseName)
+	if entry.is_empty():
+		push_warning("ShootoutTurnManager: hp_below target '%s' is not in the fight." % baseName)
+		return false
+	var actor = entry.actor
+	var maxHp := maxi(1, int(actor.maxHp))
+	var value := maxHp if condition.get("stat", "hp") == "maxHp" else int(actor.hp)
 	if condition.has("amount"):
-		return total < int(condition.amount)
-	return float(total) / totalMax < float(condition.get("fraction", 0.5))
+		return value < int(condition.amount)
+	return float(value) / maxHp < float(condition.get("fraction", 0.5))
+
+
+func hpBelowWinner(condition: Dictionary) -> String:
+	if condition.has("winner"):
+		return str(condition.winner)
+	var entry := findActorByBaseName(str(condition.get("actorName", "")))
+	if entry.is_empty():
+		return TEAM_PLAYER
+	return TEAM_ENEMY if entry.side == TEAM_PLAYER else TEAM_PLAYER
+
+
+func findActorByBaseName(baseName: String) -> Dictionary:
+	for actorSide in shootoutActors:
+		for actorName in shootoutActors[actorSide]:
+			var actor = shootout.getActor(actorName)
+			if actor != null and str(actor.get("actorName")) == baseName:
+				return { "indexedName": actorName, "side": actorSide, "actor": actor }
+	return {}

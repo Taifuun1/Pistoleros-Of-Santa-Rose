@@ -64,7 +64,7 @@ func addActor(ctx: Dictionary, nodeName: String, baseName: String, side: String,
 	return actor
 
 
-func validateEncounter(data: Dictionary, fileName: String) -> void:
+func validateEncounter(data: Dictionary, fileName: String, movesData: Dictionary) -> void:
 	var teams = data.get("teams", data)
 	for side in teams:
 		_check(SIDES.has(side), "%s: unknown side '%s'" % [fileName, side])
@@ -78,6 +78,7 @@ func validateEncounter(data: Dictionary, fileName: String) -> void:
 					_check(position >= 1 and position <= 4, "%s: %s position %d out of range" % [fileName, actorName, position])
 					_check(!columns.has(position), "%s: two actors on %s position %d" % [fileName, side, position])
 					columns[position] = true
+				_check(actorHasOffensiveMove(actorType, actorName, movesData), "%s: %s has no legal offensive Move" % [fileName, actorName])
 	# Colliding node names are silently rejected by Godot, which breaks the
 	# per-actor node paths (hover outline, getActor), so the spawn plan must
 	# produce unique indexed names even when both teams use the same actor.
@@ -85,12 +86,79 @@ func validateEncounter(data: Dictionary, fileName: String) -> void:
 	for actor in shootoutScript.actorSpawnPlan(teams):
 		_check(!seen.has(actor.indexedName), "%s: duplicate indexed actor name %s" % [fileName, actor.indexedName])
 		seen[actor.indexedName] = true
+	validateWinCondition(data.get("winCondition", {}), teams, fileName)
+
+
+## Every combat actor must have at least one legal offensive Move; a fighter
+## that can only pass or reposition silently stalls the fight.
+func actorHasOffensiveMove(actorType: String, actorName: String, movesData: Dictionary) -> bool:
+	var actorData = loadActorData(actorType, actorName)
+	if actorData.is_empty():
+		return false
+	for moveName in actorData.get("moves", []):
+		var moveData = movesData.get(str(moveName), {})
+		if moveData.get("category", "") == "attack_ability" or int(moveData.get("baseAmount", 0)) > 0:
+			return true
+	return false
+
+
+func loadActorData(actorType: String, actorName: String) -> Dictionary:
+	var path = "res://Data/Actors/{actorType}/{actorName}.gd".format({
+		"actorType": actorType,
+		"actorName": actorName.capitalize().replace(" ", ""),
+	})
+	if !ResourceLoader.exists(path):
+		# Party members are starter Party data, mirrored by their actor file.
+		path = "res://Data/Actors/Named People/{actorName}.gd".format({ "actorName": actorName.capitalize().replace(" ", "") })
+	if !ResourceLoader.exists(path):
+		return {}
+	var holder = load(path).new()
+	var data = holder.data if holder != null and ("data" in holder) else {}
+	if holder is Node:
+		holder.free()
+	return data
+
+
+func validateWinCondition(condition: Dictionary, teams: Dictionary, fileName: String) -> void:
+	if condition.get("type", "rout") != "hp_below":
+		return
+	_check(str(condition.get("actorName", "")) != "", "%s: hp_below requires actorName" % fileName)
+	_check(!condition.has("target"), "%s: hp_below rejects side-total target" % fileName)
+	_check(condition.has("fraction") != condition.has("amount"), "%s: hp_below requires exactly one of fraction/amount" % fileName)
+	if condition.has("fraction"):
+		var fraction = float(condition.fraction)
+		_check(fraction > 0.0 and fraction <= 1.0, "%s: hp_below fraction out of range" % fileName)
+	if condition.has("amount"):
+		_check(int(condition.amount) > 0, "%s: hp_below amount must be positive" % fileName)
+	var actors = []
+	for side in teams:
+		for actorType in teams[side]:
+			for actorName in teams[side][actorType]:
+				actors.append(actorName)
+	_check(actors.has(str(condition.get("actorName", ""))), "%s: hp_below actorName is not in the encounter" % fileName)
+
+
+func loadMovesData() -> Dictionary:
+	var movesData = {}
+	var folder = "res://Data/Shootout/Moves"
+	for fileName in DirAccess.get_files_at(folder):
+		if !fileName.ends_with(".gd"):
+			continue
+		var holder = load("{folder}/{fileName}".format({ "folder": folder, "fileName": fileName })).new()
+		if holder != null and ("data" in holder):
+			var data = holder.data
+			if data is Dictionary and str(data.get("name", "")) != "":
+				movesData[data.name] = data
+		if holder is Node:
+			holder.free()
+	return movesData
 
 
 func _run() -> void:
 	# Loaded at runtime: Shootout.gd references autoloads, which are not
 	# registered while the --script main loop compiles its preloads.
 	shootoutScript = load("res://Shootout/Shootout.gd")
+	var movesData = loadMovesData()
 	print("--- Encounter files are valid ---")
 	var fileCount = 0
 	for fileName in DirAccess.get_files_at("res://Data/Shootout/Encounters"):
@@ -100,7 +168,7 @@ func _run() -> void:
 		var encounterInstance = load("res://Data/Shootout/Encounters/{fileName}".format({ "fileName": fileName })).new()
 		var data = encounterInstance.data
 		_check(data is Dictionary and !data.is_empty(), "%s: empty encounter data" % fileName)
-		validateEncounter(data, fileName)
+		validateEncounter(data, fileName, movesData)
 		_check(data.has("winCondition") and data.winCondition.get("type", "rout") in ["rout", "defeat_actor", "survive_rounds", "hp_below"], "%s: bad winCondition" % fileName)
 		encounterInstance.free()
 	_check(fileCount > 0, "expected at least one encounter file")
@@ -162,24 +230,50 @@ func _run() -> void:
 	ctx.turnManager.checkBattleEnd()
 	_check(wins == ["player team"], "surviving the round count wins, got %s" % [wins])
 
-	print("\n--- Win condition: hp_below ---")
-	ctx = makeManager()
-	wins = []
-	ctx.turnManager.battleEnded.connect(func(side): wins.append(side))
-	addActor(ctx, "Player0", "Player", "player team", 10, 50)
-	addActor(ctx, "Enemy0", "Enemy", "enemy team", 50, 50)
-	ctx.turnManager.setWinCondition({ "type": "hp_below", "target": "party", "fraction": 0.5 })
-	ctx.turnManager.checkBattleEnd()
-	_check(wins == ["enemy team"], "party below the HP fraction loses, got %s" % [wins])
+	print("\n--- Win condition: hp_below per actor ---")
 	ctx = makeManager()
 	wins = []
 	ctx.turnManager.battleEnded.connect(func(side): wins.append(side))
 	addActor(ctx, "Player0", "Player", "player team", 50, 50)
-	addActor(ctx, "Enemy0", "Enemy", "enemy team", 30, 50)
-	ctx.turnManager.setWinCondition({ "type": "hp_below", "target": "enemy", "amount": 40 })
+	var hpBoss = addActor(ctx, "Boss0", "Boss", "enemy team", 30, 50)
+	addActor(ctx, "Minion0", "Minion", "enemy team", 1, 50)
+	ctx.turnManager.setWinCondition({ "type": "hp_below", "actorName": "Boss", "fraction": 0.5 })
 	ctx.turnManager.checkBattleEnd()
-	_check(wins == ["player team"], "enemy below the HP amount loses, got %s" % [wins])
+	_check(wins.is_empty(), "the side total being low does not trigger a per-actor threshold")
+	hpBoss.hp = 20
+	ctx.turnManager.checkBattleEnd()
+	_check(wins == ["player team"], "the named boss crossing the fraction ends the fight, got %s" % [wins])
+
+	ctx = makeManager()
+	wins = []
+	ctx.turnManager.battleEnded.connect(func(side): wins.append(side))
+	addActor(ctx, "Player0", "Player", "player team", 50, 50)
+	hpBoss = addActor(ctx, "Boss0", "Boss", "enemy team", 30, 50)
+	ctx.turnManager.setWinCondition({ "type": "hp_below", "actorName": "Boss", "amount": 25 })
+	ctx.turnManager.checkBattleEnd()
+	_check(wins.is_empty(), "the boss above the absolute amount does not trigger")
+	hpBoss.hp = 20
+	ctx.turnManager.checkBattleEnd()
+	_check(wins == ["player team"], "the boss below the absolute amount ends the fight, got %s" % [wins])
 	_check(ctx.turnManager.battleOver, "endBattle sets battleOver")
+
+	ctx = makeManager()
+	wins = []
+	ctx.turnManager.battleEnded.connect(func(side): wins.append(side))
+	addActor(ctx, "Player0", "Player", "player team", 50, 50)
+	addActor(ctx, "Boss0", "Boss", "enemy team", 50, 50)
+	ctx.turnManager.setWinCondition({ "type": "hp_below", "actorName": "Missing", "fraction": 0.5 })
+	ctx.turnManager.checkBattleEnd()
+	_check(wins.is_empty(), "an unknown hp_below actor fails closed")
+
+	ctx = makeManager()
+	wins = []
+	ctx.turnManager.battleEnded.connect(func(side): wins.append(side))
+	addActor(ctx, "Player0", "Player", "player team", 10, 50)
+	addActor(ctx, "Boss0", "Boss", "enemy team", 50, 50)
+	ctx.turnManager.setWinCondition({ "type": "hp_below", "actorName": "Player", "fraction": 0.5, "winner": "enemy team" })
+	ctx.turnManager.checkBattleEnd()
+	_check(wins == ["enemy team"], "the optional winner overrides the default side, got %s" % [wins])
 
 	print("\n--- Rout remains the default ---")
 	ctx = makeManager()

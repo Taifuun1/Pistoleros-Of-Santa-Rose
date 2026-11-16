@@ -42,18 +42,17 @@ func testCalculator(calculator) -> void:
 	_check(!current.stats.has("damageTakenReduction"), "unsupported affix is not applied as a stat")
 	_check(member.stats.highTailin == 6 and member.equipment.weapon.stats.rifleDamage == 5, "source member is not mutated")
 
-	print("\n--- Calculator: HP clamp, knockout and replacement preview ---")
+	print("\n--- Calculator: HP clamp, injected attrition and replacement preview ---")
 	member.hp = 99
 	var clamped = calculator.calculate(member, classData)
 	_check(clamped.hp == 15, "HP clamps down to effective MxHP")
 	member.hp = 5
 	_check(calculator.calculate(member, classData).hp == 5, "higher MxHP never heals current HP")
 	member.hp = 12
-	member.knockoutDebuffs = [{ "stat": "sixShootin", "amount": -1 }]
-	var debuffed = calculator.calculate(member, classData)
-	_check(debuffed.stats.sixShootin == 2, "knockout debuff applies after equipment")
-	_check(member.stats.sixShootin == 3, "knockout preview does not mutate source")
-	member.knockoutDebuffs = []
+	var offTrail = calculator.calculate(member, classData, "", null, { "applyAttrition": false })
+	_check(offTrail.maxHp == 16 and offTrail.hp == 12, "Off-Trail projection ignores accumulated journey injury")
+	_check(calculator.calculate(member, classData).maxHp == 15, "On-Trail projection applies journey injury")
+	_check(member.injuryDamage == 4, "attrition context does not mutate source members")
 
 	var revolver = _weapon("revolver", 6, { "revolverDamage": 3, "rifleDamage": 50, "mxHp": 2 })
 	var projected = calculator.calculate(member, classData, "weapon", revolver)
@@ -67,7 +66,7 @@ func testCalculator(calculator) -> void:
 
 	print("\n--- Calculator: legacy member without equipment ---")
 	var legacy = { "hp": 12, "baseMaxHp": 12, "injuryDamage": 4, "injuryRate": 4,
-		"stats": { "sixShootin": 3, "highTailin": 6 }, "knockoutDebuffs": [], "weapon": { "type": "lead", "weapon": "rifle", "baseDamage": 4 } }
+		"stats": { "sixShootin": 3, "highTailin": 6 }, "weapon": { "type": "lead", "weapon": "rifle", "baseDamage": 4 } }
 	var legacyData = calculator.calculate(legacy, {})
 	_check(legacyData.maxHp == 11 and legacyData.hp == 11, "legacy injury behavior is preserved")
 	_check(legacyData.stats.defense.style == 0 and legacyData.stats.damage.lead.revolver == -1, "missing stat containers get safe defaults")
@@ -191,7 +190,6 @@ func _member() -> Dictionary:
 		"baseMaxHp": 12,
 		"injuryDamage": 4,
 		"injuryRate": 4,
-		"knockoutDebuffs": [],
 		"beltReservations": [
 			{ "instanceId": "test_reserved", "combatId": "Paregoric", "quantity": 1 },
 		],

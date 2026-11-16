@@ -33,7 +33,12 @@ func getDataSet(dataSet: String) -> Dictionary:
 func resolveAttack(actingActor, targetActor) -> void:
 	var quality = getHitQuality(actingActor)
 	if quality is String:
-		resolveSpecialChamber(quality, actingActor)
+		resolveSpecialChamber(quality, actingActor, targetActor)
+		return
+	if quality == CylinderManagerScript.CHAMBER_MISS:
+		# A Miss consumes the Chamber but no on-hit effects or marks.
+		applyHitDamage(targetActor, 0, quality)
+		advanceCylinder(actingActor)
 		return
 	var damage = calculateAttackDamage(actingActor, targetActor, quality)
 	applyHitDamage(targetActor, damage, quality)
@@ -51,7 +56,12 @@ func resolveMove(moveName: String, actingActor, targetActor) -> void:
 		# Attack abilities use the Cylinder like basic attacks (decided).
 		var quality = getHitQuality(actingActor)
 		if quality is String:
-			resolveSpecialChamber(quality, actingActor)
+			resolveSpecialChamber(quality, actingActor, targetActor)
+			return
+		if quality == CylinderManagerScript.CHAMBER_MISS:
+			# No on-hit effects on a Miss for attack abilities either.
+			applyHitDamage(targetActor, 0, quality)
+			advanceCylinder(actingActor)
 			return
 		# Attack abilities roll quality on their own amount; weapon family
 		# defense rules don't apply (the ability amount isn't weapon damage).
@@ -77,8 +87,12 @@ func resolveItem(itemName: String, actingActor, targetActor) -> void:
 	if !_consumeBeltItem(actingActor, itemName):
 		return
 	var amount = int(itemData.get("baseAmount", 0))
-	targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
-	shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
+	var effectManager = shootout.get("effectManager")
+	if effectManager != null and effectManager.has_method("healActor"):
+		effectManager.healActor(targetActor.name, amount)
+	else:
+		targetActor.hp = mini(targetActor.hp + amount, targetActor.maxHp)
+		shootout.spawnDamageNumber("+{amount}".format({ "amount": amount }), "green", targetActor.position + DAMAGE_NUMBER_OFFSET)
 	applyActEffects(itemData.get("effects", []), targetActor, actingActor.name)
 
 
@@ -121,14 +135,6 @@ func calculateAttackDamage(actingActor, targetActor, quality: int, consumeEffect
 	damage = applyOutgoingModifiers(actingActor, damage, blocked)
 	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""), consumeEffects)
 	return maxi(0, roundi(damage))
-
-## Side-effect-free estimate for the enemy AI: same pipeline, but marks are not
-## consumed. Returns 0 for special Chambers (Reload/Jammed).
-func estimateAttackDamage(actingActor, targetActor) -> int:
-	var quality = getHitQuality(actingActor)
-	if quality is String:
-		return 0
-	return calculateAttackDamage(actingActor, targetActor, quality, false)
 
 # The relevant offensive stat per weapon family:
 # - Lead: the matching stats.damage.lead entry, Rodeo-modified.
@@ -220,17 +226,36 @@ func advanceCylinder(actingActor) -> void:
 	if cylinderManager != null and cylinderManager.has_method("advance"):
 		cylinderManager.advance(actingActor.name)
 
-# Reload spends the Move without attacking; Jammed fails the attack. Both
-# consume the Chamber (the action resolver advances after this returns).
-func resolveSpecialChamber(quality: String, actingActor) -> void:
+# Reload spends the Move without attacking; Jammed fails the attack and applies
+# the authored class payload (target: self by default). Both consume the Chamber.
+func resolveSpecialChamber(quality: String, actingActor, targetActor = null) -> void:
 	match quality:
 		"reload":
 			shootout.spawnDamageNumber("Reload", "white", actingActor.position + DAMAGE_NUMBER_OFFSET)
 		"jammed":
+			var payload := _jammedPayload(actingActor)
+			if payload.is_empty():
+				push_warning("ShootoutActionResolver: '{actor}' has no authored Jammed payload".format({ "actor": actingActor.actorName }))
+			else:
+				var jammedTarget = targetActor if str(payload.get("target", "self")) == "selectedActor" else actingActor
+				applyActEffects(payload.get("effects", []), jammedTarget, actingActor.name)
 			shootout.spawnDamageNumber("Jammed!", "yellow", actingActor.position + DAMAGE_NUMBER_OFFSET)
 		_:
 			push_warning("ShootoutActionResolver: unknown special chamber '{quality}'".format({ "quality": quality }))
 	advanceCylinder(actingActor)
+
+
+## Jammed buff/debuff source (Docs/System Design/Shootout/Cylinders.md): class
+## data may author `jammed: { target: "self"|"selectedActor", effects: [...] }`.
+func _jammedPayload(actingActor) -> Dictionary:
+	var cylinderManager = shootout.get("cylinderManager")
+	if cylinderManager == null:
+		return {}
+	var classData = cylinderManager.get("classesData")
+	if !(classData is Dictionary):
+		return {}
+	var payload = classData.get(actingActor.get("characterClass"), {}).get("jammed", null)
+	return payload if payload is Dictionary else {}
 
 func applyHitDamage(targetActor, damage: int, quality: int) -> void:
 	var label = "Miss" if quality == CylinderManagerScript.CHAMBER_MISS else str(damage)

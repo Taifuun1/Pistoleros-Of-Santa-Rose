@@ -23,6 +23,7 @@ const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 const LegendaryDataScript = preload("res://Data/Items/LegendaryData.gd")
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
+const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 
 const RARITIES = {
 	"common": { "displayName": "Trail-Worn" },
@@ -254,6 +255,18 @@ func _rngFromOptions(options: Dictionary) -> RandomNumberGenerator:
 	return rng if rng is RandomNumberGenerator else null
 
 
+## Canonical Zone validation for generation context. An unknown id fails closed
+## to "anywhere" with a warning rather than silently selecting no equipment.
+func _resolvedGenerationZone(zoneId: String) -> String:
+	var zone = str(zoneId).strip_edges()
+	if zone == "" or zone == "anywhere":
+		return "anywhere"
+	if ZoneCatalogScript.new().hasZone(zone):
+		return zone
+	push_warning("ItemGeneration: unknown Zone '%s'; falling back to anywhere." % zone)
+	return "anywhere"
+
+
 func _randomFloat(rng: RandomNumberGenerator) -> float:
 	return rng.randf() if rng != null else randf()
 
@@ -274,7 +287,9 @@ func _randomIntRange(rng: RandomNumberGenerator, from: int, to: int) -> int:
 ## weighted entries from a loot table, then applies Rodeo loot modifiers
 ## (flat amounts first, multipliers after). An optional rng makes the whole
 ## roll deterministic; null preserves the existing global-RNG behavior.
-func generateLoot(table: Dictionary, modifiers := {}, rng: RandomNumberGenerator = null) -> Dictionary:
+## `zoneId` propagates the encounter's canonical Zone into generated equipment
+## so `dropsAnywhere: false` behaves as it does for vendor stock.
+func generateLoot(table: Dictionary, modifiers := {}, rng: RandomNumberGenerator = null, zoneId := "") -> Dictionary:
 	_loadData()
 	var loot = { "money": 0, "items": [] }
 	var amounts = modifiers.get("amounts", {})
@@ -299,7 +314,7 @@ func generateLoot(table: Dictionary, modifiers := {}, rng: RandomNumberGenerator
 					continue
 				loot.items.append(itemCatalog.makeStackable(consumableId, 1))
 			"weapon", "equipment":
-				var options = { "itemType": entry.kind }
+				var options = { "itemType": entry.kind, "zone": _resolvedGenerationZone(zoneId) }
 				if rng != null:
 					options["rng"] = rng
 				var rarityPool = entry.get("rarity", [])

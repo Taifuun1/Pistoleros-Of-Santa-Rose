@@ -80,10 +80,8 @@ func gatherLegalActs(actorName: String) -> Array:
 	var targetingManager = getManager("targetingManager")
 	if targetingManager == null:
 		return legal
-	# Basic attack against every living enemy the weapon can reach.
-	for targetName in livingActors(enemySide(actorName)):
-		if targetingManager.isValidTarget({ "type": "Attack" }, targetName, actorName):
-			legal.append({ "type": "Attack", "targetName": targetName })
+	# Offense goes through authored Moves only (Docs/System Design/System
+	# Coherence.md): there is no basic Attack branch.
 	# Moves (silence and column filtering included).
 	var silenced = isSilenced(actorName)
 	for moveName in targetingManager.usableMoves(actorList(actingActor, "moves"), actorName, silenced, dataSet("movesData")):
@@ -123,12 +121,6 @@ func scoreAct(act: Dictionary, actingActor) -> float:
 	var aggression = aiValue(actingActor, "aggression", 0.7)
 	var score = 0.0
 	match act.type:
-		"Attack":
-			var target = getActor(act.targetName)
-			if target == null:
-				return 0.0
-			var expected = expectedAttackDamage(actingActor, target)
-			score = (expected + (KILL_BONUS if expected >= target.hp else 0.0)) * (0.5 + aggression)
 		"Moves":
 			score = scoreMove(act, actingActor) * (1.5 - aggression)
 		"Items":
@@ -192,12 +184,6 @@ func effectScore(effect: Dictionary, actingActor, target) -> float:
 		_:
 			return 0.0
 	return 0.0
-
-func expectedAttackDamage(actingActor, target) -> int:
-	var actionResolver = getManager("actionResolver")
-	if actionResolver != null and actionResolver.has_method("estimateAttackDamage"):
-		return actionResolver.estimateAttackDamage(actingActor, target)
-	return 0
 
 func pickFromTop(scored: Array) -> Dictionary:
 	var top = mini(PICK_FROM_TOP, scored.size())

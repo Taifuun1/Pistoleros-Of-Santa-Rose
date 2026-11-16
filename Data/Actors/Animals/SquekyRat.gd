@@ -26,6 +26,7 @@ var data = {
 		"resistances": { "bleed": 0.0, "poison": 0.0 }
 	},
 	"rodeo": null,
+	"moves": ["Scratch"],
 	"magazine": [2, 1, 2, 0],
 	"weapon": {
 		"type": "melee",

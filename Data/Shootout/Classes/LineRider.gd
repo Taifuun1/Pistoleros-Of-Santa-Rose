@@ -11,5 +11,11 @@ var data = {
 	],
 	"beltSpace": 2,
 	"defense": { "sand": 1 },
-	"explosiveBase": 0
+	"explosiveBase": 0,
+	"jammed": {
+		"target": "self",
+		"effects": [
+			{ "op": "apply_effect", "effect": "decrease", "amount": 1, "turns": 1 }
+		]
+	}
 }
