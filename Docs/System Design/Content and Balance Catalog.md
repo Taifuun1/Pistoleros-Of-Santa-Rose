@@ -6,13 +6,13 @@ Companion documents: [Implementation gaps](Implementation%20Gaps.md) records unf
 
 ## Authoring rules
 
-- Most combat content is a GDScript exposing `var data = {...}`. `Globals/Shootout.gd::loadDataFolder()` loads only immediate `*.gd` children of each registered folder and keys entries by **`data.name`**, not filename. The legacy `Data/Shootout/Moves/Pistolero.gd` shape (`var moves`) is not registered and should not be copied.
+- Most combat content is a GDScript exposing `var data = {...}`. `Globals/Shootout.gd::loadDataFolder()` loads only immediate `*.gd` children of each registered folder and keys entries by **`data.name`**, not filename; a duplicate `data.name` silently overwrites the earlier file, so `Tests/TestContentLint.gd` rejects it. The legacy `Data/Shootout/Moves/Pistolero.gd` shape (`var moves`) is not registered and should not be copied.
 - Quest definitions are typed Resources (`.tres`), the Overworld map manifest is generated, and Party members are currently initialized in code. These are deliberately different workflows.
 - Stable ids connect systems. Zone ids, item `definitionId`s, item `instanceId`s, vendor ids, encounter paths/names, loot-table names, quest/objective ids, and Location ids must not be renamed casually.
 - A definition existing on disk does not make it reachable or functional. Encounters need a launcher/pool, items need an acquisition/loadout path, actors need data and animation scenes, and vendors need both catalog and scene placement. Content must also respect the explicit On/Off Trail state: Off Trail permits town-to-town Overworld travel and quest progression, but disables non-town Location access, attrition mechanics, and loot from every source.
 - Basic weapon attacks are not a content path for either side. Author offensive actions as Moves (`attack_ability` where the Cylinder applies); the current enemy-AI basic `Attack` branch is legacy behavior to remove.
 - Do not hand-edit `res://Data/Overworld/OverworldMapData.tres`, `res://Assets/Journal/OverworldMap.png`, or `res://Assets/Journal/OverworldMapOverview.png`; regenerate them after changing their sources.
-- Run focused content tests and then `godot --headless --path . --script res://Tests/RunAll.gd`. For map changes also run `godot --headless --path . --script res://Tools/GenerateOverworldMap.gd -- --check` after regenerating.
+- Run focused content tests and then `godot --headless --path . --script res://Tests/RunAll.gd`. `Tests/TestContentLint.gd` is the production content lint (duplicate names, reference and canonical-Zone resolution, Trail-gated reward and non-town Location-access producers); run it before committing content. For map changes also run `godot --headless --path . --script res://Tools/GenerateOverworldMap.gd -- --check` after regenerating.
 
 ## 1. Shared world, Zone, event, and narrative datasets
 

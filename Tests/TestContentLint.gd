@@ -1,0 +1,466 @@
+extends SceneTree
+
+## Production content lint (Docs/System Design/First Steps Implementation Plan.md,
+## commit 6; System Coherence.md section 10). Fails closed on silent content
+## defects: duplicate `data.name` values that would overwrite each other, unknown
+## Move/item/effect/class/actor references, non-canonical Zone ids, and reward or
+## Location-access producers that are not behind the authoritative Trail gate.
+## Run with: godot --headless --script res://Tests/TestContentLint.gd
+
+const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
+const EncounterPoolDataScript = preload("res://Data/Shootout/EncounterPoolData.gd")
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
+const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
+
+## Every folder whose files expose a `data` Dictionary identified by `data.name`.
+const CONTENT_FOLDERS := [
+	"res://Data/Shootout/Moves",
+	"res://Data/Shootout/Items",
+	"res://Data/Shootout/Encounters",
+	"res://Data/Shootout/LootTables",
+	"res://Data/Shootout/Rodeos",
+	"res://Data/Shootout/Classes",
+	"res://Data/Actors/Animals",
+	"res://Data/Actors/Named People",
+]
+
+## Source roots scanned for Trail-gated reward producers. Tests are excluded:
+## they inject fixtures and gates deliberately.
+const PRODUCTION_ROOTS := [
+	"res://Globals",
+	"res://Shootout",
+	"res://Overworld",
+	"res://Location",
+	"res://Minigames",
+	"res://Nodes",
+	"res://UI",
+	"res://Vendors",
+	"res://Actors",
+	"res://Items",
+	"res://Cutscenes",
+	"res://Game",
+]
+
+const CHUNK_DIR := "res://Overworld/Overworld Chunks"
+const GENERIC_EVENT_FILE := "res://Data/Events/GenericEvents.gd"
+const SUPPORTED_OUTCOME_KINDS := ["none", "encounter"]
+const REWARD_CALL_TOKENS := ["generateLoot(", ".applyLoot("]
+const TRAIL_GATE_TOKENS := ["canGrantLoot", "onTrail", "trailState", "applyAttrition"]
+const MOVE_EFFECT_OPS := ["apply_effect", "cleanse_effect", "modify_cylinder"]
+const RODEO_EFFECT_OPS := ["modify_stat", "move_position", "modify_loot", "set_hit_quality_floor", "cleanse_effect"]
+
+var failures := 0
+
+
+func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
+	_testDuplicateNames()
+	_testReferenceIntegrity()
+	_testZoneReferences()
+	_testTrailAndAccessGates()
+	_testLintHasTeeth()
+
+	if failures == 0:
+		print("\nALL CHECKS PASSED")
+	else:
+		print("\n%d CHECK(S) FAILED" % failures)
+	quit(failures)
+
+
+## Proves the lint has teeth: deliberately broken fixtures must trip it and a
+## valid producer must not.
+func _testLintHasTeeth() -> void:
+	print("\n--- The lint rejects broken fixtures ---")
+	var duplicates := _duplicateNameErrors([
+		{ "file": "A.gd", "data": { "name": "Same Name" } },
+		{ "file": "B.gd", "data": { "name": "Same Name" } },
+	])
+	_check(duplicates.size() == 1, "duplicate data.name fixtures are rejected: %s" % [duplicates])
+
+	var ungated := _rewardProducerOffenders("Broken.gd", "extends Node\nfunc grant():\n\tlootGenerator.generateLoot({})\n")
+	_check(ungated == ["Broken.gd::grant"], "an ungated reward producer is rejected: %s" % [ungated])
+
+	var gated := _rewardProducerOffenders("Gated.gd", "extends Node\nfunc grant():\n\tif !Locations.canGrantLoot():\n\t\treturn\n\tlootGenerator.generateLoot({})\n")
+	_check(gated.is_empty(), "a Trail-gated reward producer passes: %s" % [gated])
+
+	var definition := _rewardProducerOffenders("Producer.gd", "extends Node\nfunc generateLoot(_options):\n\treturn {}\n")
+	_check(definition.is_empty(), "a reward producer definition is not mistaken for a caller: %s" % [definition])
+
+
+func _testDuplicateNames() -> void:
+	print("--- Duplicate data.name values fail closed ---")
+	var total := 0
+	for folder in CONTENT_FOLDERS:
+		var collected := _collectData(folder)
+		_check(collected.errors.is_empty(), "content folder '%s' has unique data.name values: %s" % [folder, collected.errors])
+		_check(!collected.entries.is_empty(), "content folder '%s' ships content" % folder)
+		total += collected.entries.size()
+	_check(total > 0, "the content lint sees production data")
+
+
+func _testReferenceIntegrity() -> void:
+	print("\n--- Content references resolve ---")
+	var moves := _collectData("res://Data/Shootout/Moves")
+	var items := _collectData("res://Data/Shootout/Items")
+	var lootTables := _collectData("res://Data/Shootout/LootTables")
+	var classes := _collectData("res://Data/Shootout/Classes")
+	var rodeos := _collectData("res://Data/Shootout/Rodeos")
+	var encounters := _collectData("res://Data/Shootout/Encounters")
+	var actors := _collectData("res://Data/Actors/Animals")
+	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+
+	var effectTypes := _knownEffectTypes()
+	for entry in moves.entries:
+		_validateEffectList("Move '%s'" % entry.data.get("name", entry.file), entry.data.get("effects", []), MOVE_EFFECT_OPS, effectTypes)
+	for entry in classes.entries:
+		var jammed = entry.data.get("jammed", {})
+		if jammed is Dictionary:
+			_validateEffectList("Class '%s' jammed" % entry.data.get("name", entry.file), jammed.get("effects", []), MOVE_EFFECT_OPS, effectTypes)
+	for entry in rodeos.entries:
+		_validateEffectList("Rodeo '%s'" % entry.data.get("name", entry.file), entry.data.get("effects", []), RODEO_EFFECT_OPS, effectTypes)
+
+	for entry in actors.entries:
+		var actorLabel := str(entry.data.get("actorName", entry.file))
+		for moveName in entry.data.get("moves", []):
+			_check(moves.names.has(str(moveName)), "actor '%s' references authored Move '%s'" % [actorLabel, moveName])
+		var className := str(entry.data.get("characterClass", ""))
+		if className != "":
+			_check(classes.names.has(className), "actor '%s' references authored class '%s'" % [actorLabel, className])
+		for combatId in entry.data.get("items", []):
+			_check(items.names.has(str(combatId)), "actor '%s' references authored combat item '%s'" % [actorLabel, combatId])
+
+	var catalog = ItemCatalogScript.new()
+	var catalogErrors: Array = catalog.validate()
+	_check(catalogErrors.is_empty(), "the item catalog validates: %s" % [catalogErrors])
+	for definitionId in catalog.definitions:
+		var definition: Dictionary = catalog.definitions[definitionId]
+		if str(definition.get("itemType", "")) == "consumable":
+			_check(items.names.has(str(definition.get("combatId", ""))), "consumable '%s' resolves combat item '%s'" % [definitionId, definition.get("combatId", "")])
+
+	var actorNames := []
+	for entry in actors.entries:
+		actorNames.append(str(entry.data.get("actorName", "")))
+	for entry in encounters.entries:
+		var encounterName := str(entry.data.get("name", entry.file))
+		var lootTable := str(entry.data.get("lootTable", ""))
+		if lootTable != "":
+			_check(lootTables.names.has(lootTable), "encounter '%s' references authored loot table '%s'" % [encounterName, lootTable])
+		var background := str(entry.data.get("background", ""))
+		if background != "":
+			_check(ResourceLoader.exists(background), "encounter '%s' background exists" % encounterName)
+		var teams: Dictionary = entry.data.get("teams", entry.data)
+		for side in teams:
+			for actorType in teams[side]:
+				for referencedName in teams[side][actorType]:
+					_check(actorNames.has(str(referencedName)), "encounter '%s' actor '%s' has authored data" % [encounterName, referencedName])
+
+
+func _testZoneReferences() -> void:
+	print("\n--- Zone references are canonical ---")
+	var catalog = ZoneCatalogScript.new()
+	_check(catalog.validate().is_empty(), "the Zone catalog validates: %s" % [catalog.validate()])
+
+	var pools = EncounterPoolDataScript.new()
+	var poolErrors: Array = pools.validateAuthoredPools(catalog)
+	_check(poolErrors.is_empty(), "authored encounter pools use canonical Zone ids: %s" % [poolErrors])
+	_check(pools.hasZone("canyon"), "the authored pools load (sanity check)")
+
+	var lootTables := _collectData("res://Data/Shootout/LootTables")
+	for entry in lootTables.entries:
+		for lootEntry in entry.data.get("entries", []):
+			if !(lootEntry is Dictionary):
+				continue
+			var zone := str(lootEntry.get("zone", ""))
+			if zone != "":
+				_check(zone == "anywhere" or catalog.hasZone(zone), "loot entry in '%s' uses Zone '%s' or anywhere" % [entry.file, zone])
+
+	var eventsScript = load("res://Globals/OverworldEvents.gd")
+	var zoneFiles: Dictionary = eventsScript.ZONE_EVENT_FILES
+	_check(!zoneFiles.is_empty(), "the Zone to event-file mapping is authored")
+	var generic := _loadEvents(GENERIC_EVENT_FILE)
+	for zoneId in zoneFiles:
+		_check(catalog.hasZone(zoneId), "event file key '%s' is a canonical Zone id" % zoneId)
+		var events := _loadEvents(zoneFiles[zoneId])
+		for eventId in events:
+			_check(!generic.has(eventId), "Zone event '%s' does not shadow a generic event id" % eventId)
+		_validateEventOutcomes(zoneFiles[zoneId], events, catalog)
+	_validateEventOutcomes(GENERIC_EVENT_FILE, generic, catalog)
+
+
+func _testTrailAndAccessGates() -> void:
+	print("\n--- Reward and access producers are Trail-gated ---")
+	var offenders := _findUngatedRewardProducers()
+	_check(offenders.is_empty(), "every reward producer sits in a Trail-gated function: %s" % [offenders])
+
+	var partyBodies := _functionBodies(_readSource("res://Globals/Party.gd"))
+	var resultsBody := str(partyBodies.get("applyFightResults", ""))
+	_check(resultsBody != "", "Party.applyFightResults exists")
+	_check(_bodyHasTrailGate(resultsBody), "Party.applyFightResults reads the authoritative Trail state")
+
+	var overworldBodies := _functionBodies(_readSource("res://Overworld/Overworld.gd"))
+	var enterBody := str(overworldBodies.get("enterLocation", ""))
+	_check(enterBody != "", "Overworld.enterLocation exists")
+	_check(enterBody.contains("canAccessLocation"), "non-town Location entry checks the shared access gate")
+	var gateIndex := enterBody.find("canAccessLocation")
+	var transitionIndex := enterBody.find("changeScene")
+	_check(gateIndex >= 0 and transitionIndex > gateIndex, "the access gate runs before the Location transition")
+	var createBody := str(overworldBodies.get("createLocation", ""))
+	_check(createBody.contains("body_entered.connect(enterLocation"), "Location collisions route through the gated enterLocation")
+	_check(createBody.contains("isTown"), "the Location entrance forwards its authored Town flag")
+
+	var badEntries := []
+	var locationCount := 0
+	for fileName in DirAccess.get_files_at(CHUNK_DIR):
+		if !fileName.ends_with(".gd"):
+			continue
+		var result := _collectChunkLocations(CHUNK_DIR + "/" + fileName)
+		badEntries.append_array(result.errors)
+		locationCount += int(result.count)
+	_check(badEntries.is_empty(), "authored Location entries declare a boolean isTown flag when present: %s" % [badEntries])
+	_check(locationCount > 0, "the access gate guards authored Locations (found %d)" % locationCount)
+
+
+## Loads every `.gd` in a folder that exposes a `data` Dictionary, tracking
+## `data.name` so a duplicate is an error instead of a silent overwrite.
+func _collectData(folder: String) -> Dictionary:
+	var result := { "entries": [], "names": {}, "errors": [] }
+	if !DirAccess.dir_exists_absolute(folder):
+		result.errors.append("content folder '%s' is missing" % folder)
+		return result
+	var files := DirAccess.get_files_at(folder)
+	files.sort()
+	for fileName in files:
+		if !fileName.ends_with(".gd"):
+			continue
+		var script = load(folder + "/" + fileName)
+		if script == null:
+			result.errors.append("'%s/%s' could not be loaded" % [folder, fileName])
+			continue
+		var holder = script.new()
+		if holder == null:
+			continue
+		var data = holder.get("data") if ("data" in holder) else null
+		if holder is Node:
+			holder.free()
+		if !(data is Dictionary):
+			continue
+		result.entries.append({ "file": fileName, "data": data })
+	result.names = _namesFor(result.entries)
+	result.errors.append_array(_duplicateNameErrors(result.entries))
+	return result
+
+
+## Pure duplicate detector so the lint can prove it rejects broken fixtures.
+func _duplicateNameErrors(records: Array) -> Array:
+	var errors := []
+	var seen := {}
+	for record in records:
+		var dataName := str(record.data.get("name", record.data.get("actorName", "")))
+		if dataName == "":
+			continue
+		if seen.has(dataName):
+			errors.append("duplicate data.name '%s' in %s and %s" % [dataName, seen[dataName], record.file])
+		else:
+			seen[dataName] = record.file
+	return errors
+
+
+func _namesFor(records: Array) -> Dictionary:
+	var names := {}
+	for record in records:
+		var dataName := str(record.data.get("name", record.data.get("actorName", "")))
+		if dataName != "" and !names.has(dataName):
+			names[dataName] = record.file
+	return names
+
+
+func _validateEffectList(label: String, effects, allowedOps: Array, effectTypes: Array) -> void:
+	if !(effects is Array):
+		return
+	for effect in effects:
+		if !(effect is Dictionary):
+			_check(false, "%s: effect entry must be a Dictionary" % label)
+			continue
+		var op := str(effect.get("op", ""))
+		_check(allowedOps.has(op), "%s: known effect op '%s'" % [label, op])
+		var effectType := str(effect.get("effect", ""))
+		if effectType == "" or (op == "cleanse_effect" and effectType == "random"):
+			continue
+		_check(effectTypes.has(effectType), "%s: known effect type '%s'" % [label, effectType])
+
+
+func _knownEffectTypes() -> Array:
+	var types := []
+	types.append_array(EffectManagerScript.AFFLICTIONS)
+	types.append_array(EffectManagerScript.BENEFICIALS)
+	types.append("cylinder")
+	return types
+
+
+func _loadEvents(path: String) -> Dictionary:
+	var script = load(path)
+	if script == null:
+		return {}
+	var holder = script.new()
+	if holder == null:
+		return {}
+	var events = holder.get("events") if ("events" in holder) else null
+	if holder is Node:
+		holder.free()
+	return events.duplicate(true) if events is Dictionary else {}
+
+
+func _validateEventOutcomes(filePath: String, events: Dictionary, catalog) -> void:
+	_check(!events.is_empty(), "event file '%s' authors events" % filePath)
+	for eventId in events:
+		var eventData = events[eventId]
+		if !(eventData is Dictionary):
+			_check(false, "event '%s' must be a Dictionary" % eventId)
+			continue
+		var choices = eventData.get("choices", [])
+		_check(choices is Array and !choices.is_empty(), "event '%s' authors choices" % eventId)
+		for choice in choices:
+			if !(choice is Dictionary):
+				_check(false, "event '%s' choices must be Dictionaries" % eventId)
+				continue
+			var outcome = choice.get("outcome", null)
+			if outcome == null:
+				continue
+			_check(outcome is Dictionary and !(outcome as Dictionary).is_empty(), "event '%s' outcome must be a non-empty Dictionary" % eventId)
+			if !(outcome is Dictionary):
+				continue
+			var kind := str(outcome.get("kind", ""))
+			_check(SUPPORTED_OUTCOME_KINDS.has(kind), "event '%s' outcome kind '%s' is implemented" % [eventId, kind])
+			if kind != "encounter":
+				continue
+			var encounterPath := str(outcome.get("encounter", ""))
+			var poolZone := str(outcome.get("poolZone", outcome.get("zone", "")))
+			if encounterPath != "":
+				_check(encounterPath.begins_with("res://") and ResourceLoader.exists(encounterPath), "event '%s' encounter path exists" % eventId)
+				if poolZone != "":
+					_check(catalog.hasZone(poolZone), "event '%s' outcome Zone '%s' is canonical" % [eventId, poolZone])
+			else:
+				_check(poolZone != "" and catalog.hasZone(poolZone), "event '%s' selects a canonical encounter pool Zone" % eventId)
+
+
+## Authored Location entries must declare `isTown` as a Boolean when present, so
+## the single access gate always evaluates a real flag instead of a truthy string.
+func _collectChunkLocations(path: String) -> Dictionary:
+	var result := { "errors": [], "count": 0 }
+	var script = load(path)
+	if script == null:
+		return result
+	var holder = script.new()
+	if holder == null:
+		return result
+	if "locations" in holder and holder.locations is Dictionary:
+		for locationName in holder.locations:
+			result.count += 1
+			var entry = holder.locations[locationName]
+			if entry is Dictionary and entry.has("isTown") and typeof(entry["isTown"]) != TYPE_BOOL:
+				result.errors.append("%s/%s" % [path.get_file(), locationName])
+	if holder is Node:
+		holder.free()
+	return result
+
+
+## A reward producer is a function that calls the loot entry points. Each must
+## read the Trail state so Off-Trail reward payloads stay empty.
+func _findUngatedRewardProducers() -> Array:
+	var offenders := []
+	for rootPath in PRODUCTION_ROOTS:
+		for filePath in _gdFiles(rootPath):
+			offenders.append_array(_rewardProducerOffenders(filePath.get_file(), _readSource(filePath)))
+	offenders.sort()
+	return offenders
+
+
+## Pure per-source detector so the lint can prove it rejects broken fixtures.
+func _rewardProducerOffenders(fileName: String, source: String) -> Array:
+	var offenders := []
+	var bodies := _functionBodies(source)
+	for functionName in bodies:
+		var body := str(bodies[functionName])
+		if _bodyCallsRewardProducer(body) and !_bodyHasTrailGate(body):
+			offenders.append("%s::%s" % [fileName, functionName])
+	offenders.sort()
+	return offenders
+
+
+func _gdFiles(path: String) -> Array:
+	var files := []
+	var directory := DirAccess.open(path)
+	if directory == null:
+		return files
+	directory.list_dir_begin()
+	var entryName := directory.get_next()
+	while entryName != "":
+		if directory.current_is_dir():
+			files.append_array(_gdFiles(path + "/" + entryName))
+		elif entryName.ends_with(".gd"):
+			files.append(path + "/" + entryName)
+		entryName = directory.get_next()
+	directory.list_dir_end()
+	return files
+
+
+func _readSource(path: String) -> String:
+	if !FileAccess.file_exists(path):
+		return ""
+	return FileAccess.get_file_as_string(path)
+
+
+## Maps each function name to its source body. Bodies keep their `func` signature
+## line so callers can tell a definition apart from a call site.
+func _functionBodies(source: String) -> Dictionary:
+	var bodies := {}
+	var currentName := ""
+	var buffer := ""
+	for line in source.split("\n"):
+		var trimmed := line.strip_edges()
+		if trimmed.begins_with("func ") or trimmed.begins_with("static func "):
+			if currentName != "":
+				bodies[currentName] = buffer
+			currentName = _functionName(trimmed)
+			buffer = line + "\n"
+		elif currentName != "":
+			buffer += line + "\n"
+	if currentName != "":
+		bodies[currentName] = buffer
+	return bodies
+
+
+func _functionName(signature: String) -> String:
+	var open := signature.find("(")
+	var declaration := signature if open < 0 else signature.substr(0, open)
+	var parts := declaration.strip_edges().split(" ", false)
+	return str(parts[parts.size() - 1]) if !parts.is_empty() else ""
+
+
+## Ignores the signature line so a function defining `generateLoot`/`applyLoot`
+## is not mistaken for a caller of itself.
+func _bodyCallsRewardProducer(body: String) -> bool:
+	var lines := body.split("\n")
+	for index in range(1, lines.size()):
+		for token in REWARD_CALL_TOKENS:
+			if lines[index].contains(token):
+				return true
+	return false
+
+
+func _bodyHasTrailGate(body: String) -> bool:
+	for token in TRAIL_GATE_TOKENS:
+		if body.contains(token):
+			return true
+	return false
+
+
+func _check(condition: bool, message: String) -> void:
+	if condition:
+		print("PASS: ", message)
+	else:
+		failures += 1
+		printerr("FAIL: ", message)

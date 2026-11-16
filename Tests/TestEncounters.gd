@@ -79,6 +79,7 @@ func validateEncounter(data: Dictionary, fileName: String, movesData: Dictionary
 					_check(!columns.has(position), "%s: two actors on %s position %d" % [fileName, side, position])
 					columns[position] = true
 				_check(actorHasOffensiveMove(actorType, actorName, movesData), "%s: %s has no legal offensive Move" % [fileName, actorName])
+				_check(actorUsesKnownMoves(actorType, actorName, movesData), "%s: %s references an unknown Move" % [fileName, actorName])
 	# Colliding node names are silently rejected by Godot, which breaks the
 	# per-actor node paths (hover outline, getActor), so the spawn plan must
 	# produce unique indexed names even when both teams use the same actor.
@@ -102,6 +103,18 @@ func actorHasOffensiveMove(actorType: String, actorName: String, movesData: Dict
 	return false
 
 
+## Every Move an actor names must resolve to authored Move data; a typo silently
+## removes the only offensive option and stalls the fight.
+func actorUsesKnownMoves(actorType: String, actorName: String, movesData: Dictionary) -> bool:
+	var actorData = loadActorData(actorType, actorName)
+	if actorData.is_empty():
+		return false
+	for moveName in actorData.get("moves", []):
+		if !movesData.has(str(moveName)):
+			return false
+	return true
+
+
 func loadActorData(actorType: String, actorName: String) -> Dictionary:
 	var path = "res://Data/Actors/{actorType}/{actorName}.gd".format({
 		"actorType": actorType,
@@ -123,13 +136,19 @@ func validateWinCondition(condition: Dictionary, teams: Dictionary, fileName: St
 	if condition.get("type", "rout") != "hp_below":
 		return
 	_check(str(condition.get("actorName", "")) != "", "%s: hp_below requires actorName" % fileName)
-	_check(!condition.has("target"), "%s: hp_below rejects side-total target" % fileName)
+	# Side-total fields contradict a per-actor threshold; they must not coexist.
+	for contradictory in ["target", "side", "sideTotal", "team"]:
+		_check(!condition.has(contradictory), "%s: hp_below rejects side-total field '%s'" % [fileName, contradictory])
 	_check(condition.has("fraction") != condition.has("amount"), "%s: hp_below requires exactly one of fraction/amount" % fileName)
 	if condition.has("fraction"):
 		var fraction = float(condition.fraction)
 		_check(fraction > 0.0 and fraction <= 1.0, "%s: hp_below fraction out of range" % fileName)
 	if condition.has("amount"):
 		_check(int(condition.amount) > 0, "%s: hp_below amount must be positive" % fileName)
+	if condition.has("stat"):
+		_check(str(condition.stat) in ["hp", "maxHp"], "%s: hp_below stat must be hp or maxHp" % fileName)
+	if condition.has("winner"):
+		_check(SIDES.has(str(condition.winner)), "%s: hp_below winner must be a known side" % fileName)
 	var actors = []
 	for side in teams:
 		for actorType in teams[side]:
@@ -148,6 +167,8 @@ func loadMovesData() -> Dictionary:
 		if holder != null and ("data" in holder):
 			var data = holder.data
 			if data is Dictionary and str(data.get("name", "")) != "":
+				# Duplicate Move names would silently shadow each other.
+				_check(!movesData.has(data.name), "duplicate Move data.name '%s' in %s" % [data.name, fileName])
 				movesData[data.name] = data
 		if holder is Node:
 			holder.free()
@@ -161,6 +182,8 @@ func _run() -> void:
 	var movesData = loadMovesData()
 	print("--- Encounter files are valid ---")
 	var fileCount = 0
+	# Duplicate encounter names would silently shadow each other at runtime.
+	var encounterNames = {}
 	for fileName in DirAccess.get_files_at("res://Data/Shootout/Encounters"):
 		if !fileName.ends_with(".gd"):
 			continue
@@ -168,6 +191,9 @@ func _run() -> void:
 		var encounterInstance = load("res://Data/Shootout/Encounters/{fileName}".format({ "fileName": fileName })).new()
 		var data = encounterInstance.data
 		_check(data is Dictionary and !data.is_empty(), "%s: empty encounter data" % fileName)
+		if data is Dictionary and str(data.get("name", "")) != "":
+			_check(!encounterNames.has(data.name), "%s: duplicate encounter data.name '%s'" % [fileName, data.name])
+			encounterNames[data.name] = true
 		validateEncounter(data, fileName, movesData)
 		_check(data.has("winCondition") and data.winCondition.get("type", "rout") in ["rout", "defeat_actor", "survive_rounds", "hp_below"], "%s: bad winCondition" % fileName)
 		encounterInstance.free()

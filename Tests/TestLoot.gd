@@ -26,6 +26,8 @@ func loadFolder(folder: String) -> Dictionary:
 		var entry = load("{folder}/{fileName}".format({ "folder": folder, "fileName": fileName })).new()
 		var entryData = entry.get("data")
 		if entryData != null:
+			# Duplicate names would silently overwrite each other in this loader.
+			_check(!data.has(str(entryData.name)), "%s: duplicate data.name '%s' in %s" % [folder, entryData.name, fileName])
 			data[entryData.name] = entryData
 		if entry is Node:
 			entry.free()

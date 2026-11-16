@@ -1,6 +1,6 @@
 # System coherence and integration requirements
 
-This document defines what the implemented systems need in order to function as one game rather than independent prototypes. It is based on the current code and the [Implementation gap register](Implementation%20Gaps.md) as of 2026-11-15. Authoring locations are in the [Content and balance catalog](Content%20and%20Balance%20Catalog.md).
+This document defines what the implemented systems need in order to function as one game rather than independent prototypes. It is based on the current code and the [Implementation gap register](Implementation%20Gaps.md) as of 2026-11-16. Authoring locations are in the [Content and balance catalog](Content%20and%20Balance%20Catalog.md).
 
 ## 1. Coherence goals
 
@@ -226,7 +226,11 @@ Add a single production content-lint entry point, run before the full suite and 
 
 Production should fail closed for malformed content. Warn-and-skip remains useful for isolated tooling/tests, but it must not turn a broken live encounter or paid item into silent empty behavior.
 
+**Commit 6 status:** `Tests/TestContentLint.gd` implements the uniqueness rule (1), reference resolution for Moves/items/effects/classes/actors/loot/encounters/backgrounds and canonical Zone ids (2, 5 partially), the `hp_below` rule shape (4 partially) and the Trail gates for reward producers and non-town Location entrances (6), with a fixture test proving it rejects broken content; `Tests/TestEncounters.gd`/`TestLoot.gd` cover duplicate encounter/loot/Move names and `hp_below` side-total fields, and `Tests/TestOverworldEvents.tscn` covers event outcomes. Asset lint (3), quest rewards, and full world reachability (7) remain open.
+
 ## 11. Dependency-ordered implementation plan
+
+The concrete first delivery slice for phases 0–2 (authoritative Trail state, the encounter request/router, shared belt ownership, the decided combat rules, Vamoose/New Game, and the content lint and documentation closure) is tracked in the [First steps implementation plan](First%20Steps%20Implementation%20Plan.md).
 
 | Phase | Work | Exit gate |
 |---|---|---|

@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–5 implemented and verified; commit 6 remains proposed.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator.
+**Status: commits 1–6 implemented and verified.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Manual 640×360 acceptance remains the human QA step and is not closed by the automated suite.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -224,7 +224,9 @@ Create `res://Tests/TestVamooseFlow.gd` and `res://Tests/TestNewGameReset.gd` co
 
 Vamoose has one complete outcome path and New Game is clean even after purchases, reveals, quest progress, belt use and Vamoose.
 
-## 9. Commit 6 — Content lint, documentation and acceptance
+## 9. ✅ Commit 6 — Content lint, documentation and acceptance
+
+**Implemented.** `Tests/TestContentLint.gd` is the production content lint: it rejects duplicate `data.name` values instead of silently overwriting them, unknown Move/item/effect/class/actor/loot/encounter/background references, invalid `hp_below` targets and side-total fields, non-canonical Zone ids in pools/loot/events, ungated reward producers and ungated non-town Location entrances, and proves it rejects deliberately broken fixtures. `Tests/TestEncounters.gd` gained unknown-Move, duplicate-encounter-name and `hp_below` side-total/`stat`/`winner` checks; `Tests/TestLoot.gd` rejects duplicate loot-table names. `Tests/TestOverworldEvents.tscn` covers injected-RNG cadence determinism and the active-event lock, exact canonical Zone → event-pool mapping with no cross-Zone bleed, every enabled outcome executing once through the resolver, and every legacy/unimplemented result staying explicitly unavailable. All focused suites plus `RunAll` pass without new leaks. Manual 640×360 acceptance remains the human QA step listed under §6 validation debt.
 
 ### Automated closure
 
@@ -244,6 +246,8 @@ Vamoose has one complete outcome path and New Game is clean even after purchases
 4. Fix any new ownership/resource leaks introduced by these flows. Record pre-existing shutdown warnings separately rather than hiding them behind a zero exit code.
 
 ### Manual vertical-slice acceptance
+
+**Status: outstanding human QA.** The automated suite cannot close these; they stay listed in the gap register's manual-acceptance row until performed at 640×360 by hand.
 
 At 640×360 with mouse and keyboard/controller:
 
