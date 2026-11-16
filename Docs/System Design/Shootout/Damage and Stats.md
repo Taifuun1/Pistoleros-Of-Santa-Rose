@@ -35,7 +35,7 @@ Weapon family rules:
 **Implemented** (steps 1-5 of the implementation order):
 
 - `Actors/BaseActor.gd` — extended `stats` (`defense: {style, sand}`, `resistances: {bleed, poison}`, `damage.lasso`) and `weapon.baseDamage`; `init()` duplicates source data and fills safe defaults (defense 0/0, resistances 0.0, lasso 0, melee baseDamage 2) so Shootout-time mutation never touches source data.
-- `ShootoutActionResolver.calculateAttackDamage()` — the full pipeline: quality multiplier, weapon base + offensive stat, weapon family defense rules, then the effect hooks (`applyOutgoingModifiers`/`applyIncomingModifiers` — pass-through until [Effects](Effects.md) lands).
+- `ShootoutActionResolver.calculateAttackDamage()` — the full pipeline: quality multiplier, weapon base + offensive stat, weapon family defense rules, then the live effect hooks (`applyOutgoingModifiers`/`applyIncomingModifiers`) for piercing, decrease and marks.
 - Offensive stats per family: Lead uses the Rodeo-modified `stats.damage.lead` entry; Explosive adds the class `explosiveBase` from the class data file; Lasso and melee contribute no stat (lassos are weapon base damage only — decided).
 - Weapon family rules: revolvers lose the higher of Style/Sand, rifles gain Style and lose Sand, shotguns gain Sand and lose Style; explosives/lassos/melee ignore defense. Attack abilities roll quality on their own amount but skip family rules (the ability amount isn't weapon damage).
 - `Globals/CharacterStatCalculator.gd` — projects canonical equipment into fight data: Style/Sand, core stats, MxHP, matching weapon-family damage, and belt space. Only supported modifiers affect combat; other affixes remain item details.
@@ -96,11 +96,13 @@ All combat reads of stats go through a single helper so every modifier source st
 func getModifiedStat(actor, statPath: String, baseValue):
 	var value = baseValue
 	value = shootout.rodeoManager.getStatModifier(actor, statPath, value)
-	value = shootout.effectManager.getStatModifier(actor, statPath, value)   # once Effects land
+	value = shootout.effectManager.getStatModifier(actor, statPath, value)   # currently pass-through; next effect/stat slice
 	return value
 ```
 
 This lives on the shootout root (`Shootout.getModifiedStat`) so turn manager (initiative), action resolver (damage) and UI (display) all share it.
+
+**Current/next:** the root helper already applies Rodeo modifiers first and effect modifiers second, but `ShootoutEffectManager.getStatModifier()` returns its base value unchanged, while turn-manager initiative and `ShootoutActionResolver.offensiveStat()` still query the Rodeo manager directly. The next effect/stat commit must route those consumers through this helper, add the supported-stat registry and implement the effect/taunt modifiers without changing the established modifier order. Extend `TestDamage`, `TestTurnOrder`, `TestEffects` and `TestShootoutUI` to prove that displayed and resolved values agree.
 
 ## Files to create / modify
 
@@ -120,8 +122,8 @@ This lives on the shootout root (`Shootout.getModifiedStat`) so turn manager (in
 - The `Docs/Combat.md` worked example: Cylinder [2,3,1,0], second attack (Chamber 3), base 10 x 150% = 15, Style 4 / Sand 1 with a revolver -> 11.
 - Rifle vs high-Style target out-damages rifle vs high-Sand target; shotgun mirror.
 - Lasso damage is identical regardless of Six Shootin'.
-- Damage never goes below 0; Miss deals 0 but still applies on-hit effects (see Open Questions).
-- Rodeo and effect modifiers stack through `getModifiedStat()`.
+- Damage never goes below 0; Miss deals 0 and applies no on-hit effects or mark consumption (decided and implemented).
+- Rodeo and effect modifiers stack through `getModifiedStat()`; the effect half is the next implementation slice, with initiative, damage and UI sharing the same result.
 
 ## Implementation order
 

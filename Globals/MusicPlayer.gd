@@ -304,7 +304,7 @@ func on_overworld_chunk(chunk: Vector2i) -> void:
 ## Shootout music: the encounter's own "music" field first (unique encounters
 ## like quest bosses), then the per-encounter registry, then the "zone" field
 ## (fights tied to an Overworld zone), then the default shootout list.
-func on_shootout_started(encounterData: Dictionary) -> void:
+func on_shootout_started(encounterData: Dictionary, requestZone := "") -> void:
 	var encounterMusic = str(encounterData.get("music", ""))
 	if encounterMusic != "":
 		play_music(encounterMusic)
@@ -315,6 +315,8 @@ func on_shootout_started(encounterData: Dictionary) -> void:
 		play_music(perEncounter[encounterName])
 		return
 	var fightZone = str(encounterData.get("zone", ""))
+	if fightZone == "":
+		fightZone = requestZone.strip_edges()
 	var perZone: Dictionary = musicData.get("zone_shootout_tracks", {})
 	if perZone.has(fightZone):
 		play_music(perZone[fightZone])

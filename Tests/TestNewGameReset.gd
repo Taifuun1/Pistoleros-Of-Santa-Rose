@@ -29,6 +29,9 @@ func _ready() -> void:
 
 func _run() -> void:
 	print("--- Dirty every domain ---")
+	var canonicalParty = load("res://Globals/Party.gd").new()
+	var canonicalMoney := int(canonicalParty.money)
+	canonicalParty.free()
 	Party.money = 999
 	Party.inventory = [
 		{ "instanceId": "starter_paregoric", "definitionId": "paregoric", "itemType": "consumable", "quantity": 1 },
@@ -75,7 +78,7 @@ func _run() -> void:
 	_check(!sceneManager.journal.isOpen, "New Game closes modals")
 	_check(!sceneManager.hasPendingShootout() and Shootout.pendingRequest == null, "New Game clears encounter context")
 
-	_check(Party.money == 0, "New Game resets money")
+	_check(Party.money == canonicalMoney, "New Game resets money to the canonical starter amount")
 	_check(Party.inventory.size() == 1 and Party.inventory[0].instanceId == "starter_paregoric", "New Game restores the starter carried stack")
 	_check(int(Party.party["Walker Langley"]["injuryDamage"]) == 0, "New Game clears injuries")
 	var belt: Dictionary = Party.getBeltSnapshot("Walker Langley")
@@ -101,7 +104,7 @@ func _run() -> void:
 	_check(mainMenu.get_node("CenterContainer/VBoxContainer/Continue").disabled, "Continue stays disabled (no save service yet)")
 	mainMenu._on_new_game_pressed()
 	_check(await _awaitSceneKey("overworld"), "MainMenu New Game loads the Overworld")
-	_check(Party.money == 0, "MainMenu New Game resets Party state through the coordinator")
+	_check(Party.money == canonicalMoney, "MainMenu New Game restores Party state to the canonical starter amount")
 	mainMenu.queue_free()
 
 

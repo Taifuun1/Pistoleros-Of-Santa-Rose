@@ -15,7 +15,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (steps 1-5 of the implementation order, minus UI grey-out polish and multi-target acts):
+**Implemented** (steps 1-5 of the implementation order; single-target resolution only, with multi-target acts as the next implementation slice and UI grey-out polish pending):
 
 - `Globals/Shootout.gd` `shootoutPositions` maps each team's columns 1-4 to screen coordinates; `Shootout.getPositionForColumn()` resolves them.
 - The turn manager is the single source of truth for positions: `getActorPosition()`, `placeActor()` (raw set + node move) and the occupancy-aware `setActorPosition()` — one actor per position (decided), the mover takes the spot and the displaced occupants shift one column toward the mover's vacated spot (squeeze repositioning; see Occupancy and displacement). The displaced chain fills exactly the vacated span, so a move inside the row never fails; only no-op targets and out-of-row requests do.
@@ -74,6 +74,15 @@ With the effect system (see [Effects](Effects.md)):
 - `ShootoutTargetingManager.isValidTarget()` stays pure validation; redirect happens at resolution: `Shootout.selectActor()` / enemy AI target choice call `effectManager.redirectTaunt(actingSide, targetName)`, which swaps the target to the taunt caster when the chosen target stands in a taunted position.
 - Multi-target acts re-resolve each affected position individually, per Open Question 11 in `Docs/Combat.md`.
 
+### Next slice — multi-target acts
+
+Current resolution is single-target: `Shootout.selectActor()` stores one actor and `resolveWithFocus()` calls the resolver once. The next implementation commit must replace that handoff with one validated, ordered target-set pipeline shared by player and AI:
+
+1. Expand `positions.type: "multi"` into legal targets, with explicit empty/dead-target behavior and once-per-act Move/Cylinder/item costs.
+2. Re-resolve taunt for each affected position. First decide Open Question 4 below: whether a caster hit through several protected positions takes each redirected hit once per position or only once per act. Do not encode an accidental answer in the pipeline.
+3. Feed the same target set to damage/healing, effects, death checks, animations/focus and UI confirmation. Enemy AI must score that resolved set rather than duplicate target expansion.
+4. Prove friendly and enemy acts, partially taunted sets, targets dying mid-resolution, cancellation/repeated input and no double consumption in `TestTargeting`, `TestActs`, `TestEnemyAI` and a real encounter scene test. Doctor's Kit must heal every legal living target.
+
 ## Files to create / modify
 
 **Modify**
@@ -102,7 +111,7 @@ With the effect system (see [Effects](Effects.md)):
 3. ✅ Reposition act (UI + flow).
 4. ✅ Occupancy/displacement rules in `setActorPosition()`; Leaders Duck routes through it.
 5. ✅ Taunt redirect (with [Effects](Effects.md)).
-6. UI polish: greyed-out unusable moves with reasons (pending, see [Shootout UI](Shootout%20UI.md)); multi-target acts follow with the acts overhaul.
+6. UI polish: greyed-out unusable moves with reasons (pending, see [Shootout UI](Shootout%20UI.md)); **next:** the multi-target target-set pipeline described above.
 
 ## Open Questions
 

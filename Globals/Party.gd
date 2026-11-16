@@ -33,7 +33,9 @@ const STATE_FORMAT_VERSION := 1
 const VAMOOSE_STACK_LOSS_FRACTION := 0.15
 
 var level = 1
-var money = 0
+## Provisional New Game balance used for vertical-slice acceptance.
+## Reset tests compare against the canonical Party baseline rather than this value.
+var money = 1000
 var inventory = [{
 	"instanceId": "starter_paregoric",
 	"definitionId": "paregoric",

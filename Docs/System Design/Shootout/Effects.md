@@ -8,7 +8,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 | Effect | Behavior | Stacks? | Duration | Removed by |
 | --- | --- | --- | --- | --- |
-| Bleed | Damage at the start of each of the afflicted character's Turns | No; highest applies, rest are stored | Until healed | Healing items/abilities |
+| Bleed | Damage at the start of each of the afflicted character's Turns | Combined stacks; every two total stacks deal one damage before resistance | Until healed | Healing items/abilities |
 | Poison | Damage at the start of each Round; wears off ~35% per Round | Yes, duration and damage | Wears off | Cleanse, wearing off |
 | Cylinder | Increases/decreases Chambers (specific or whole Cylinder) | Replaces previous | Until modified or fight ends | Another cylinder modifier, fight end |
 | Mark | After one full Round becomes active; damage to the marked character deals extra damage/effects and consumes it | No | Until consumed or cleansed; expires after a turn or two if never triggered (Open Question 8) | Triggering, cleanse, expiry |
@@ -30,10 +30,19 @@ This is a design doc: it describes the intended design, and the implementation m
 - `Shootout/ShootoutEffectManager.gd` — the full effect set: **combined-stack bleed** (every two total stacks deal one damage before resistance; healing and cleanses remove stacks through the same path), poison (per-stack stacking, round-start ticks, 35% wear-off at round end, optional `rounds` duration), mark (priming -> active after one Round, bonus damage + follow-up effects consume it, expiry, cleanse), damage-type mark (one Round), damage piercing/decrease (turn countdown, stack limit), silence (turn countdown), taunt (round countdown, per-position redirect) and the Cylinder effect type delegated to the cylinder manager.
 - Resistances are percentage potency reduction applied at tick time (`stats.resistances.bleed/poison`).
 - Damage pipeline hooks (`applyOutgoingModifiers`/`applyIncomingModifiers`) are live: piercing reclaims only the amount actually blocked by defense (decided cap), decrease subtracts flat, active marks add bonus damage and apply their follow-up effects, damage-type marks match the attack's weapon type.
-- Lifecycle wiring in `Shootout.gd`: `onTurnStart` before a turn (bleed kills are checked before the actor acts), `onTurnEnd` in `finishTurn()`, `onRoundEnd`/`onRoundStart` around the turn-order rebuild with a post-poison death sweep; taunt redirect on basic attacks for both sides in `resolveActOnce()`.
+- Lifecycle wiring in `Shootout.gd`: `onTurnStart` before a turn (bleed kills are checked before the actor acts), `onTurnEnd` in `finishTurn()`, `onRoundEnd`/`onRoundStart` around the turn-order rebuild with a post-poison death sweep; taunt redirect for single-target acts for both sides in `resolveActOnce()`; multi-target redirect is next-slice work.
 - Rodeo ops `apply_effect`, `cleanse_effect` and `modify_cylinder` route into the effect manager (warn-and-skip when it's absent).
 - Move/item `effects` lists are dispatched after instant damage/healing by the action resolver.
 - Tests: `Tests/TestEffects.gd` covers every behavior listed in the testing section below.
+
+### Next slice — effect/stat seams
+
+`getStatModifier()` is still a pass-through, and some combat consumers read only `rodeoManager.getStatModifier()` directly. The next implementation commit must:
+
+1. Define the supported combat stat-path registry and modifier payload/order, preserving `Shootout.getModifiedStat()`'s Rodeo-first/effect-second order and rejecting unknown paths in content lint.
+2. Implement data-driven effect stat modifiers and route turn-manager initiative, action-resolver offense and UI display through the shared root helper.
+3. Add taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry and source/caster death. Multi-target taunt behavior itself belongs to the preceding multi-target commit.
+4. Extend `TestEffects`, `TestDamage`, `TestTurnOrder` and `TestShootoutUI` for stacking, cleanse/expiry/death cleanup and preview/actual parity. Unsupported affixes and equipment-granted Moves remain separate later work.
 
 ## Design
 
@@ -57,8 +66,8 @@ var effects = {}
 
 Core API, consumed by the action resolver (moves/items apply effects), the cylinder manager, the targeting manager (taunt redirect) and the UI (effect icons):
 
-- `applyEffect(targetName, effect)` — handles per-type stacking rules: bleed keeps the highest active and stores the rest; poison appends; mark/damage-type-mark replace; piercing/decrease append up to a cap; cylinder delegates to `cylinderManager.applyCylinderModifier()`.
-- `onTurnStart(actorName)` — bleed tick: deal the highest stored bleed's damage (reduced by `stats.resistances.bleed`); mark priming/expiry countdown.
+- `applyEffect(targetName, effect)` — handles per-type stacking rules: bleed adds stacks to the combined total; poison appends; mark/damage-type-mark replace; piercing/decrease append up to a cap; cylinder delegates to `cylinderManager.applyCylinderModifier()`.
+- `onTurnStart(actorName)` — bleed tick: every two combined stacks deal one damage before `stats.resistances.bleed`; mark priming/expiry countdown.
 - `onRoundStart()` — poison tick on every afflicted actor (reduced by `stats.resistances.poison`).
 - `onRoundEnd()` — poison wear-off (multiply each stack's amount by 0.65, drop stacks below 1), damage-type-mark cleanup, taunt round countdown.
 - `onTurnEnd(actorName)` — piercing/decrease/silence turn countdown.
@@ -115,7 +124,7 @@ Move the reserved `cleanse_effect` op from warn-and-skip to `effectManager.clean
 
 `Tests/TestEffects.gd`:
 
-- Bleed: only the highest stack ticks; stored stacks take over when it ends; healing removes it; resistance reduces potency.
+- Bleed: one/two/three/four combined stacks tick correctly (two stacks per damage before resistance); healing removes authored stacks through the cleanse path; resistance reduces potency; death during a tick is handled.
 - Poison: stacks accumulate, tick at round start, wear off 35% per round end.
 - Mark: primes for a Round, bonus damage consumes it; expiry after the configured turns; cleanse removes it.
 - Piercing caps at the amount actually blocked by defense.
@@ -128,7 +137,7 @@ Move the reserved `cleanse_effect` op from warn-and-skip to `effectManager.clean
 1. ✅ Manager skeleton + hooks + `applyEffect`/`cleanse` with bleed and poison.
 2. ✅ Marks and damage-type marks + damage pipeline queries.
 3. ✅ Piercing/decrease + silence.
-4. ✅ Taunt redirect (basic attacks; multi-target acts follow with [Positions and Targeting](Positions%20and%20Targeting.md)).
+4. ✅ Taunt redirect (single-target acts; multi-target acts follow with [Positions and Targeting](Positions%20and%20Targeting.md)).
 5. ✅ Rodeo ops and move/item `effects` dispatch (authoring effect-bearing content pending).
 6. UI icons (pending, see [Shootout UI](Shootout%20UI.md)).
 

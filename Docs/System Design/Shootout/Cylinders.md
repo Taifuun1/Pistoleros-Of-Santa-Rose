@@ -21,7 +21,7 @@ This is a design doc: it describes the intended design, and the implementation m
 
 - `Shootout/ShootoutCylinderManager.gd` — builds Cylinders from character/class/weapon Magazines (special-Chamber priority weapon > class > character, numeric sum clamped 0-3, all-Hit default when no data exists), tracks `chamberIndex`, `advance()`, `hitQuality()` (with Rodeo floor), and single-modifier `applyCylinderModifier()` / `clearCylinderModifier()` that re-derives from sources.
 - Chamber constants and `CHAMBER_DAMAGE_MULT` live on `ShootoutCylinderManager` (not the `Shootout` autoload) so the resolver and headless tests can use them without autoloads.
-- `ShootoutActionResolver` — `resolveAttack()` rolls hit quality: Miss/Graze/Hit/Crit multiply damage (0/50/100/150%) with per-quality damage-number colors; Reload spends the Move without attacking; Jammed fails the attack; both advance the Cylinder. `resolveMove()` applies quality and advances only for `category: "attack_ability"` moves (decided); non-attack abilities bypass the Cylinder entirely.
+- `ShootoutActionResolver` — `resolveAttack()` rolls hit quality: Miss/Graze/Hit/Crit multiply damage (0/50/100/150%) with per-quality damage-number colors; Reload spends the Move without attacking; Jammed fails the attack and applies the acting class's authored `jammed` effects payload; both advance the Cylinder. `resolveMove()` applies quality and advances only for `category: "attack_ability"` moves (decided); non-attack abilities bypass the Cylinder entirely.
 - Class data in `Data/Shootout/Classes/*.gd` (decided) with class Magazines, ability lists, belt space and class stat bases; loaded into `Shootout.classesData`. Weapon Magazines live in `Data/Items/WeaponData.gd` (`magazines`, keyed by weapon id). Actor data and `Party.party` carry `characterClass` and `magazine`.
 - `ShootoutRodeoManager.getHitQualityFloor()` implements the `set_hit_quality_floor` op for always-on Rodeos (Natural Gunslinger floors at 2).
 - Registration in `Shootout.spawnActor()`; unregistration in `ShootoutTurnManager.checkActorDead()` (guarded, headless-safe).
@@ -120,5 +120,5 @@ In `ShootoutActionResolver.resolveAttack()`:
 
 1. ~~Where does class data live~~ — **decided**: new `Data/Shootout/Classes/*.gd` folder; actor data references the class by name via `characterClass`.
 2. Special Chamber conflict priority when several Magazines put special Chambers in the same slot (weapon > class > character proposed).
-3. Exact Jammed outcome per weapon/class: is the buff/debuff defined on the weapon, the class, or globally?
+3. ~~Exact Jammed outcome per weapon/class: is the buff/debuff defined on the weapon, the class, or globally?~~ — **decided/implemented**: the acting actor's class data owns `jammed: { target, effects }`; broader payload redesign is deferred.
 4. Do cylinder effects with `"chambers": [indices]` use absolute indices or indices relative to the current Chamber?

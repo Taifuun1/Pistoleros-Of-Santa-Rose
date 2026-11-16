@@ -176,7 +176,7 @@ Example: a Gunslinger with Cylinder [2, 3, 1, 0] makes their second weapon attac
 
 | Effect | Stacks? | Duration model | Removed by |
 | --- | --- | --- | --- |
-| Bleed | No; highest applies, rest are stored | Until healed | Healing items/abilities |
+| Bleed | Combined stacks; every two total stacks deal one damage before resistance | Until healed | Healing items/abilities |
 | Poison | Yes, duration and damage | Wears off ~35% per Round | Cleanse items/abilities, wearing off |
 | Cylinder | Replaces previous modifier | Until modified or fight ends | Another cylinder modifier, fight end |
 | Mark | No | Until consumed or cleansed | Triggering, cleanse |

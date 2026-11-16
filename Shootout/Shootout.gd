@@ -206,9 +206,9 @@ func init(encounterData: Dictionary) -> void:
 	var teams = encounterData.get("teams", encounterData)
 	turnManager.setWinCondition(encounterData.get("winCondition", {}))
 	turnManager.setEncounterKind(encounterData.get("kind", "dustup"))
-	# Encounter music (MusicPlayer resolves it from the encounter data, the
-	# MusicData encounter registry or the zone, with a default fight list).
-	MusicPlayer.on_shootout_started(encounterData)
+	# Encounter music: explicit encounter track > encounter-name registry >
+	# authored encounter Zone > launching request Zone > default fight list.
+	MusicPlayer.on_shootout_started(encounterData, encounterZoneId)
 	lootTableName = encounterData.get("lootTable", "")
 	encounterLootEnabled = encounterData.get("loot", true)
 	encounterName = encounterData.get("name", "Shootout")

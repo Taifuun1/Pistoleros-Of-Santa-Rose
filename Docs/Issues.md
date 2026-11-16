@@ -9,8 +9,17 @@ Markdown file for listing issues that pop up.
 - Move and Flee icons should be positioned to the right always in Shootout UI
 - Move by clicking on the actor position instead of icons in the UI
 - Inventory party icons seems taller than the icon dimensions
+- Music doesn't change when leaving Lazysprings
+- Victory music continues after Shootout result confirmation; returning to the same Overworld Zone does not force the Overworld playlist back on
+- Movement, interaction and Journal actions lack gamepad bindings, blocking the controller portion of vertical-slice acceptance
+- Gameplay has no production UI route back to the main menu, so New Game after a live session can only be exercised through the temporary QA helper or process restart
+- Buying a map doesn't seem to reveal the location Gold Rush
 
 ## Fixed
+
+- Fixed — Encounter-request Zone was not propagated to Shootout music, so Canyon fights could use the default shootout list
+    - `Shootout.init()` now passes its validated request `encounterZoneId` to `MusicPlayer.on_shootout_started()` as the final Zone fallback when the encounter file itself omits `zone`; authored encounter data still wins over the request
+    - `Tests/TestMusicPlayer.gd` covers request-Zone fallback and authored-Zone precedence
 
 - Fixed — `TestActorShadow` failed its VERTICAL directional coverage checks
     - The test asserted `bodyRect.size.x * WIDTH_RATIO + 5` and a bottom-line offset of `-2`, but the shipped `Coverage.VERTICAL` branch uses `+ 3` and `- 3`; both values landed in `f775b0d` and the shipped geometry is what the wagon has always rendered, so the expectation was stale rather than the implementation wrong

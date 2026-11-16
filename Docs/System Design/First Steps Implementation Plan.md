@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–6 implemented and verified.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Manual 640×360 acceptance remains the human QA step and is not closed by the automated suite.
+**Status: commits 1–6 implemented and verified; available manual vertical-slice acceptance is complete.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator. Commit 6 added the production content lint (`Tests/TestContentLint.gd`) with teeth, the injected-RNG Overworld event suite (`Tests/TestOverworldEvents.tscn`), the duplicate/reference/`hp_below`/Zone/access-gate checks in the existing content tests, and this documentation closure. Manual acceptance recorded steps 1–4, 6 and 7 at 640×360; step 5 has no production quest-encounter entry point yet and remains verified only through the constructed automated request path.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -226,7 +226,7 @@ Vamoose has one complete outcome path and New Game is clean even after purchases
 
 ## 9. ✅ Commit 6 — Content lint, documentation and acceptance
 
-**Implemented.** `Tests/TestContentLint.gd` is the production content lint: it rejects duplicate `data.name` values instead of silently overwriting them, unknown Move/item/effect/class/actor/loot/encounter/background references, invalid `hp_below` targets and side-total fields, non-canonical Zone ids in pools/loot/events, ungated reward producers and ungated non-town Location entrances, and proves it rejects deliberately broken fixtures. `Tests/TestEncounters.gd` gained unknown-Move, duplicate-encounter-name and `hp_below` side-total/`stat`/`winner` checks; `Tests/TestLoot.gd` rejects duplicate loot-table names. `Tests/TestOverworldEvents.tscn` covers injected-RNG cadence determinism and the active-event lock, exact canonical Zone → event-pool mapping with no cross-Zone bleed, every enabled outcome executing once through the resolver, and every legacy/unimplemented result staying explicitly unavailable. All focused suites plus `RunAll` pass without new leaks. Manual 640×360 acceptance remains the human QA step listed under §6 validation debt.
+**Implemented.** `Tests/TestContentLint.gd` is the production content lint: it rejects duplicate `data.name` values instead of silently overwriting them, unknown Move/item/effect/class/actor/loot/encounter/background references, invalid `hp_below` targets and side-total fields, non-canonical Zone ids in pools/loot/events, ungated reward producers and ungated non-town Location entrances, and proves it rejects deliberately broken fixtures. `Tests/TestEncounters.gd` gained unknown-Move, duplicate-encounter-name and `hp_below` side-total/`stat`/`winner` checks; `Tests/TestLoot.gd` rejects duplicate loot-table names. `Tests/TestOverworldEvents.tscn` covers injected-RNG cadence determinism and the active-event lock, exact canonical Zone → event-pool mapping with no cross-Zone bleed, every enabled outcome executing once through the resolver, and every legacy/unimplemented result staying explicitly unavailable. All focused suites plus `RunAll` pass without new leaks. The available 640×360 manual checks have since been performed and recorded below; production integration gaps remain separate from automated coverage.
 
 ### Automated closure
 
@@ -247,17 +247,33 @@ Vamoose has one complete outcome path and New Game is clean even after purchases
 
 ### Manual vertical-slice acceptance
 
-**Status: outstanding human QA.** The automated suite cannot close these; they stay listed in the gap register's manual-acceptance row until performed at 640×360 by hand.
+**Status: available production checks performed.** Mouse/keyboard acceptance is recorded below. Controller acceptance remains open because movement, interaction and Journal actions do not yet have gamepad bindings.
 
-At 640×360 with mouse and keyboard/controller:
+At 640×360 with mouse and keyboard:
 
 1. Start New Game Off Trail; confirm a non-town Location is blocked while quest progress and Town access work.
+   - Confirmed to work
 2. Buy Paregoric and inspect it in Inventory. Start a Trail once and confirm stock changes once.
+   - Confirmed to work
 3. Trigger the authored event, verify the canyon encounter/music/Flair-independent transition, assign/use Paregoric and win.
+   - Expected Zone fight track is `Shootout/Steel Cannon Run`; inspect `MusicPlayer.currentTrackId` with F8. The Shootout now passes its request Zone to `MusicPlayer.on_shootout_started()` as the fallback when the encounter file omits `zone`; a default-track result remains a regression.
+   - Generic events can fire before the Canyon event and currently have no executable outcomes; closing one with its disabled/choiceless UI intact is expected. Keep walking until `Canyon Cache Raiders` appears.
+   - Confirmed to work
 4. Confirm exact origin restoration, one carried-stack decrement and one On-Trail loot award.
+   - Paregoric purchases share the existing stack, so buying one changes the one `starter_paregoric` stack from quantity 2 rather than creating a second row. That is expected stack behavior. Verify one `{ instanceId, combatId, quantity: 1 }` combat record and exactly one unit removed by Party; loot can also be a Paregoric, so use the authoritative consumption/accepted-loot details rather than net quantity alone.
+   - Confirmed except the victory stinger continuing after result confirmation; tracked in `Docs/Issues.md`.
 5. Complete the Off-Trail quest encounter and confirm no reward.
+   - **Blocked in production:** no quest caller creates an `EncounterRequest`, and no Shootout result command completes the quest/objective. `TestEncounterFlow.tscn` exercises only a constructed quest-sourced request. Do not mark this manual step passed until the quest trigger and result integration are wired.
 6. Trigger Vamoose and verify destination, money/stack loss, no knockout debuff and Off-Trail restrictions.
+   - Confirmed to work
 7. Return to the main menu and start New Game; verify all current state resets.
+   - **Controller blocker:** `MOVE_*`, `INTERACT` and `TOGGLE_JOURNAL` currently bind only keyboard events, so gameplay/controller acceptance cannot pass until their gamepad bindings are added.
+   - **Menu-route blocker:** gameplay has no production action that calls `change_scene("main_menu")`. Use `Ctrl+Shift+M` in the temporary QA helper for this check; the formal acceptance path should not be marked complete until a quit-to-menu/pause route ships in the product UI.
+   - State reset confirmed with the QA helper using mouse/keyboard.
+
+### Current manual-acceptance status
+
+Steps 1–3, 6 and 7 passed the available mouse/keyboard acceptance path, with step 7 exercised through the QA helper because no production return-to-menu action exists. Step 4 passed its functional restoration, belt-consumption and loot checks; its victory-stinger continuation remains an open audio defect. Step 5 has no production quest-encounter entry point and remains covered only by the constructed `TestEncounterFlow.tscn` request. Controller acceptance remains open. Quest-encounter integration, return-to-menu, controller bindings, Overworld music transitions and map-reveal behavior are tracked in `Docs/Issues.md` and the gap register.
 
 ### Documentation closure
 
@@ -275,3 +291,52 @@ Defer these until the vertical slice is stable:
 - Poker house rules/economy integration, Flair and broad presentation polish.
 
 The immediate next slice after acceptance should be **multi-target acts plus effect/stat seams**, followed by **full save-service integration**. Expanding content before those foundations would repeat the ownership and no-op-content problems this plan is intended to solve.
+
+## 11. Next delivery sequence after commit 6
+
+**Status:** the available 640×360 mouse/keyboard vertical-slice acceptance has been recorded. Step 5, controller checks and a production return-to-menu route remain incomplete; fix those acceptance follow-ups in a dedicated integration pass before broadening mechanics.
+
+### Next commit 0 — First-slice integration pass
+
+1. Wire the quest encounter source end to end: one quest trigger creates a validated `source: "quest"` request carrying `questId`/`objectiveId`, and one authoritative post-victory command completes that objective. Commit Party/belt results once, suppress rewards Off Trail, and make repeated scene entry or result handling idempotent.
+2. Add a production return-to-menu or pause-menu route through `SceneManager`; do not rely on the QA helper to call `change_scene("main_menu")`.
+3. Add gamepad events to movement, interaction and Journal actions, then repeat controller navigation/UI focus at 640×360.
+4. Fix Overworld music re-entry by invalidating the prior Zone context when leaving a Location or Shootout, or by forcing the Overworld decision on return. This should resolve both the Lazysprings-exit track and continuing victory-stinger issues.
+5. Re-test map acquisition and use: purchasing alone must not reveal a target; using the map should consume one copy and reveal Gold Run deterministically, or expose a concrete UI/state defect.
+
+**Exit gate:** vertical-slice step 5 has a real production path and controller/menu acceptance can pass without the QA helper; music transitions and map use no longer require a helper workaround.
+
+The next implementation gates remain:
+
+### Next commit 1 — Multi-target acts
+
+Keep the current single-target behavior intact while replacing the one-target handoff in `Shootout.selectActor()`/`resolveWithFocus()` with one validated, ordered target-set pipeline shared by player acts and enemy AI.
+
+1. Expand `positions.type: "multi"` into legal targets, including empty/dead-target handling and per-position taunt redirection. Resolve Open Question 4 in [Positions and Targeting](Shootout/Positions%20and%20Targeting.md) before implementing redirect stacking.
+2. Resolve damage, healing, effects, death checks, animations and focus against that same target set. Charge the Move, Cylinder and item use once per act, not once per target.
+3. Present the complete target set for confirmation and make enemy AI score the same resolved set rather than maintaining a second targeting path.
+4. Extend `TestTargeting`, `TestActs`, `TestEnemyAI` and a real encounter scene test for friendly/enemy multi-target acts, taunted subsets, deaths during resolution, cancelled acts and repeated input.
+
+**Exit gate:** Doctor's Kit really heals every legal living target, multi-target offense/support behaves identically for both sides, and no effect or cost is applied twice.
+
+### Next commit 2 — Effect/stat seams
+
+1. Define the supported combat stat-path registry and one modifier payload/order. Preserve the existing `Shootout.getModifiedStat()` order (Rodeo first, effects second) and reject unknown stat paths in content lint.
+2. Implement the currently pass-through `ShootoutEffectManager.getStatModifier()` and route initiative, offensive damage and UI reads through the shared root helper instead of direct Rodeo-only reads.
+3. Implement taunt's authored defensive buffs with the same lifecycle as its redirect, including expiry, death and cleanse behavior. Do not pull unsupported affixes or equipment abilities into this commit.
+4. Extend `TestEffects`, `TestDamage`, `TestTurnOrder` and `TestShootoutUI` for stacking order, lifecycle, preview/actual parity and both Trail states where relevant.
+
+**Exit gate:** every displayed modified stat has a real consumer, initiative/damage/UI agree, and no direct stat read bypasses the shared modifier pipeline.
+
+### Next commit 3 — Full save-service integration
+
+1. Add one versioned disk save service that assembles and schema-checks every current domain snapshot, validates cross-references before mutating live state, and commits in dependency order. A failed load preserves the previous valid session; file replacement is atomic.
+2. Cover existing snapshots for Party (including reservations and next instance number), Locations/Trail state, Vendors/stock/Bank and Discovery. Add the missing Quests and Cutscene export/import/reset contract before including them. Restore the Overworld exact player position through its provider, and keep transient Shootout nodes, pending encounters, visual parties, modals, pause/music stacks and loaders out of the payload.
+3. Enable Main Menu Continue only when a valid save exists. Add migration for format/content-id changes and keep New Game independent of any loaded session.
+4. Add coordinated-restore, malformed-file rollback, migration and real application-restart tests. Verify exact position, departure/stock synchronization, reservation references and id uniqueness after restarting the process.
+
+**Exit gate:** a save made during an allowed scene restores exactly after an application restart, malformed/older files fail safely or migrate explicitly, and Continue never restores a partial domain.
+
+### Work that remains after these foundations
+
+Do not expand Zones, parties, bosses, quests, legendary awards or vendor breadth first. Secret destinations/rewards also remain later content work: a future secret-item claim must check Trail eligibility before capacity, refuse a full inventory all-or-nothing, persist a one-shot claimed-target id, and never silently drop a unique reward. Dynamic spawns, multi-source affixes/equipment abilities, differentiated encounter AI, Flair and Poker integration stay in their existing deferred/priority rows.

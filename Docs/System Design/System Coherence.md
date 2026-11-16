@@ -232,6 +232,15 @@ Production should fail closed for malformed content. Warn-and-skip remains usefu
 
 The concrete first delivery slice for phases 0–2 (authoritative Trail state, the encounter request/router, shared belt ownership, the decided combat rules, Vamoose/New Game, and the content lint and documentation closure) is tracked in the [First steps implementation plan](First%20Steps%20Implementation%20Plan.md).
 
+**Current delivery status (2026-11-16):** commits 1–6 are implemented and the full suite passes 58/58. Available mouse/keyboard manual vertical-slice acceptance is recorded; quest-encounter integration, controller bindings, a production return-to-menu route and Overworld music transitions remain follow-ups. The ordered next mechanics steps are:
+
+0. **First-slice integration pass:** quest-sourced encounter launch/result completion, production return-to-menu, gamepad bindings, and Overworld music-transition invalidation.
+1. **Multi-target acts:** one target-set pipeline for player and AI resolution, per-position taunt, UI/animation/focus and death handling.
+2. **Effect/stat seams:** data-driven effect modifiers, the supported-stat registry, taunt's defensive buffs and all combat reads through `Shootout.getModifiedStat()`.
+3. **Full save-service integration:** the remaining disk Save/Continue work and application-restart proof. The existing domain snapshots and New Game coordinator do not by themselves complete phase 2.
+
+Only after those gates should the project resume phase-4 content expansion. Phase 3 is not complete merely because the decided HP/bleed/basic-attack/boss-threshold rules and Vamoose landed: supported affixes/equipment abilities, differentiated encounter AI and representative Party/enemy content remain open. Detailed commit scopes and exit gates are in [First steps implementation plan §11](First%20Steps%20Implementation%20Plan.md).
+
 | Phase | Work | Exit gate |
 |---|---|---|
 | **0 — Apply decided rules and lint foundation** | Encode the canonical HP/knockout, bleed, no-basic-attack, per-actor boss-HP, Vamoose-scope and Zone-loot decisions; define the supported-stat registry and canonical ids; add duplicate/reference/asset lint. Stop generating unsupported paid affixes or mark them unavailable honestly. Keep Poker house rules explicitly open. | Decided rules have one implementation contract and tests; production content lint fails on deliberate broken fixtures and passes valid current content. |
