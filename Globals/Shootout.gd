@@ -17,10 +17,28 @@ const RODEO_TRIGGER_TURN_START = "turn_start"
 const RODEO_TRIGGER_TURN_END = "turn_end"
 const RODEO_TRIGGER_ALWAYS = "always"
 
-# Encounter launcher (Docs/System Design/Shootout/Encounters.md): callers set a
-# res:// path here before switching to the Shootout scene; null falls back to
-# the debug encounter.
-var pendingEncounter = null
+# Encounter launcher (Docs/System Design/First Steps Implementation Plan.md,
+# commit 2): SceneManager installs one validated EncounterRequest here before
+# switching to the Shootout scene. The scene consumes it exactly once; no
+# production request means a direct debug run, never a silent production path.
+var pendingRequest = null
+
+
+func setPendingRequest(request) -> bool:
+	if pendingRequest != null:
+		return false
+	pendingRequest = request
+	return true
+
+
+func consumePendingRequest():
+	var request = pendingRequest
+	pendingRequest = null
+	return request
+
+
+func clearPendingRequest() -> void:
+	pendingRequest = null
 
 # Flavor variation names for the Shootout start popup (Docs/Combat.md).
 const DUSTUP_FLAVORS = ["Scuffle", "Ruckus", "Hold-up", "Tussle"]

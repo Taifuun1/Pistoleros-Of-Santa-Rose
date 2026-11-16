@@ -8,6 +8,8 @@ class_name SceneManager
 signal scene_change_started(sceneKey)
 signal scene_changed(sceneKey)
 
+const EncounterRequestScript = preload("res://Shootout/EncounterRequest.gd")
+
 ## Logical scene keys mapped to scene paths. Location paths are formatted
 ## with the "location" context value (see _resolveScenePath).
 const SCENES := {
@@ -50,6 +52,8 @@ var transitioning := false
 var _pauseCoordinator: ModalPauseCoordinator
 ## Parent Location + safe door position captured when entering a vendor room.
 var _vendorReturnContext := {}
+## Launch request, captured origin and one-shot result state for a Shootout.
+var _shootoutContext := {}
 
 
 func _ready() -> void:
@@ -73,6 +77,138 @@ func get_current_scene() -> Node:
 	if currentSceneContainer.get_child_count() == 0:
 		return null
 	return currentSceneContainer.get_child(0)
+
+
+## Launches one validated encounter and owns its return context. Accepts an
+## EncounterRequest or the options Dictionary that builds one; invalid requests
+## never transition and production never falls back to the debug encounter.
+func launchShootout(requestOptions) -> bool:
+	if transitioning or currentSceneKey == "shootout" or !_shootoutContext.is_empty():
+		return false
+	var request = requestOptions
+	if !_isEncounterRequest(request):
+		request = EncounterRequestScript.make(requestOptions if requestOptions is Dictionary else {}, null, Locations)
+	if !request.isValid():
+		push_warning("SceneManager: Shootout launch rejected (%s)." % request.reason())
+		return false
+	var origin := _captureShootoutOrigin()
+	if !request.origin.is_empty():
+		for key in request.origin:
+			origin[key] = request.origin[key]
+	request.origin = origin
+	if !request.isValid():
+		push_warning("SceneManager: Shootout origin rejected (%s)." % request.reason())
+		return false
+	var shootoutGlobals = get_node_or_null("/root/Shootout")
+	if shootoutGlobals == null or !shootoutGlobals.has_method("setPendingRequest"):
+		push_warning("SceneManager: the Shootout launcher is unavailable.")
+		return false
+	if !shootoutGlobals.setPendingRequest(request):
+		push_warning("SceneManager: another Shootout request is already pending.")
+		return false
+	_shootoutContext = {
+		"request": request,
+		"origin": origin.duplicate(true),
+		"handled": false,
+		"scene": null,
+	}
+	change_scene("shootout")
+	return true
+
+
+func hasPendingShootout() -> bool:
+	return !_shootoutContext.is_empty()
+
+
+func _isEncounterRequest(value) -> bool:
+	return value is Object and value.has_method("isValid") and value.has_method("reason") and value.has_method("toDictionary")
+
+
+## Exact enough to restore the launching context. The Overworld autoload already
+## reseeds spawnChunk/spawnTile from the destroyed scene's exact player position;
+## Location origins keep their location value and player position.
+func _captureShootoutOrigin() -> Dictionary:
+	var origin := {
+		"sceneKey": currentSceneKey,
+		"location": _duplicateLocationValue(Locations.currentLocation),
+		"trailState": Locations.exportState(),
+	}
+	if currentSceneKey == "overworld":
+		var provider = get_node_or_null("/root/Overworld")
+		if provider != null and provider.has_method("getOverworldMapPosition"):
+			var positionInfo: Dictionary = provider.getOverworldMapPosition()
+			if bool(positionInfo.get("valid", false)):
+				origin["worldPosition"] = positionInfo.get("world_position", Vector2.ZERO)
+	else:
+		var player := _findScenePlayer()
+		if player is Node2D:
+			origin["playerPosition"] = (player as Node2D).global_position
+	return origin
+
+
+func _findScenePlayer() -> Node:
+	var scene := get_current_scene()
+	if scene == null:
+		return null
+	for path in ["Entities/Actors/PlayerActor", "Actors/PlayerOverworldActor"]:
+		var player = scene.get_node_or_null(path)
+		if player != null:
+			return player
+	return null
+
+
+func _connectShootoutResult(scene: Node) -> void:
+	if _shootoutContext.is_empty() or bool(_shootoutContext.get("handled", false)):
+		return
+	if !scene.has_signal("shootoutEnded"):
+		return
+	var resultCallable := Callable(self, "_on_shootout_ended")
+	if !scene.is_connected("shootoutEnded", resultCallable):
+		scene.connect("shootoutEnded", resultCallable)
+	_shootoutContext["scene"] = scene
+
+
+func _disconnectShootoutResult() -> void:
+	var scene = _shootoutContext.get("scene", null)
+	if is_instance_valid(scene) and scene.is_connected("shootoutEnded", Callable(self, "_on_shootout_ended")):
+		scene.disconnect("shootoutEnded", Callable(self, "_on_shootout_ended"))
+
+
+## One-shot result handoff. Party/loot results are already committed by the
+## Shootout; this only clears the request and restores the launch origin.
+func _on_shootout_ended(_winningSide: String, _results: Dictionary) -> void:
+	if _shootoutContext.is_empty() or bool(_shootoutContext.get("handled", false)):
+		return
+	_shootoutContext["handled"] = true
+	_disconnectShootoutResult()
+	var shootoutGlobals = get_node_or_null("/root/Shootout")
+	if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
+		shootoutGlobals.clearPendingRequest()
+	var origin: Dictionary = _shootoutContext.get("origin", {})
+	if !_restoreShootoutOrigin(origin):
+		push_warning("SceneManager: could not restore the Shootout origin; staying in the current scene.")
+		_shootoutContext = {}
+
+
+func _restoreShootoutOrigin(origin: Dictionary) -> bool:
+	if transitioning:
+		return false
+	var sceneKey := str(origin.get("sceneKey", ""))
+	if sceneKey == "" or sceneKey == "shootout" or !SCENES.has(sceneKey):
+		return false
+	var context := {}
+	if sceneKey == "location" or sceneKey == "pregenerated_location" or sceneKey == "wfc_location":
+		var returnLocation = _duplicateLocationValue(origin.get("location", Locations.currentLocation))
+		if returnLocation is Dictionary and origin.has("playerPosition"):
+			returnLocation["playerPosition"] = origin["playerPosition"]
+		context["location"] = returnLocation
+		if origin.has("playerPosition"):
+			context["playerPosition"] = origin["playerPosition"]
+	# The Overworld restores from Overworld.spawnChunk/spawnTile, which its
+	# _exit_tree reseeds from the exact live position before leaving.
+	change_scene(sceneKey, context)
+	return true
+
 
 
 ## Switches to a scene from the SCENES registry. Optional context values
@@ -156,6 +292,10 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 		return
 
 	var newScene: Node = scenePacked.instantiate()
+	if sceneKey == "shootout":
+		# Connect before the scene enters the tree so combat can never emit a
+		# result before the return handler exists.
+		_connectShootoutResult(newScene)
 	var oldScene := get_current_scene()
 	currentSceneContainer.add_child(newScene)
 	if oldScene != null:
@@ -168,6 +308,9 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	# A successful transition away from a vendor room completes the return.
 	if sceneKey != "vendor_room" and !_vendorReturnContext.is_empty():
 		_vendorReturnContext = {}
+	# A successful return from a Shootout completes its one-shot context.
+	if sceneKey != "shootout" and !_shootoutContext.is_empty() and bool(_shootoutContext.get("handled", false)):
+		_shootoutContext = {}
 
 
 	await _fadeIn()
@@ -198,6 +341,12 @@ func _abortTransition(failedSceneKey := "") -> void:
 	# a failed return keeps the vendor room and its context intact.
 	if failedSceneKey == "vendor_room":
 		_vendorReturnContext = {}
+	# A failed Shootout load consumes no results and leaves no stale request.
+	if failedSceneKey == "shootout":
+		var shootoutGlobals = get_node_or_null("/root/Shootout")
+		if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
+			shootoutGlobals.clearPendingRequest()
+		_shootoutContext = {}
 	await _fadeIn()
 	transitioning = false
 	_syncInventoryPolicy()

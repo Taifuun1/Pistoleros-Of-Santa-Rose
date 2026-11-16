@@ -67,6 +67,12 @@ var flavorName = ""
 var fled = false
 var lootTableName = ""
 var encounterLootEnabled = true
+## Validated launch request consumed from the Shootout autoload (commit 2).
+var encounterRequest = null
+var encounterZoneId := ""
+var encounterSource := ""
+var encounterSourceId := ""
+var encounterTrailState: Dictionary = {}
 var lootGenerator
 # baseName -> { hp, injuryDamage, downed } for dead party members this fight.
 var partyFightState = {}
@@ -127,11 +133,71 @@ func _ready() -> void:
 	add_child(repositionMarkersRoot)
 	move_child(repositionMarkersRoot, 0)
 	actorDone.connect(_on_actor_done)
-	var encounterScript = DefaultEncounter
-	if Shootout.pendingEncounter != null:
-		encounterScript = load(Shootout.pendingEncounter)
-		Shootout.pendingEncounter = null
-	init(encounterScript.new().data)
+	encounterRequest = Shootout.consumePendingRequest()
+	var encounterData := _encounterDataForRequest(encounterRequest)
+	if encounterData.is_empty():
+		# A production request is validated before this scene loads. Reject an
+		# invalid one instead of silently substituting the debug encounter.
+		push_error("Shootout: the launch request is missing or invalid; the encounter will not start.")
+		battleOver = true
+		ui.showBanner("Encounter unavailable")
+		call_deferred("_emitInvalidRequestResult")
+		return
+	_applyEncounterRequest(encounterRequest)
+	init(encounterData)
+
+
+## Direct scene runs (F6/tests) have no pending request and intentionally use
+## the debug encounter. A malformed production request returns {}.
+func _encounterDataForRequest(request) -> Dictionary:
+	if request == null:
+		return _dataFromScript(DefaultEncounter)
+	if !request.has_method("isValid") or !request.isValid():
+		return {}
+	var script = load(request.encounterPath)
+	if script == null:
+		return {}
+	return _dataFromScript(script)
+
+
+func _dataFromScript(script) -> Dictionary:
+	if script == null:
+		return {}
+	var holder = script.new()
+	if holder == null or !("data" in holder):
+		if holder != null:
+			holder.free()
+		return {}
+	var data: Dictionary = holder.data.duplicate(true)
+	holder.free()
+	return data
+
+
+func _applyEncounterRequest(request) -> void:
+	if request == null:
+		encounterZoneId = ""
+		encounterSource = "debug"
+		encounterSourceId = ""
+		encounterTrailState = {}
+		return
+	encounterZoneId = str(request.zoneId)
+	encounterSource = str(request.source)
+	encounterSourceId = str(request.sourceId)
+	encounterTrailState = request.trailState.duplicate(true)
+
+
+## Rejected production requests return to the launcher without applying Party
+## results or falling back to another encounter.
+func _emitInvalidRequestResult() -> void:
+	shootoutEnded.emit("", {
+		"winningSide": "",
+		"fled": false,
+		"outcome": "invalid_request",
+		"party": {},
+		"rodeoLoot": {},
+		"loot": { "money": 0, "items": [] },
+		"lootResult": {},
+	})
 
 
 func init(encounterData: Dictionary) -> void:

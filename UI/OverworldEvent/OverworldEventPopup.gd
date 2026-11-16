@@ -13,19 +13,18 @@ const IMAGE_TYPE_PATHS: Dictionary = {
 # Fallback icon when image_type is unknown.
 const FALLBACK_IMAGE_PATH: String = "res://Assets/Icons/RevolverIcon.png"
 
-# Reference to the player actor — set when the popup is shown.
-var _player_actor: Node = null
 # Whether this popup pushed its own music (restored on close).
 var _music_pushed := false
+# Current event identity for outcome dispatch.
+var _event_name := ""
+var _event_data: Dictionary = {}
 
 func _ready() -> void:
 	OverworldEvents.event_triggered.connect(show_event)
 
 func show_event(event_name: String, event_data: Dictionary) -> void:
-	# Resolve the player actor reference.
-	var overworld = get_tree().current_scene
-	if overworld and overworld.has_node("Actors/PlayerOverworldActor"):
-		_player_actor = overworld.get_node("Actors/PlayerOverworldActor")
+	_event_name = event_name
+	_event_data = event_data
 
 	# Event/shop popup music (Docs/System Design/Music player.md): an event
 	# with a "music" field pushes that track, restored when the popup closes.
@@ -58,24 +57,34 @@ func show_event(event_name: String, event_data: Dictionary) -> void:
 	var separator = HSeparator.new()
 	content_box.add_child(separator)
 
-	# Add choice buttons.
+	# Add choice buttons. Choices without a supported explicit outcome stay
+	# disabled and explain why instead of silently closing as a no-op.
 	var choices: Array = event_data.get("choices", [])
-	for choice in choices:
+	for choiceValue in choices:
+		if !(choiceValue is Dictionary):
+			continue
+		var choice: Dictionary = choiceValue
 		var btn = Button.new()
 		btn.text = choice.get("label", "")
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var result_value: String = choice.get("result", "")
-		btn.pressed.connect(_on_choice_pressed.bind(result_value))
+		var validation: Dictionary = OverworldEvents.can_resolve_choice(choice)
+		btn.disabled = !bool(validation.get("success", false))
+		if btn.disabled:
+			btn.tooltip_text = "Unavailable: %s" % str(validation.get("reason", "missing_outcome"))
+		btn.pressed.connect(_on_choice_pressed.bind(choice.duplicate(true)))
 		content_box.add_child(btn)
 
 	show()
 
 
-func _on_choice_pressed(result: String) -> void:
+func _on_choice_pressed(choice: Dictionary) -> void:
 	_closePopup()
-	if _player_actor and _player_actor.has_method("process_event_result"):
-		_player_actor.process_event_result(result)
 	OverworldEvents.on_event_closed()
+	var resolution: Dictionary = OverworldEvents.resolve_event_choice(_event_name, _event_data, choice)
+	if !bool(resolution.get("success", false)):
+		push_warning("OverworldEventPopup: choice could not resolve (%s)." % str(resolution.get("reason", "")))
+	_event_name = ""
+	_event_data = {}
 	hide()
 
 
@@ -83,6 +92,8 @@ func _on_close_button_pressed() -> void:
 	# Closing without a choice counts as dismissing — still unblocks events.
 	_closePopup()
 	OverworldEvents.on_event_closed()
+	_event_name = ""
+	_event_data = {}
 	hide()
 
 

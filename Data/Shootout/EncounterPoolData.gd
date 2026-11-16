@@ -72,6 +72,54 @@ func getPublicEntries(zoneId: String) -> Array:
 	return publicEntries
 
 
+## Deterministic weighted selection for gameplay launchers. The same authored
+## entries drive the newspaper; an injected RNG keeps selection testable and the
+## global RNG untouched. Entries are read in authored order.
+func selectEncounter(zoneId: String, rng: RandomNumberGenerator, zoneCatalog = null) -> Dictionary:
+	if zoneCatalog != null and !zoneCatalog.hasZone(zoneId):
+		return _selectionFailure("invalid_zone", zoneId)
+	if !pools.has(zoneId):
+		return _selectionFailure("no_pool", zoneId)
+	if rng == null:
+		return _selectionFailure("invalid_rng", zoneId)
+	var entries = getEntries(zoneId)
+	var total := 0
+	for entryValue in entries:
+		if !(entryValue is Dictionary):
+			return _selectionFailure("invalid_entries", zoneId)
+		var weight = int(entryValue.get("weight", 0))
+		if weight <= 0:
+			return _selectionFailure("invalid_entries", zoneId)
+		total += weight
+	if total <= 0:
+		return _selectionFailure("no_pool", zoneId)
+	var pick := rng.randi_range(0, total - 1)
+	for entryValue in entries:
+		var entry: Dictionary = entryValue
+		pick -= int(entry.get("weight", 0))
+		if pick < 0:
+			return {
+				"success": true,
+				"reason": "",
+				"zoneId": zoneId,
+				"encounterPath": str(entry.get("encounter", "")),
+				"weight": int(entry.get("weight", 0)),
+				"entry": entry.duplicate(true),
+			}
+	return _selectionFailure("no_pool", zoneId)
+
+
+func _selectionFailure(reason: String, zoneId: String) -> Dictionary:
+	return {
+		"success": false,
+		"reason": reason,
+		"zoneId": zoneId,
+		"encounterPath": "",
+		"weight": 0,
+		"entry": {},
+	}
+
+
 ## Validates every authored pool. zoneCatalog enforces canonical Zone ids;
 ## encounterNames, when provided, resolves encounter file basenames so unknown
 ## references are rejected before runtime.
