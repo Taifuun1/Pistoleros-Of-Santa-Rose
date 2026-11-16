@@ -9,6 +9,13 @@ signal scene_change_started(sceneKey)
 signal scene_changed(sceneKey)
 
 const EncounterRequestScript = preload("res://Shootout/EncounterRequest.gd")
+const NewGameCoordinatorScript = preload("res://Globals/NewGameCoordinator.gd")
+
+## Authored return-routing sources (no second geometry table): the map manifest
+## resolves a Location id to its chunk/tile, the chunk data script holds
+## isTown/pregenerated.
+const MAP_MANIFEST_PATH := "res://Data/Overworld/OverworldMapData.tres"
+const CHUNK_DATA_PATH := "res://Overworld/Overworld Chunks/#%d#%d.gd"
 
 ## Logical scene keys mapped to scene paths. Location paths are formatted
 ## with the "location" context value (see _resolveScenePath).
@@ -120,6 +127,27 @@ func hasPendingShootout() -> bool:
 	return !_shootoutContext.is_empty()
 
 
+## Main Menu New Game entry point: resets every domain to its canonical initial
+## state, closes modals and clears transient contexts, then loads the Overworld.
+## Continue stays disabled until a full save service exists.
+func startNewGame(seedValue := 0) -> void:
+	if transitioning:
+		return
+	if vendorMenu.isOpen:
+		vendorMenu.close()
+	if journal.isOpen:
+		journal.close()
+	_vendorReturnContext = {}
+	_shootoutContext = {}
+	# New Game always starts from a running, unpaused Overworld.
+	get_tree().paused = false
+	var shootoutGlobals = get_node_or_null("/root/Shootout")
+	if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
+		shootoutGlobals.clearPendingRequest()
+	NewGameCoordinatorScript.resetDomains(get_tree().root, seedValue)
+	change_scene("overworld")
+
+
 func _isEncounterRequest(value) -> bool:
 	return value is Object and value.has_method("isValid") and value.has_method("reason") and value.has_method("toDictionary")
 
@@ -175,8 +203,9 @@ func _disconnectShootoutResult() -> void:
 
 
 ## One-shot result handoff. Party/loot results are already committed by the
-## Shootout; this only clears the request and restores the launch origin.
-func _on_shootout_ended(_winningSide: String, _results: Dictionary) -> void:
+## Shootout; this only clears the request and routes the return: Vamoose goes to
+## the recorded Town/checkpoint, every other outcome restores the launch origin.
+func _on_shootout_ended(_winningSide: String, results: Dictionary) -> void:
 	if _shootoutContext.is_empty() or bool(_shootoutContext.get("handled", false)):
 		return
 	_shootoutContext["handled"] = true
@@ -185,9 +214,128 @@ func _on_shootout_ended(_winningSide: String, _results: Dictionary) -> void:
 	if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
 		shootoutGlobals.clearPendingRequest()
 	var origin: Dictionary = _shootoutContext.get("origin", {})
+	if str(results.get("outcome", "")) == "vamoose" and _routeVamooseReturn():
+		_shootoutContext = {}
+		return
 	if !_restoreShootoutOrigin(origin):
 		push_warning("SceneManager: could not restore the Shootout origin; staying in the current scene.")
 		_shootoutContext = {}
+
+
+## Vamoose return (Docs/System Design/System Coherence.md, outcome routing):
+## one Vamoose command halves money and removes the selected carried stacks, the
+## Trail ends, and the party is thrown to the active quest checkpoint when one
+## exists, else the recorded last Town. A Town also applies recovery once
+## through the single Locations command. A non-town checkpoint is restored at
+## its authored Overworld entrance because Off Trail blocks the interior.
+func _routeVamooseReturn() -> bool:
+	var party = get_node_or_null("/root/Party")
+	if party == null or !party.has_method("vamoose"):
+		return false
+	var retreat: Dictionary = party.vamoose()
+	var destinationId := str(retreat.get("destination", ""))
+	if destinationId == "":
+		return false
+	var entry := _resolveDestinationEntry(destinationId)
+	var isTown := bool(entry.get("isTown", false)) or str(retreat.get("destinationKind", "")) == "town"
+	if isTown:
+		var locations = get_node_or_null("/root/Locations")
+		if locations == null or !locations.has_method("enterTown"):
+			return false
+		var townResult: Dictionary = locations.enterTown(destinationId)
+		if !bool(townResult.get("success", false)):
+			return false
+		var interiorKey := _interiorSceneKey(destinationId, bool(entry.get("pregenerated", false)))
+		if interiorKey != "":
+			change_scene(interiorKey, { "location": destinationId })
+			return true
+		_placeAtOverworldEntrance(entry)
+		return true
+	_endTrailIfActive()
+	_placeAtOverworldEntrance(entry)
+	return true
+
+
+## Ends an active Trail once (no Town destination to record).
+func _endTrailIfActive() -> void:
+	var locations = get_node_or_null("/root/Locations")
+	if locations != null and locations.has_method("isOnTrail") and locations.isOnTrail():
+		locations.endTrail()
+
+
+## Places the party at the destination's authored Overworld entrance and loads
+## the Overworld. Falls back to the stored last-known position when the manifest
+## entry is missing.
+func _placeAtOverworldEntrance(entry: Dictionary) -> bool:
+	if bool(entry.get("found", false)) and entry.get("chunk", null) is Vector2i and entry.get("tile", null) is Vector2i:
+		var provider = get_node_or_null("/root/Overworld")
+		if provider != null and provider.has_method("setSpawn"):
+			provider.setSpawn(entry.chunk, entry.tile)
+	change_scene("overworld")
+	return true
+
+
+## Resolves a Location id to its authored return metadata:
+## { found, isTown, pregenerated, chunk, tile }. The map manifest supplies the
+## chunk/tile and the chunk data script supplies isTown/pregenerated; both are
+## the authored source of truth, never a second geometry table.
+func _resolveDestinationEntry(locationId: String) -> Dictionary:
+	var entry := {
+		"found": false,
+		"isTown": false,
+		"pregenerated": false,
+		"chunk": Vector2i.ZERO,
+		"tile": Vector2i.ZERO,
+	}
+	var manifest = load(MAP_MANIFEST_PATH) if ResourceLoader.exists(MAP_MANIFEST_PATH) else null
+	if manifest == null or !manifest.has_method("resolveLocation"):
+		return entry
+	var location: Dictionary = manifest.resolveLocation(locationId)
+	if location.is_empty():
+		return entry
+	entry.found = true
+	if location.get("chunk", null) is Vector2i:
+		entry.chunk = location.chunk
+	if location.get("tile", null) is Vector2i:
+		entry.tile = location.tile
+	var authored := _authoredChunkLocation(entry.chunk, locationId)
+	entry.isTown = bool(authored.get("isTown", false))
+	entry.pregenerated = bool(authored.get("pregenerated", false))
+	return entry
+
+
+func _authoredChunkLocation(chunk: Vector2i, locationId: String) -> Dictionary:
+	var path := CHUNK_DATA_PATH % [chunk.x, chunk.y]
+	if !ResourceLoader.exists(path):
+		return {}
+	var script = load(path)
+	if script == null:
+		return {}
+	var instance = script.new()
+	if instance == null:
+		return {}
+	var locations := {}
+	if "locations" in instance:
+		var authored = instance.locations
+		if authored is Dictionary:
+			locations = authored.duplicate(true)
+	if instance is Node:
+		instance.free()
+	var locationValue = locations.get(locationId, {})
+	return locationValue if locationValue is Dictionary else {}
+
+
+## Interior scene key for a Town destination, trying the authored loader first
+## and the other loader when the shipped scene disagrees. "" means neither
+## loader has a scene, so the caller falls back to the Overworld entrance.
+func _interiorSceneKey(locationId: String, pregenerated: bool) -> String:
+	var primaryKey := "pregenerated_location" if pregenerated else "wfc_location"
+	if ResourceLoader.exists(_resolveScenePath(primaryKey, { "location": locationId })):
+		return primaryKey
+	var alternateKey := "wfc_location" if pregenerated else "pregenerated_location"
+	if ResourceLoader.exists(_resolveScenePath(alternateKey, { "location": locationId })):
+		return alternateKey
+	return ""
 
 
 func _restoreShootoutOrigin(origin: Dictionary) -> bool:

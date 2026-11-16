@@ -9,6 +9,9 @@ extends Node
 var spawnChunk = Vector2i(8, 12)
 var spawnTile = Vector2i(40, 38)
 
+const DEFAULT_SPAWN_CHUNK := Vector2i(8, 12)
+const DEFAULT_SPAWN_TILE := Vector2i(40, 38)
+
 var overworldActorIdCount = 0
 var overworldSpawnpointIdCount = 0
 
@@ -16,6 +19,27 @@ var _livePlayerActor: Node2D = null
 var _lastKnownPosition := Vector2.ZERO
 var _hasLastKnownPosition := false
 var _coordinates: OverworldCoordinates = null
+
+
+## Return-to-town/checkpoint placement: set the Overworld entry anchor and drop
+## the exact prior position so re-entry lands on the destination entrance.
+func setSpawn(chunk: Vector2i, tile: Vector2i) -> void:
+	spawnChunk = chunk
+	spawnTile = tile
+	_lastKnownPosition = Vector2.ZERO
+	_hasLastKnownPosition = false
+
+
+## New Game: return to the default Overworld entry anchor and forget the
+## previous run's last-known position.
+func resetForNewGame() -> void:
+	spawnChunk = DEFAULT_SPAWN_CHUNK
+	spawnTile = DEFAULT_SPAWN_TILE
+	overworldActorIdCount = 0
+	overworldSpawnpointIdCount = 0
+	_livePlayerActor = null
+	_lastKnownPosition = Vector2.ZERO
+	_hasLastKnownPosition = false
 
 
 ## The Overworld scene registers its live player on entry; the placement

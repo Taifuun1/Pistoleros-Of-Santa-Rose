@@ -5,6 +5,7 @@ extends Node
 ## Shootout at effective max HP; persistent knockout/downed state is removed.
 ## All fighters' post-fight state flows through applyFightResults().
 ## Inventories/equipment follow Docs/System Design/Journal/Inventory and Equipment.md.
+## Vamoose routing/loss and the versioned New Game snapshot land here too.
 
 signal inventoryChanged
 signal moneyChanged
@@ -24,6 +25,12 @@ const RESERVABLE_ITEM_TYPES = ["consumable"]
 const FLEE_MXHP_LOSS = 0.2
 # Placeholder: HP lost per point of MxHP lost to injuries.
 const DEFAULT_INJURY_RATE = 4
+## Save/New Game snapshot format for Party exportState()/importState().
+const STATE_FORMAT_VERSION := 1
+## Vamoose carried-inventory loss (Docs/System Design/Content and Balance
+## Catalog.md): 15% of occupied carried stacks, rounded up, minimum one while
+## non-empty. Named and injectable so balance changes stay in one place.
+const VAMOOSE_STACK_LOSS_FRACTION := 0.15
 
 var level = 1
 var money = 0
@@ -36,7 +43,6 @@ var inventory = [{
 var inventoryManagementAllowed := false
 var classesData = {}
 var rodeosData = {}
-var questInProgress = false
 
 var _inventoryRules
 var _statCalculator
@@ -44,6 +50,8 @@ var _itemCatalog
 var _inventoryDataAvailable := false
 var _characterDataAvailable := false
 var _nextInstanceNumber := 1
+## Canonical New Game baseline captured before any gameplay mutation.
+var _newGameBaseline := {}
 
 var party = {
 	"Walker Langley": {
@@ -111,6 +119,18 @@ var party = {
 		}
 	}
 }
+
+
+## New Game baseline: capture the canonical starter state before any gameplay
+## mutation so resetForNewGame() can restore it exactly.
+func _init() -> void:
+	_newGameBaseline = {
+		"money": money,
+		"level": level,
+		"inventory": inventory.duplicate(true),
+		"nextInstanceNumber": _nextInstanceNumber,
+		"party": party.duplicate(true),
+	}
 
 
 func _ready() -> void:
@@ -1013,13 +1033,279 @@ func reduceInjury(amount: int) -> void:
 		partyChanged.emit("")
 
 
-## Full party down: lose half of the money pouch and return where the party is
-## thrown to. Persistent knockout/downed state no longer exists; carried-stack
-## loss and checkpoint/last-Town routing land in commit 5.
-func vamoose() -> String:
-	var moneyBefore = money
+## Full-party-down retreat (Docs/System Design/Shootout/Death Injury and
+## Retreat.md). Halves the money pouch once, removes the balance-selected
+## carried stacks atomically, never touches equipped gear or the shared Bank,
+## creates no knockout/downed state, and returns the active quest checkpoint
+## when one exists, otherwise the recorded last Town. `options` may inject
+## `rng`, `checkpointId` and `lastTownId` for deterministic tests.
+func vamoose(options := {}) -> Dictionary:
+	var checkpointId := str(options.get("checkpointId", _resolveQuestCheckpointId()))
+	var lastTownId := str(options.get("lastTownId", _lastTownId()))
+	var destination := ""
+	var destinationKind := ""
+	if !checkpointId.is_empty():
+		destination = checkpointId
+		destinationKind = "quest_checkpoint"
+	elif !lastTownId.is_empty():
+		destination = lastTownId
+		destinationKind = "town"
+
+	var moneyBefore := int(money)
 	money = int(floor(money / 2.0))
+	var removed := _removeVamooseStacks(options.get("rng", null))
+	_reconcileBeltReservations(false)
+	inventoryChanged.emit()
 	if money != moneyBefore:
-		partyChanged.emit("")
 		moneyChanged.emit()
-	return "quest_checkpoint" if questInProgress else "town"
+	partyChanged.emit("")
+	return {
+		"success": true,
+		"reason": "",
+		"destination": destination,
+		"destinationKind": destinationKind,
+		"moneyLost": moneyBefore - money,
+		"money": money,
+		"removedItems": removed,
+	}
+
+
+## Number of occupied carried stacks Vamoose removes. Removed stacks stay whole
+## and each removal preserves instance-id uniqueness (stacks are whole rows).
+static func vamooseLossCount(inventorySize: int) -> int:
+	if inventorySize <= 0:
+		return 0
+	return maxi(1, int(ceil(inventorySize * VAMOOSE_STACK_LOSS_FRACTION)))
+
+
+## Removes complete carried stacks at deterministic indices; equipment and any
+## service-owned storage (the Bank) live outside Party.inventory.
+func _removeVamooseStacks(rng) -> Array:
+	var removalCount := vamooseLossCount(inventory.size())
+	if removalCount <= 0:
+		return []
+	var generator: RandomNumberGenerator = rng if rng is RandomNumberGenerator else RandomNumberGenerator.new()
+	if !(rng is RandomNumberGenerator):
+		generator.randomize()
+	var indices := []
+	for index in inventory.size():
+		indices.append(index)
+	# Partial Fisher-Yates: deterministic for a seeded RNG, uniform otherwise.
+	for position in removalCount:
+		var swapIndex := generator.randi_range(position, indices.size() - 1)
+		var swapValue = indices[position]
+		indices[position] = indices[swapIndex]
+		indices[swapIndex] = swapValue
+	var targets := indices.slice(0, removalCount)
+	targets.sort()
+	targets.reverse()
+	var removed := []
+	for index in targets:
+		removed.append((inventory[index] as Dictionary).duplicate(true))
+		inventory.remove_at(index)
+	return removed
+
+
+## Quest checkpoint resolution uses authoritative Quests state (the current
+## objective's map target), not a second Party flag. Missing services resolve
+## to "" so a headless call simply falls back to the last Town.
+func _resolveQuestCheckpointId() -> String:
+	var quests = _serviceNode("Quests")
+	if quests != null and quests.has_method("getCurrentObjectiveTarget"):
+		return str(quests.getCurrentObjectiveTarget())
+	return ""
+
+
+func _lastTownId() -> String:
+	var locations = _serviceNode("Locations")
+	if locations != null and "lastTownId" in locations:
+		return str(locations.lastTownId)
+	return ""
+
+
+func _serviceNode(nodeName: String) -> Node:
+	var mainLoop = Engine.get_main_loop()
+	if mainLoop is SceneTree and mainLoop.root != null:
+		return mainLoop.root.get_node_or_null(nodeName)
+	return null
+
+## Versioned Party snapshot for the later save service and the New Game reset
+## path. Covers money/level, mutable member state, inventory/equipment, belt
+## reservations and the instance-id counter.
+func exportState() -> Dictionary:
+	var members := {}
+	for memberKey in party:
+		var member = party[memberKey]
+		if !(member is Dictionary):
+			continue
+		members[str(memberKey)] = {
+			"hp": int(member.get("hp", 1)),
+			"injuryDamage": int(member.get("injuryDamage", 0)),
+			"injuryRate": int(member.get("injuryRate", DEFAULT_INJURY_RATE)),
+			"equipment": _duplicateDictionary(member.get("equipment", {})),
+			"beltReservations": _duplicateArray(member.get("beltReservations", [])),
+		}
+	return {
+		"formatVersion": STATE_FORMAT_VERSION,
+		"level": level,
+		"money": money,
+		"nextInstanceNumber": _nextInstanceNumber,
+		"inventory": inventory.duplicate(true),
+		"members": members,
+	}
+
+
+## Validates the whole payload (item ids and references included) before
+## committing anything; a rejected import leaves Party state untouched.
+func importState(state) -> Dictionary:
+	if !isInventoryDataAvailable():
+		return _stateFailure("data_unavailable")
+	if !(state is Dictionary):
+		return _stateFailure("invalid_state")
+	if int(state.get("formatVersion", -1)) != STATE_FORMAT_VERSION:
+		return _stateFailure("invalid_state")
+	var moneyValue = state.get("money", null)
+	var levelValue = state.get("level", null)
+	var nextInstanceValue = state.get("nextInstanceNumber", null)
+	if typeof(moneyValue) != TYPE_INT or int(moneyValue) < 0:
+		return _stateFailure("invalid_state")
+	if typeof(levelValue) != TYPE_INT or int(levelValue) < 1:
+		return _stateFailure("invalid_state")
+	if typeof(nextInstanceValue) != TYPE_INT or int(nextInstanceValue) < 1:
+		return _stateFailure("invalid_state")
+	var inventoryValue = state.get("inventory", null)
+	if !(inventoryValue is Array):
+		return _stateFailure("invalid_state")
+	var membersValue = state.get("members", null)
+	if !(membersValue is Dictionary):
+		return _stateFailure("invalid_state")
+
+	var seenIds := {}
+	var candidateInventory := []
+	for entryValue in inventoryValue:
+		if !(entryValue is Dictionary):
+			return _stateFailure("invalid_state")
+		var entry: Dictionary = entryValue
+		var instanceId := str(entry.get("instanceId", ""))
+		if instanceId == "" or seenIds.has(instanceId):
+			return _stateFailure("invalid_state")
+		if typeof(entry.get("quantity", null)) != TYPE_INT or int(entry.quantity) <= 0:
+			return _stateFailure("invalid_state")
+		if str(entry.get("definitionId", "")) == "":
+			return _stateFailure("invalid_state")
+		if _inventoryRules.projectItem(entry, _itemCatalog).is_empty():
+			return _stateFailure("invalid_item")
+		seenIds[instanceId] = true
+		candidateInventory.append(entry.duplicate(true))
+
+	var candidateMembers := {}
+	for memberKeyValue in membersValue:
+		var memberKey := str(memberKeyValue)
+		if !party.has(memberKey):
+			return _stateFailure("invalid_state")
+		var memberValue = membersValue[memberKeyValue]
+		if !(memberValue is Dictionary):
+			return _stateFailure("invalid_state")
+		var memberState: Dictionary = memberValue
+		var hpValue = memberState.get("hp", null)
+		var injuryValue = memberState.get("injuryDamage", null)
+		var injuryRateValue = memberState.get("injuryRate", null)
+		if typeof(hpValue) != TYPE_INT or int(hpValue) < 0:
+			return _stateFailure("invalid_state")
+		if typeof(injuryValue) != TYPE_INT or int(injuryValue) < 0:
+			return _stateFailure("invalid_state")
+		if typeof(injuryRateValue) != TYPE_INT or int(injuryRateValue) < 1:
+			return _stateFailure("invalid_state")
+		var equipmentValue = memberState.get("equipment", null)
+		if equipmentValue != null and !(equipmentValue is Dictionary):
+			return _stateFailure("invalid_state")
+		var reservationsValue = memberState.get("beltReservations", null)
+		if !(reservationsValue is Array):
+			return _stateFailure("invalid_state")
+		var equipment := {}
+		if equipmentValue is Dictionary:
+			for slot in equipmentValue:
+				if !InventoryRulesScript.EQUIPMENT_SLOTS.has(str(slot)):
+					return _stateFailure("invalid_state")
+				var itemValue = equipmentValue[slot]
+				if itemValue == null:
+					equipment[slot] = null
+					continue
+				if !(itemValue is Dictionary):
+					return _stateFailure("invalid_state")
+				var item: Dictionary = itemValue
+				var itemId := str(item.get("instanceId", ""))
+				if itemId == "" or seenIds.has(itemId) or !_isValidEquipItem(item):
+					return _stateFailure("invalid_state")
+				seenIds[itemId] = true
+				equipment[slot] = item.duplicate(true)
+		var reservations := []
+		var reservationIds := {}
+		for reservationValue in reservationsValue:
+			if !(reservationValue is Dictionary):
+				return _stateFailure("invalid_state")
+			var reservation: Dictionary = reservationValue
+			var reservationId := str(reservation.get("instanceId", ""))
+			if reservationId == "" or !seenIds.has(reservationId) or reservationIds.has(reservationId):
+				return _stateFailure("invalid_state")
+			if str(reservation.get("combatId", "")) == "":
+				return _stateFailure("invalid_state")
+			if typeof(reservation.get("quantity", null)) != TYPE_INT or int(reservation.quantity) <= 0:
+				return _stateFailure("invalid_state")
+			reservationIds[reservationId] = true
+			reservations.append(reservation.duplicate(true))
+		candidateMembers[memberKey] = {
+			"hp": int(hpValue),
+			"injuryDamage": int(injuryValue),
+			"injuryRate": int(injuryRateValue),
+			"equipment": equipment,
+			"beltReservations": reservations,
+		}
+
+	money = int(moneyValue)
+	level = int(levelValue)
+	_nextInstanceNumber = int(nextInstanceValue)
+	inventory = candidateInventory
+	for memberKey in candidateMembers:
+		var member = party[memberKey]
+		var memberState: Dictionary = candidateMembers[memberKey]
+		member["hp"] = memberState.hp
+		member["injuryDamage"] = memberState.injuryDamage
+		member["injuryRate"] = memberState.injuryRate
+		member["equipment"] = memberState.equipment
+		member["beltReservations"] = memberState.beltReservations
+	inventoryChanged.emit()
+	moneyChanged.emit()
+	partyChanged.emit("")
+	return { "success": true, "reason": "" }
+
+
+## New Game: restore the canonical starter state captured at construction.
+func resetForNewGame() -> void:
+	var baseline: Dictionary = _newGameBaseline
+	money = int(baseline.get("money", 0))
+	level = int(baseline.get("level", 1))
+	_nextInstanceNumber = int(baseline.get("nextInstanceNumber", 1))
+	inventory = _duplicateArray(baseline.get("inventory", []))
+	var baselineParty: Dictionary = baseline.get("party", {})
+	for memberKey in party:
+		if baselineParty.has(memberKey):
+			party[memberKey] = _duplicateDictionary(baselineParty[memberKey])
+	inventoryManagementAllowed = false
+	inventoryChanged.emit()
+	moneyChanged.emit()
+	partyChanged.emit("")
+
+
+
+func _duplicateDictionary(value) -> Dictionary:
+	return value.duplicate(true) if value is Dictionary else {}
+
+
+func _duplicateArray(value) -> Array:
+	return value.duplicate(true) if value is Array else []
+
+
+func _stateFailure(reason: String) -> Dictionary:
+	return { "success": false, "reason": reason }
+

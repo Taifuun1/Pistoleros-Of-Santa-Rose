@@ -83,7 +83,7 @@ The launcher validates the whole request, connects the result handler before com
 
 Automate one real scene test for each source type: event, Location ambush and quest. Cover selected encounter identity, Zone propagation, one Party commit, victory/flee/Vamoose destinations, stock departure rules, overflow acknowledgment, double input, launch/load failure and no leaked modal/music/pause state. Run the reward/access cases both On and Off Trail: Off Trail must permit quests and town-to-town travel while rejecting non-town Locations, attrition and every reward source.
 
-**Commit 2 progress:** `TestEncounterFlow.tscn` covers the event source: deterministic pool selection, request/Zone propagation, double-launch rejection, real Overworld → canyon Shootout → exact origin return, duplicate-result rejection and failed-load context cleanup. Location-ambush and quest sources, Vamoose destination behavior and reward/access On-vs-Off-Trail cases remain open.
+**Commit 2 and 5 progress:** `TestEncounterFlow.tscn` covers the event source: deterministic pool selection, request/Zone propagation, double-launch rejection, real Overworld → canyon Shootout → exact origin return, duplicate-result rejection and failed-load context cleanup. `TestVamooseFlow.tscn` covers the Vamoose outcome: last-Town interior return, non-town checkpoint Overworld-entrance return, one end-of-Trail/recovery pass, Off-Trail restriction restoration and no stock reroll. Location-ambush and quest sources (as launch callers) and reward/access On-vs-Off-Trail cases for those sources remain open.
 
 ## 4. Event outcome contract
 
@@ -104,7 +104,7 @@ Validation must reject duplicate event ids, unknown outcome kinds/references and
 
 ## 5. Inventory, equipment, and belt coherence
 
-**Status: the shared belt ownership and consumption boundary is implemented in commit 3.** Party members own `beltReservations` referencing carried stacks; fight setup resolves them to combat `combatId`s with source `instanceId`s; successful uses are recorded and committed once through `Party.applyFightResults()`, and unconsumed/stale reservations are reconciled. Save/load and Vamoose inventory-loss integration remain later commits.
+**Status: the shared belt ownership and consumption boundary is implemented in commit 3; Vamoose's carried-stack loss lands in commit 5.** Party members own `beltReservations` referencing carried stacks; fight setup resolves them to combat `combatId`s with source `instanceId`s; successful uses are recorded and committed once through `Party.applyFightResults()`, and unconsumed/stale reservations are reconciled. `Party.vamoose()` removes whole carried stacks and reconciles their reservations, and Party exposes a versioned snapshot for the later save service; disk Continue remains a later commit.
 
 ### One ownership model
 
@@ -179,7 +179,7 @@ Do not serialize active Shootout nodes, pending global encounter paths, transien
 3. Commit in dependency order: content/progression inputs, Party, Quests/Locations, Discovery, Vendors, position, then derived UI/music state. Reuse the validate-before-commit coordinator contract already audited for Vendors/Discovery.
 4. Recompute derived state rather than trusting duplicated cached values: equipment stats, current objective markers, current Zone, stock departure alignment and Journal projections.
 5. On any failure, preserve the previous valid session and report the error; never partially import money/items/quests.
-6. New Game calls every domain reset, closes modals, clears encounter/return context, restores the initial seed/Party/quest/position and initial Off-Trail state, and only then enters the initial scene.
+6. New Game calls every domain reset, closes modals, clears encounter/return context, restores the initial seed/Party/quest/position and initial Off-Trail state, and only then enters the initial scene. **Commit 5 note:** `SceneManager.startNewGame()` + `Globals/NewGameCoordinator.gd` implement this reset path and `MainMenu` uses it; the disk load/save service (Continue) remains later work, so steps 1–5 above are still design intent.
 
 Enable Continue only after a valid save exists and an application-restart test passes. Add migration tests for starter items, instance-id allocation, changed content ids and older snapshot versions.
 

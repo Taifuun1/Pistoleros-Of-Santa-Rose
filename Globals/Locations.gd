@@ -36,6 +36,12 @@ func isCurrentLocationTown() -> bool:
 	return currentLocationIsTown
 
 
+## The Town recorded by the last enterTown() call; Vamoose returns here when no
+## quest checkpoint is available.
+func getLastTownId() -> String:
+	return lastTownId
+
+
 ## Enters a designated Town through the Overworld entrance. Records the Town and
 ## ends an active Trail once. Repeated Town entry is idempotent.
 func enterTown(locationId: String) -> Dictionary:
@@ -177,12 +183,15 @@ func importState(state) -> Dictionary:
 
 
 ## New Game starts Off Trail with no departure cycle and no remembered Town.
+## Minigame session score/materials reset here too (Locations owns that state).
 func resetForNewGame() -> void:
 	var changed := onTrail
 	onTrail = false
 	trailDepartureId = 0
 	lastTownId = ""
 	currentLocationIsTown = false
+	minigamePoints = MINIGAME_POINTS_DEFAULT.duplicate(true)
+	collectedPanningMaterials = PANNING_MATERIALS_DEFAULT.duplicate(true)
 	if changed:
 		trailStateChanged.emit(false)
 
@@ -196,7 +205,7 @@ func _failure(reason: String) -> Dictionary:
 
 
 # Points earned from minigames, keyed by minigame name
-var minigamePoints = {
+const MINIGAME_POINTS_DEFAULT = {
 	"Dodging": 0,
 	"Gathering": 0,
 	"Hunting": 0,
@@ -206,7 +215,10 @@ var minigamePoints = {
 }
 
 # Materials collected during Mining and Robbing that feed into the Panning minigame
-var collectedPanningMaterials = {
+const PANNING_MATERIALS_DEFAULT = {
 	"rock": 20,
 	"soil": 10,
 }
+
+var minigamePoints = MINIGAME_POINTS_DEFAULT.duplicate(true)
+var collectedPanningMaterials = PANNING_MATERIALS_DEFAULT.duplicate(true)

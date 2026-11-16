@@ -133,6 +133,38 @@ func getCurrentMapMarkers() -> Array[Dictionary]:
 	return markers
 
 
+## True when at least one quest is active. Authoritative replacement for the
+## removed Party.questInProgress second flag.
+func hasActiveQuest() -> bool:
+	for questId in _states:
+		if str(_states[questId].get("status", "")) == STATUS_ACTIVE:
+			return true
+	return false
+
+
+## The authored map target of the highest-priority active quest's current
+## objective, or "" when no checkpoint is available. Vamoose resolves its
+## destination from this instead of a copied flag.
+func getCurrentObjectiveTarget() -> String:
+	if !_dataAvailable:
+		return ""
+	for definition in _sortedDefinitions():
+		if !_states.has(definition.quest_id):
+			continue
+		var objective := _currentObjectiveFor(definition, _states[definition.quest_id])
+		if objective != null and !objective.map_target_id.is_empty():
+			return objective.map_target_id
+	return ""
+
+
+## New Game: forget all runtime progress without touching the authored catalog.
+func resetForNewGame() -> void:
+	var cleared: Array = _states.keys()
+	_states = {}
+	for questId in cleared:
+		questStateChanged.emit(str(questId))
+
+
 func _projectQuest(definition: QuestDefinition, state: Dictionary) -> Dictionary:
 	var history: Array[Dictionary] = []
 	var completedObjectiveIds: Array = state.get("completed_objective_ids", [])

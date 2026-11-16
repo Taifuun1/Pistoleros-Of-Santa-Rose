@@ -13,16 +13,16 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (party persistence, On-Trail injuries, Vamoose and fleeing; the Scene Manager town/checkpoint handoff is pending with the launcher integration):
+**Implemented** (party persistence, On-Trail injuries, Vamoose and fleeing, including the Scene Manager town/checkpoint handoff):
 
-- `Globals/Party.gd` owns the persistent state: per-member `injuryDamage`, `injuryRate`, `hp`, `money` and `questInProgress`. `effectiveMaxHp()` derives MxHP from journey injuries (floor 1) only while On Trail; `getFightData()` starts each fighter at effective max HP.
+- `Globals/Party.gd` owns the persistent state: per-member `injuryDamage`, `injuryRate`, `hp` and `money`. `effectiveMaxHp()` derives MxHP from journey injuries (floor 1) only while On Trail; `getFightData()` starts each fighter at effective max HP. Quest-checkpoint resolution now reads authoritative `Quests` state, not a copied flag.
 - Injuries: all damage (attacks, abilities, bleed/poison) accumulates on the actor node (`injuryDamage`) and is written back to the party at fight end only when the captured request is On Trail. Off-Trail fights and scene transitions do not change MxHP.
 - Knockouts: persistent knockout/downed state is removed (decided). The fight keeps only in-fight zero-HP state to determine Vamoose.
-- Vamoose: an enemy win with the whole party downed yields outcome `vamoose`; `Party.vamoose()` halves the money pouch and returns the destination (`town`, or `quest_checkpoint` when `questInProgress`). Carried-inventory loss and authoritative last-Town routing remain commit 5.
-- Post-fight flow: `Shootout._on_battle_ended()` builds a results payload (`winningSide`, `outcome`, `fled`, per-member `party` state with death snapshots, `beltConsumed`, `trailState`, `rodeoLoot`) and calls `Party.applyFightResults()`; the `shootoutEnded` signal carries `(winningSide, results)`.
+- Vamoose: an enemy win with the whole party downed yields outcome `vamoose`; `Party.vamoose(options)` halves the money pouch once, removes `max(1, ceil(inventory.size * 0.15))` occupied carried stacks deterministically/atomically (equipped gear and the Bank excluded) with no knockout state, and returns the destination: the active quest checkpoint (`Quests.getCurrentObjectiveTarget()`) when one exists, otherwise the recorded last Town (`Locations.getLastTownId()`, set by `enterTown()`). `SceneManager` routes the outcome to the Town interior through the single `enterTown()` command (ending the Trail and applying recovery once) or to a non-town checkpoint's authored Overworld entrance.
+- Post-fight flow: `Shootout._on_battle_ended()` builds a results payload (`winningSide`, `outcome`, `fled`, per-member `party` state with death snapshots, `beltConsumed`, `trailState`, `rodeoLoot`) and calls `Party.applyFightResults()`; the `shootoutEnded` signal carries `(winningSide, results)`. The SceneManager routes `vamoose` to Vamoose and every other outcome back to the launch origin.
 - Fleeing: a Flee button (UI) enabled via `turnManager.canFlee()` — instant in Dust-ups, turn 10+ in Showdowns (`FLEE_TURN_THRESHOLD`); fleeing yields outcome `fled` (party keeps remaining loot and is not thrown to town) and the On-Trail `Party.applyFleeCost()` models the MxHp loss as injury (placeholder 20% of base MxHp x injury rate). Enemies never flee (decided).
-- `resetInjury()` (town entry) and `reduceInjury()` (camp items) are ready for the overworld systems.
-- Tests: `Tests/TestInjury.gd` covers max-HP fight starts, On/Off-Trail attrition and loot gating, town/camp resets, flee cost, flee enablement, Vamoose and the absence of persistent knockout/downed state.
+- `resetInjury()` (town entry, through the single `Locations.enterTown()` command) and `reduceInjury()` (camp items) are ready; town entry is wired, camp/rest producers remain later work.
+- Tests: `Tests/TestInjury.gd` covers max-HP fight starts, On/Off-Trail attrition and loot gating, town/camp resets, flee cost, flee enablement, the Vamoose destination/money rule and the absence of persistent knockout/downed state; `Tests/TestVamooseFlow.tscn` covers the carried-stack loss, destination routing and the Party snapshot.
 
 ## Design
 
@@ -54,7 +54,7 @@ A party member at 0 HP when the fight ends (or who died mid-fight and the fight 
 When `battleEnded` fires with the enemy winning (all 4 gang members downed):
 
 1. `shootoutEnded` carries the loss to the launcher.
-2. The launcher calls `Party.vamoose()`: halves carried loot/money, records the knockout debuffs, and asks the Scene Manager (`Docs/System Design/Scene Manager.md`) to load the last visited town — or the last quest checkpoint if a quest is in progress (quest system tracks the checkpoint).
+2. The launcher calls `Party.vamoose(options)`: halves money and the selected carried stacks, records no knockout debuffs, and asks the Scene Manager to load the last visited town — or the active quest checkpoint if one exists (the Quests service owns the checkpoint target).
 
 ### Fleeing
 
@@ -92,7 +92,7 @@ Enemy death is permanent for the fight only; named story characters are downed r
 2. ✅ Injury accumulation + effective MxHp.
 3. ✅ Knockout debuffs.
 4. ✅ Flee button + turn-gating.
-5. ✅ Vamoose; Scene Manager handoff (pending with the launcher integration).
+5. ✅ Vamoose + Scene Manager town/checkpoint handoff (commit 5).
 
 ## Open Questions
 

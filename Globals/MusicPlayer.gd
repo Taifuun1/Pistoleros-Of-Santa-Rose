@@ -159,6 +159,16 @@ func stop_music(fadeSeconds := -1.0) -> void:
 	_fadeOutPlayer(players[activePlayerIndex], _fadeSeconds(fadeSeconds))
 
 
+## New Game: drop the popup music stack and forget the current track/Zone so the
+## fresh Overworld restarts its Zone music instead of inheriting a stale state.
+func resetForNewGame() -> void:
+	musicStack.clear()
+	currentTrackId = ""
+	currentZone = ""
+	playlist = []
+	playlistIndex = 0
+
+
 ## Popup soundtrack (shops, events, menus that appear over other scenes):
 ## plays a temporary track selection and restores the previous music on pop.
 func push_music(trackSelection, fadeSeconds := -1.0) -> void:

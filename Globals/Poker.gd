@@ -361,3 +361,13 @@ var players = {
 		"personality": PLAYER_PERSONALITIES.Pinchpenny
 	}
 }
+
+
+## New Game: restore the canonical table roster and AI personalities.
+func resetForNewGame() -> void:
+	players = {
+		"player1": { "name": "player1", "money": 100, "playerType": "player" },
+		"player2": { "name": "player2", "money": 100, "playerType": "ai", "personality": PLAYER_PERSONALITIES.Casual },
+		"player3": { "name": "player3", "money": 100, "playerType": "ai", "personality": PLAYER_PERSONALITIES.Gambler },
+		"player4": { "name": "player4", "money": 100, "playerType": "ai", "personality": PLAYER_PERSONALITIES.Pinchpenny },
+	}

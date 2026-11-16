@@ -139,12 +139,12 @@ func _run() -> void:
 
 	print("\n--- Vamoose halves loot and picks the destination ---")
 	party.money = 100
-	party.questInProgress = false
-	_check(party.vamoose() == "town", "vamoose without a quest throws the party to town")
+	var townRetreat: Dictionary = party.vamoose({ "checkpointId": "", "lastTownId": "Lazysprings" })
+	_check(townRetreat.destination == "Lazysprings" and townRetreat.destinationKind == "town", "vamoose without a checkpoint returns the recorded last Town")
 	_check(party.money == 50, "vamoose halves the money pouch, got %d" % party.money)
 	_check(!member.has("downed") and !member.has("knockoutDebuffs"), "vamoose creates no persistent knockout/downed state")
-	party.questInProgress = true
-	_check(party.vamoose() == "quest_checkpoint", "vamoose during a quest throws the party to the checkpoint")
+	var checkpointRetreat: Dictionary = party.vamoose({ "checkpointId": "Bandit Camp", "lastTownId": "Lazysprings" })
+	_check(checkpointRetreat.destination == "Bandit Camp" and checkpointRetreat.destinationKind == "quest_checkpoint", "vamoose during a quest returns the quest checkpoint")
 
 	print("\n--- Damage accumulates as injury ---")
 	var fake = FakeShootout.new()

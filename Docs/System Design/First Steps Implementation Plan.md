@@ -1,6 +1,6 @@
 # First implementation steps: coherent Trail and encounter vertical slice
 
-**Status: commits 1–4 implemented and verified; commits 5–6 remain proposed.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot.
+**Status: commits 1–5 implemented and verified; commit 6 remains proposed.** Commit 1 added the authoritative On/Off Trail state and gates. Commit 2 added the typed encounter request, SceneManager launch/return router, deterministic Zone pool selection, canonical Zone event pools and the explicit event outcome dispatcher. Commit 3 replaced independent Party belt arrays with validated reservations and one-shot combat consumption. Commit 4 migrated the decided combat rules: max-HP fight starts with Trail-gated attrition, combined bleed stacks with stack-removing healing, authored-Move-only offense, per-actor `hp_below`, explicit Jammed payloads, Miss suppression and Zone-aware loot. Commit 5 added Vamoose routing/loss and the New Game reset coordinator.
 
 This is the first delivery slice for the [Implementation gap register](Implementation%20Gaps.md) and [System coherence requirements](System%20Coherence.md). Use the [Content and balance catalog](Content%20and%20Balance%20Catalog.md) for exact data/scene locations.
 
@@ -189,7 +189,9 @@ Update `res://Tests/TestInjury.gd`, `res://Tests/TestCharacterSheet.gd` and `res
 
 Focused rule tests and the full suite pass. The canyon rat fight uses only Moves, starts at max HP, applies combined bleed correctly, supports a per-actor threshold and can award canonical Zone equipment only On Trail.
 
-## 8. Commit 5 — Vamoose routing/loss and New Game reset
+## 8. ✅ Commit 5 — Vamoose routing/loss and New Game reset
+
+**Implemented.** `Locations.enterTown()` records the last resupply Town used for recovery, `Locations.getLastTownId()` exposes it, and quest checkpoints resolve from `Quests.getCurrentObjectiveTarget()` (the authoritative current-objective map target) instead of the removed `Party.questInProgress` flag. `Party.vamoose(options)` halves money once, removes `max(1, ceil(inventory.size * 0.15))` occupied stacks atomically with an injectable RNG, excludes equipped gear and the Bank, applies no knockout state, reconciles removed reservations and returns the checkpoint or last-Town destination. The SceneManager routes Vamoose only for the `vamoose` outcome: a Town enters its interior through the single `enterTown()` command (end-of-Trail plus recovery once), a non-town checkpoint is placed at its authored Overworld entrance while Off Trail, and flees and non-wipe defeats still restore the launch origin without stock reroll. Versioned `Party.exportState()/importState()/resetForNewGame()` and the `NewGameCoordinator` (Party, Quests, Locations, Overworld, Cutscene, OverworldEvents, Vendors, Discovery, PokerMoney, Poker) are live behind `SceneManager.startNewGame()`. `TestVamooseFlow.tscn` and `TestNewGameReset.tscn` cover the slice.
 
 ### Implementation
 

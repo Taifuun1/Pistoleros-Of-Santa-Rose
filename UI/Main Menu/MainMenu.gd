@@ -7,6 +7,13 @@ func _ready() -> void:
 
 
 func _on_new_game_pressed() -> void:
+	# One reset path: the Scene Manager resets every domain and clears transient
+	# state before the Overworld loads. Direct-scene runs fall back to a plain
+	# Overworld change so the menu still works without the manager.
+	var sceneManager = HelperFunctions.sceneManagerNode()
+	if sceneManager != null and sceneManager.has_method("startNewGame"):
+		sceneManager.startNewGame()
+		return
 	HelperFunctions.changeScene("overworld")
 
 

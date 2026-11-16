@@ -110,6 +110,11 @@ func resetEventState() -> void:
 	event_active = false
 
 
+## New Game: same as resetEventState, named for the coordinator contract.
+func resetForNewGame() -> void:
+	resetEventState()
+
+
 func _trigger_random_event() -> void:
 	var current_chunk := _current_chunk()
 	var zoneId := get_zone_for_chunk(current_chunk)

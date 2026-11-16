@@ -158,7 +158,7 @@ func testCombatConsumptionAndWriteBack() -> void:
 
 
 func testUnusedReservationsSurvive() -> void:
-	print("\n--- Unused reservations survive every outcome ---")
+	print("\n--- Unused reservations survive victory/flee; Vamoose removes selected stacks ---")
 	var catalog = ItemCatalogScript.new()
 	var party = _freshParty(catalog, 2)
 	var instanceId = party.addItems([_stack("paregoric", 2)]).acceptedInstanceIds[0]
@@ -168,13 +168,22 @@ func testUnusedReservationsSurvive() -> void:
 		var application = party.applyFightResults(outcome.duplicate(true))
 		_check(application.belt.success and application.belt.consumed.is_empty(), "no item use commits nothing")
 	_check(party.inventory[0].quantity == 2, "the unused stack stays owned")
-	var belt = party.getBeltSnapshot("Walker Langley")
-	_check(belt.used == 1 and belt.entries[0].quantity == 1, "the unused reservation stays reserved")
+	_check(party.getBeltSnapshot("Walker Langley").used == 1, "the unused reservation stays reserved")
+
+	# Vamoose removes the balance-selected carried stacks and reconciles the
+	# reservation of a removed stack away.
 	party.money = 100
-	party.questInProgress = false
-	party.vamoose()
-	_check(party.inventory[0].quantity == 2 and party.getBeltSnapshot("Walker Langley").used == 1, "Vamoose removes neither the stack nor its reservation")
+	var retreat: Dictionary = party.vamoose({ "rng": _seededRng(11) })
+	_check(retreat.removedItems.size() == 1, "Vamoose removes one complete carried stack")
+	_check(party.inventory.is_empty(), "the removed stack leaves the inventory")
+	_check(party.getBeltSnapshot("Walker Langley").used == 0, "the removed stack's reservation is reconciled away")
 	party.free()
+
+
+func _seededRng(value: int) -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = value
+	return rng
 
 
 func testInvalidRecordsAreAtomic() -> void:
