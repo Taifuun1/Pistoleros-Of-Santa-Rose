@@ -40,6 +40,11 @@ const SCENES := {
 @export var fadeDuration := 0.3
 ## How long a load may take before the loading screen is shown, in seconds.
 @export var loadingScreenDelay := 0.2
+## Overworld-boundary save checkpoints (Docs/System Design/First Steps
+## Implementation Plan.md, save-service commit). Scene-run tests instantiate this
+## manager instead of being the live session, so they turn it off and save
+## explicitly through the SaveGame service.
+@export var autosaveEnabled := true
 
 var currentSceneKey := ""
 var transitioning := false
@@ -146,6 +151,60 @@ func startNewGame(seedValue := 0) -> void:
 		shootoutGlobals.clearPendingRequest()
 	NewGameCoordinatorScript.resetDomains(get_tree().root, seedValue)
 	change_scene("overworld")
+
+
+## Main Menu Continue entry point: restores the stored save through the one save
+## service and resumes on the Overworld at the recorded exact position. A
+## rejected or missing save leaves the current session and scene untouched.
+func continueGame() -> bool:
+	if transitioning or !hasValidSave():
+		return false
+	if vendorMenu.isOpen:
+		vendorMenu.close()
+	if journal.isOpen:
+		journal.close()
+	_vendorReturnContext = {}
+	_shootoutContext = {}
+	get_tree().paused = false
+	var shootoutGlobals = get_node_or_null("/root/Shootout")
+	if shootoutGlobals != null and shootoutGlobals.has_method("clearPendingRequest"):
+		shootoutGlobals.clearPendingRequest()
+	var restored: Dictionary = loadSave()
+	if !bool(restored.get("success", false)):
+		return false
+	change_scene("overworld")
+	return true
+
+
+func hasValidSave() -> bool:
+	var saveGame = get_node_or_null("/root/SaveGame")
+	return saveGame != null and saveGame.has_method("hasValidSave") and saveGame.hasValidSave()
+
+
+## Restores the stored save through the shared service. Failures are reported to
+## the caller instead of half-applying: the service restores the previous session
+## when a domain rejects its payload.
+func loadSave() -> Dictionary:
+	var saveGame = get_node_or_null("/root/SaveGame")
+	if saveGame == null or !saveGame.has_method("loadSave"):
+		return { "success": false, "reason": "save_service_unavailable" }
+	var result: Dictionary = saveGame.loadSave()
+	if !bool(result.get("success", false)):
+		push_warning("SceneManager: save restore rejected (%s)." % str(result.get("reason", "")))
+	return result
+
+
+## Records one save checkpoint from the live session. Failures stay warnings: a
+## checkpoint must never interrupt gameplay or a transition.
+func _recordSaveCheckpoint() -> void:
+	if !autosaveEnabled:
+		return
+	var saveGame = get_node_or_null("/root/SaveGame")
+	if saveGame == null or !saveGame.has_method("save"):
+		return
+	var result: Dictionary = saveGame.save()
+	if !bool(result.get("success", false)):
+		push_warning("SceneManager: save checkpoint skipped (%s)." % str(result.get("reason", "")))
 
 
 func _isEncounterRequest(value) -> bool:
@@ -469,6 +528,10 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 		# Connect before the scene enters the tree so combat can never emit a
 		# result before the return handler exists.
 		_connectShootoutResult(newScene)
+	# Leaving the Overworld snapshots the exact player position while the live
+	# actor is still registered; the payload records no scene/encounter context.
+	if currentSceneKey == "overworld" and sceneKey != "overworld":
+		_recordSaveCheckpoint()
 	var oldScene := get_current_scene()
 	currentSceneContainer.add_child(newScene)
 	if oldScene != null:
@@ -489,6 +552,10 @@ func _swapScene(scenePath: String, context: Dictionary, sceneKey: String) -> voi
 	await _fadeIn()
 	transitioning = false
 	_syncInventoryPolicy()
+	# Entering the Overworld records the checkpoint Continue resumes from: the
+	# position is the entrance anchor or the restored origin at this point.
+	if sceneKey == "overworld":
+		_recordSaveCheckpoint()
 	scene_changed.emit(sceneKey)
 
 

@@ -15,6 +15,9 @@ var sceneManager: Node
 func _ready() -> void:
 	sceneManager = SceneManagerScene.instantiate()
 	sceneManager.initialScene = ""
+	# A scene-run test is not the live session, so Overworld save checkpoints
+	# stay off: the Continue assertion below depends on this test's own file.
+	sceneManager.autosaveEnabled = false
 	get_tree().root.add_child.call_deferred(sceneManager)
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -98,10 +101,11 @@ func _run() -> void:
 
 	# The Main Menu is the production entry point for the same reset path.
 	print("\n--- MainMenu New Game routes through the coordinator ---")
+	SaveGame.deleteSave()
 	Party.money = 321
 	var mainMenu = load("res://UI/Main Menu/MainMenu.tscn").instantiate()
 	add_child(mainMenu)
-	_check(mainMenu.get_node("CenterContainer/VBoxContainer/Continue").disabled, "Continue stays disabled (no save service yet)")
+	_check(mainMenu.get_node("CenterContainer/VBoxContainer/Continue").disabled, "Continue stays disabled without a save")
 	mainMenu._on_new_game_pressed()
 	_check(await _awaitSceneKey("overworld"), "MainMenu New Game loads the Overworld")
 	_check(Party.money == canonicalMoney, "MainMenu New Game restores Party state to the canonical starter amount")

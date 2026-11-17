@@ -66,6 +66,7 @@ class FakeQuestProvider:
 func _ready() -> void:
 	sceneManager = SceneManagerScene.instantiate()
 	sceneManager.initialScene = ""
+	sceneManager.autosaveEnabled = false
 	add_child(sceneManager)
 	journal = sceneManager.get_node("JournalLayer/Journal")
 	journal.opened.connect(func(): openedCount += 1)

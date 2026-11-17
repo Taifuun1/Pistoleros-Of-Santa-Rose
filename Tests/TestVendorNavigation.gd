@@ -20,6 +20,7 @@ const ENTRANCE_TOLERANCE := 12.0
 func _ready() -> void:
 	sceneManager = SceneManagerScene.instantiate()
 	sceneManager.initialScene = ""
+	sceneManager.autosaveEnabled = false
 	get_tree().root.add_child.call_deferred(sceneManager)
 	await get_tree().process_frame
 	await get_tree().process_frame
