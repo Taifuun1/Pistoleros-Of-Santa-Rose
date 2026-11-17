@@ -157,6 +157,27 @@ func _run() -> void:
 	_check(battleEndedCalls.size() == 1, "battleEnded emits exactly once")
 	_check(battleEndedCalls[0] == "enemy team", "last side standing wins")
 
+	print("\n--- Equipment initiative affix (commit 12) ---")
+	manager = makeManager()
+	addActor(manager, "Plain", 5)
+	var geared = addActor(manager, "Geared", 0)
+	geared.stats["initiative"] = 100
+	var gearedFirst = true
+	for i in 30:
+		manager.createTurnOrder()
+		if manager.turnOrder[0] != "Geared":
+			gearedFirst = false
+			break
+	_check(gearedFirst, "the equipment initiative affix joins the one initiative roll")
+	geared.stats["initiative"] = 0
+	var plainFirst = true
+	for i in 30:
+		manager.createTurnOrder()
+		if manager.turnOrder[0] != "Plain":
+			plainFirst = false
+			break
+	_check(plainFirst, "without the affix the roll falls back to High Tailin' alone")
+
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:

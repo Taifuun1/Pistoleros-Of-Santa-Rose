@@ -71,9 +71,9 @@ func testStatCatalog(calculator) -> void:
 	_check(weaponModifier.effects.size() == 2 and weaponModifier.effects[0].path == "stats.highTailin" and int(weaponModifier.effects[0].amount) == 1, "weapon core stat is listed")
 	_check(weaponModifier.effects[1].path == "weapon.baseDamage" and int(weaponModifier.effects[1].amount) == 5, "only the matching family damage affix is listed")
 	var dusterModifier = sheet.modifiers[3]
-	_check(dusterModifier.effects.size() == 3, "duster lists Style, Sand and MxHP only")
-	_check(_effectPaths(dusterModifier) == ["stats.defense.style", "stats.defense.sand", "maxHp"], "duster effect order is deterministic")
-	_check(!_allEffectPaths(sheet).has("stats.damageTakenReduction") and !_allEffectPaths(sheet).has("damageTakenReduction"), "unsupported affixes are not presented as active")
+	_check(dusterModifier.effects.size() == 4, "duster lists its supported affixes only")
+	_check(_effectPaths(dusterModifier) == ["stats.defense.style", "stats.defense.sand", "maxHp", "stats.damageTakenReduction"], "duster effect order is deterministic")
+	_check(!_allEffectPaths(sheet).has("stats.mxEn") and !_allEffectPaths(sheet).has("stats.turnOrder"), "excluded affixes are not presented as active")
 	_check(sheet.modifiers[4].slot == "belt" and sheet.modifiers[4].effects[0].path == "beltSpace", "belt space is a supported equipment modifier")
 
 	print("\n--- Calculator: purity and no shared mutable state ---")

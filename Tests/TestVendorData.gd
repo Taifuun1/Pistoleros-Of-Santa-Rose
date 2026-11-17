@@ -257,6 +257,10 @@ func _testPricing() -> void:
 	var badAffix = generator.generateWeapon({ "rarity": "common", "family": "revolver" })
 	badAffix["prefix"]["stat"] = "missing_stat"
 	_check(pricing.quoteGear(badAffix).reason == "unknown_affix", "unknown affix stat fails closed")
+	var legacy = generator.generateWeapon({ "rarity": "common", "family": "revolver" })
+	legacy["prefix"] = { "name": "Rattlesnake's", "stat": "poisonAffliction", "value": 5 }
+	var legacyQuote = pricing.quoteGear(legacy)
+	_check(legacyQuote.success, "a legacy excluded affix keeps its record and stays sellable, got reason '%s'" % str(legacyQuote.reason))
 
 	var brokenPricing = VendorPricingScript.new()
 	brokenPricing.weaponData.baseValues.erase("cattleman")

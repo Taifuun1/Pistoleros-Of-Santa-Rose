@@ -208,6 +208,23 @@ func _run() -> void:
 	_check(target.hp == 22, "non-attack ability applies its flat amount, got %d" % target.hp)
 	_check(manager9.getChamberIndex("Shooter") == 1, "non-attack ability does not advance the cylinder")
 
+	print("\n--- Equipment cylinderIncrease (commit 12) ---")
+	var fake10 = FakeShootout.new()
+	root.add_child(fake10)
+	var manager10 = makeManager(fake10)
+	var plain = addActor(fake10, "PlainCyl", [1, 0, 2], "")
+	manager10.registerActor(plain)
+	var baseLength = manager10.getCylinder("PlainCyl").size()
+	var geared = addActor(fake10, "GearedCyl", [1, 0, 2], "")
+	geared.stats = { "sixShootin": 3, "damage": { "lead": { "revolver": 4 } }, "cylinderIncrease": 2 }
+	manager10.registerActor(geared)
+	_check(manager10.getCylinder("GearedCyl").size() == baseLength + 2, "cylinderIncrease gear appends extra chambers, got size %d for base %d" % [manager10.getCylinder("GearedCyl").size(), baseLength])
+	_check(manager10.getCylinder("GearedCyl").slice(0, baseLength) == manager10.getCylinder("PlainCyl"), "the authored chambers are unchanged ahead of the extras")
+	var capped = addActor(fake10, "CappedCyl", [1, 0, 2], "")
+	capped.stats = { "cylinderIncrease": 99 }
+	manager10.registerActor(capped)
+	_check(manager10.getCylinder("CappedCyl").size() == baseLength + manager10.MAX_EQUIPMENT_CHAMBERS, "the equipment bonus clamps at a bounded chamber count")
+
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
 	else:

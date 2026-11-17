@@ -159,6 +159,25 @@ func _run() -> void:
 	var empty = lootGenerator.generateLoot({ "name": "T", "rolls": 0, "entries": [] }, {})
 	_check(empty.money == 0 and empty.items.is_empty(), "no money config and no rolls means no loot")
 
+	print("\n--- Equipment loot affixes (commit 12) ---")
+	var lootStats = lootGenerator.equipmentLootStats([{ "lootGold": 30, "lootItems": 50 }, { "lootGold": 10, "irrelevant": 5 }, "not_a_dict"])
+	_check(lootStats.lootGold == 40 and lootStats.lootItems == 50, "equipment loot percents sum across gear, got %s" % [lootStats])
+	_check(lootGenerator.equipmentLootStats([{}]).lootGold == 0, "gear without loot affixes adds nothing")
+	var merged = lootGenerator.mergeLootModifiers({ "amounts": { "money": 5 }, "multipliers": { "money": 2.0 } }, lootStats)
+	_check(is_equal_approx(float(merged.multipliers.money), 2.8), "rodeo multiplier composes with the equipment percent: 2.0 * 1.4, got %f" % float(merged.multipliers.money))
+	_check(int(merged.rollsPercent) == 50 and int(merged.amounts.money) == 5, "the roll bonus and rodeo flats ride along")
+	var lootGoldTable = { "name": "T", "rolls": 0, "money": { "min": 10, "max": 10, "chance": 1.0 }, "entries": [] }
+	_check(lootGenerator.generateLoot(lootGoldTable, merged).money == 42, "(10 + 5) * 2.8 = 42, got %d" % lootGenerator.generateLoot(lootGoldTable, merged).money)
+	var rollsTable = { "name": "T", "rolls": 2, "money": { "chance": 0.0 }, "entries": [{ "kind": "consumable", "definitionId": "paregoric", "weight": 1 }] }
+	var rngRolls = RandomNumberGenerator.new()
+	rngRolls.seed = 777
+	var boosted = lootGenerator.generateLoot(rollsTable, merged, rngRolls)
+	_check(boosted.items.size() == 3, "rollsPercent adds whole extra rolls: 2 + 50%% = 3, got %d" % boosted.items.size())
+	var plainRolls = lootGenerator.generateLoot(rollsTable, {}, rngRolls)
+	_check(plainRolls.items.size() == 2, "without the affix the roll count is unchanged")
+	var zeroRollTable = { "name": "T", "rolls": 0, "entries": [] }
+	_check(lootGenerator.generateLoot(zeroRollTable, merged).items.is_empty(), "no base rolls means no loot-items bonus (nothing to multiply)")
+
 	lootGenerator.free()
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

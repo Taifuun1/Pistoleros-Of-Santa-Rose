@@ -55,6 +55,9 @@ const RODEO_EFFECT_OPS := ["modify_stat", "move_position", "modify_loot", "set_h
 
 var failures := 0
 
+const AffixDataScript = preload("res://Data/Items/AffixData.gd")
+const LegendaryDataScript = preload("res://Data/Items/LegendaryData.gd")
+
 
 func _init() -> void:
 	call_deferred("_run")
@@ -66,6 +69,7 @@ func _run() -> void:
 	_testZoneReferences()
 	_testTrailAndAccessGates()
 	_testMoveGrants()
+	_testAffixSupport()
 	_testLintHasTeeth()
 
 	if failures == 0:
@@ -79,6 +83,70 @@ func _run() -> void:
 ## valid producer must not.
 ## Class, weapon and equipment Move grants must resolve to authored Moves, and
 ## no combat actor may lose its only offensive option to a grant union.
+
+## Commit 12: every rollable or sellable affix has a registry decision, and no
+## generation pool or authored legendary references an excluded stat.
+func _testAffixSupport() -> void:
+	print("\n--- Affix support registry ---")
+	var affixData = AffixDataScript.new()
+	var decisions := CombatStatRegistryScript.AFFIX_DECISIONS
+	for statKey in affixData.stats:
+		var decision = decisions.get(statKey, null)
+		if !(decision is Dictionary):
+			_check(false, "affix stat '%s' has a registry decision" % statKey)
+			continue
+		var kindMatches := str(decision.get("kind", "")) == str(affixData.stats[statKey].get("kind", ""))
+		_check(kindMatches, "affix stat '%s' kind matches its registry decision" % statKey)
+		if bool(decision.get("generation", false)):
+			_check(!str(decision.get("consumer", "")).is_empty(), "supported affix '%s' names its production consumer" % statKey)
+		else:
+			_check(!str(decision.get("reason", "")).is_empty(), "excluded affix '%s' records its exclusion reason" % statKey)
+	for statKey in decisions:
+		_check(affixData.stats.has(statKey), "registry decision '%s' maps to an authored affix stat" % statKey)
+
+	var poolEntries := []
+	for category in affixData.prefixes:
+		for affixName in affixData.prefixes[category]:
+			poolEntries.append([affixName, str(affixData.prefixes[category][affixName])])
+	for affixName in affixData.suffixes:
+		poolEntries.append([affixName, str(affixData.suffixes[affixName])])
+	var legendaryStats := []
+	var legendaryData = LegendaryDataScript.new()
+	for legendaryKey in legendaryData.legendaries:
+		var stats = legendaryData.legendaries[legendaryKey].get("stats", {})
+		if stats is Dictionary:
+			for statKey in stats:
+				legendaryStats.append(str(statKey))
+	var errors := _affixSupportErrors(decisions, poolEntries, legendaryStats)
+	_check(errors.is_empty(), "generation pools and legendaries roll only supported affixes: %s" % [errors])
+
+	var brokenErrors := _affixSupportErrors(
+		{ "sixShootin": { "kind": "flat", "generation": true, "consumer": "test" } },
+		[["Sundance", "turnOrder"], ["Ghost", "unknown_stat"]],
+		["lootGems"])
+	_check(brokenErrors.size() == 3, "broken fixtures trip the affix support lint: %s" % [brokenErrors])
+	_check(_affixSupportErrors(decisions, [["Cowboys", "sixShootin"]], []).is_empty(), "a supported pool entry passes")
+
+
+## Pure per-fixture checker so the lint can prove it rejects broken pools.
+func _affixSupportErrors(decisions: Dictionary, poolEntries: Array, legendaryStats: Array) -> Array:
+	var errors := []
+	for entry in poolEntries:
+		var statKey := str(entry[1])
+		var decision = decisions.get(statKey, null)
+		if !(decision is Dictionary):
+			errors.append("pool affix '%s' rolls unknown stat '%s'" % [entry[0], statKey])
+		elif !bool(decision.get("generation", false)):
+			errors.append("pool affix '%s' rolls excluded stat '%s'" % [entry[0], statKey])
+	for statKey in legendaryStats:
+		var decision = decisions.get(statKey, null)
+		if !(decision is Dictionary):
+			errors.append("legendary stat '%s' has no registry decision" % statKey)
+		elif !bool(decision.get("generation", false)):
+			errors.append("legendary stat '%s' is excluded from generation" % statKey)
+	return errors
+
+
 func _testMoveGrants() -> void:
 	print("\n--- Move grants resolve ---")
 	var moves := _collectData("res://Data/Shootout/Moves")

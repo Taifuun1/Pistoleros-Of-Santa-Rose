@@ -5,6 +5,7 @@ extends SceneTree
 
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 const ActionResolverScript = preload("res://Shootout/ShootoutActionResolver.gd")
+const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 
 var failures = 0
 
@@ -171,6 +172,27 @@ func _run() -> void:
 	var defenseRead = attackDamage(shooter, styleTarget, 2)
 	_check(defenseRead == 5, "target defense also reads the shared pipeline: (10+2+3) - max(8+2,1) = 5, got %d" % defenseRead)
 	fake.effectManager.modifiers.erase("style")
+
+	print("\n--- Equipment affixes ride the shared combat hooks (commit 12) ---")
+	makeFight()
+	var realEffects = EffectManagerScript.new()
+	realEffects.init(fake)
+	fake.effectManager = realEffects
+	var piercer = addActor("Piercer", "lead", "revolver", 0, { "style": 0, "sand": 0 })
+	var markedTarget = addActor("Marked", "lead", "revolver", 0, { "style": 0, "sand": 8 })
+	piercer.stats["damagePiercing"] = 5
+	piercer.stats["damageVsMarked"] = 6
+	# Revolver family rule loses the higher of Style/Sand: (10) - 8 = 2 damage,
+	# so only 8 was blocked and the equipment piercing caps at those 8.
+	_check(attackDamage(piercer, markedTarget, 2) == 7, "equipment piercing reclaims only the blocked amount: 2 + 5 = 7, got %d" % attackDamage(piercer, markedTarget, 2))
+	piercer.stats["damagePiercing"] = 20
+	_check(attackDamage(piercer, markedTarget, 2) == 10, "piercing beyond the blocked amount clamps at it: 2 + 8 = 10, got %d" % attackDamage(piercer, markedTarget, 2))
+	piercer.stats["damagePiercing"] = 0
+	realEffects.applyEffect("Marked", { "op": "apply_effect", "effect": "mark", "extraDamage": 0 }, "Piercer")
+	realEffects.onRoundEnd()
+	_check(attackDamage(piercer, markedTarget, 2) == 8, "an active mark lets damageVsMarked gear add flat damage: 2 + 6 = 8, got %d" % attackDamage(piercer, markedTarget, 2))
+	realEffects.cleanse("Marked", "mark", 1)
+	_check(attackDamage(piercer, markedTarget, 2) == 2, "without the mark the vs-marked gear adds nothing")
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

@@ -39,7 +39,8 @@ func testCalculator(calculator) -> void:
 	_check(current.stats.defense.style == 5 and current.stats.defense.sand == 3, "gear Style/Sand add to defense")
 	_check(current.weapon.weapon == "rifle" and current.weapon.baseDamage == 9, "rifle base 4 + rifle damage 5 = 9")
 	_check(current.beltSpace == 2, "class belt 1 + belt item 1 = 2")
-	_check(!current.stats.has("damageTakenReduction"), "unsupported affix is not applied as a stat")
+	_check(current.stats.damageTakenReduction == 99, "supported reduction affix projects as a stat")
+	_check(!current.stats.has("mxEn"), "excluded legacy affix is not applied as a stat")
 	_check(member.stats.highTailin == 6 and member.equipment.weapon.stats.rifleDamage == 5, "source member is not mutated")
 
 	print("\n--- Calculator: HP clamp, injected attrition and replacement preview ---")
@@ -72,6 +73,30 @@ func testCalculator(calculator) -> void:
 	_check(legacyData.stats.defense.style == 0 and legacyData.stats.damage.lead.revolver == -1, "missing stat containers get safe defaults")
 	_check(legacyData.weapon.weapon == "rifle" and legacyData.weapon.baseDamage == 4, "legacy weapon is preserved")
 	_check(legacyData.beltSpace == -1, "unknown class leaves belt space uncapped")
+
+	print("\n--- Calculator: commit-12 supported affixes ---")
+	var affixGear = _duster("Affix Duster", 0, {
+		"gunpowderDamage": 7, "liquidSkullDamage": 5, "shrapnelDamage": 3,
+		"initiative": 4, "damageVsMarked": 3, "damagePiercing": 2, "cylinderIncrease": 2,
+		"damageTakenReduction": 10, "damageTakenReductionTaunting": 15,
+		"mxHpHealTauntingPerTurn": 2, "silenceImmunity": 1,
+		"lootGold": 25, "lootItems": 30, "negativeEffectPotencyReduction": 20,
+	})
+	var affixMember = _member()
+	affixMember.equipment.duster = affixGear
+	var affixStats = calculator.calculate(affixMember, classData).stats
+	_check(affixStats.damage.explosive.gunpowder == 8 and affixStats.damage.explosive.liquid == 6 and affixStats.damage.explosive.shrapnel == 4, "explosive damage affixes join the shared damage stats, got %s" % [affixStats.damage.explosive])
+	_check(affixStats.initiative == 4 and affixStats.damageVsMarked == 3 and affixStats.damagePiercing == 2 and affixStats.cylinderIncrease == 2, "flat combat affixes project onto their canonical stats")
+	_check(affixStats.damageTakenReduction == 10 and affixStats.damageTakenReductionTaunting == 15 and affixStats.mxHpHealTauntingPerTurn == 2, "percent/heal affixes keep raw percent and flat values")
+	_check(affixStats.silenceImmunity == 1, "the silenceImmunity flag projects as 1")
+	_check(affixStats.lootGold == 25 and affixStats.lootItems == 30, "loot percents project for the fight loot merge")
+	_check(is_equal_approx(float(affixStats.resistances.bleed), 0.2) and is_equal_approx(float(affixStats.resistances.poison), 0.2), "potency reduction maps onto the bleed/poison resistance seam")
+	_check(!affixStats.has("mxEn") and !affixStats.has("lassoDamage"), "excluded legacy affixes stay item text")
+	var affixCurrent = calculator.calculate(_member(), classData)
+	var affixDeltas = calculator.compare(affixCurrent, calculator.calculate(affixMember, classData))
+	for expectedPath in ["stats.damage.explosive.gunpowder", "stats.initiative", "stats.damageVsMarked", "stats.damagePiercing", "stats.cylinderIncrease", "stats.damageTakenReduction", "stats.resistances.bleed", "stats.silenceImmunity", "stats.lootGold", "stats.lootItems"]:
+		_check(_hasRow(affixDeltas, expectedPath), "compare surfaces the changed row %s" % expectedPath)
+	_check(!_hasRow(affixDeltas, "stats.highTailin"), "unchanged rows stay omitted")
 
 
 func testParty() -> void:
@@ -259,6 +284,13 @@ func _withInstance(item: Dictionary, instanceId: String) -> Dictionary:
 	var result = item.duplicate(true)
 	result["instanceId"] = instanceId
 	return result
+
+
+func _hasRow(rows: Array, path: String) -> bool:
+	for row in rows:
+		if row.path == path:
+			return true
+	return false
 
 
 func _hasDelta(rows: Array, path: String, delta: int) -> bool:

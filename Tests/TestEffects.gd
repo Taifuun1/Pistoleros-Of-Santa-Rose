@@ -267,6 +267,51 @@ func _run() -> void:
 	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "cylinder", "chambers": "all", "amount": 1 }, "Rat")
 	_check(fake.cylinderManager.applied.size() == 2, "apply_effect cylinder delegates too")
 
+	print("\n--- Equipment affix support (commit 12) ---")
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	fake.actors["Weak"].stats["silenceImmunity"] = 1
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "silence", "turns": 2 }, "Rat")
+	_check(!manager.isSilenced("Weak"), "silenceImmunity gear refuses the silence")
+	fake.actors["Weak"].stats["silenceImmunity"] = 0
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "silence", "turns": 2 }, "Rat")
+	_check(manager.isSilenced("Weak"), "without the gear the silence lands")
+
+	fake.actors["Tank"].stats["damagePiercing"] = 3
+	_check(manager.applyOutgoingModifiers(fake.actors["Tank"], 6.0, 2.0) == 8.0, "equipment piercing caps at the blocked amount, got %f" % manager.applyOutgoingModifiers(fake.actors["Tank"], 6.0, 2.0))
+	_check(manager.applyOutgoingModifiers(fake.actors["Tank"], 6.0, 0.0) == 6.0, "equipment piercing without blocked damage reclaims nothing")
+	fake.actors["Tank"].stats["damagePiercing"] = 0
+
+	fake.actors["Tank"].stats["damageVsMarked"] = 4
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "damage_type_mark", "damageType": "lead", "extraDamage": 2 }, "Rat")
+	_check(manager.applyIncomingModifiers(fake.actors["Weak"], 10.0, "lead", true, fake.actors["Tank"]) == 16.0, "damageVsMarked gear adds flat damage against a marked target")
+	_check(manager.applyIncomingModifiers(fake.actors["Weak"], 10.0, "explosive", true, fake.actors["Tank"]) == 10.0, "an unmatched damage type gets no mark or vs-marked bonus")
+	fake.actors["Tank"].stats["damageVsMarked"] = 0
+	_check(manager.applyIncomingModifiers(fake.actors["Weak"], 10.0, "lead", true, fake.actors["Tank"]) == 12.0, "without the gear only the mark's own bonus applies")
+
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	fake.actors["Tank"].stats["damageTakenReduction"] = 30
+	fake.actors["Tank"].stats["damageTakenReductionTaunting"] = 40
+	_check(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0) == 7.0, "equipment reduction applies without a taunt, the taunting-only share waits")
+	manager.applyEffect("Tank", { "op": "apply_effect", "effect": "taunt", "positions": [2], "rounds": 2 }, "Tank")
+	_check(is_equal_approx(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0), 3.0), "taunting adds the equipment share to the authored reduction (70%)")
+	fake.actors["Tank"].stats["damageTakenReduction"] = 60
+	fake.actors["Tank"].stats["damageTakenReductionTaunting"] = 50
+	_check(is_equal_approx(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0), 1.0), "the combined reduction clamps at 90 percent")
+	fake.actors["Tank"].hp = 20
+	fake.actors["Tank"].stats["mxHpHealTauntingPerTurn"] = 2
+	manager.onTurnStart("Tank")
+	_check(fake.actors["Tank"].hp == 22, "mxHpHealTauntingPerTurn gear heals while taunting")
+	manager.onRoundEnd()
+	manager.onRoundEnd()
+	_check(manager.getTaunt("Tank").is_empty(), "the taunt expires")
+	_check(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0) == 4.0, "expired taunt keeps only the always-on reduction")
+	manager.onTurnStart("Tank")
+	_check(fake.actors["Tank"].hp == 22, "expired taunt stops the taunting-only heal")
+
 	print("\n--- Death cleanup ---")
 	ctx = makeManager()
 	fake = ctx.fake

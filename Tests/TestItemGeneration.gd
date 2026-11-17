@@ -217,6 +217,8 @@ func _run() -> void:
 
 	_testInjectedRng(generator)
 
+	_testAffixEligibility(generator)
+
 	generator.free()
 	if failures == 0:
 		print("\nALL CHECKS PASSED")
@@ -228,6 +230,39 @@ func _run() -> void:
 ## Injected RNG: identical seeds roll identical items, different seeds generally
 ## diverge, and the global RNG stream is left untouched. Null rng keeps the
 ## existing global-RNG behavior.
+
+
+## Commit 12: only registry-eligible affixes may roll. The pools are audited
+## directly and a seeded roll sweep proves no excluded stat re-enters generation.
+func _testAffixEligibility(generator) -> void:
+	print("\n--- Affix generation eligibility (commit 12) ---")
+	var registry = load("res://Globals/CombatStatRegistry.gd")
+	var excluded = {}
+	for statKey in generator.affixData.EXCLUDED_AFFIXES:
+		excluded[statKey] = true
+		_check(registry.isGenerationEligible(statKey) == false, "excluded stat '%s' is not generation-eligible" % statKey)
+	for category in generator.affixData.prefixes:
+		for affixName in generator.affixData.prefixes[category]:
+			var statKey = str(generator.affixData.prefixes[category][affixName])
+			_check(!excluded.has(statKey), "pool affix '%s' no longer rolls excluded stat '%s'" % [affixName, statKey])
+			_check(registry.isGenerationEligible(statKey), "pool affix '%s' rolls a registry-eligible stat" % affixName)
+	for affixName in generator.affixData.suffixes:
+		var statKey = str(generator.affixData.suffixes[affixName])
+		_check(!excluded.has(statKey), "pool affix '%s' no longer rolls excluded stat '%s'" % [affixName, statKey])
+		_check(registry.isGenerationEligible(statKey), "pool affix '%s' rolls a registry-eligible stat" % affixName)
+	var rng = RandomNumberGenerator.new()
+	rng.seed = 20261117
+	var rolledStats = {}
+	for i in 200:
+		var itemType = "weapon" if i % 2 == 0 else "equipment"
+		var item = generator.generateItem({ "itemType": itemType, "rarity": "rare", "rng": rng })
+		for affixKey in ["prefix", "suffix"]:
+			var affix = item.get(affixKey, {})
+			if affix is Dictionary and !(affix as Dictionary).is_empty():
+				var rolledKey = str((affix as Dictionary).get("stat", ""))
+				rolledStats[rolledKey] = true
+				_check(registry.isGenerationEligible(rolledKey), "rolled affix stat '%s' is generation-eligible" % rolledKey)
+	_check(rolledStats.size() >= 8, "the sweep exercises a real affix spread, got %d stats" % rolledStats.size())
 func _testInjectedRng(generator) -> void:
 	print("\n--- Injected RNG determinism ---")
 	var firstRng = RandomNumberGenerator.new()
