@@ -253,7 +253,7 @@ The concrete first delivery slice for phases 0–2 (authoritative Trail state, t
 3. ~~**Full save-service integration:** the versioned disk save, validate-before-commit restore, format/content-id migration policy, Main Menu Continue and application-restart proof.~~ Implemented in the save-service commit; a save-management UI and user settings remain later work.
 4. ~~**Canonical class/equipment Move grants:** validated grant ids, one active-loadout projection for Party and actor data, Journal activation, four-Move/equipment-swap guards and saved selections with migration.~~ Implemented as commit 11.
 5. ~~**Honest affix support:** one support registry shared by generation, vendor pricing, combat, loot and the Journal; remove every remaining unsupported paid roll.~~ Implemented as commit 12.
-6. **Differentiated AI and reproducible metrics:** actor-authored action weights/candidate counts, seeded combat decisions and a real-scene measurement driver for Dust-up/Showdown behavior and encounter balance. Planned as commit 13.
+6. ~~**Differentiated AI and reproducible metrics:** actor-authored action weights/candidate counts, seeded combat decisions and a real-scene measurement driver for Dust-up/Showdown behavior and encounter balance.~~ Implemented as commit 13.
 
 Only after those gates should the project resume phase-4 content expansion. Phase 3 is not complete merely because the decided HP/bleed/basic-attack/boss-threshold rules and Vamoose landed: supported affixes/equipment abilities, differentiated encounter AI and representative Party/enemy content remain open. Detailed commit scopes and exit gates are in [First steps implementation plan §12](First%20Steps%20Implementation%20Plan.md#12-phase-3--combat-breadth).
 
