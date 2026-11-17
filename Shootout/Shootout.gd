@@ -77,6 +77,12 @@ var encounterZoneId := ""
 var encounterSource := ""
 var encounterSourceId := ""
 var encounterTrailState: Dictionary = {}
+## Combat RNG (commit 13): one explicit generator consumed by AI picks,
+## initiative rolls, random cleanses and flavor names. Seeded from the
+## validated EncounterRequest when provided; explicit random fallback keeps
+## production behavior. Camera shake never consumes it.
+var combatRng := RandomNumberGenerator.new()
+var encounterSeed := -1
 var lootGenerator
 # baseName -> { hp, injuryDamage, downed } for dead party members this fight.
 var partyFightState = {}
@@ -140,6 +146,7 @@ func _ready() -> void:
 	move_child(repositionMarkersRoot, 0)
 	actorDone.connect(_on_actor_done)
 	encounterRequest = Shootout.consumePendingRequest()
+	setupCombatRandomness(encounterRequest)
 	var encounterData := _encounterDataForRequest(encounterRequest)
 	if encounterData.is_empty():
 		# A production request is validated before this scene loads. Reject an
@@ -150,7 +157,13 @@ func _ready() -> void:
 		call_deferred("_emitInvalidRequestResult")
 		return
 	_applyEncounterRequest(encounterRequest)
-	init(encounterData)
+	if autoInit:
+		init(encounterData)
+
+
+## Measurement drivers (commit 13) clear this before the scene enters the tree
+## so _ready skips the debug encounter and they can init their own.
+var autoInit := true
 
 
 ## Direct scene runs (F6/tests) have no pending request and intentionally use
@@ -192,6 +205,24 @@ func _applyEncounterRequest(request) -> void:
 	encounterTrailState = request.trailState.duplicate(true)
 
 
+## Combat randomness (commit 13): a seeded request makes AI picks, initiative
+## rolls, random cleanses and flavor names reproducible. The seed stays inside
+## the encounter context (never persisted as session state), and any seeded
+## fight logs the seed with its request so results are traceable.
+func setupCombatRandomness(request) -> void:
+	encounterSeed = int(request.seedValue) if request != null else -1
+	combatRng = RandomNumberGenerator.new()
+	if encounterSeed >= 0:
+		combatRng.seed = encounterSeed
+		print("Shootout: seeded combat RNG (%d) for %s [%s/%s]" % [
+			encounterSeed,
+			str(request.encounterPath),
+			str(request.source), str(request.sourceId),
+		])
+	else:
+		combatRng.randomize()
+
+
 ## Rejected production requests return to the launcher without applying Party
 ## results or falling back to another encounter.
 func _emitInvalidRequestResult() -> void:
@@ -206,8 +237,9 @@ func _emitInvalidRequestResult() -> void:
 	})
 
 
-func init(encounterData: Dictionary) -> void:
+func init(encounterData: Dictionary, autostart := true) -> void:
 	var teams = encounterData.get("teams", encounterData)
+	encounterDataUsed = encounterData.duplicate(true)
 	turnManager.setWinCondition(encounterData.get("winCondition", {}))
 	turnManager.setEncounterKind(encounterData.get("kind", "dustup"))
 	# Encounter music: explicit encounter track > encounter-name registry >
@@ -224,11 +256,17 @@ func init(encounterData: Dictionary) -> void:
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_FIGHT_START)
 	turnManager.createTurnOrder()
 	rodeoManager.trigger(Shootout.RODEO_TRIGGER_ROUND_START)
-	startCurrentTurn()
+	# Measurement drivers (commit 13) drive the production turn loop themselves
+	# and skip only the presentation hand-off.
+	if autostart:
+		startCurrentTurn()
+
+## The encounter data this fight was initialized with (drivers/log readers).
+var encounterDataUsed: Dictionary = {}
 
 func pickFlavorName(kind: String) -> String:
 	var flavors = Shootout.SHOWDOWN_FLAVORS if kind == "showdown" else Shootout.DUSTUP_FLAVORS
-	return flavors[randi() % flavors.size()]
+	return flavors[combatRng.randi_range(0, flavors.size() - 1)]
 
 
 ## One entry per spawned actor: side, type, name, position and the unique
@@ -618,6 +656,11 @@ func _on_battle_ended(winningSide: String) -> void:
 		"rodeoLoot": rodeoManager.consumeLootModifiers()
 	}
 	results["loot"] = generateLootForFight(results.rodeoLoot, winningSide)
+	if encounterSeed >= 0:
+		print("Shootout: seeded fight finished — seed %d, request %s [%s/%s], encounter '%s', outcome '%s'" % [
+			encounterSeed, str(encounterRequest.encounterPath) if encounterRequest != null else "",
+			encounterSource, encounterSourceId, encounterName, str(results.outcome),
+		])
 	presentFightResults(results)
 
 

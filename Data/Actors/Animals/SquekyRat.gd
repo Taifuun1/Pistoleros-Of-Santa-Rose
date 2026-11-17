@@ -26,6 +26,11 @@ var data = {
 		"resistances": { "bleed": 0.0, "poison": 0.0 }
 	},
 	"rodeo": null,
+	"ai": {
+		"archetype": "damage",
+		"pickFromTop": 3,
+		"weights": { "offense": 1.0, "support": 0.2, "defense": 0.5, "reposition": 0.5 },
+	},
 	"moves": ["Scratch"],
 	"magazine": [2, 1, 2, 0],
 	"weapon": {

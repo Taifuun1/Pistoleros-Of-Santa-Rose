@@ -57,10 +57,15 @@ func createTurnOrder() -> void:
 			var actorStats = actor.get("stats")
 			if actorStats is Dictionary:
 				equipmentInitiative = int((actorStats as Dictionary).get("initiative", 0))
+			# Combat RNG seam (commit 13): the shootout's seeded generator drives
+			# the initiative roll and tiebreak when present.
+			var rng = shootout.get("combatRng") if shootout != null else null
+			var roll = rng.randi_range(0, RANDOM_ROLL_MAX) if rng is RandomNumberGenerator else randi_range(0, RANDOM_ROLL_MAX)
+			var tiebreak = rng.randf() if rng is RandomNumberGenerator else randf()
 			initiatives.append({
 				"actorName": actorName,
-				"initiative": int(highTailin) + equipmentInitiative + randi_range(0, RANDOM_ROLL_MAX),
-				"tiebreak": randf()
+				"initiative": int(highTailin) + equipmentInitiative + roll,
+				"tiebreak": tiebreak
 			})
 	initiatives.sort_custom(sortByInitiative)
 	turnOrder.clear()

@@ -209,6 +209,11 @@ func randomAfflictionType(list: Dictionary) -> String:
 			present.append(effectType)
 	if present.is_empty():
 		return ""
+	# Combat RNG seam (commit 13): seeded shootouts make random cleanses
+	# reproducible; the global RNG keeps unseeded runs working.
+	var rng = shootout.get("combatRng") if shootout != null else null
+	if rng is RandomNumberGenerator:
+		return present[rng.randi_range(0, present.size() - 1)]
 	return present[randi() % present.size()]
 
 

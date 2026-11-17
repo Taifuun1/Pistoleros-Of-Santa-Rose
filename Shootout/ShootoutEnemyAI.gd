@@ -6,10 +6,16 @@ extends RefCounted
 ## pair by archetype, and picks from the top with some randomness. Bosses can
 ## override scoring with data-driven priority scripts.
 
-# How many top-scored acts are candidates for the random pick.
+# How many top-scored acts are candidates for the random pick when neither the
+# encounter kind nor the actor profile says otherwise (today's Dust-up width).
 const PICK_FROM_TOP = 2
+# A Showdown is a best-act duel: only the highest-scored act is a candidate.
+const SHOWDOWN_PICK_FROM_TOP = 1
 # Score bonus for an act that kills its target.
 const KILL_BONUS = 50.0
+# Validated profile values (commit 13, Docs/System Design/Shootout/Enemy AI.md).
+const ARCHETYPES = ["damage", "support", "tank"]
+const ACTION_FAMILIES = ["offense", "support", "defense", "reposition"]
 
 var shootout
 
@@ -27,7 +33,7 @@ func chooseAct(actorName: String) -> Dictionary:
 	var scored = scoreActs(actorName, gatherLegalActs(actorName))
 	if scored.is_empty():
 		return {}
-	return pickFromTop(scored)
+	return pickFromTop(scored, actorName)
 
 
 ## Boss scripts: priority rules from Data/Shootout/AI/*.gd (or injected aiData).
@@ -159,20 +165,77 @@ func scoreActs(actorName: String, legalActs: Array) -> Array:
 	return scored
 
 func scoreAct(act: Dictionary, actingActor) -> float:
-	var aggression = aiValue(actingActor, "aggression", 0.7)
 	var score = 0.0
 	match act.type:
 		"Moves":
-			score = scoreMove(act, actingActor) * (1.5 - aggression)
+			# Offensive/support weighting is per action family (commit 13): a
+			# defensive Move (Duck) no longer shares the offense multiplier.
+			var family = "defense" if moveIsDefensive(act, actingActor) else "offense"
+			return scoreMove(act, actingActor) * actionWeight(actingActor, family)
 		"Items":
-			score = scoreItem(act, actingActor) * (1.5 - aggression)
+			var family = "support" if itemIsSupport(act, actingActor) else "offense"
+			return scoreItem(act, actingActor) * actionWeight(actingActor, family)
 		"Reposition":
-			score = 1.0
+			score = 1.0 * actionWeight(actingActor, "reposition")
 			var preferred = aiValue(actingActor, "preferredColumns", [])
 			var turnManager = getManager("turnManager")
 			if turnManager != null and !preferred.is_empty() and !(turnManager.getActorPosition(actingActor.name) in preferred):
 				score += 2.0
 	return score
+
+## Per-family weight from the authored `ai.weights` block. An unprofiled actor
+## keeps today's behavior: every Moves/Items family scaled by the legacy
+## `aggression` multiplier (1.5 - aggression, default 0.8) and reposition
+## unscaled. Authored weights must be positive (content lint).
+func actionWeight(actingActor, family: String) -> float:
+	var aiBlock = actingActor.get("ai")
+	if aiBlock is Dictionary:
+		var weights = (aiBlock as Dictionary).get("weights", null)
+		if weights is Dictionary and (weights as Dictionary).has(family):
+			return maxf(0.0, float((weights as Dictionary).get(family, 1.0)))
+	if family == "reposition":
+		return 1.0
+	return 1.5 - float(aiValue(actingActor, "aggression", 0.7))
+
+func moveIsDefensive(act: Dictionary, actingActor) -> bool:
+	var moveData = dataSet("movesData").get(str(act.get("name", "")), {})
+	return str(moveData.get("category", "")) == "duck"
+
+func itemIsSupport(act: Dictionary, actingActor) -> bool:
+	var itemData = dataSet("itemsData").get(str(act.get("name", "")), {})
+	if float(itemData.get("baseAmount", 0)) > 0:
+		return true
+	for effect in itemData.get("effects", []):
+		if str(effect.get("op", "apply_effect")) == "apply_effect" and str(effect.get("effect", "")) in ["heal", "heal_over_time", "taunt"]:
+			return true
+	return false
+
+## Candidate width for the random pick (commit 13): an authored `ai.pickFromTop`
+## narrows or widens the encounter default; a Showdown selects only the
+## highest-scored act; a Dust-up keeps today's width for unprofiled actors.
+func effectivePickFromTop(actingActor) -> int:
+	if actingActor != null:
+		var authored = int(aiValue(actingActor, "pickFromTop", 0))
+		if authored > 0:
+			return authored
+	var turnManager = getManager("turnManager")
+	var kind = str(turnManager.get("encounterKind")) if turnManager != null else ""
+	return SHOWDOWN_PICK_FROM_TOP if kind == "showdown" else PICK_FROM_TOP
+
+## The one combat RNG seam (commit 13): AI picks consume the shootout's seeded
+## generator when present; the global RNG keeps unseeded runs working.
+func _pickIndex(top: int) -> int:
+	var rng = shootout.get("combatRng") if shootout != null else null
+	if rng is RandomNumberGenerator:
+		return rng.randi_range(0, maxi(1, top) - 1)
+	return randi() % maxi(1, top)
+
+func pickFromTop(scored: Array, actorName := "") -> Dictionary:
+	var actingActor = getActor(actorName)
+	var top = mini(effectivePickFromTop(actingActor), scored.size())
+	if top <= 0:
+		return {}
+	return scored[_pickIndex(top)]
 
 func scoreMove(act: Dictionary, actingActor) -> float:
 	var moveData = dataSet("movesData").get(act.name, {})
@@ -239,11 +302,6 @@ func effectScore(effect: Dictionary, actingActor, target) -> float:
 		_:
 			return 0.0
 	return 0.0
-
-func pickFromTop(scored: Array) -> Dictionary:
-	var top = mini(PICK_FROM_TOP, scored.size())
-	return scored[randi() % top]
-
 
 # --- helpers ---
 
