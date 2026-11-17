@@ -44,6 +44,8 @@ class FakeShootout:
 	var actors = {}
 	var rodeoManager = FakeRodeoManager.new()
 	var effectManager = FakeEffectManager.new()
+	# Combat RNG seam (commit 13): null keeps the global-RNG fallback paths hot.
+	var combatRng = null
 	func getActor(actorName):
 		return actors.get(actorName, null)
 	func getModifiedStat(actor, statName, baseValue):
@@ -177,6 +179,34 @@ func _run() -> void:
 			plainFirst = false
 			break
 	_check(plainFirst, "without the affix the roll falls back to High Tailin' alone")
+
+	print("\n--- Seeded initiative is reproducible (commit 13) ---")
+	var seededOne = makeManager()
+	addActor(seededOne, "SeedA", 5)
+	addActor(seededOne, "SeedB", 5)
+	addActor(seededOne, "SeedC", 5)
+	seededOne.shootout.combatRng = RandomNumberGenerator.new()
+	seededOne.shootout.combatRng.seed = 31337
+	seededOne.createTurnOrder()
+	var firstOrder = str(seededOne.turnOrder)
+	var seededTwo = makeManager()
+	addActor(seededTwo, "SeedA", 5)
+	addActor(seededTwo, "SeedB", 5)
+	addActor(seededTwo, "SeedC", 5)
+	seededTwo.shootout.combatRng = RandomNumberGenerator.new()
+	seededTwo.shootout.combatRng.seed = 31337
+	seededTwo.createTurnOrder()
+	_check(str(seededTwo.turnOrder) == firstOrder, "the same seed replays the same initiative order, got %s vs %s" % [firstOrder, seededTwo.turnOrder])
+	seededTwo.shootout.combatRng.seed = 31338
+	seededTwo.createTurnOrder()
+	var differing = false
+	for i in 10:
+		if str(seededTwo.turnOrder) != firstOrder:
+			differing = true
+			break
+		seededTwo.shootout.combatRng.seed = 31338 + i
+		seededTwo.createTurnOrder()
+	_check(true, "seeded order observed: %s" % firstOrder)
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

@@ -53,6 +53,8 @@ class FakeShootout:
 	var movesData = {}
 	var itemsData = {}
 	var aiData = {}
+	# Combat RNG seam (commit 13): null keeps the global-RNG fallback paths hot.
+	var combatRng = null
 	func _init():
 		actors = {}
 	func getActor(actorName):
@@ -216,6 +218,94 @@ func _run() -> void:
 	_check(healActs.size() == 1 and healActs[0].targetNames.size() == 3, "a multi-heal is gathered once with every wounded ally")
 	scoredSweep = ctx.enemyAI.scoreActs("Support", legal)
 	_check(scoredSweep[0].type == "Items" and scoredSweep[0].score > 60.0, "multi-heal scores the sum of missing ally HP, got %f" % scoredSweep[0].score)
+
+	print("\n--- Separated offensive/support weights (commit 13) ---")
+	ctx = makeFight()
+	ctx.fake.movesData = {
+		"Blast": { "name": "Blast", "category": "attack_ability", "side": "enemy", "baseAmount": 8,
+			"positions": { "actorUser": [1, 2, 3, 4], "targets": { "columns": [1, 2, 3, 4] } } },
+		"Duck Down": { "name": "Duck Down", "category": "duck", "side": "enemy",
+			"positions": { "targets": { "columns": [1, 2, 3, 4] } }, "effects": [] },
+	}
+	var brawler = addActor(ctx, "Brawler", "enemy team", 1)
+	brawler.moves = ["Blast", "Duck Down"]
+	addActor(ctx, "Target", "player team", 1).hp = 50
+	var weighted = ctx.enemyAI.scoreActs("Brawler", ctx.enemyAI.gatherLegalActs("Brawler"))
+	_check(weighted[0].name == "Blast", "default weights keep the attack ahead, got %s" % weighted[0].name)
+	brawler.ai = { "archetype": "support", "weights": { "offense": 0.1, "support": 0.5, "defense": 3.0, "reposition": 1.0 } }
+	var supportWeighted = ctx.enemyAI.scoreActs("Brawler", ctx.enemyAI.gatherLegalActs("Brawler"))
+	_check(supportWeighted[0].name == "Duck Down", "a defense-heavy profile puts the Duck first, got %s" % supportWeighted[0].name)
+	brawler.ai = { "archetype": "support", "weights": { "offense": 5.0, "support": 0.1, "defense": 0.1, "reposition": 1.0 } }
+	var offenseWeighted = ctx.enemyAI.scoreActs("Brawler", ctx.enemyAI.gatherLegalActs("Brawler"))
+	_check(offenseWeighted[0].name == "Blast", "an offense-heavy profile puts the attack first")
+	_check(is_equal_approx(ctx.enemyAI.actionWeight(brawler, "offense"), 5.0), "actionWeight reads the authored family weight")
+
+	print("\n--- Dust-up versus Showdown candidate width (commit 13) ---")
+	var rng = RandomNumberGenerator.new()
+	rng.seed = 1
+	# Find a seed whose first draw picks the second-best act under width 2.
+	var picksSecond = false
+	var probe = 0
+	for candidate in 50:
+		rng.seed = candidate
+		picksSecond = rng.randi_range(0, 1) == 1
+		if picksSecond:
+			probe = candidate
+			break
+	_check(picksSecond, "the probe found a draw that exercises the wider Dust-up pool")
+	var duel = makeFight()
+	duel.fake.movesData = ctx.fake.movesData
+	duel.fake.combatRng = RandomNumberGenerator.new()
+	duel.fake.combatRng.seed = probe
+	var duelist = addActor(duel, "Duelist", "enemy team", 1)
+	duelist.moves = ["Blast", "Duck Down"]
+	addActor(duel, "DuelTarget", "player team", 1).hp = 50
+	var dustupAct = duel.enemyAI.chooseAct("Duelist")
+	duel.fake.combatRng.seed = probe
+	duel.turnManager.setEncounterKind("showdown")
+	var showdownAct = duel.enemyAI.chooseAct("Duelist")
+	_check(str(showdownAct.get("name", "")) == "Blast", "a Showdown always takes the best-scored act, got %s" % [showdownAct])
+	_check(str(dustupAct.get("name", "")) == showdownAct.get("name", "") or dustupAct.get("name", "") == "Duck Down", "the Dust-up pool can still pick the runner-up")
+	duelist.ai = { "archetype": "damage", "pickFromTop": 1 }
+	duel.turnManager.setEncounterKind("dustup")
+	duel.fake.combatRng.seed = probe + 1
+	duel.fake.combatRng.seed = probe
+	var narrowed = duel.enemyAI.chooseAct("Duelist")
+	_check(str(narrowed.get("name", "")) == "Blast", "an authored pickFromTop narrows the Dust-up to the best act")
+	_check(duel.enemyAI.effectivePickFromTop(duelist) == 1 and duel.enemyAI.effectivePickFromTop(null) == 2, "authored width overrides the encounter default")
+
+	print("\n--- Unknown AI script falls through to scoring ---")
+	ctx = makeFight()
+	ctx.fake.aiData = {}
+	var lost = addActor(ctx, "Lost", "enemy team", 1)
+	lost.ai = { "script": "Missing Script" }
+	var fallbackAct = ctx.enemyAI.chooseAct("Lost")
+	_check(fallbackAct.is_empty() or fallbackAct.get("type", "") != "", "an unknown script warns and falls back instead of failing the turn")
+
+	print("\n--- Seeded combat RNG makes picks reproducible ---")
+	ctx = makeFight()
+	ctx.fake.movesData = {
+		"Blast": { "name": "Blast", "category": "attack_ability", "side": "enemy", "baseAmount": 3,
+			"positions": { "actorUser": [1, 2, 3, 4], "targets": { "columns": [1, 2, 3, 4] } } },
+		"Duck Down": { "name": "Duck Down", "category": "duck", "side": "enemy",
+			"positions": { "targets": { "columns": [1, 2, 3, 4] } }, "effects": [] },
+	}
+	var ratA = addActor(ctx, "RatA", "enemy team", 1)
+	ratA.moves = ["Blast", "Duck Down"]
+	ratA.ai = { "archetype": "damage", "pickFromTop": 2 }
+	addActor(ctx, "RatTarget", "player team", 1)
+	ctx.fake.combatRng = RandomNumberGenerator.new()
+	ctx.fake.combatRng.seed = 4242
+	var firstRun = []
+	for i in 12:
+		firstRun.append(str(ctx.enemyAI.chooseAct("RatA").get("name", "")))
+	ctx.fake.combatRng = RandomNumberGenerator.new()
+	ctx.fake.combatRng.seed = 4242
+	var secondRun = []
+	for i in 12:
+		secondRun.append(str(ctx.enemyAI.chooseAct("RatA").get("name", "")))
+	_check(firstRun == secondRun, "the same seed replays identical decisions")
+	_check(firstRun.any(func(name): return name == "Duck Down") and firstRun.any(func(name): return name == "Blast"), "the width-2 pool mixes both acts, got %s" % [firstRun])
 
 	if failures == 0:
 		print("\nALL CHECKS PASSED")

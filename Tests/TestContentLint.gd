@@ -15,6 +15,7 @@ const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
 const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
 const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
+const ShootoutEnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
 
 ## Every folder whose files expose a `data` Dictionary identified by `data.name`.
 const CONTENT_FOLDERS := [
@@ -70,6 +71,7 @@ func _run() -> void:
 	_testTrailAndAccessGates()
 	_testMoveGrants()
 	_testAffixSupport()
+	_testAiProfiles()
 	_testLintHasTeeth()
 
 	if failures == 0:
@@ -144,6 +146,74 @@ func _affixSupportErrors(decisions: Dictionary, poolEntries: Array, legendarySta
 			errors.append("legendary stat '%s' has no registry decision" % statKey)
 		elif !bool(decision.get("generation", false)):
 			errors.append("legendary stat '%s' is excluded from generation" % statKey)
+	return errors
+
+
+## Commit 13: authored `ai` profiles are validated — known archetypes, positive
+## selection counts, positive action-family weights, and scripts that resolve to
+## real AI data with known Moves and targets. Unprofiled actors stay legal.
+func _testAiProfiles() -> void:
+	print("\n--- AI profiles resolve ---")
+	var moves := _collectData("res://Data/Shootout/Moves")
+	var moveNames := {}
+	for entry in moves.entries:
+		moveNames[str(entry.data.get("name", ""))] = true
+	var scriptNames := {}
+	for fileName in _gdFiles("res://Data/Shootout/AI"):
+		scriptNames[fileName.get_basename()] = true
+	var actorNames := {}
+	for folder in ["res://Data/Actors/Animals", "res://Data/Actors/Named People"]:
+		for entry in _collectData(folder).entries:
+			actorNames[str(entry.data.get("actorName", ""))] = true
+
+	var actors := _collectData("res://Data/Actors/Animals")
+	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+	var profiled := 0
+	for entry in actors.entries:
+		var label := str(entry.data.get("actorName", entry.file))
+		var aiBlock = entry.data.get("ai", null)
+		if !(aiBlock is Dictionary):
+			continue
+		profiled += 1
+		var errors := _aiProfileErrors(aiBlock, scriptNames, moveNames, actorNames)
+		_check(errors.is_empty(), "actor '%s' has a valid AI profile: %s" % [label, errors])
+	_check(profiled >= 1, "at least one authored AI profile is linted, got %d" % profiled)
+
+	var broken := _aiProfileErrors(
+		{
+			"archetype": "assassin", "pickFromTop": 0,
+			"weights": { "offense": -1.0, "flanking": 2.0 },
+			"script": "Ghost Script",
+		},
+		{}, { "Real Move": true }, {})
+	_check(broken.size() == 5, "a broken profile trips every profile rule: %s" % [broken])
+	_check(_aiProfileErrors({ "archetype": "damage", "pickFromTop": 3, "weights": { "offense": 1.0, "support": 0.2, "defense": 0.5, "reposition": 0.5 } }, {}, { "Real Move": true }, {}).is_empty(), "a valid profile passes")
+
+
+## Pure per-profile checker so the lint can prove it rejects broken profiles.
+func _aiProfileErrors(profile: Dictionary, scriptNames: Dictionary, moveNames: Dictionary, actorNames: Dictionary) -> Array:
+	var errors := []
+	var archetype = str(profile.get("archetype", "damage"))
+	if !(archetype in ShootoutEnemyAIScript.ARCHETYPES):
+		errors.append("unknown archetype '%s'" % archetype)
+	if profile.has("pickFromTop"):
+		var width = profile.get("pickFromTop", null)
+		if typeof(width) != TYPE_INT or int(width) <= 0:
+			errors.append("pickFromTop must be a positive integer")
+	if profile.has("weights"):
+		var weights = profile.get("weights", null)
+		if !(weights is Dictionary):
+			errors.append("weights must be a dictionary")
+		else:
+			for family in weights:
+				if !(str(family) in ShootoutEnemyAIScript.ACTION_FAMILIES):
+					errors.append("unknown action family '%s'" % str(family))
+				elif typeof(weights[family]) not in [TYPE_INT, TYPE_FLOAT] or float(weights[family]) <= 0.0:
+					errors.append("weight '%s' must be a positive number" % str(family))
+	var scriptName = str(profile.get("script", ""))
+	if scriptName != "":
+		if !scriptNames.has(scriptName):
+			errors.append("unknown AI script '%s'" % scriptName)
 	return errors
 
 

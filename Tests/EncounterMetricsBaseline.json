@@ -1,0 +1,38 @@
+{
+  "canyonRats": {
+    "encounter": "Canyon Rats",
+    "encounterPath": "res://Data/Shootout/Encounters/CanyonRats.gd",
+    "guardTripped": false,
+    "hits": 6,
+    "kind": "dustup",
+    "knockdowns": 3,
+    "outcome": "victory",
+    "remainingHealth": {
+      "Walker Langley0": {
+        "hp": 8,
+        "maxHp": 12
+      },
+      "Walker Langley1": {
+        "hp": 10,
+        "maxHp": 12
+      },
+      "Walker Langley2": {
+        "hp": 12,
+        "maxHp": 12
+      }
+    },
+    "rounds": 1,
+    "seed": 20261117,
+    "source": "measurement_driver",
+    "teams": [
+      "Walker Langley",
+      "Walker Langley",
+      "Walker Langley",
+      "Squeky rat",
+      "Squeky rat",
+      "Squeky rat"
+    ],
+    "turns": 6,
+    "zoneId": "canyon"
+  }
+}

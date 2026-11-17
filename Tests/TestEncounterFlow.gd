@@ -231,6 +231,7 @@ func _testSceneRouter() -> void:
 	_check(shootout.encounterName == "Canyon Rats", "the selected encounter initializes instead of the debug fallback")
 	_check(shootout.encounterRequest != null and shootout.encounterRequest.encounterPath == CANYON_RATS, "the Shootout consumes the request once")
 	_check(shootout.encounterZoneId == "canyon" and shootout.encounterSourceId == "fight_cache_rats", "the Shootout keeps request context")
+	_check(shootout.encounterSeed == 2468 and shootout.combatRng.seed == 2468, "the request seed drives the combat RNG")
 	_check(Shootout.pendingRequest == null, "the global pending request is cleared after consumption")
 
 	# Simulate the acknowledged end screen; the router owns the return.

@@ -39,6 +39,8 @@ class FakeShootout:
 	var turnManager = FakeTurnManager.new()
 	var cylinderManager = FakeCylinderManager.new()
 	var damageNumbers = []
+	# Combat RNG seam (commit 13): null keeps the global-RNG fallback paths hot.
+	var combatRng = null
 	func _init():
 		actors = {}
 		damageNumbers = []
@@ -311,6 +313,40 @@ func _run() -> void:
 	_check(manager.applyIncomingModifiers(fake.actors["Tank"], 10.0) == 4.0, "expired taunt keeps only the always-on reduction")
 	manager.onTurnStart("Tank")
 	_check(fake.actors["Tank"].hp == 22, "expired taunt stops the taunting-only heal")
+
+	print("\n--- Seeded random cleanses are reproducible (commit 13) ---")
+	ctx = makeManager()
+	fake = ctx.fake
+	manager = ctx.manager
+	fake.actors["Weak"].stats["silenceImmunity"] = 0
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "poison", "amount": 1 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "mark", "extraDamage": 1 }, "Rat")
+	fake.combatRng = RandomNumberGenerator.new()
+	fake.combatRng.seed = 909
+	var cleanseSequence = []
+	for i in 3:
+		manager.cleanse("Weak", "random", 1)
+		cleanseSequence.append(str(manager.getEffects("Weak", "bleed").size()) + "/" + str(manager.getEffects("Weak", "poison").size()) + "/" + str(manager.getEffects("Weak", "mark").size()))
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "poison", "amount": 1 }, "Rat")
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "mark", "extraDamage": 1 }, "Rat")
+	manager.cleanse("Weak", "bleed", 99)
+	manager.cleanse("Weak", "poison", 99)
+	manager.cleanse("Weak", "mark", 99)
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "poison", "amount": 1 }, "Rat")
+	manager.applyEffect("Weak", { "op": "apply_effect", "effect": "mark", "extraDamage": 1 }, "Rat")
+	fake.combatRng = RandomNumberGenerator.new()
+	fake.combatRng.seed = 909
+	var replaySequence = []
+	for i in 3:
+		manager.cleanse("Weak", "random", 1)
+		replaySequence.append(str(manager.getEffects("Weak", "bleed").size()) + "/" + str(manager.getEffects("Weak", "poison").size()) + "/" + str(manager.getEffects("Weak", "mark").size()))
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "bleed", "amount": 1 }, "Rat")
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "poison", "amount": 1 }, "Rat")
+		manager.applyEffect("Weak", { "op": "apply_effect", "effect": "mark", "extraDamage": 1 }, "Rat")
+	_check(cleanseSequence == replaySequence, "the same seed replays the same random-cleanse sequence, got %s vs %s" % [cleanseSequence, replaySequence])
 
 	print("\n--- Death cleanup ---")
 	ctx = makeManager()
