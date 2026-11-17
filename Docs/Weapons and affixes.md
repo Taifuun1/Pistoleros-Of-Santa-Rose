@@ -5,6 +5,8 @@ Names for weapons, equipment and affixes. Rollable affix stats. Rarity tiers for
 
 Affixes are rolled with item type, rarity, and zone as parameters. Type will set wich type of item the rolled item will be(Revolver, Johnny B. etc.). Rarity is decided by the level of the party, which is tied to main quest progression — rolled items always use the party's current main quest rarity; a specific rarity can also be passed as a parameter when generating an item directly. Rarity is the item's power tier — items have no separate tier stat. The current zone for the party sets the zone. Each type of equipment has restrictions on which affixes it can roll(defined loosely in [Combat doc](Combat.md)). Affixes are tied to specific stats. Every rolled item always gets two affixes regardless of rarity; each affix is chosen based on a random stat line. Unique modifiers and flavour texts are reserved for unique items. The UI node for an item is in [Item Stat node](../Nodes/Item%20Stats/ItemStats.tscn).
 
+**Affix support (commit 12):** the rollable pool is governed by `Globals/CombatStatRegistry.gd` `AFFIX_DECISIONS`. Sundance (turn order), Grizzled (MxEN), Prospector's/of the Mother Lode (loot gems), of the Cattleherder (lasso damage), Whiskey-Soaked (liquid skull duration), Rattlesnake's/Firebrand (poison/bleed affliction) and of the Poker Face (negative-effect duration reduction) no longer roll or sell: turn order duplicates the initiative contract, MxEN/lasso/gems have no systems yet, and the affliction/duration rules are undocumented. Previously rolled items carrying these stats keep their text, pricing and save validity. The design names stay below as the reserved backlog for when those systems arrive.
+
 ## Rarity (Common → Unique)
 
 - **Trail-Worn** (common)
