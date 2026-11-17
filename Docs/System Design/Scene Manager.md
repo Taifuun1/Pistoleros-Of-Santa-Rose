@@ -136,10 +136,19 @@ Replace every direct `change_scene_to_*` call:
 ### 9. Main menu
 
 - Create `UI/Main Menu/MainMenu.tscn` (a `Control` following the existing `UI/` structure, using `UI/UITheme.tres`) with buttons:
-  - **New Game** → `SceneManager.change_scene("cutscene", { "cutscene": <intro cutscene> })` or straight to `"overworld"` until the intro cutscene is wired up.
-  - **Continue** → loads save data (when saving exists), then `change_scene("overworld")`. Disabled until save support lands.
+  - **New Game** → `SceneManager.startNewGame()`; resets every domain through `Globals/NewGameCoordinator.gd`, closes modals, clears transient contexts and loads the `overworld` scene, leaving any stored save untouched.
+  - **Continue** → `SceneManager.continueGame()`; enabled only while `SaveGame.hasValidSave()` is true. It restores the one saved payload through `Globals/SaveGame.gd`, clears transient contexts and resumes on the `overworld` scene at the restored exact position. A missing or rejected save leaves the current scene and session untouched.
   - **Quit** → `get_tree().quit()`.
 - The main menu becomes the default `initial_scene`, making it the game's entry point.
+
+### Save checkpoints
+
+`SceneManager` owns the only checkpoint triggers (`autosaveEnabled`, on by default):
+
+- leaving the Overworld while the live player is still registered records the exact walked position;
+- entering the Overworld records the anchor or restored origin the session resumes from.
+
+`Globals/SaveGame.gd` owns the actual write: it assembles one versioned JSON payload from every persistent domain, audits it before writing, and replaces the file atomically through a temp file plus a one-generation backup. Scene-run tests that instantiate this manager set `autosaveEnabled = false` and save explicitly.
 
 ### 10. Testing
 

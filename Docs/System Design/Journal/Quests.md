@@ -2,7 +2,7 @@
 
 The Journal's Quests tab tells the player which quests are active or completed, what has already happened, and what to do next. It also provides navigation from a current objective to the same quest target on the Overworld map.
 
-**Status: stages 1–4 and the production quest-encounter integration are implemented; stage 5 automated validation is complete, while visual/controller reconfirmation remains.** Typed definitions/catalog live in `Data/Quests/`, and `Globals/Quests.gd` owns validated catalog loading, runtime state, journal projections, current-objective queries and the marker API, covered by `Tests/TestQuests.gd`. `UI/Journal/Tabs/QuestsTab.*` renders the read-only Active/Completed master/detail view against an injectable provider (`Tests/TestQuestsTab.gd`/`.tscn`). The shell wires `showOnMapRequested` to `Journal.showOnMap()`, and MapTab uses the real `Quests.getCurrentMapMarkers()` provider with quest/objective marker identity and exact `focusQuestTarget()` selection (`Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`). `Pistoleros Regroup` is authored in `Data/Quests/Definitions/PistolerosRegroup.tres`, registered in `Data/Quests/QuestCatalog.tres`, and advanced by four end-of-cutscene quest shots plus Littlehill Grove's real `QuestEncounterTrigger`, covered by `Tests/TestQuestTriggers.gd`/`.tscn`, `Tests/TestEncounterFlow.tscn` and `Tests/TestQuests.gd`. All five prologue Location scenes now exist and are chained Finch Pond → Pine Meadows → Great Fall Ridge → Blackberry Retreat → Littlehill Grove; Littlehill Grove has no onward exit yet. `Globals/Locations.gd::currentQuest` still selects location content.
+**Status: stages 1–4 and the production quest-encounter integration are implemented; stage 5 automated validation is complete, while visual/controller reconfirmation remains.** Typed definitions/catalog live in `Data/Quests/`, and `Globals/Quests.gd` owns validated catalog loading, runtime state, journal projections, current-objective queries, the marker API and a versioned save snapshot, covered by `Tests/TestQuests.gd`. `UI/Journal/Tabs/QuestsTab.*` renders the read-only Active/Completed master/detail view against an injectable provider (`Tests/TestQuestsTab.gd`/`.tscn`). The shell wires `showOnMapRequested` to `Journal.showOnMap()`, and MapTab uses the real `Quests.getCurrentMapMarkers()` provider with quest/objective marker identity and exact `focusQuestTarget()` selection (`Tests/TestJournal.gd`, `Tests/TestOverworldMapTab.gd`). `Pistoleros Regroup` is authored in `Data/Quests/Definitions/PistolerosRegroup.tres`, registered in `Data/Quests/QuestCatalog.tres`, and advanced by four end-of-cutscene quest shots plus Littlehill Grove's real `QuestEncounterTrigger`, covered by `Tests/TestQuestTriggers.gd`/`.tscn`, `Tests/TestEncounterFlow.tscn` and `Tests/TestQuests.gd`. All five prologue Location scenes now exist and are chained Finch Pond → Pine Meadows → Great Fall Ridge → Blackberry Retreat → Littlehill Grove; Littlehill Grove has no onward exit yet. `Globals/Locations.gd::currentQuest` still selects location content.
 
 ## First-iteration decisions
 
@@ -11,7 +11,7 @@ The Journal's Quests tab tells the player which quests are active or completed, 
 - Build progress history from completed objectives in completion order. Do not add a second narrative-event feed yet.
 - Keep the tab read-only. Gameplay advances quests through domain commands; the Journal never starts, completes, abandons, or resets them.
 - Use a two-pane Active/Completed master list and quest detail view, with scrolling and keyboard/controller focus at 640×360.
-- Keep runtime state in the `Quests` autoload across scene changes. Save/load integration waits for the save service; this iteration does not imply persistence across application restarts.
+- Keep runtime state in the `Quests` autoload across scene changes, with a versioned `exportState()`/`importState()`/`resetForNewGame()` snapshot. Quest progress persists through the disk save service (`Globals/SaveGame.gd`) and is restored exactly after an application restart; the tab itself still owns no save representation.
 
 ## Scope and requirements
 
@@ -56,7 +56,7 @@ The Journal's Quests tab tells the player which quests are active or completed, 
 - Narrative-only log entries unrelated to completed objectives. The model can be extended later without making the UI parse dialogue.
 - Reward display/claiming and links to Inventory or Character.
 - Location/dungeon maps, routes, moving-actor targets, fast travel, or quest-target tracking on foot.
-- Save/load format, migration of existing cutscene flags, and cross-application persistence.
+- Save/load format and migration of existing cutscene flags: the quest snapshot participates in the disk save service, but the tab owns no file format, slot management, or migration UI.
 - Bulk conversion of existing cutscene data into quests. Initial live content should be a small, explicitly wired vertical slice.
 
 ## User experience and layout
