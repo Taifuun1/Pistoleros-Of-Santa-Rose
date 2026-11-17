@@ -73,8 +73,8 @@ The Journal's Inventory & Equipment tab manages the party's shared carried items
 ### Out of scope for this iteration
 
 - Using consumables outside combat, or rich belt editing beyond the single assign/remove action (quantity pickers, stack splitting, drag-and-drop).
-- Activating/deactivating class or equipment abilities and resolving equipment-granted ability loadouts.
-- Implementing combat mechanics for affixes that the Shootout pipeline does not yet support.
+- Activating/deactivating equipment-granted Moves is implemented (commit 11 through the Journal Character Move loadout); class ability breadth beyond the authored grants and richer belt editing remain deferred.
+- Implementing combat mechanics for affixes that the Shootout pipeline does not yet support (planned as commit 12).
 - Direct unequipping, drag-and-drop, manual slot rearrangement, sorting, filtering, search, comparison across multiple characters, and equipped-item dropping.
 - Buying, selling, Bank storage, trading between characters, crafting, durability, weight, ammunition management, and ground-persistent dropped items.
 - Save serialization/migration across application restarts, New Game reset, and a settings/save service.

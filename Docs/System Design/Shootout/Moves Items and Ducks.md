@@ -19,9 +19,10 @@ This is a design doc: it describes the intended design, and the implementation m
 
 ## Current state
 
-**Implemented** (loadouts, belt space, item consumption, Duck mechanics, silence/position filtering and multi-target act sets; equipment abilities and the out-of-combat activation UI are outside this doc):
+**Implemented** (loadouts, belt space, item consumption, Duck mechanics, silence/position filtering, multi-target act sets and commit 11's canonical class/equipment Move grants with Journal activation and persisted selection; richer belt editing remains deferred).
 
 - Character loadouts are data-driven: actor data and `Party.party` carry `moves` (final activated list, max 4) and `items` (belt contents); `ActorBase.applyLoadoutLimits(beltSpace)` enforces the 4-move cap and the effective belt space with warn-and-truncate (belt space -1 = uncapped when class data is unknown). For Party actors, `CharacterStatCalculator` supplies class belt space plus equipped-belt bonuses; enemies retain class-data belt space. Class belt space comes from the class files in `Data/Shootout/Classes` (decided).
+- Grants (commit 11): classes declare canonical `moves` (unimplemented design text lives in `futureAbilities`), weapon/equipment bases declare optional `grantedMoves`, and `Globals/CombatLoadoutProjector.gd` resolves direct/innate, class and equipment grants into the member's active selection. `Party.activateMove`/`deactivateMove` own the Journal selection, the last offensive Move stays protected, and Party snapshots persist the selection (domain version 2, save version 3 migration).
 - Move data carries `category`: `ability` (utility; blocked by silence), `attack_ability` (fires the weapon; advances the Cylinder — see [Cylinders](Cylinders.md)), `duck` (defensive buffs; effects only, no damage, never advances the Cylinder — decided).
 - Ducks live in `Data/Shootout/Moves/` with `category: "duck"` (decided) — first placeholders: Duck Down (self-taunt) and Hold Steady (heal over time).
 - Item use consumes exactly one instance from the belt at resolution time (unknown items are not consumed), even when the item targets a multi-target set; the acts panel is rebuilt from the remaining list on open.

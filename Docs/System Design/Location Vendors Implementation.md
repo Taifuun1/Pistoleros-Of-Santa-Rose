@@ -530,7 +530,7 @@ Land the following as reviewable patches. Run focused tests and the existing ful
 ### ⏳ Patch 7 — Content completion, persistence audit, and release verification (partially implemented)
 
 1. ⏳ **Content:** all five kinds are authored and placed in Lazysprings (general store, gunsmith, outfitter, bank, gazette) with real prices/stock counts, working interiors and one production Zone report. The remaining authoring is blocked on **art and world content, not code**: every vendor actor still shares the `Character_24px` sprite, only the `canyon` Zone has a real pool and copy (further Zones need authored encounters and actor animation sets), and production secret *items* still have no reachable cache interaction to reveal. No incomplete offer ships — `TestVendorContent` fails the run if a fixed offer cannot deliver its effect.
-2. ✅ **Persistence audit:** `Tests/TestVendorPersistence.gd` (new) drives the documented coordinator order end to end. A real session (stack purchase, map purchase → reveal, Bank deposit, rolled stock, explicit trail departure) is exported as one payload, restored into a fresh session, deep-compared, and re-exported byte-identically. It pins the contract below: each payload is validated on throwaway service instances before anything commits, scalars are validated by hand, invalid or partial payloads leave every live service untouched, and the New Game resets clear stock/Bank/reveals/departure while deliberately leaving Party untouched. Party persistence and the real Save/Continue path stay blocked on the save service — `MainMenu`'s Continue is still a disabled stub — and the audit records that boundary instead of faking it.
+2. ✅ **Persistence audit:** `Tests/TestVendorPersistence.gd` (new) drives the documented coordinator order end to end. A real session (stack purchase, map purchase → reveal, Bank deposit, rolled stock, explicit trail departure) is exported as one payload, restored into a fresh session, deep-compared, and re-exported byte-identically. It pins the legacy coordinator seams: invalid or partial vendor/discovery/departure payloads leave their live services untouched, and the New Game resets clear stock/Bank/reveals/departure while deliberately leaving Party untouched. The real Save/Continue path is now implemented by `Globals/SaveGame.gd`; `TestSaveGame` and `TestSaveRestart` additionally prove rollback, migration and process-restart persistence.
 3. ✅ **Docs:** this plan, `Location Vendors.md`, `Testing.md` and `Inventory and Equipment.md` now state actual results, and every high-level acceptance criterion carries recorded evidence.
 4. ⏳ **Verification:** the full `Tests/RunAll.gd` suite passes **50/50** (patch 7 added `TestVendorPersistence` and `TestVendorContent`). The manual pass is reduced below to what automation cannot judge and remains outstanding.
 
@@ -542,13 +542,13 @@ Land the following as reviewable patches. Run focused tests and the existing ful
 
 ### Save coordinator contract
 
-The save service does not exist yet, so the order below is what its coordinator must follow; `TestVendorPersistence` exercises it against the real services and fails if a payload can half-apply.
+The shipped `Globals/SaveGame.gd` autoload owns this contract; see [System Coherence §8](System%20Coherence.md#8-save-continue-and-new-game-contract). `TestVendorPersistence` still guards the vendor/discovery seams, and `TestSaveGame`/`TestSaveRestart` check the coordinated disk save and real application restart.
 
-1. **Collect** one payload per domain: `Vendors.exportState()`, `Discovery.exportState()`, `Locations.trailDepartureId` and the Party side (money, inventory, equipment) belong together, because a Bank deposit, a map reveal and a stock roll are only consistent with the Party state they were made from.
-2. **Validate everything before committing anything.** Import each payload into throwaway instances of the same services — the services' own importers are the validators — and check scalars (a non-negative integer departure id) by hand. A rejected payload must not commit anywhere.
-3. **Commit in one order:** Party state, then `Vendors.importState()`, then `Discovery.importState()`, then `Locations.restoreTrailDepartureId()`.
-4. **New Game** calls the explicit resets (`Vendors.resetForNewGame(seed)`, `Discovery.resetForNewGame()`, `Locations.resetTrailDepartures()`) rather than relying on autoload recreation, and resets Party through the same service that will restore it.
-5. **Never regenerate on import:** rolled stock is restored as stored and keyed by departure cycle, so a reload cannot reroll a shop.
+1. **Collect** one payload per domain through each domain's `exportState()`: Party (including equipment, reservations and next instance number), Quests, Locations/Trail, Cutscene, Vendors/stock/Bank, Discovery and the Overworld provider position. Bank id, reveal-target and stock-cycle references must be consistent with Party and the Trail state, not restored independently.
+2. **Validate before committing anything.** `SaveGame.validatePayload()` audits the whole key set and JSON-safe values, cross-resolves ids and verifies that `vendors.activeDepartureId` and every rolled stock entry use `locations.trailDepartureId`. Domain importers remain the validators for their own shapes and content references. A failure during commit rolls the already-committed domains back from captured snapshots.
+3. **Commit in dependency order:** Party, Quests, Locations, Cutscene, Vendors, Discovery, then the Overworld position. `Vendors.importState()` still owns departure/stock synchronization; rolled stock never regenerates on import.
+4. **Write atomically** through a verified temp file and one-generation backup. A malformed file or newer save version leaves the previous live session and any readable prior save intact.
+5. **New Game and Continue use their own commands:** the save is not deleted by New Game; `SceneManager.continueGame()` restores the one valid payload and resumes through the Overworld. Vendor stock changes only through the explicit Trail start, not on load, scene entry or a vendor-room return.
 
 ## Verification
 
@@ -610,7 +610,7 @@ Automation now covers the data behaviour of every step below; what remains is wh
 7. **Manual (visual half):** read a report on screen and compare its tone and layout with the real encounter behaviour; accuracy, exclusions and the no-fallback rule are automated.
 8. **Manual (feel half):** hammer open/close/cancel with real input and alt-tabbing, including pre-existing pause states; balance and cleanup are automated.
 9. **Manual only:** review all five vendor views, long item/report text, empty/sold-out states and confirmations at 640×360 with integer scaling and keyboard/controller only.
-10. **Manual (deferred):** snapshot round-trips are automated (`TestVendorPersistence`); repeat through actual Save/Continue/New Game once the save service replaces `MainMenu`'s disabled Continue stub.
+10. **Manual (Continue/New Game):** repeat a purchase, map reveal, Bank deposit and Trail start through Main Menu Continue, then start New Game through the product UI and verify initial stock/clears; schema validation and exact restart behavior are automated in `TestSaveRestart.tscn`.
 
 ## Remaining content decisions and risks
 
@@ -621,6 +621,6 @@ Automation now covers the data behaviour of every step below; what remains is wh
 - Shared Zone migration and real encounter pools are cross-feature dependencies. Do not fork their data to make vendor progress appear complete — `canyon` is the only authored Zone so far, and other Zones must report themselves unavailable.
 - ✅ Vendor NPC art, bespoke interior art and enemy actor animation sets are the remaining authoring blockers for patch 7's content item; the placed content reuses existing art deliberately rather than shipping placeholder claims.
 - Bank’s unlimited capacity is intentional for this iteration but should be playtested alongside the 24-slot carried inventory; change it only through a new design decision, not a UI-only cap.
-- ✅ Save snapshots are audited end to end (`TestVendorPersistence`), including the ordered, validate-before-commit coordinator contract; actual application-restart persistence remains blocked on the save service (`MainMenu`'s Continue is a disabled stub), and Party has no export/import yet.
+- ✅ Save snapshots are audited end to end (`TestVendorPersistence`), including the ordered validate-before-commit coordinator contract. `Globals/SaveGame.gd` now coordinates Party and vendor/discovery payloads on disk; Party has its validated export/import, and `TestSaveGame` plus `TestSaveRestart` prove rollback, migration and application-restart behavior.
 - This plan deliberately leaves existing gathering interactions, general fog of war, visual-party behavior, loot overflow, and non-vendor Location transitions unchanged.
 - This plan deliberately leaves existing gathering interactions, general fog of war, visual-party behavior, loot overflow, and non-vendor Location transitions unchanged.

@@ -365,7 +365,7 @@ The Character filter runs both new suites; the other focused filters guard share
 
 - **Rendered presentation:** consider a model only after the full text/stat layout has spare space at integer scale; the static icon remains the fallback.
 - **Exact Rodeo values:** add a shared pure level-scaling/display projection used by both combat and Journal. Do not duplicate `ShootoutRodeoManager.applyLevelScaling()` in UI.
-- **Moves and belt loadouts:** design read-only inspection, activation limits, shared-inventory assignment, consumption write-back, and controller flows together.
+- **Moves and belt loadouts:** Move grants and activation are implemented (commit 11: canonical class/equipment grants, Journal activation, persisted selection). Belt editing (quantity/drag-and-drop, shared-inventory assignment and consumption write-back in one place) remains deferred.
 - **Cross-tab shortcuts:** if desired, add Journal-level selected-member navigation or **Manage equipment** requests without letting tabs find each other through node paths.
 - **Live Shootout access:** if Journal availability expands into Shootouts, decide explicitly whether Character remains the persistent journey sheet or receives a separate live-combat provider. Never accidentally mix persistent Party HP with live actor HP/effects.
 - **Persistence:** save/load character state belongs to Party and the future save service. The tab stores no authoritative member data or persistent per-member UI selection.

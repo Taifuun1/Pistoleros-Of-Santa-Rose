@@ -105,5 +105,5 @@ This deletes the special-cased enemy attack and routes everything through the an
 
 1. How much should enemies "know"? (Proposed: full Cylinder and effect knowledge, since the player sees the same; HP thresholds only for their own side. First pass uses full knowledge.)
 2. ~~Should generic enemies flee or surrender?~~ — **decided**: no, enemies never flee; quest variety comes from win conditions instead (survive N turns, get MxHP below an amount, etc. — see [Encounters](Encounters.md)).
-3. Difficulty knobs: should Dust-ups use dumber weights (more randomness) than Showdowns? (First pass: `PICK_FROM_TOP = 2` for everything; the knob exists on the AI.)
+3. **Decided for commit 13 in [First Steps §12](../First%20Steps%20Implementation%20Plan.md#12-phase-3--combat-breadth):** an unprofiled actor keeps today's top-2 selection for compatibility; a Dust-up deliberately chooses from a wider validated candidate set and a Showdown chooses only the highest-scored act. Authored `ai.pickFromTop`, action-family weights and seeded combat drivers replace the single global `PICK_FROM_TOP` constant and supply deterministic metrics before balance changes.
 - Dust-ups are easier than Showdowns, which should be expressed in dumber weights and lower stats for enemies
