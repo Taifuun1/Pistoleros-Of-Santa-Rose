@@ -10,6 +10,7 @@ extends Node
 
 const SceneManagerScene = preload("res://Nodes/Scene Manager/SceneManager.tscn")
 const OverworldCoordinatesScript = preload("res://Overworld/OverworldCoordinates.gd")
+const ItemGenerationScript = preload("res://Globals/ItemGeneration.gd")
 
 const VERIFY_SCENE := "res://Tests/SaveRestartVerify.tscn"
 const QUEST_ID := "pistoleros_regroup"
@@ -134,6 +135,17 @@ func _playSession() -> void:
 		var reservation: Dictionary = Party.reserveBeltItem("Walker Langley", stackId, 1)
 		_check(bool(reservation.get("success", false)), "the carried stack is reserved on Walker's belt: %s" % str(reservation))
 	Party.money = EXPECTED_MONEY
+	# One activated class grant plus an equipped equipment grant: the Fight
+	# loadout and its grant sources must survive the restart.
+	_check(bool(Party.activateMove("Walker Langley", "Duck Down").get("success", false)), "Walker activates the class-granted Duck Down")
+	var generator = ItemGenerationScript.new()
+	var revolver: Dictionary = generator.generateWeapon({ "definitionId": "cattleman", "family": "revolver", "rarity": "common" })
+	generator.free()
+	var added: Dictionary = Party.addItem(revolver)
+	var acceptedIds: Array = added.get("acceptedInstanceIds", [])
+	_check(acceptedIds.size() == 1, "the rolled Cattleman is carried: %s" % str(added))
+	if acceptedIds.size() == 1:
+		_check(bool(Party.equipItem("Walker Langley", str(acceptedIds[0])).get("success", false)), "the granting Cattleman is equipped")
 	_check(Quests.startQuest(QUEST_ID), "the quest starts")
 	Quests.completeCurrentObjective(QUEST_ID, Quests.getCurrentObjectiveId(QUEST_ID))
 	expectedObjective = Quests.getCurrentObjectiveId(QUEST_ID)
@@ -172,6 +184,8 @@ func _runVerifyProcess() -> int:
 		"reveal=%s" % EXPECTED_REVEAL,
 		"seed=%d" % int(Vendors.baseSeed),
 		"belt=%d" % int(Party.getBeltSnapshot("Walker Langley").get("used", 0)),
+		"moves=%s" % "|".join(Party.party["Walker Langley"]["moves"]),
+		"weapon=%s" % str(Party.party["Walker Langley"]["equipment"]["weapon"].get("definitionId", "")),
 		"pos_x=%s" % String.num(expectedPosition.x, 6),
 		"pos_y=%s" % String.num(expectedPosition.y, 6),
 	]

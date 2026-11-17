@@ -36,6 +36,12 @@ func _ready() -> void:
 
 	var belt: Dictionary = Party.getBeltSnapshot("Walker Langley")
 	_check(int(belt.get("used", -1)) == _expectInt("belt", -1), "the belt reservation count is restored")
+	var expectedMoves: Array = _expectString("moves", "").split("|", false)
+	_check(Party.party["Walker Langley"]["moves"] == expectedMoves, "the selected Move loadout is restored (%s)" % str(Party.party["Walker Langley"]["moves"]))
+	_check(Party.getFightData("Walker Langley").moves == expectedMoves, "the restored loadout resolves against the real class grants")
+	var weapon = Party.party["Walker Langley"]["equipment"].get("weapon", {})
+	_check(str(weapon.get("definitionId", "")) == _expectString("weapon", ""), "the equipped granting weapon is restored")
+	_check(weapon.get("grantedMoves", []) == ["Sharp Shot"], "the equipment grant data survives the restart")
 	var ids := {}
 	var duplicate := false
 	for entryValue in Party.inventory:

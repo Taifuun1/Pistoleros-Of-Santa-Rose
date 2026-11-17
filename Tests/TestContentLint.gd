@@ -12,6 +12,9 @@ const EncounterPoolDataScript = preload("res://Data/Shootout/EncounterPoolData.g
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
+const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
+const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
+const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 
 ## Every folder whose files expose a `data` Dictionary identified by `data.name`.
 const CONTENT_FOLDERS := [
@@ -62,6 +65,7 @@ func _run() -> void:
 	_testReferenceIntegrity()
 	_testZoneReferences()
 	_testTrailAndAccessGates()
+	_testMoveGrants()
 	_testLintHasTeeth()
 
 	if failures == 0:
@@ -73,6 +77,88 @@ func _run() -> void:
 
 ## Proves the lint has teeth: deliberately broken fixtures must trip it and a
 ## valid producer must not.
+## Class, weapon and equipment Move grants must resolve to authored Moves, and
+## no combat actor may lose its only offensive option to a grant union.
+func _testMoveGrants() -> void:
+	print("\n--- Move grants resolve ---")
+	var moves := _collectData("res://Data/Shootout/Moves")
+	var movesData := _movesDataFor(moves.entries)
+	var classes := _collectData("res://Data/Shootout/Classes")
+	for entry in classes.entries:
+		var errors := _classGrantErrors(entry.data, moves.names)
+		_check(errors.is_empty(), "class '%s' has canonical unique Move grants: %s" % [entry.data.get("name", entry.file), errors])
+
+	var weaponData = WeaponDataScript.new()
+	for family in weaponData.weaponFamilies:
+		for baseValue in weaponData.weaponFamilies[family]:
+			if !(baseValue is Dictionary) or !baseValue.has("grantedMoves"):
+				continue
+			var errors := _grantErrors(str(baseValue.get("id", "?")), baseValue.get("grantedMoves", null), moves.names)
+			_check(errors.is_empty(), "weapon '%s' grants authored Moves: %s" % [baseValue.get("id", "?"), errors])
+
+	var equipmentData = EquipmentDataScript.new()
+	for slot in equipmentData.genericBases:
+		var base = equipmentData.genericBases[slot]
+		if base is Dictionary and base.has("grantedMoves"):
+			var errors := _grantErrors(str(base.get("id", slot)), base.get("grantedMoves", null), moves.names)
+			_check(errors.is_empty(), "equipment '%s' grants authored Moves: %s" % [base.get("id", slot), errors])
+	for zoneId in equipmentData.zones:
+		for itemValue in equipmentData.zones[zoneId].get("items", []):
+			if itemValue is Dictionary and itemValue.has("grantedMoves"):
+				var errors := _grantErrors(str(itemValue.get("id", "?")), itemValue.get("grantedMoves", null), moves.names)
+				_check(errors.is_empty(), "equipment '%s' grants authored Moves: %s" % [itemValue.get("id", "?"), errors])
+
+	var actors := _collectData("res://Data/Actors/Animals")
+	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+	for entry in actors.entries:
+		var actorLabel := str(entry.data.get("actorName", entry.file))
+		var classRecord := _recordNamed(classes.entries, str(entry.data.get("characterClass", "")))
+		var classData: Dictionary = classRecord.get("data", {}) if !classRecord.is_empty() else {}
+		var resolved: Array = CombatLoadoutProjectorScript.resolvedDirectMoves(entry.data, classData)
+		_check(CombatLoadoutProjectorScript.hasOffensiveMove(resolved, movesData), "combat actor '%s' keeps a legal offensive Move after grants (resolved %s)" % [actorLabel, resolved])
+
+
+## Pure class-grant checker: unknown/duplicate/legacy prose grants.
+func _classGrantErrors(classData: Dictionary, moveNames: Dictionary) -> Array:
+	var errors := _grantErrors(str(classData.get("name", "")), classData.get("moves", []), moveNames)
+	if classData.has("abilities"):
+		errors.append("legacy 'abilities' prose must move to 'futureAbilities'")
+	return errors
+
+
+## Pure grant checker: a grant list must be an array of unique authored Move ids.
+func _grantErrors(label: String, grants, moveNames: Dictionary) -> Array:
+	if !(grants is Array):
+		return ["%s grant list must be an Array" % label]
+	var errors := []
+	var seen := {}
+	for grantValue in grants:
+		var grantId := str(grantValue)
+		if grantId == "" or !moveNames.has(grantId):
+			errors.append("%s grants unknown Move '%s'" % [label, grantId])
+			continue
+		if seen.has(grantId):
+			errors.append("%s grants Move '%s' twice" % [label, grantId])
+		seen[grantId] = true
+	return errors
+
+
+func _movesDataFor(records: Array) -> Dictionary:
+	var data := {}
+	for record in records:
+		data[str(record.data.get("name", ""))] = record.data
+	return data
+
+
+func _recordNamed(records: Array, dataName: String) -> Dictionary:
+	if dataName == "":
+		return {}
+	for record in records:
+		if str(record.data.get("name", "")) == dataName:
+			return record
+	return {}
+
+
 func _testLintHasTeeth() -> void:
 	print("\n--- The lint rejects broken fixtures ---")
 	var duplicates := _duplicateNameErrors([
@@ -96,6 +182,25 @@ func _testLintHasTeeth() -> void:
 	_check(percentStat.size() == 1, "a percent path is not a flat stat modifier: %s" % [percentStat])
 	var validStat := _effectStatPathErrors({ "op": "apply_effect", "effect": "stat_modifier", "stat": "highTailin", "amount": 2 })
 	_check(validStat.is_empty(), "a supported flat stat path passes: %s" % [validStat])
+
+	var knownMoves := { "Sharp Shot": "SharpShot.gd" }
+	var classFixture := { "name": "Broken Class", "moves": ["Sharp Shot", "Missing Move", "Sharp Shot"], "abilities": ["legacy prose"] }
+	var classErrors := _classGrantErrors(classFixture, knownMoves)
+	_check(classErrors.size() == 3, "an unknown, a duplicate and a legacy prose class grant are rejected: %s" % [classErrors])
+	var validClass := { "name": "Good Class", "moves": ["Sharp Shot"], "futureAbilities": ["legacy prose"] }
+	_check(_classGrantErrors(validClass, knownMoves).is_empty(), "a canonical class grant with backlog prose passes: %s" % [_classGrantErrors(validClass, knownMoves)])
+	var weaponErrors := _grantErrors("Broken Weapon", ["Missing Move"], knownMoves)
+	_check(weaponErrors.size() == 1, "an unknown weapon grant is rejected: %s" % [weaponErrors])
+	_check(_grantErrors("Broken Weapon", "Sharp Shot", knownMoves).size() == 1, "a non-array grant list is rejected: %s" % [_grantErrors("Broken Weapon", "Sharp Shot", knownMoves)])
+
+	var movesFixture := {
+		"Sharp Shot": { "name": "Sharp Shot", "category": "attack_ability" },
+		"Duck Down": { "name": "Duck Down", "category": "duck" },
+	}
+	var supportOnly := CombatLoadoutProjectorScript.resolvedDirectMoves({ "moves": ["Duck Down"] }, { "moves": ["Duck Down"] })
+	_check(!CombatLoadoutProjectorScript.hasOffensiveMove(supportOnly, movesFixture), "a grant union without offense is rejected")
+	var withClassGrant := CombatLoadoutProjectorScript.resolvedDirectMoves({ "moves": ["Duck Down"] }, { "moves": ["Sharp Shot"] })
+	_check(CombatLoadoutProjectorScript.hasOffensiveMove(withClassGrant, movesFixture), "a class attack grant keeps the actor offensive")
 
 
 func _testDuplicateNames() -> void:

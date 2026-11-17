@@ -4,6 +4,7 @@ extends SceneTree
 ## Run with: godot --headless --script res://Tests/TestEncounters.gd
 
 const TurnManagerScript = preload("res://Shootout/ShootoutTurnManager.gd")
+const LoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
 
 const SIDES = ["player team", "enemy team"]
 
@@ -91,20 +92,19 @@ func validateEncounter(data: Dictionary, fileName: String, movesData: Dictionary
 
 
 ## Every combat actor must have at least one legal offensive Move; a fighter
-## that can only pass or reposition silently stalls the fight.
+## that can only pass or reposition silently stalls the fight. Class and
+## equipment grants count, because the Shootout resolves the same union.
 func actorHasOffensiveMove(actorType: String, actorName: String, movesData: Dictionary) -> bool:
 	var actorData = loadActorData(actorType, actorName)
 	if actorData.is_empty():
 		return false
-	for moveName in actorData.get("moves", []):
-		var moveData = movesData.get(str(moveName), {})
-		if moveData.get("category", "") == "attack_ability" or int(moveData.get("baseAmount", 0)) > 0:
-			return true
-	return false
+	var resolved: Array = LoadoutProjectorScript.resolvedDirectMoves(actorData, loadClassData(actorData))
+	return LoadoutProjectorScript.hasOffensiveMove(resolved, movesData)
 
 
 ## Every Move an actor names must resolve to authored Move data; a typo silently
-## removes the only offensive option and stalls the fight.
+## removes the only offensive option and stalls the fight. Class and equipment
+## grants are checked by the content lint.
 func actorUsesKnownMoves(actorType: String, actorName: String, movesData: Dictionary) -> bool:
 	var actorData = loadActorData(actorType, actorName)
 	if actorData.is_empty():
@@ -113,6 +113,21 @@ func actorUsesKnownMoves(actorType: String, actorName: String, movesData: Dictio
 		if !movesData.has(str(moveName)):
 			return false
 	return true
+
+
+## Authored class data for an actor, or {} when the actor has no class.
+func loadClassData(actorData: Dictionary) -> Dictionary:
+	var className = str(actorData.get("characterClass", ""))
+	if className == "":
+		return {}
+	var path = "res://Data/Shootout/Classes/%s.gd" % className.replace(" ", "")
+	if !ResourceLoader.exists(path):
+		return {}
+	var holder = load(path).new()
+	var classData = holder.get("data") if ("data" in holder) else null
+	if holder is Node:
+		holder.free()
+	return classData if classData is Dictionary else {}
 
 
 func loadActorData(actorType: String, actorName: String) -> Dictionary:

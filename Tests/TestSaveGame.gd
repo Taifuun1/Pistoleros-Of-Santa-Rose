@@ -103,6 +103,16 @@ func testPayloadAssembly() -> void:
 	unknownRarity.quests.currentMainQuestLevel = { "level": 2, "rarity": "mythic" }
 	_check(context.saveGame.validatePayload(unknownRarity).reason == "invalid_state", "an unknown progression rarity is rejected")
 
+	var duplicateMoves := payload.duplicate(true)
+	duplicateMoves.party.members["Walker Langley"].moves = ["Sharp Shot", "Sharp Shot"]
+	_check(context.saveGame.validatePayload(duplicateMoves).reason == "invalid_state", "a duplicate selected Move is rejected")
+
+	var oversizedMoves := payload.duplicate(true)
+	oversizedMoves.party.members["Walker Langley"].moves = ["Sharp Shot", "Hold Steady", "Duck Down", "Scratch", "Sharp Shot"]
+	_check(context.saveGame.validatePayload(oversizedMoves).reason == "invalid_state", "a selected Move list beyond the cap is rejected")
+
+	_check(payload.party.members["Walker Langley"].moves == ["Sharp Shot", "Hold Steady"], "the payload records the member's selected Move loadout")
+
 	_release(context)
 
 
@@ -110,11 +120,13 @@ func testRoundTrip() -> void:
 	print("")
 	print("--- Save, mutate and restore a full session ---")
 	var context := _makeContext()
+	_dirtySession(context)
 	_check(context.saveGame.save().success, "a dirty session saves without errors")
 	_check(FileAccess.file_exists(SAVE_PATH), "save() writes the payload to the injected path")
 	_check(context.saveGame.hasValidSave(), "the written save reads back as valid")
 	_check(!FileAccess.file_exists(SAVE_PATH + ".tmp") and !FileAccess.file_exists(SAVE_PATH + ".bak"), "a completed save leaves no temp or backup file")
 	var savedCapture := _capture(context)
+	_check((savedCapture.party.members["Walker Langley"].moves as Array).size() == 3, "the saved session carries the activated class grant")
 	var savedPayload: Dictionary = context.saveGame.exportPayload()
 	var skipped: Dictionary = context.saveGame.save()
 	_check(bool(skipped.get("skipped", false)), "an unchanged session is not rewritten")
@@ -145,7 +157,7 @@ func testMalformedRollback() -> void:
 	_check(context.saveGame.loadSave().reason == "malformed_save", "a malformed file fails with a stable reason")
 	_check(_capture(context) == baseline, "a malformed file leaves the session untouched")
 
-	_writeRaw(JSON.stringify({ "formatVersion": 3, "party": {} }))
+	_writeRaw(JSON.stringify({ "formatVersion": context.saveGame.SAVE_FORMAT_VERSION + 1, "party": {} }))
 	_check(context.saveGame.readPayload().reason == "unsupported_version", "a newer format version is refused")
 
 	var payload: Dictionary = context.saveGame.exportPayload()
@@ -219,6 +231,24 @@ func testMigration() -> void:
 	var refused: Dictionary = context.saveGame.loadSave()
 	_check(!refused.success, "a legacy payload with unresolvable content ids is refused: %s" % str(refused))
 	_check(_capture(context) == before, "a refused legacy payload leaves the session untouched")
+
+	print("")
+	print("--- Pre-loadout payload migration ---")
+	_dirtySession(context)
+	var stored: Dictionary = context.saveGame.exportPayload()
+	stored.formatVersion = 2
+	stored.party.formatVersion = 1
+	for memberValue in stored.party.members.values():
+		memberValue.erase("moves")
+	_writeRaw(JSON.stringify(stored))
+	_check(!context.saveGame.validatePayload(stored).success, "a pre-loadout payload is not a current payload")
+	_resetToNewGame(context)
+	var migrated: Dictionary = context.saveGame.loadSave()
+	_check(migrated.success, "a pre-loadout payload migrates: %s" % str(migrated))
+	_check(int(migrated.get("migratedFrom", -1)) == 2, "the load reports the pre-loadout source version")
+	_check(context.party.party["Walker Langley"].moves == ["Sharp Shot", "Hold Steady"], "the migrated loadout defaults to the canonical selection")
+	_check(context.party.getMoveLoadoutSnapshot("Walker Langley").active == ["Sharp Shot", "Hold Steady"], "the migrated selection resolves through the loadout projection")
+	_check(int(context.saveGame.readPayload().payload.party.formatVersion) == context.party.STATE_FORMAT_VERSION, "the migrated Party payload carries the current domain version")
 	_release(context)
 
 
@@ -255,7 +285,11 @@ func testAtomicReplacementAndDelete() -> void:
 func _makeContext() -> Dictionary:
 	var itemCatalog = ItemCatalogScript.new()
 	var party = PartyScript.new()
-	party.configureInventory(itemCatalog)
+	party.configureInventory(itemCatalog, _loadDataFolder("res://Data/Shootout/Classes"))
+	party.configureCharacterData(
+		_loadDataFolder("res://Data/Shootout/Classes"),
+		_loadDataFolder("res://Data/Shootout/Rodeos"),
+		_loadDataFolder("res://Data/Shootout/Moves"))
 	party.setInventoryManagementAllowed(true)
 	var quests = QuestsScript.new()
 	quests.loadCatalog(load(QUEST_CATALOG_PATH))
@@ -294,6 +328,22 @@ func _makeContext() -> Dictionary:
 	}
 
 
+## Authored content loader matching Globals/Shootout.loadDataFolder so the
+## context resolves the real class/Move grants.
+func _loadDataFolder(folderPath: String) -> Dictionary:
+	var data := {}
+	for fileName in DirAccess.get_files_at(folderPath):
+		if !fileName.ends_with(".gd"):
+			continue
+		var entry = load(folderPath + "/" + fileName).new()
+		var entryData = entry.get("data")
+		if entryData != null:
+			data[str(entryData.name)] = entryData
+		if entry is Node:
+			entry.free()
+	return data
+
+
 func _makeVendors() -> Dictionary:
 	return {
 		"test_general": {
@@ -322,6 +372,12 @@ func _makeVendors() -> Dictionary:
 ## a walked Overworld position.
 func _dirtySession(context: Dictionary) -> void:
 	context.party.money = 500
+	# One activated class grant: the selected loadout must round-trip and stay
+	# resolvable against the real Gunslinger grants.
+	context.party.setInventoryManagementAllowed(true)
+	var activation: Dictionary = context.party.activateMove("Walker Langley", "Duck Down")
+	if !bool(activation.get("success", false)) and str(activation.get("reason", "")) != "already_active":
+		push_warning("TestSaveGame: could not activate the class grant: %s" % str(activation))
 	var locations = context.locations
 	locations.enterTown("Lazysprings")
 	locations.startTrail()
