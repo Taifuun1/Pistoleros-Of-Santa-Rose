@@ -416,3 +416,5 @@ The implemented gates, in order:
 ### What stays outside combat breadth
 
 Do not expand Zones, parties, bosses, quests, legendary awards or vendor breadth before these three commits land. Secret destinations/rewards also remain later content work: a future secret-item claim must check Trail eligibility before capacity, refuse a full inventory all-or-nothing, persist a one-shot claimed-target id, and never silently drop a unique reward. A save-management UI (slots, delete/overwrite, migration prompts) and user settings remain open; they are not reasons to change disk ownership or store more transient combat data. Dynamic spawns, Flair and Poker integration stay in their existing deferred/priority rows.
+
+**Next sequence:** [Next Steps Implementation Plan](Next%20Steps%20Implementation%20Plan.md) — commit 14 (save slots and save-management UI), commit 15 (user settings), commit 16 (secret destinations and reward claims), commit 17 (combat content breadth), commit 18 (Zone breadth).
