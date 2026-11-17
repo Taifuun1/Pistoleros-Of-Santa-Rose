@@ -665,7 +665,24 @@ func generateLootForFight(rodeoLoot, winningSide: String) -> Dictionary:
 	if !(table is Dictionary):
 		push_warning("Shootout: unknown loot table {table}".format({ "table": lootTableName }))
 		return empty
-	return lootGenerator.generateLoot(table, rodeoLoot, null, encounterZoneId)
+	return lootGenerator.generateLoot(table, _fightLootModifiers(rodeoLoot), null, encounterZoneId)
+
+
+## Supported equipment loot affixes (commit 12) merge into the fight's loot
+## modifiers. Off-Trail fights returned empty above, so the reward gate is
+## never bypassed; rodeo multipliers still compose on top.
+func _fightLootModifiers(rodeoLoot: Dictionary) -> Dictionary:
+	var itemStatsList := []
+	for memberValue in Party.party.values():
+		if !(memberValue is Dictionary):
+			continue
+		var equipment = (memberValue as Dictionary).get("equipment", {})
+		if !(equipment is Dictionary):
+			continue
+		for itemValue in (equipment as Dictionary).values():
+			if itemValue is Dictionary and (itemValue as Dictionary).get("stats") is Dictionary:
+				itemStatsList.append((itemValue as Dictionary).get("stats"))
+	return lootGenerator.mergeLootModifiers(rodeoLoot, lootGenerator.equipmentLootStats(itemStatsList))
 
 func fightOutcome(winningSide: String) -> String:
 	if fled:

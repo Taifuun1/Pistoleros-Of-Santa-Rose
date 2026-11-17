@@ -22,6 +22,8 @@ const DEFAULT_CYLINDER = [2, 2, 2, 2]
 
 const MIN_CYLINDER_LENGTH = 2
 const MAX_CYLINDER_LENGTH = 6
+# Bounded equipment cylinderIncrease bonus (commit 12).
+const MAX_EQUIPMENT_CHAMBERS = 3
 
 var shootout
 var classesData = {}
@@ -57,13 +59,20 @@ func registerActor(actor) -> void:
 	var weaponMagazine = null
 	if actor.get("weapon") != null and actor.weapon.get("weapon", null) != null:
 		weaponMagazine = weaponMagazines.get(actor.weapon.weapon, null)
+	# Equipment cylinderIncrease affix (commit 12): extra chambers appended to
+	# the rebuilt Cylinder, clamped to a small bounded bonus.
+	var extraChambers = 0
+	var actorStats = actor.get("stats")
+	if actorStats is Dictionary:
+		extraChambers = clampi(int((actorStats as Dictionary).get("cylinderIncrease", 0)), 0, MAX_EQUIPMENT_CHAMBERS)
 	cylinders[actor.name] = {
 		"characterMagazine": characterMagazine if characterMagazine is Array else [],
 		"classMagazine": classMagazine if classMagazine is Array else [],
 		"weaponMagazine": weaponMagazine if weaponMagazine is Array else [],
 		"modifier": null,
 		"chamberIndex": 0,
-		"cylinder": []
+		"cylinder": [],
+		"extraChambers": extraChambers,
 	}
 	rebuild(actor.name)
 
@@ -151,6 +160,17 @@ func rebuild(actorName: String) -> void:
 		return
 	var entry = cylinders[actorName]
 	entry.cylinder = buildCylinder(entry.weaponMagazine, entry.classMagazine, entry.characterMagazine, entry.modifier)
+	# Equipment extra chambers (commit 12) repeat the last numeric Chamber so
+	# the Cylinder keeps its character and just cycles longer.
+	var extraChambers = int(entry.get("extraChambers", 0))
+	if extraChambers > 0:
+		var lastNumeric = CHAMBER_HIT
+		for i in range(entry.cylinder.size() - 1, -1, -1):
+			if entry.cylinder[i] is int:
+				lastNumeric = entry.cylinder[i]
+				break
+		for i in extraChambers:
+			entry.cylinder.append(lastNumeric)
 	if entry.chamberIndex >= entry.cylinder.size():
 		entry.chamberIndex = 0
 

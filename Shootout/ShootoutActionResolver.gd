@@ -187,7 +187,7 @@ func calculateAttackDamage(actingActor, targetActor, quality: int, consumeEffect
 	var damage = applyWeaponFamilyRule(preDefense, actingActor.weapon, targetDefense(targetActor))
 	var blocked = maxf(0.0, preDefense - damage)
 	damage = applyOutgoingModifiers(actingActor, damage, blocked)
-	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""), consumeEffects)
+	damage = applyIncomingModifiers(targetActor, damage, actingActor.weapon.get("type", ""), consumeEffects, actingActor)
 	return maxi(0, roundi(damage))
 
 # The relevant offensive stat per weapon family:
@@ -270,10 +270,10 @@ func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float
 		return effectManager.applyOutgoingModifiers(actingActor, damage, blocked)
 	return damage
 
-func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true) -> float:
+func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true, actingActor = null) -> float:
 	var effectManager = shootout.get("effectManager")
 	if effectManager != null and effectManager.has_method("applyIncomingModifiers"):
-		return effectManager.applyIncomingModifiers(targetActor, damage, damageType, consume)
+		return effectManager.applyIncomingModifiers(targetActor, damage, damageType, consume, actingActor)
 	return damage
 
 # Instant damage/healing resolves first, then the act's effect list is applied.

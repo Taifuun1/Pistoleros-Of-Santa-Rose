@@ -50,9 +50,16 @@ func createTurnOrder() -> void:
 				highTailin = shootout.getModifiedStat(actor, "highTailin", actor.stats.highTailin)
 			else:
 				highTailin = shootout.rodeoManager.getStatModifier(actor, "highTailin", actor.stats.highTailin)
+			# Equipment initiative affix (commit 12): the one authored initiative
+			# effect; it shares High Tailin's turn-order contract instead of
+			# inventing a separate turnOrder mechanic.
+			var equipmentInitiative = 0
+			var actorStats = actor.get("stats")
+			if actorStats is Dictionary:
+				equipmentInitiative = int((actorStats as Dictionary).get("initiative", 0))
 			initiatives.append({
 				"actorName": actorName,
-				"initiative": int(highTailin) + randi_range(0, RANDOM_ROLL_MAX),
+				"initiative": int(highTailin) + equipmentInitiative + randi_range(0, RANDOM_ROLL_MAX),
 				"tiebreak": randf()
 			})
 	initiatives.sort_custom(sortByInitiative)

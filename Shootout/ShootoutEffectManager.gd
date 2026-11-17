@@ -66,6 +66,10 @@ func applyEffect(targetName: String, effect: Dictionary, sourceName := "") -> vo
 
 func applyAffliction(targetName: String, effect: Dictionary, sourceName: String) -> void:
 	var effectType = effect.get("effect", "")
+	if effectType == "silence" and hasSilenceImmunity(targetName):
+		# Equipment silenceImmunity affix (commit 12): the silence is refused
+		# before it is stored; other effects still apply normally.
+		return
 	if effectType == "heal":
 		healActor(targetName, int(effect.get("amount", 0)))
 		return
@@ -216,8 +220,10 @@ func isSilenced(actorName: String) -> bool:
 ## Every two bleed stacks deal one damage before resistance.
 func onTurnStart(actorName: String) -> void:
 	# Taunt's authored defensive upkeep heals the caster at the start of its
-	# turn while the taunt is active (before HoT/bleed resolution).
-	var tauntHeal = tauntHealPerTurn(actorName)
+	# turn while the taunt is active (before HoT/bleed resolution). The
+	# equipment mxHpHealTauntingPerTurn affix (commit 12) adds to the same
+	# heal while the actor is taunting.
+	var tauntHeal = tauntHealPerTurn(actorName) + equipmentTauntingHeal(actorName)
 	if tauntHeal > 0:
 		healActor(actorName, tauntHeal)
 	var keptHoT = []
@@ -337,12 +343,54 @@ func tauntHealPerTurn(actorName: String) -> int:
 	return int(taunt.get("mxHpHealPerTurn", 0)) if !taunt.is_empty() else 0
 
 
+## Equipment affix reads (commit 12) — the shared actor.stats projection the
+## calculator aggregates; fakes without a stats Dictionary read as zero.
+func _equipmentStat(actor, statKey: String) -> int:
+	if actor == null:
+		return 0
+	var stats = actor.get("stats")
+	if !(stats is Dictionary):
+		return 0
+	return maxi(0, int((stats as Dictionary).get(statKey, 0)))
+
+
+func equipmentPiercing(actor) -> int:
+	return _equipmentStat(actor, "damagePiercing")
+
+
+func equipmentDamageVsMarked(actor) -> int:
+	return _equipmentStat(actor, "damageVsMarked")
+
+
+## The taunting-only reductions/heal read as zero unless a taunt is active, so
+## the equipment numbers keep the taunt's lifecycle (death/expiration cleanup).
+func equipmentDamageReduction(targetActor) -> int:
+	var reduction = _equipmentStat(targetActor, "damageTakenReduction")
+	if !getTaunt(targetActor.name).is_empty():
+		reduction += _equipmentStat(targetActor, "damageTakenReductionTaunting")
+	return reduction
+
+
+func equipmentTauntingHeal(actorName: String) -> int:
+	if getTaunt(actorName).is_empty():
+		return 0
+	var actor = shootout.getActor(actorName) if shootout.has_method("getActor") else null
+	return _equipmentStat(actor, "mxHpHealTauntingPerTurn")
+
+
+func hasSilenceImmunity(targetName: String) -> bool:
+	var actor = shootout.getActor(targetName) if shootout.has_method("getActor") else null
+	return _equipmentStat(actor, "silenceImmunity") > 0
+
+
 ## Outgoing damage hook: damage piercing adds back up to the amount actually
-## blocked by defense (never more), damage decrease subtracts flat.
+## blocked by defense (never more), damage decrease subtracts flat. The
+## equipment damagePiercing affix (commit 12) joins the same capped pool.
 func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float:
 	var pierce = 0
 	for piercing in getEffects(actingActor.name, "piercing"):
 		pierce += piercing.amount
+	pierce += equipmentPiercing(actingActor)
 	var result = damage + minf(float(pierce), blocked)
 	for decrease in getEffects(actingActor.name, "decrease"):
 		result -= decrease.amount
@@ -351,12 +399,17 @@ func applyOutgoingModifiers(actingActor, damage: float, blocked := 0.0) -> float
 
 ## Incoming damage hook: active marks deal extra damage and apply their effects,
 ## consuming the mark; damage-type marks add extra damage for matching attacks
-## and last the Round.
-func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true) -> float:
+## and last the Round. The equipment damageVsMarked affix (commit 12) adds flat
+## damage against a marked target and the damageTakenReduction /
+## damageTakenReductionTaunting affixes reduce incoming damage through the same
+## clamped percent lane as the taunt's authored buff.
+func applyIncomingModifiers(targetActor, damage: float, damageType := "", consume := true, actingActor = null) -> float:
 	var result = damage
+	var targetIsMarked = false
 	for mark in getEffects(targetActor.name, "mark"):
 		if mark.state != "active":
 			continue
+		targetIsMarked = true
 		result += mark.extraDamage
 		if !consume:
 			# Dry run (enemy AI estimates): count the bonus, keep the mark.
@@ -367,10 +420,13 @@ func applyIncomingModifiers(targetActor, damage: float, damageType := "", consum
 		break
 	for typeMark in getEffects(targetActor.name, "damage_type_mark"):
 		if typeMark.damageType == damageType:
+			targetIsMarked = true
 			result += typeMark.extraDamage
-	var tauntReduction = tauntDamageReduction(targetActor.name)
-	if tauntReduction > 0:
-		result = maxf(0.0, result * (1.0 - clampf(float(tauntReduction) / 100.0, 0.0, 0.9)))
+	if actingActor != null and targetIsMarked:
+		result += equipmentDamageVsMarked(actingActor)
+	var reductionPercent = tauntDamageReduction(targetActor.name) + equipmentDamageReduction(targetActor)
+	if reductionPercent > 0:
+		result = maxf(0.0, result * (1.0 - clampf(float(reductionPercent) / 100.0, 0.0, 0.9)))
 	pruneExpired(targetActor.name)
 	return result
 

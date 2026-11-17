@@ -72,6 +72,7 @@ func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "",
 				stats[affix] += int(itemStats.get(affix, 0))
 		stats.defense.style += int(itemStats.get("style", 0))
 		stats.defense.sand += int(itemStats.get("sand", 0))
+		_applySupportedAffixes(stats, itemStats)
 
 	# Attrition is injected: Off Trail ignores accumulated journey injury for
 	# the effective MxHP projection. The calculator never reads Locations.
@@ -104,6 +105,36 @@ func calculate(member: Dictionary, classData: Dictionary, replacementSlot := "",
 		var beltBonus = int(belt.get("beltSpace", 0)) if belt is Dictionary else 0
 		result["beltSpace"] = classBeltSpace + beltBonus
 	return result
+
+
+## Aggregates the commit-12 supported equipment affixes into the projected stats
+## using their canonical paths. Percent reductions keep raw percent integers;
+## the potency reduction maps onto the documented bleed/poison resistance seam.
+func _applySupportedAffixes(stats: Dictionary, itemStats: Dictionary) -> void:
+	var explosivePairs = {
+		"gunpowderDamage": "gunpowder",
+		"liquidSkullDamage": "liquid",
+		"shrapnelDamage": "shrapnel",
+	}
+	for affix in explosivePairs:
+		var amount = int(itemStats.get(affix, 0))
+		if amount == 0:
+			continue
+		var path = str(explosivePairs[affix])
+		var current = int(stats.damage.explosive.get(path, 0))
+		# A negative base is the unknown-stat sentinel; equipment adds its own
+		# amount instead of adding onto -1.
+		stats.damage.explosive[path] = amount if current < 0 else current + amount
+	for affix in ["initiative", "damageVsMarked", "damagePiercing", "cylinderIncrease",
+			"damageTakenReduction", "damageTakenReductionTaunting",
+			"mxHpHealTauntingPerTurn", "lootGold", "lootItems"]:
+		stats[affix] += int(itemStats.get(affix, 0))
+	if int(itemStats.get("silenceImmunity", 0)) > 0:
+		stats["silenceImmunity"] = 1
+	var potency = int(itemStats.get("negativeEffectPotencyReduction", 0))
+	if potency > 0:
+		stats.resistances.bleed = float(stats.resistances.bleed) + float(potency) / 100.0
+		stats.resistances.poison = float(stats.resistances.poison) + float(potency) / 100.0
 
 
 ## Pure Journal character-sheet projection. It uses the same calculate() result
@@ -216,6 +247,21 @@ func compare(current: Dictionary, projected: Dictionary) -> Array:
 		{ "path": "stats.defense.sand", "label": "Sand" },
 		{ "path": "weapon.baseDamage", "label": "Damage" },
 		{ "path": "beltSpace", "label": "Belt space" },
+		{ "path": "stats.damage.explosive.gunpowder", "label": "Gunpowder" },
+		{ "path": "stats.damage.explosive.liquid", "label": "Liquid" },
+		{ "path": "stats.damage.explosive.shrapnel", "label": "Shrapnel" },
+		{ "path": "stats.initiative", "label": "Initiative" },
+		{ "path": "stats.damageVsMarked", "label": "vs. Marked" },
+		{ "path": "stats.damagePiercing", "label": "Piercing" },
+		{ "path": "stats.cylinderIncrease", "label": "Cylinder" },
+		{ "path": "stats.damageTakenReduction", "label": "Damage taken" },
+		{ "path": "stats.damageTakenReductionTaunting", "label": "Reduction taunting" },
+		{ "path": "stats.mxHpHealTauntingPerTurn", "label": "Heal taunting" },
+		{ "path": "stats.resistances.bleed", "label": "Bleed resist" },
+		{ "path": "stats.resistances.poison", "label": "Poison resist" },
+		{ "path": "stats.silenceImmunity", "label": "Silence immunity" },
+		{ "path": "stats.lootGold", "label": "Loot gold" },
+		{ "path": "stats.lootItems", "label": "Loot items" },
 	]:
 		var before = _valueAt(current, spec.path)
 		var after = _valueAt(projected, spec.path)
@@ -304,6 +350,22 @@ func _itemEffects(slot: String, item: Dictionary) -> Array:
 		_appendEffect(effects, "stats.defense.style", STAT_LABELS["style"], _intValue(stats.get("style", 0)))
 		_appendEffect(effects, "stats.defense.sand", STAT_LABELS["sand"], _intValue(stats.get("sand", 0)))
 		_appendEffect(effects, "maxHp", STAT_LABELS["maxHp"], _intValue(stats.get("mxHp", 0)))
+		_appendEffect(effects, "stats.damage.explosive.gunpowder", "Gunpowder", _intValue(stats.get("gunpowderDamage", 0)))
+		_appendEffect(effects, "stats.damage.explosive.liquid", "Liquid", _intValue(stats.get("liquidSkullDamage", 0)))
+		_appendEffect(effects, "stats.damage.explosive.shrapnel", "Shrapnel", _intValue(stats.get("shrapnelDamage", 0)))
+		_appendEffect(effects, "stats.initiative", "Initiative", _intValue(stats.get("initiative", 0)))
+		_appendEffect(effects, "stats.damageVsMarked", "vs. Marked", _intValue(stats.get("damageVsMarked", 0)))
+		_appendEffect(effects, "stats.damagePiercing", "Piercing", _intValue(stats.get("damagePiercing", 0)))
+		_appendEffect(effects, "stats.cylinderIncrease", "Cylinder", _intValue(stats.get("cylinderIncrease", 0)))
+		_appendEffect(effects, "stats.damageTakenReduction", "Damage taken", _intValue(stats.get("damageTakenReduction", 0)))
+		_appendEffect(effects, "stats.damageTakenReductionTaunting", "Reduction taunting", _intValue(stats.get("damageTakenReductionTaunting", 0)))
+		_appendEffect(effects, "stats.mxHpHealTauntingPerTurn", "Heal taunting", _intValue(stats.get("mxHpHealTauntingPerTurn", 0)))
+		_appendEffect(effects, "stats.resistances.bleed", "Bleed resist", _intValue(stats.get("negativeEffectPotencyReduction", 0)))
+		_appendEffect(effects, "stats.resistances.poison", "Poison resist", _intValue(stats.get("negativeEffectPotencyReduction", 0)))
+		_appendEffect(effects, "stats.lootGold", "Loot gold", _intValue(stats.get("lootGold", 0)))
+		_appendEffect(effects, "stats.lootItems", "Loot items", _intValue(stats.get("lootItems", 0)))
+		if _intValue(stats.get("silenceImmunity", 0)) > 0:
+			effects.append(_effect("stats.silenceImmunity", "Silence immunity", 1))
 		if slot == "weapon":
 			var family = str(item.get("family", ""))
 			if !family.is_empty():
@@ -383,6 +445,13 @@ func _normalizedStats(statsValue) -> Dictionary:
 		"bleed": float(resistances.get("bleed", 0.0)),
 		"poison": float(resistances.get("poison", 0.0)),
 	}
+	# Supported equipment-only affixes (commit 12) default to zero so the
+	# aggregation and combat reads never touch a missing key.
+	for affix in ["initiative", "damageVsMarked", "damagePiercing", "cylinderIncrease",
+			"damageTakenReduction", "damageTakenReductionTaunting",
+			"mxHpHealTauntingPerTurn", "lootGold", "lootItems"]:
+		stats[affix] = int(stats.get(affix, 0))
+	stats["silenceImmunity"] = 1 if int(stats.get("silenceImmunity", 0)) > 0 else 0
 	return stats
 
 
