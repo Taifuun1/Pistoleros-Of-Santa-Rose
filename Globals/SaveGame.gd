@@ -39,6 +39,12 @@ const MIGRATION_STEPS := {
 const DEFAULT_SAVE_PATH := "user://savegame.json"
 const TEMP_SUFFIX := ".tmp"
 const BACKUP_SUFFIX := ".bak"
+## Slot storage (commit 14): one JSON file per slot under `SLOT_DIRECTORY` plus
+## an index file carrying the active slot id. An empty `activeSlot` keeps the
+## legacy single-file behavior (`savePath`) so existing saves and call sites
+## are untouched until a slot is created or selected.
+const SLOT_DIRECTORY := "user://saves"
+const SLOT_INDEX_PATH := "user://saves/index.json"
 ## Required domain keys; also the commit order. Party commits first because the
 ## vendor Bank validation reads the restored carried ids.
 const COMMIT_ORDER := ["party", "quests", "locations", "cutscene", "vendors", "discovery", "overworld"]
@@ -56,6 +62,9 @@ const META_KEYS := ["formatVersion", "savedAt"]
 
 var savePath := DEFAULT_SAVE_PATH
 
+## The selected save slot id, or "" for the legacy single-file path.
+var activeSlot := ""
+
 var _injectedDomains := {}
 var _lastWrittenJson := ""
 var _lastError := ""
@@ -70,12 +79,19 @@ func configure(domains: Dictionary = {}, options: Dictionary = {}) -> void:
 		if domains[key] != null:
 			_injectedDomains[str(key)] = domains[key]
 	savePath = str(options.get("savePath", savePath))
+	activeSlot = str(options.get("activeSlot", ""))
 	_lastWrittenJson = ""
 	_lastError = ""
 
 
 func getSavePath() -> String:
 	return savePath
+
+
+## The file the next save/load touches: the active slot when one is selected,
+## otherwise the legacy single-file path.
+func getActivePath() -> String:
+	return _slotPath(activeSlot) if _isValidSlotId(activeSlot) else savePath
 
 
 ## Stable reason of the last failed save/load, or "" when it succeeded.
@@ -101,13 +117,13 @@ func save() -> Dictionary:
 	var json := JSON.stringify(payload, "", true, true)
 	if json.is_empty():
 		return _fail("invalid_state")
-	if json == _lastWrittenJson and FileAccess.file_exists(savePath):
-		return { "success": true, "reason": "", "path": savePath, "skipped": true }
+	if json == _lastWrittenJson and FileAccess.file_exists(getActivePath()):
+		return { "success": true, "reason": "", "path": getActivePath(), "skipped": true }
 	var written := _writeAtomically(json)
 	if !bool(written.get("success", false)):
 		return written
 	_lastWrittenJson = json
-	return { "success": true, "reason": "", "path": savePath }
+	return { "success": true, "reason": "", "path": getActivePath() }
 
 
 ## Read -> migrate -> audit -> commit. A failure at any step leaves the live
@@ -124,7 +140,7 @@ func loadSave() -> Dictionary:
 	return {
 		"success": true,
 		"reason": "",
-		"path": savePath,
+		"path": getActivePath(),
 		"migratedFrom": int(read.get("migratedFrom", SAVE_FORMAT_VERSION)),
 	}
 
@@ -133,9 +149,10 @@ func loadSave() -> Dictionary:
 ## Returns { success, reason, payload, migratedFrom }. When the main file is
 ## missing, a leftover backup from an interrupted replacement is used.
 func readPayload(includeBackup := true) -> Dictionary:
-	var read := _readFile(savePath)
+	var activePath := getActivePath()
+	var read := _readFile(activePath)
 	if !bool(read.get("success", false)) and includeBackup and str(read.get("reason", "")) == "no_save":
-		var backupPath := savePath + BACKUP_SUFFIX
+		var backupPath := activePath + BACKUP_SUFFIX
 		if FileAccess.file_exists(backupPath):
 			read = _readFile(backupPath)
 	return read
@@ -145,11 +162,187 @@ func readPayload(includeBackup := true) -> Dictionary:
 ## this: a New Game session is independent of any stored save.
 func deleteSave() -> bool:
 	var removed := false
-	for path in [savePath, savePath + TEMP_SUFFIX, savePath + BACKUP_SUFFIX]:
+	for path in [getActivePath(), getActivePath() + TEMP_SUFFIX, getActivePath() + BACKUP_SUFFIX]:
 		if FileAccess.file_exists(path):
 			removed = DirAccess.remove_absolute(path) == OK or removed
 	_lastWrittenJson = ""
 	return removed
+
+
+## --- Save slots (commit 14) -------------------------------------------------
+##
+## Slots are plain payload files under `SLOT_DIRECTORY`; the index file carries
+## only the active slot id. No payload schema changes: every slot is a complete
+## versioned save validated by the same audit, and an empty `activeSlot` keeps
+## the legacy single-file path fully functional.
+
+func _ready() -> void:
+	_restoreSlotIndex()
+
+
+func _isValidSlotId(slotId: String) -> bool:
+	if slotId.is_empty() or slotId.length() > 64:
+		return false
+	# Letters, digits, underscore, dash and space only: no path separators or
+	# control characters can reach the filesystem through a slot id.
+	for character in slotId:
+		var code := character.unicode_at(0)
+		var letterOrDigit := (code >= 48 and code <= 57) or (code >= 65 and code <= 90) or (code >= 97 and code <= 122)
+		if !letterOrDigit and character != "-" and character != "_" and character != " ":
+			return false
+	return true
+
+
+func _slotPath(slotId: String) -> String:
+	return SLOT_DIRECTORY + "/" + slotId + ".json"
+
+
+## One entry per slot file: { id, savedAt, formatVersion, valid, notice }.
+## Newest first. The legacy single-file save is imported as "slot1" on the
+## first listing so existing players keep their save.
+func listSlots() -> Array:
+	_ensureLegacyImported()
+	var slots := []
+	if !DirAccess.dir_exists_absolute(SLOT_DIRECTORY):
+		return slots
+	var directory := DirAccess.open(SLOT_DIRECTORY)
+	if directory == null:
+		return slots
+	directory.list_dir_begin()
+	var fileName := directory.get_next()
+	while fileName != "":
+		if !directory.current_is_dir() and fileName.ends_with(".json") and fileName != "index.json":
+			slots.append(_slotEntry(slotIdFromFileName(fileName)))
+		fileName = directory.get_next()
+	directory.list_dir_end()
+	slots.sort_custom(func(a, b): return int(a.savedAt) > int(b.savedAt))
+	return slots
+
+
+func slotIdFromFileName(fileName: String) -> String:
+	return fileName.trim_suffix(".json")
+
+
+func _slotEntry(slotId: String) -> Dictionary:
+	var entry := { "id": slotId, "savedAt": 0, "formatVersion": 0, "valid": false, "notice": "" }
+	# _readFile parses, migrates and audits: a successful read is a valid slot
+	# (older payloads migrate in memory, never on disk during a listing).
+	var read := _readFile(_slotPath(slotId))
+	entry.valid = bool(read.get("success", false))
+	if entry.valid:
+		var payload: Dictionary = read.get("payload", {})
+		entry.savedAt = int(payload.get("savedAt", 0))
+		entry.formatVersion = int(payload.get("formatVersion", 0))
+	else:
+		entry.notice = migrationNotice(str(read.get("reason", "invalid_state")))
+	return entry
+
+
+## Makes an existing slot file the save/load target. Unknown ids fail closed.
+func selectSlot(slotId: String) -> Dictionary:
+	_ensureLegacyImported()
+	if !_isValidSlotId(slotId) or !FileAccess.file_exists(_slotPath(slotId)):
+		return _fail("unknown_slot")
+	activeSlot = slotId
+	_lastWrittenJson = ""
+	_persistSlotIndex()
+	return { "success": true, "reason": "", "activeSlot": activeSlot }
+
+
+## Selects a fresh slot id without a file; the slot appears in listings only
+## after its first checkpoint save. An empty id takes the first free number.
+func createSlot(slotId := "") -> Dictionary:
+	_ensureLegacyImported()
+	var newId := slotId.strip_edges()
+	if newId == "":
+		var counter := 1
+		while FileAccess.file_exists(_slotPath("slot%d" % counter)):
+			counter += 1
+		newId = "slot%d" % counter
+	if !_isValidSlotId(newId):
+		return _fail("invalid_slot_id")
+	if FileAccess.file_exists(_slotPath(newId)):
+		return _fail("slot_exists")
+	activeSlot = newId
+	_lastWrittenJson = ""
+	_persistSlotIndex()
+	return { "success": true, "reason": "", "activeSlot": activeSlot }
+
+
+## Removes a slot file and its temp/backup siblings. Deleting the active slot
+## clears the selection (Continue falls back to disabled until another slot is
+## chosen); the legacy path is never touched by this.
+func deleteSlot(slotId: String) -> Dictionary:
+	if !_isValidSlotId(slotId) or !FileAccess.file_exists(_slotPath(slotId)):
+		return _fail("unknown_slot")
+	var removed := false
+	for path in [_slotPath(slotId), _slotPath(slotId) + TEMP_SUFFIX, _slotPath(slotId) + BACKUP_SUFFIX]:
+		if FileAccess.file_exists(path):
+			removed = DirAccess.remove_absolute(path) == OK or removed
+	if activeSlot == slotId:
+		activeSlot = ""
+		_lastWrittenJson = ""
+		_persistSlotIndex()
+	return { "success": removed, "reason": "" if removed else "nothing_removed", "activeSlot": activeSlot }
+
+
+## Human-readable text for a slot that cannot be loaded, by failure reason.
+func migrationNotice(reason: String) -> String:
+	match reason:
+		"unsupported_version":
+			return "This save was written by a newer version of the game."
+		"no_save":
+			return ""
+		_:
+			return "This save is damaged and cannot be loaded."
+
+
+func _restoreSlotIndex() -> void:
+	if !FileAccess.file_exists(SLOT_INDEX_PATH):
+		return
+	var file := FileAccess.open(SLOT_INDEX_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	file.close()
+	if parsed is Dictionary:
+		var stored = (parsed as Dictionary).get("activeSlot", "")
+		if _isValidSlotId(str(stored)):
+			activeSlot = str(stored)
+
+
+func _persistSlotIndex() -> void:
+	if !DirAccess.dir_exists_absolute(SLOT_DIRECTORY):
+		DirAccess.make_dir_recursive_absolute(SLOT_DIRECTORY)
+	var file := FileAccess.open(SLOT_INDEX_PATH, FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({ "activeSlot": activeSlot }, "  "))
+	file.close()
+
+
+## One-time import of the pre-slot save so existing players do not lose it.
+func _ensureLegacyImported() -> void:
+	if activeSlot != "":
+		return
+	if !DirAccess.dir_exists_absolute(SLOT_DIRECTORY):
+		DirAccess.make_dir_recursive_absolute(SLOT_DIRECTORY)
+	var directory := DirAccess.open(SLOT_DIRECTORY)
+	if directory == null:
+		return
+	directory.list_dir_begin()
+	var fileName := directory.get_next()
+	var hasSlots := false
+	while fileName != "":
+		if !directory.current_is_dir() and fileName.ends_with(".json") and fileName != "index.json":
+			hasSlots = true
+		fileName = directory.get_next()
+	directory.list_dir_end()
+	if hasSlots or !FileAccess.file_exists(savePath):
+		return
+	if DirAccess.copy_absolute(savePath, _slotPath("slot1")) == OK:
+		activeSlot = "slot1"
+		_persistSlotIndex()
 
 
 ## Assembled payload from every live domain. Metadata keys are added first so
@@ -743,11 +936,12 @@ func _preparePayload(parsed) -> Dictionary:
 ## only removed after the new one is in place, so a crash mid-write leaves either
 ## the old save or its backup readable.
 func _writeAtomically(json: String) -> Dictionary:
-	var directory := savePath.get_base_dir()
+	var targetPath := getActivePath()
+	var directory := targetPath.get_base_dir()
 	if !directory.is_empty() and !DirAccess.dir_exists_absolute(directory):
 		DirAccess.make_dir_recursive_absolute(directory)
-	var tempPath := savePath + TEMP_SUFFIX
-	var backupPath := savePath + BACKUP_SUFFIX
+	var tempPath := targetPath + TEMP_SUFFIX
+	var backupPath := targetPath + BACKUP_SUFFIX
 	var file := FileAccess.open(tempPath, FileAccess.WRITE)
 	if file == null:
 		return _fail("write_failed")
@@ -761,21 +955,21 @@ func _writeAtomically(json: String) -> Dictionary:
 		return _fail("write_verify_failed")
 	verify.close()
 
-	var hadPrevious := FileAccess.file_exists(savePath)
+	var hadPrevious := FileAccess.file_exists(targetPath)
 	if hadPrevious:
 		if FileAccess.file_exists(backupPath):
 			DirAccess.remove_absolute(backupPath)
-		if DirAccess.rename_absolute(savePath, backupPath) != OK:
+		if DirAccess.rename_absolute(targetPath, backupPath) != OK:
 			DirAccess.remove_absolute(tempPath)
 			return _fail("write_failed")
-	if DirAccess.rename_absolute(tempPath, savePath) != OK:
+	if DirAccess.rename_absolute(tempPath, targetPath) != OK:
 		if hadPrevious:
-			DirAccess.rename_absolute(backupPath, savePath)
+			DirAccess.rename_absolute(backupPath, targetPath)
 		DirAccess.remove_absolute(tempPath)
 		return _fail("write_failed")
 	if hadPrevious:
 		DirAccess.remove_absolute(backupPath)
-	return { "success": true, "reason": "", "path": savePath }
+	return { "success": true, "reason": "", "path": getActivePath() }
 
 
 func _domain(domainKey: String) -> Node:

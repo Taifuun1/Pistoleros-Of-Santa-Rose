@@ -43,11 +43,63 @@ text = "Continue"
 layout_mode = 2
 text = "Settings"
 
+[node name="Saves" type="Button" parent="CenterContainer/VBoxContainer" unique_id=464295264]
+layout_mode = 2
+text = "Saves"
+
 [node name="Quit" type="Button" parent="CenterContainer/VBoxContainer" unique_id=992948591]
 layout_mode = 2
 text = "Quit"
 
+[node name="SavesPanel" type="PanelContainer" parent="." unique_id=771200341]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SavesPanel" unique_id=771200342]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SavesPanel/MarginContainer" unique_id=771200343]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="SavesPanel/MarginContainer/VBoxContainer" unique_id=771200344]
+layout_mode = 2
+text = "Saves"
+
+[node name="SlotList" type="VBoxContainer" parent="SavesPanel/MarginContainer/VBoxContainer" unique_id=771200345]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="Status" type="Label" parent="SavesPanel/MarginContainer/VBoxContainer" unique_id=771200346]
+layout_mode = 2
+text = ""
+autowrap_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="SavesPanel/MarginContainer/VBoxContainer" unique_id=771200347]
+layout_mode = 2
+
+[node name="NewSave" type="Button" parent="SavesPanel/MarginContainer/VBoxContainer/Buttons" unique_id=771200348]
+layout_mode = 2
+text = "New Save"
+
+[node name="Back" type="Button" parent="SavesPanel/MarginContainer/VBoxContainer/Buttons" unique_id=771200349]
+layout_mode = 2
+text = "Back"
+
+[node name="Spacer" type="Control" parent="SavesPanel/MarginContainer/VBoxContainer/Buttons" unique_id=771200350]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [connection signal="pressed" from="CenterContainer/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/Continue" to="." method="_on_continue_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/Settings" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Saves" to="." method="_on_saves_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="SavesPanel/MarginContainer/VBoxContainer/Buttons/NewSave" to="." method="_on_new_save_pressed"]
+[connection signal="pressed" from="SavesPanel/MarginContainer/VBoxContainer/Buttons/Back" to="." method="_on_saves_back_pressed"]
