@@ -208,7 +208,7 @@ var stats = {
 	"liquidSkullDuration": { "displayName": "Liquid skull duration", "kind": "flat", "value": statValues.liquidSkullDuration, "category": "status" },
 	"shrapnelDamage": { "displayName": "Shrapnel boom damage", "kind": "flat", "value": statValues.shrapnelDamage, "category": "status" },
 	"lassoDamage": { "displayName": "Lasso damage increase", "kind": "flat", "value": statValues.lassoDamage, "category": "offense" },
-	"damageVsMarked": { "displayName": "Damage against marked", "kind": "percent", "value": statValues.damageVsMarked, "category": "offense" },
+	"damageVsMarked": { "displayName": "Damage against marked", "kind": "flat", "value": statValues.damageVsMarked, "category": "offense" },
 	"damagePiercing": { "displayName": "Damage piercing", "kind": "flat", "value": statValues.damagePiercing, "category": "offense" },
 	"cylinderIncrease": { "displayName": "Cylinder increase", "kind": "flat", "value": statValues.cylinderIncrease, "category": "offense" },
 	"highTailin": { "displayName": "High Tailin'", "kind": "flat", "value": statValues.highTailin, "category": "utility" },
@@ -249,24 +249,18 @@ var prefixes = {
 		"Stonewall": "mxHpHealTauntingPerTurn",
 		"Rawhide-Tough": "mxHp",
 		"Undertaker's": "damageTakenReduction",
-		"Grizzled": "mxEn",
 		"Bronco": "negativeEffectPotencyReduction",
 	},
 	"utility": {
 		"Cowboys": "sixShootin",
 		"Fleet-Footed": "highTailin",
 		"Coyote's": "initiative",
-		"Sundance": "turnOrder",
-		"Prospector's": "lootGems",
 		"Silver-Tongued": "taffyin",
 		"Stagecoach's": "lootItems",
 	},
 	"status": {
-		"Rattlesnake's": "poisonAffliction",
-		"Firebrand": "bleedAffliction",
 		"Thunderhead's": "gunpowderDamage",
 		"Saloon-Forged": "liquidSkullDamage",
-		"Whiskey-Soaked": "liquidSkullDuration",
 		"Dusty": "silenceImmunity",
 	},
 }
@@ -292,8 +286,16 @@ var suffixes = {
 	"of the Six Feet Under": "shrapnelDamage",
 	"of the Gold Rush": "lootGold",
 	"of the Dead Reckoning": "cylinderIncrease",
-	"of the Cattleherder": "lassoDamage",
-	"of the Poker Face": "negativeEffectDurationReduction",
-	"of the Mother Lode": "lootGems",
 	"of the Lucky Horseshoe": "lootItems",
 }
+
+## Affix stats excluded from generation and vendor stock (commit 12). They keep
+## their statValues records and their pricing, so previously rolled legacy items
+## stay importable, wearable and sellable — they just cannot re-enter a roll and
+## have no inferred mechanics. `Globals/CombatStatRegistry.gd` AFFIX_DECISIONS
+## carries the reason for each exclusion, and the content lint fails if a pool
+## references one of them again.
+const EXCLUDED_AFFIXES = [
+	"turnOrder", "mxEn", "lassoDamage", "lootGems", "liquidSkullDuration",
+	"poisonAffliction", "bleedAffliction", "negativeEffectDurationReduction",
+]

@@ -10,6 +10,7 @@ const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 const LegendaryDataScript = preload("res://Data/Items/LegendaryData.gd")
 const AffixDataScript = preload("res://Data/Items/AffixData.gd")
+const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
 
 const RARITY_MULTIPLIERS = {
 	"common": 1.0,
@@ -149,7 +150,12 @@ func _affixValue(item: Dictionary) -> Dictionary:
 		var statKey = str(affix.get("stat", ""))
 		if !affixData.stats.has(statKey):
 			return _failure("unknown_affix")
-		var kind = str(affixData.stats[statKey].get("kind", ""))
+		# Kind comes from the shared registry decision record (commit 12) so
+		# pricing cannot value a stat the combat/generation record disagrees
+		# about; legacy excluded affixes keep their record and stay sellable.
+		var kind = CombatStatRegistryScript.affixKind(statKey)
+		if kind == "":
+			return _failure("unknown_affix")
 		if !AFFIX_KIND_POINT_VALUES.has(kind):
 			return _failure("unknown_affix_kind")
 		var value = affix.get("value", null)

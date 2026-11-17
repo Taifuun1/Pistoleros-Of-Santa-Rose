@@ -57,7 +57,7 @@ var legendaries = {
 		"baseName": "A.H. Fox Double Barrel",
 		"baseDamage": 11,
 		"sprite": "",
-		"stats": { "shotgunDamage": 20, "bleedAffliction": 3 },
+		"stats": { "shotgunDamage": 20, "damagePiercing": 3 },
 		"lore": "Two barrels, no survivors.",
 	},
 	"buffalo_tamer": {
@@ -91,7 +91,7 @@ var legendaries = {
 		"itemType": "equipment",
 		"slot": "belt",
 		"sprite": "",
-		"stats": { "lootGems": 25, "lootItems": 15 },
+		"stats": { "lootItems": 25, "lootGold": 15 },
 		"lore": "Every pouch holds something worth keeping.",
 	},
 	"the_undertakers_coat": {
@@ -107,7 +107,7 @@ var legendaries = {
 		"itemType": "equipment",
 		"slot": "justins",
 		"sprite": "",
-		"stats": { "highTailin": 2, "turnOrder": 2 },
+		"stats": { "highTailin": 2, "initiative": 2 },
 		"lore": "They sing when you walk. Nobody has ever heard them twice.",
 	},
 	"stylish_spurs": {

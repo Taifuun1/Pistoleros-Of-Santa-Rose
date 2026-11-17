@@ -38,6 +38,59 @@ const STAT_PATHS := {
 ## their nested defense entries; these are the flat core stats.
 const FLAT_EQUIPMENT_AFFIXES := ["sixShootin", "highTailin", "taffyin", "mxHp"]
 
+## Per-affix decision record (commit 12): one entry per `Data/Items/AffixData.gd`
+## stat key, so generation, vendor pricing, the Journal previews and the content
+## lint cannot disagree about which affixes are real. `generation` marks whether
+## the affix may roll or be sold; `consumer` names the production mechanic that
+## reads it. Excluded affixes keep their record so legacy items stay priceable
+## and importable without phantom mechanics.
+const AFFIX_DECISIONS := {
+	"sixShootin": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator core stat (Shootout offense)" },
+	"highTailin": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator core stat; ShootoutTurnManager initiative" },
+	"taffyin": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator core stat" },
+	"style": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator defense; ShootoutActionResolver family rule" },
+	"sand": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator defense; ShootoutActionResolver family rule" },
+	"mxHp": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator max HP" },
+	"revolverDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator weapon base damage" },
+	"rifleDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator weapon base damage" },
+	"shotgunDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "CharacterStatCalculator weapon base damage" },
+	"gunpowderDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "stats.damage.explosive.gunpowder via ShootoutActionResolver.offensiveStat" },
+	"liquidSkullDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "stats.damage.explosive.liquid via ShootoutActionResolver.offensiveStat" },
+	"shrapnelDamage": { "kind": KIND_FLAT, "generation": true, "consumer": "stats.damage.explosive.shrapnel via ShootoutActionResolver.offensiveStat" },
+	"initiative": { "kind": KIND_FLAT, "generation": true, "consumer": "ShootoutTurnManager.createTurnOrder (one authored initiative effect)" },
+	"damageVsMarked": { "kind": KIND_FLAT, "generation": true, "consumer": "ShootoutEffectManager.applyIncomingModifiers (marked targets)" },
+	"damagePiercing": { "kind": KIND_FLAT, "generation": true, "consumer": "ShootoutEffectManager.applyOutgoingModifiers (capped at blocked)" },
+	"cylinderIncrease": { "kind": KIND_FLAT, "generation": true, "consumer": "ShootoutCylinderManager extra chambers" },
+	"damageTakenReduction": { "kind": KIND_PERCENT, "generation": true, "consumer": "ShootoutEffectManager.applyIncomingModifiers (percent, clamped)" },
+	"damageTakenReductionTaunting": { "kind": KIND_PERCENT, "generation": true, "consumer": "ShootoutEffectManager.applyIncomingModifiers while taunting" },
+	"mxHpHealTauntingPerTurn": { "kind": KIND_FLAT, "generation": true, "consumer": "ShootoutEffectManager.onTurnStart while taunting" },
+	"silenceImmunity": { "kind": "flag", "generation": true, "consumer": "ShootoutEffectManager.applyAffliction silence gate" },
+	"negativeEffectPotencyReduction": { "kind": KIND_PERCENT, "generation": true, "consumer": "stats.resistances bleed/poison via ShootoutEffectManager.resistance" },
+	"lootGold": { "kind": KIND_PERCENT, "generation": true, "consumer": "ItemGeneration.generateLoot money multiplier (fight loot only)" },
+	"lootItems": { "kind": KIND_PERCENT, "generation": true, "consumer": "ItemGeneration.generateLoot roll bonus (fight loot only)" },
+	"turnOrder": { "kind": KIND_FLAT, "generation": false, "reason": "no distinct contract versus initiative" },
+	"mxEn": { "kind": KIND_FLAT, "generation": false, "reason": "no energy system" },
+	"lassoDamage": { "kind": KIND_FLAT, "generation": false, "reason": "no lasso system" },
+	"lootGems": { "kind": KIND_PERCENT, "generation": false, "reason": "no gem system" },
+	"liquidSkullDuration": { "kind": KIND_FLAT, "generation": false, "reason": "undocumented duration rule" },
+	"poisonAffliction": { "kind": KIND_FLAT, "generation": false, "reason": "undocumented equipment affliction contract" },
+	"bleedAffliction": { "kind": KIND_FLAT, "generation": false, "reason": "undocumented equipment affliction contract" },
+	"negativeEffectDurationReduction": { "kind": KIND_PERCENT, "generation": false, "reason": "undocumented duration reduction rule" },
+}
+
+
+static func affixDecision(statKey: String) -> Dictionary:
+	var decision = AFFIX_DECISIONS.get(statKey, null)
+	return decision if decision is Dictionary else {}
+
+
+static func isGenerationEligible(statKey: String) -> bool:
+	return bool(affixDecision(statKey).get("generation", false))
+
+
+static func affixKind(statKey: String) -> String:
+	return str(affixDecision(statKey).get("kind", ""))
+
 
 static func hasPath(statPath: String) -> bool:
 	return STAT_PATHS.has(statPath)

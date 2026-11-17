@@ -24,6 +24,7 @@ const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 const LegendaryDataScript = preload("res://Data/Items/LegendaryData.gd")
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
+const CombatStatRegistryScript = preload("res://Globals/CombatStatRegistry.gd")
 
 const RARITIES = {
 	"common": { "displayName": "Trail-Worn" },
@@ -240,6 +241,11 @@ func _rollAffix(affix: String, rarityKey: String, rng: RandomNumberGenerator = n
 				pool[affixName] = affixData.prefixes[category][affixName]
 	else:
 		pool = affixData.suffixes
+	# Defense in depth: the content lint rejects non-eligible pool entries; this
+	# filter keeps a reintroduced one out of the rolls anyway (commit 12).
+	for affixName in pool.keys():
+		if not CombatStatRegistryScript.isGenerationEligible(str(pool[affixName])):
+			pool.erase(affixName)
 	var names = pool.keys()
 	var affixName = names[_randomIndex(rng, names.size())]
 	var statKey = pool[affixName]
@@ -310,6 +316,40 @@ func _randomIntRange(rng: RandomNumberGenerator, from: int, to: int) -> int:
 	return rng.randi_range(from, to) if rng != null else randi_range(from, to)
 
 
+## Equipment loot bonuses (commit 12): sums the supported percent loot affixes
+## across the party's equipped item stats. Pure; no autoloads or member writes.
+## Returns { "lootGold", "lootItems" } as integer percents.
+static func equipmentLootStats(itemStatsList: Array) -> Dictionary:
+	var lootGold := 0
+	var lootItems := 0
+	for statsValue in itemStatsList:
+		if !(statsValue is Dictionary):
+			continue
+		lootGold += int((statsValue as Dictionary).get("lootGold", 0))
+		lootItems += int((statsValue as Dictionary).get("lootItems", 0))
+	return { "lootGold": maxi(0, lootGold), "lootItems": maxi(0, lootItems) }
+
+
+## Merges equipment loot affixes into a generateLoot modifier payload (fight
+## loot only — Off-Trail rewards never reach generateLoot with these). Rodeo
+## multipliers compose multiplicatively; percent affixes add first:
+## multiplier = rodeo * (1 + percent/100). `rollsPercent` adds whole extra
+## weighted rolls only (never fractional or negative).
+static func mergeLootModifiers(base: Dictionary, lootStats: Dictionary) -> Dictionary:
+	var merged = base.duplicate(true)
+	var multipliers = merged.get("multipliers", {})
+	if !(multipliers is Dictionary):
+		multipliers = {}
+	var lootGold = maxi(0, int(lootStats.get("lootGold", 0)))
+	if lootGold > 0:
+		multipliers["money"] = float(multipliers.get("money", 1.0)) * (1.0 + float(lootGold) / 100.0)
+	merged["multipliers"] = multipliers
+	var lootItems = maxi(0, int(lootStats.get("lootItems", 0)))
+	if lootItems > 0:
+		merged["rollsPercent"] = int(merged.get("rollsPercent", 0)) + lootItems
+	return merged
+
+
 ## Loot generation (Docs/System Design/Shootout/Rewards.md): rolls money and
 ## weighted entries from a loot table, then applies Rodeo loot modifiers
 ## (flat amounts first, multipliers after). An optional rng makes the whole
@@ -328,7 +368,12 @@ func generateLoot(table: Dictionary, modifiers := {}, rng: RandomNumberGenerator
 		loot.money = maxi(0, int(round(money * float(multipliers.get("money", 1.0)))))
 	else:
 		loot.money = maxi(0, int(round(int(amounts.get("money", 0)) * float(multipliers.get("money", 1.0)))))
-	for i in int(table.get("rolls", 0)):
+	var rolls = int(table.get("rolls", 0))
+	# Equipment loot affixes (commit 12): whole extra weighted rolls only.
+	var rollsPercent = maxi(0, int(modifiers.get("rollsPercent", 0)))
+	if rolls > 0 and rollsPercent > 0:
+		rolls += int(floor(float(rolls) * float(rollsPercent) / 100.0))
+	for i in rolls:
 		var entry = rollWeightedEntry(table.get("entries", []), rng)
 		if entry == null:
 			continue
