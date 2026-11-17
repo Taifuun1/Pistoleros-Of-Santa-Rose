@@ -33,6 +33,7 @@ func _run() -> void:
 	testDeterministicOrdering()
 	testProjectionIsolation()
 	testReloadClearsRuntimeState()
+	testSnapshotRoundTrip()
 
 	service.free()
 	if failures == 0:
@@ -275,6 +276,54 @@ func testReloadClearsRuntimeState() -> void:
 	_check(service.getQuestJournalEntries().is_empty(), "reloading clears known quests")
 	_check(service.getCurrentMapMarkers().is_empty(), "reloading clears markers")
 	_check(service.currentMainQuestLevel == { "level": 1, "rarity": "common" }, "currentMainQuestLevel is preserved")
+
+
+## Versioned snapshot contract for the save service (Docs/System Design/First
+## Steps Implementation Plan.md, save-service commit): progression inputs,
+## objective chains and the New Game reset.
+func testSnapshotRoundTrip() -> void:
+	print("\n--- Save snapshot round trip ---")
+	_check(service.loadCatalog(_progressCatalog()), "the progress catalog loads")
+	_check(service.startQuest("pistoleros_regroup"), "the quest starts")
+	_check(service.completeCurrentObjective("pistoleros_regroup", "find_gwyneth"), "the first objective completes")
+	var snapshot: Dictionary = service.exportState()
+	_check(snapshot.formatVersion == 1, "the snapshot carries the quest state format version")
+	_check(snapshot.states["pistoleros_regroup"].current_objective_id == "regroup_camp", "the snapshot records the current objective")
+
+	var target = QuestsScript.new()
+	_check(target.loadCatalog(_progressCatalog()), "a second service loads the same catalog")
+	_check(target.importState(snapshot).success, "the snapshot imports")
+	_check(target.exportState() == snapshot, "export/import/export is stable")
+	_check(target.getCurrentObjectiveId("pistoleros_regroup") == "regroup_camp", "the restored objective is projected")
+
+	var before: Dictionary = target.exportState()
+	var invalidChain := snapshot.duplicate(true)
+	invalidChain.states["pistoleros_regroup"].current_objective_id = "reach_lazysprings"
+	_check(target.importState(invalidChain).reason == "invalid_state", "a skipped objective is rejected")
+	_check(target.exportState() == before, "a rejected payload leaves quest state untouched")
+	var unknownQuest := snapshot.duplicate(true)
+	unknownQuest.states["missing_quest"] = { "status": "active", "current_objective_id": "anything", "completed_objective_ids": [] }
+	_check(target.importState(unknownQuest).reason == "invalid_state", "an unknown quest id is rejected")
+	var duplicateObjective := snapshot.duplicate(true)
+	duplicateObjective.states["pistoleros_regroup"].completed_objective_ids = ["find_gwyneth", "find_gwyneth"]
+	_check(target.importState(duplicateObjective).reason == "invalid_state", "a repeated completed objective is rejected")
+	var emptyRarity := snapshot.duplicate(true)
+	emptyRarity.currentMainQuestLevel = { "level": 1, "rarity": "" }
+	_check(target.importState(emptyRarity).reason == "invalid_state", "an empty progression rarity is rejected")
+	_check(target.exportState() == before, "no rejected payload committed anything")
+
+	_check(target.completeCurrentObjective("pistoleros_regroup", "regroup_camp"), "the second objective completes")
+	_check(target.completeCurrentObjective("pistoleros_regroup", "reach_lazysprings"), "the quest completes")
+	var completed: Dictionary = target.exportState()
+	_check(completed.states["pistoleros_regroup"].status == "completed", "the completed snapshot records the status")
+	_check(completed.states["pistoleros_regroup"].current_objective_id == "", "the completed snapshot has no current objective")
+	_check(target.importState(completed).success, "the completed snapshot re-imports")
+
+	target.resetForNewGame()
+	_check(target.exportState().states.is_empty(), "New Game clears quest progress")
+	_check(target.exportState().currentMainQuestLevel == { "level": 1, "rarity": "common" }, "New Game restores the progression level")
+	target.free()
+	_check(service.importState(snapshot).success, "the live service keeps accepting valid snapshots")
 
 
 func _loadSingleQuestCatalog() -> void:

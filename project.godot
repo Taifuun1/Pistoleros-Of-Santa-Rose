@@ -40,6 +40,7 @@ ItemGeneration="*res://Globals/ItemGeneration.gd"
 MusicPlayer="*res://Globals/MusicPlayer.gd"
 Discovery="*res://Globals/Discovery.gd"
 Vendors="*res://Globals/Vendors.gd"
+SaveGame="*res://Globals/SaveGame.gd"
 
 [display]
 

@@ -11,11 +11,15 @@ signal questStateChanged(questId: String)
 const STATUS_ACTIVE := "active"
 const STATUS_COMPLETED := "completed"
 const CATALOG_PATH := "res://Data/Quests/QuestCatalog.tres"
-
-var currentMainQuestLevel = {
+## Save snapshot format for exportState()/importState() (Docs/System Design/
+## First Steps Implementation Plan.md, save-service commit).
+const STATE_FORMAT_VERSION := 1
+const DEFAULT_MAIN_QUEST_LEVEL = {
 	"level": 1,
 	"rarity": "common"
 }
+
+var currentMainQuestLevel = DEFAULT_MAIN_QUEST_LEVEL.duplicate(true)
 
 ## quest_id -> QuestDefinition.
 var _definitions: Dictionary = {}
@@ -174,12 +178,122 @@ func getCurrentObjectiveTarget() -> String:
 	return ""
 
 
+## Versioned save snapshot: the progression inputs plus every known quest's
+## status, current objective and completed-objective order. Definitions stay in
+## the authored catalog; only runtime progress is persisted.
+func exportState() -> Dictionary:
+	var states := {}
+	var questIds: Array = _states.keys()
+	questIds.sort()
+	for questIdValue in questIds:
+		var questId := str(questIdValue)
+		var state = _states[questId]
+		if !(state is Dictionary) or !_definitions.has(questId):
+			push_warning("Quests: skipped unserializable state for '%s'." % questId)
+			continue
+		states[questId] = {
+			"status": str(state.get("status", STATUS_ACTIVE)),
+			"current_objective_id": str(state.get("current_objective_id", "")),
+			"completed_objective_ids": (state.get("completed_objective_ids", []) as Array).duplicate(),
+		}
+	return {
+		"formatVersion": STATE_FORMAT_VERSION,
+		"currentMainQuestLevel": currentMainQuestLevel.duplicate(true),
+		"states": states,
+	}
+
+
+## Validates the entire payload (objective chains included) before committing;
+## a rejected import leaves quest state untouched.
+func importState(state) -> Dictionary:
+	if !_dataAvailable:
+		return _stateFailure("data_unavailable")
+	if !(state is Dictionary) or int(state.get("formatVersion", -1)) != STATE_FORMAT_VERSION:
+		return _stateFailure("invalid_state")
+	var levelValue = state.get("currentMainQuestLevel", null)
+	if !(levelValue is Dictionary):
+		return _stateFailure("invalid_state")
+	var level = levelValue.get("level", null)
+	var rarity = levelValue.get("rarity", null)
+	if typeof(level) != TYPE_INT or int(level) < 1:
+		return _stateFailure("invalid_state")
+	if typeof(rarity) != TYPE_STRING or str(rarity).is_empty():
+		return _stateFailure("invalid_state")
+	var statesValue = state.get("states", null)
+	if !(statesValue is Dictionary):
+		return _stateFailure("invalid_state")
+
+	var validated := {}
+	for questIdValue in statesValue:
+		var questId := str(questIdValue)
+		if questId == "" or !_definitions.has(questId):
+			return _stateFailure("invalid_state")
+		var entryValue = statesValue[questIdValue]
+		if !(entryValue is Dictionary):
+			return _stateFailure("invalid_state")
+		var validatedState := _validatedQuestState(_definitions[questId], entryValue)
+		if validatedState.is_empty():
+			return _stateFailure("invalid_state")
+		validated[questId] = validatedState
+
+	var previous: Array = _states.keys()
+	currentMainQuestLevel = { "level": int(level), "rarity": str(rarity) }
+	_states = validated
+	for questIdValue in previous:
+		if !validated.has(str(questIdValue)):
+			questStateChanged.emit(str(questIdValue))
+	for questIdValue in validated:
+		questStateChanged.emit(str(questIdValue))
+	return { "success": true, "reason": "" }
+
+
 ## New Game: forget all runtime progress without touching the authored catalog.
 func resetForNewGame() -> void:
 	var cleared: Array = _states.keys()
 	_states = {}
+	currentMainQuestLevel = DEFAULT_MAIN_QUEST_LEVEL.duplicate(true)
 	for questId in cleared:
 		questStateChanged.emit(str(questId))
+
+
+## A payload state is only valid when its completed objectives are the authored
+## order with no gaps or repeats and the current objective is the next one (or
+## empty exactly when the quest is completed).
+func _validatedQuestState(definition: QuestDefinition, entry: Dictionary) -> Dictionary:
+	var status := str(entry.get("status", ""))
+	if status != STATUS_ACTIVE and status != STATUS_COMPLETED:
+		return {}
+	var completedValue = entry.get("completed_objective_ids", null)
+	if !(completedValue is Array):
+		return {}
+	var completed := []
+	for objectiveIdValue in completedValue:
+		if typeof(objectiveIdValue) != TYPE_STRING:
+			return {}
+		var objectiveId := str(objectiveIdValue)
+		if definition.objectiveIndex(objectiveId) != completed.size():
+			return {}
+		completed.append(objectiveId)
+	var currentValue = entry.get("current_objective_id", null)
+	if typeof(currentValue) != TYPE_STRING:
+		return {}
+	var currentId := str(currentValue)
+	if status == STATUS_ACTIVE:
+		if completed.size() >= definition.objectives.size():
+			return {}
+		if currentId != definition.objectives[completed.size()].objective_id:
+			return {}
+	elif !currentId.is_empty() or completed.size() != definition.objectives.size():
+		return {}
+	return {
+		"status": status,
+		"current_objective_id": currentId,
+		"completed_objective_ids": completed,
+	}
+
+
+func _stateFailure(reason: String) -> Dictionary:
+	return { "success": false, "reason": reason }
 
 
 func _projectQuest(definition: QuestDefinition, state: Dictionary) -> Dictionary:
