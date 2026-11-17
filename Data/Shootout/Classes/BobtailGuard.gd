@@ -4,7 +4,8 @@ extends Node
 var data = {
 	"name": "Bobtail Guard",
 	"magazine": [0, 1, 0, 1],
-	"abilities": [
+	"moves": [],
+	"futureAbilities": [
 		"Attack and poison affliction",
 		"Cylinder drop affliction",
 		"Mark affliction"

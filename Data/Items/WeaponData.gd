@@ -34,7 +34,7 @@ var weaponFamilies = {
 		# { "name": "Smith & Wesson Schofield", "sprites": ["res://Assets/Weapons/Smith&WessonSchofieldRevolver.png"] },
 		# { "name": "Smith & Wesson Model 3", "sprites": ["res://Assets/Weapons/Smith&WessonModel3Revolver.png"] },
 		# { "name": "Smith & Wesson Model 10", "sprites": ["res://Assets/Weapons/Smith&WessonModel10Revolver.png"] },
-		{"id": "cattleman", "name": "Cattleman", "sprites": ["res://Assets/Weapons/CattlemanRevolver.png", "res://Assets/Weapons/CattlemanRevolver1.png", "res://Assets/Weapons/CattlemanRevolver2.png", "res://Assets/Weapons/CattlemanRevolver3.png", "res://Assets/Weapons/CattlemanRevolver4.png"]},
+		{"id": "cattleman", "name": "Cattleman", "sprites": ["res://Assets/Weapons/CattlemanRevolver.png", "res://Assets/Weapons/CattlemanRevolver1.png", "res://Assets/Weapons/CattlemanRevolver2.png", "res://Assets/Weapons/CattlemanRevolver3.png", "res://Assets/Weapons/CattlemanRevolver4.png"], "grantedMoves": ["Sharp Shot"]},
 		{"id": "colt_python", "name": "Colt Python", "sprites": ["res://Assets/Weapons/ColtPythonRevolver.png"]},
 		{"id": "44_magnum", "name": "44. Magnum", "sprites": ["res://Assets/Weapons/44MagnumRevolver.png", "res://Assets/Weapons/44MagnumRevolverGreyHandle.png"]},
 		{"id": "500_bushwhacker", "name": "500. Bushwhacker", "sprites": ["res://Assets/Weapons/500BushwhackerGreyHandle.png"]},

@@ -15,6 +15,7 @@ signal partyChanged(memberKey: String)
 
 const InventoryRulesScript = preload("res://Globals/InventoryRules.gd")
 const CharacterStatCalculatorScript = preload("res://Globals/CharacterStatCalculator.gd")
+const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
 const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const INVENTORY_CAPACITY = 24
 ## Belt entries reference a carried consumable stack. Enemy actor belts are
@@ -25,8 +26,12 @@ const RESERVABLE_ITEM_TYPES = ["consumable"]
 const FLEE_MXHP_LOSS = 0.2
 # Placeholder: HP lost per point of MxHP lost to injuries.
 const DEFAULT_INJURY_RATE = 4
-## Save/New Game snapshot format for Party exportState()/importState().
-const STATE_FORMAT_VERSION := 1
+## Save/New Game snapshot format for Party exportState()/importState(). Version 2
+## adds each member's selected active Move loadout (commit 11).
+const STATE_FORMAT_VERSION := 2
+## The only save payload version this importer accepts for migration: version 1
+## carried no selected loadout, which defaults to the member's canonical moves.
+const LEGACY_STATE_FORMAT_VERSION := 1
 ## Vamoose carried-inventory loss (Docs/System Design/Content and Balance
 ## Catalog.md): 15% of occupied carried stacks, rounded up, minimum one while
 ## non-empty. Named and injectable so balance changes stay in one place.
@@ -45,6 +50,9 @@ var inventory = [{
 var inventoryManagementAllowed := false
 var classesData = {}
 var rodeosData = {}
+## Authored Move catalog. The loadout commands and the fight projection both read
+## this one source; empty means no Move catalog was resolved (fail closed).
+var movesData = {}
 
 var _inventoryRules
 var _statCalculator
@@ -140,8 +148,9 @@ func _ready() -> void:
 	var shootoutGlobals = get_node_or_null("/root/Shootout")
 	var classDefinitions = shootoutGlobals.classesData if shootoutGlobals != null else {}
 	var rodeoDefinitions = shootoutGlobals.rodeosData if shootoutGlobals != null else {}
+	var moveDefinitions = shootoutGlobals.movesData if shootoutGlobals != null else {}
 	configureInventory(catalog, classDefinitions)
-	configureCharacterData(classDefinitions, rodeoDefinitions)
+	configureCharacterData(classDefinitions, rodeoDefinitions, moveDefinitions)
 	# Single Town recovery boundary: recovery runs from the Locations command,
 	# not from scene loads or vendor-room returns.
 	var locations = get_node_or_null("/root/Locations")
@@ -162,16 +171,23 @@ func configureInventory(catalog, classDefinitions := {}) -> void:
 
 
 ## Test/headless initialization seam for the Journal Character tab: installs
-## immutable class/Rodeo read data independently of inventory availability.
-func configureCharacterData(classDefinitions: Dictionary, rodeoDefinitions: Dictionary) -> void:
+## immutable class/Rodeo/Move read data independently of inventory availability.
+func configureCharacterData(classDefinitions: Dictionary, rodeoDefinitions: Dictionary, moveDefinitions: Dictionary = {}) -> void:
 	_ensureStatCalculator()
 	classesData = classDefinitions.duplicate(true)
 	rodeosData = rodeoDefinitions.duplicate(true)
+	movesData = moveDefinitions.duplicate(true)
 	_characterDataAvailable = true
 
 
 func isCharacterDataAvailable() -> bool:
 	return _characterDataAvailable and _statCalculator != null
+
+
+## Move-loadout commands need both the character data and the authored Move
+## catalog; a missing catalog fails closed instead of accepting unknown ids.
+func isMoveLoadoutDataAvailable() -> bool:
+	return isCharacterDataAvailable() and !movesData.is_empty()
 
 
 ## Read-only character-sheet projection (Docs/System Design/Journal/
@@ -204,6 +220,9 @@ func getCharacterJournalSnapshot() -> Dictionary:
 			"statRows": projection.get("statRows", []).duplicate(true),
 			"modifiers": projection.get("modifiers", []).duplicate(true),
 			"rodeo": _projectRodeo(member.get("rodeo", null)),
+			# Move activation reads the same projection the fight uses; the tab
+			# never owns the loadout itself.
+			"moveLoadout": getMoveLoadoutSnapshot(key),
 		})
 	return snapshot
 
@@ -639,6 +658,126 @@ func getBeltSnapshot(memberKey: String) -> Dictionary:
 	}
 
 
+## Read-only Move loadout projection for the Journal: every grant with its
+## origin plus the active selection and cap. It comes from the same projector the
+## fight uses, so the UI and combat cannot disagree.
+func getMoveLoadoutSnapshot(memberKey: String) -> Dictionary:
+	if !isMoveLoadoutDataAvailable():
+		return _moveFailure("data_unavailable", memberKey)
+	if !party.has(memberKey):
+		return _moveFailure("unknown_member", memberKey)
+	var projection = CombatLoadoutProjectorScript.project(party[memberKey], _classDataFor(party[memberKey]))
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"cap": int(projection.cap),
+		"used": (projection.active as Array).size(),
+		"active": (projection.active as Array).duplicate(),
+		"unavailableActive": (projection.dropped as Array).duplicate(),
+		"available": _annotatedMoves(projection),
+		"managementAllowed": inventoryManagementAllowed,
+	}
+
+
+## Activates one available granted Move. Validation is atomic: a rejection
+## changes no member, loadout or signal.
+func activateMove(memberKey: String, moveId: String) -> Dictionary:
+	var context := _moveCommandContext(memberKey, moveId)
+	if !bool(context.get("success", false)):
+		return context
+	var member: Dictionary = context.member
+	var moveName := str(context.moveId)
+	var active: Array = context.active
+	if active.has(moveName):
+		return _moveFailure("already_active", memberKey)
+	if active.size() >= int(context.projection.cap):
+		return _moveFailure("move_cap_reached", memberKey)
+	member["moves"] = active + [moveName]
+	partyChanged.emit(memberKey)
+	return _moveCommandSuccess(memberKey, moveName)
+
+
+## Deactivates one active Move. The last offensive Move cannot be removed, so a
+## Party member can never be left without a way to finish a fight.
+func deactivateMove(memberKey: String, moveId: String) -> Dictionary:
+	var context := _moveCommandContext(memberKey, moveId)
+	if !bool(context.get("success", false)):
+		return context
+	var member: Dictionary = context.member
+	var moveName := str(context.moveId)
+	var active: Array = context.active
+	if !active.has(moveName):
+		return _moveFailure("not_active", memberKey)
+	var remaining: Array = active.duplicate()
+	remaining.erase(moveName)
+	if CombatLoadoutProjectorScript.hasOffensiveMove(active, movesData) and !CombatLoadoutProjectorScript.hasOffensiveMove(remaining, movesData):
+		return _moveFailure("last_offensive_move", memberKey)
+	member["moves"] = remaining
+	partyChanged.emit(memberKey)
+	return _moveCommandSuccess(memberKey, moveName)
+
+
+## Shared command validation: data, policy, member, canonical id, availability
+## and a currently valid selection.
+func _moveCommandContext(memberKey: String, moveId: String) -> Dictionary:
+	if !isMoveLoadoutDataAvailable():
+		return _moveFailure("data_unavailable", memberKey)
+	if !inventoryManagementAllowed:
+		return _moveFailure("management_unavailable", memberKey)
+	if !party.has(memberKey):
+		return _moveFailure("unknown_member", memberKey)
+	var moveName := moveId.strip_edges()
+	if moveName == "" or !movesData.has(moveName):
+		return _moveFailure("unknown_move", memberKey)
+	var member: Dictionary = party[memberKey]
+	var projection = CombatLoadoutProjectorScript.project(member, _classDataFor(member))
+	if !(projection.dropped as Array).is_empty():
+		return _moveFailure("invalid_loadout", memberKey)
+	if !(projection.availableNames as Dictionary).has(moveName):
+		return _moveFailure("move_not_available", memberKey)
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"moveId": moveName,
+		"member": member,
+		"active": (projection.active as Array).duplicate(),
+		"projection": projection,
+	}
+
+
+func _annotatedMoves(projection: Dictionary) -> Array:
+	var entries := []
+	var active: Array = projection.active
+	for entryValue in projection.available:
+		var entry: Dictionary = entryValue
+		var entryName := str(entry.get("name", ""))
+		entries.append({
+			"name": entryName,
+			"origin": str(entry.get("origin", "")),
+			"slot": str(entry.get("slot", "")),
+			"active": active.has(entryName),
+			"offensive": CombatLoadoutProjectorScript.isOffensiveMove(entryName, movesData),
+		})
+	return entries
+
+
+func _moveCommandSuccess(memberKey: String, moveId: String) -> Dictionary:
+	return {
+		"success": true,
+		"reason": "",
+		"memberKey": memberKey,
+		"moveId": moveId,
+		"loadout": getMoveLoadoutSnapshot(memberKey),
+	}
+
+
+## Stable command failures so the Journal can show a readable reason.
+func _moveFailure(reason: String, memberKey: String) -> Dictionary:
+	return { "success": false, "reason": reason, "memberKey": memberKey, "moveId": "" }
+
+
 func _beltFailure(reason: String, memberKey: String) -> Dictionary:
 	return {
 		"success": false,
@@ -674,6 +813,11 @@ func _fightDataFor(member: Dictionary) -> Dictionary:
 	# Fighters always start a Shootout at effective max HP; HP is not carried
 	# between fights (Docs/System Design/System Coherence.md, max-HP migration).
 	data["hp"] = int(data.get("maxHp", data.get("hp", 1)))
+	# The fight receives the resolved active loadout, never the raw selection.
+	var loadout = CombatLoadoutProjectorScript.project(member, _classDataFor(member))
+	if !(loadout.dropped as Array).is_empty():
+		push_warning("Party: '%s' has unavailable active Moves %s; they are not sent to the fight." % [str(member.get("actorName", "?")), str(loadout.dropped)])
+	data["moves"] = (loadout.active as Array).duplicate()
 	var projection := _combatBeltProjection(member, data)
 	data["items"] = projection.items
 	data["beltReservations"] = projection.reservations
@@ -725,15 +869,24 @@ func getEquipmentPreview(memberKey: String, instanceId: String) -> Dictionary:
 	var current = _calculateStats(member)
 	var projected = _calculateStats(member, slot, candidate)
 	var beltValid = int(projected.get("beltSpace", -1)) < 0 or _memberReservationsReadonly(member).size() <= int(projected.beltSpace)
+	var loadout = CombatLoadoutProjectorScript.projectWithEquipment(member, _classDataFor(member), slot, candidate)
+	var moveValid := (loadout.dropped as Array).is_empty()
+	var reason := ""
+	if !beltValid:
+		reason = "belt_loadout_too_large"
+	elif !moveValid:
+		reason = "move_grant_lost"
 	return {
 		"success": true,
-		"reason": "" if beltValid else "belt_loadout_too_large",
+		"reason": reason,
 		"memberKey": memberKey,
 		"slot": slot,
 		"current": current,
 		"projected": projected,
 		"deltas": _statCalculator.compare(current, projected),
 		"beltValid": beltValid,
+		"moveValid": moveValid,
+		"moveLoadout": loadout,
 		"managementAllowed": inventoryManagementAllowed,
 	}
 
@@ -757,6 +910,11 @@ func equipItem(memberKey: String, instanceId: String) -> Dictionary:
 	var projected = _calculateStats(member, slot, candidate)
 	if int(projected.get("beltSpace", -1)) >= 0 and _memberReservationsReadonly(member).size() > int(projected.beltSpace):
 		return { "success": false, "reason": "belt_loadout_too_large" }
+	# An active equipment-granted Move must survive the swap: reject atomically
+	# instead of silently trimming the loadout (same rule as the belt cap).
+	var loadout = CombatLoadoutProjectorScript.projectWithEquipment(member, _classDataFor(member), slot, candidate)
+	if !(loadout.dropped as Array).is_empty():
+		return { "success": false, "reason": "move_grant_lost" }
 
 	if !(member.get("equipment") is Dictionary):
 		member["equipment"] = {}
@@ -1146,6 +1304,9 @@ func exportState() -> Dictionary:
 			"injuryRate": int(member.get("injuryRate", DEFAULT_INJURY_RATE)),
 			"equipment": _duplicateDictionary(member.get("equipment", {})),
 			"beltReservations": _duplicateArray(member.get("beltReservations", [])),
+			# Selected active Move loadout (commit 11). Grants stay authored in
+			# class/item content; only the selection is mutable state.
+			"moves": _stringArray(member.get("moves", [])),
 		}
 	return {
 		"formatVersion": STATE_FORMAT_VERSION,
@@ -1164,8 +1325,12 @@ func importState(state) -> Dictionary:
 		return _stateFailure("data_unavailable")
 	if !(state is Dictionary):
 		return _stateFailure("invalid_state")
-	if int(state.get("formatVersion", -1)) != STATE_FORMAT_VERSION:
+	var stateVersion := int(state.get("formatVersion", -1))
+	if stateVersion != STATE_FORMAT_VERSION and stateVersion != LEGACY_STATE_FORMAT_VERSION:
 		return _stateFailure("invalid_state")
+	# Version 1 carried no selected loadout: it defaults to the member's
+	# canonical moves instead of inventing a new selection.
+	var legacyLoadout := stateVersion == LEGACY_STATE_FORMAT_VERSION
 	var moneyValue = state.get("money", null)
 	var levelValue = state.get("level", null)
 	var nextInstanceValue = state.get("nextInstanceNumber", null)
@@ -1256,12 +1421,36 @@ func importState(state) -> Dictionary:
 				return _stateFailure("invalid_state")
 			reservationIds[reservationId] = true
 			reservations.append(reservation.duplicate(true))
+		var moves: Array = []
+		if legacyLoadout:
+			moves = _canonicalMovesFor(memberKey)
+		else:
+			var movesValue = memberState.get("moves", null)
+			if !(movesValue is Array):
+				return _stateFailure("invalid_state")
+			var seenMoves := {}
+			for moveValue in movesValue:
+				if typeof(moveValue) != TYPE_STRING:
+					return _stateFailure("invalid_state")
+				var moveName := str(moveValue)
+				if moveName == "" or seenMoves.has(moveName) or moves.size() >= CombatLoadoutProjectorScript.MOVE_CAP:
+					return _stateFailure("invalid_state")
+				if !movesData.is_empty() and !movesData.has(moveName):
+					return _stateFailure("invalid_move")
+				seenMoves[moveName] = true
+				moves.append(moveName)
+		var candidateMember: Dictionary = party[memberKey].duplicate(true)
+		candidateMember["equipment"] = equipment
+		candidateMember["moves"] = moves
+		if !_loadoutResolvable(candidateMember):
+			return _stateFailure("invalid_move")
 		candidateMembers[memberKey] = {
 			"hp": int(hpValue),
 			"injuryDamage": int(injuryValue),
 			"injuryRate": int(injuryRateValue),
 			"equipment": equipment,
 			"beltReservations": reservations,
+			"moves": moves,
 		}
 
 	money = int(moneyValue)
@@ -1276,6 +1465,7 @@ func importState(state) -> Dictionary:
 		member["injuryRate"] = memberState.injuryRate
 		member["equipment"] = memberState.equipment
 		member["beltReservations"] = memberState.beltReservations
+		member["moves"] = memberState.moves.duplicate()
 	inventoryChanged.emit()
 	moneyChanged.emit()
 	partyChanged.emit("")
@@ -1298,6 +1488,51 @@ func resetForNewGame() -> void:
 	moneyChanged.emit()
 	partyChanged.emit("")
 
+
+
+## A candidate loadout is resolvable when its selection fits the member's actual
+## grants and keeps a usable, offensive-capable act list. When static class data
+## is unavailable (headless fixtures), grants cannot be resolved and the shape
+## checks above stand alone.
+func _loadoutResolvable(candidateMember: Dictionary) -> bool:
+	var classData := _classDataFor(candidateMember)
+	var projection = CombatLoadoutProjectorScript.project(candidateMember, classData)
+	if !(projection.dropped as Array).is_empty() or !(projection.duplicated as Array).is_empty():
+		return false
+	var availableNames: Dictionary = projection.availableNames
+	var active: Array = projection.active
+	if availableNames.is_empty():
+		# No resolvable grants: a class that declares no grant list cannot judge
+		# the selection, but one that declares an empty list must not claim one.
+		return true if !classData.has("moves") else active.is_empty()
+	if active.is_empty():
+		return false
+	var offensiveAvailable := false
+	for entryValue in projection.available:
+		if CombatLoadoutProjectorScript.isOffensiveMove(str((entryValue as Dictionary).get("name", "")), movesData):
+			offensiveAvailable = true
+			break
+	if offensiveAvailable and !CombatLoadoutProjectorScript.hasOffensiveMove(active, movesData):
+		return false
+	return true
+
+
+## Legacy payload default: the member's canonical New Game selection.
+func _canonicalMovesFor(memberKey: String) -> Array:
+	var baselineParty: Dictionary = _newGameBaseline.get("party", {})
+	var baselineMember = baselineParty.get(memberKey, null)
+	if baselineMember is Dictionary:
+		return _stringArray((baselineMember as Dictionary).get("moves", []))
+	return _stringArray(party[memberKey].get("moves", []))
+
+
+func _stringArray(value) -> Array:
+	var names := []
+	if value is Array:
+		for entry in value:
+			if typeof(entry) == TYPE_STRING and str(entry) != "":
+				names.append(str(entry))
+	return names
 
 
 func _duplicateDictionary(value) -> Dictionary:

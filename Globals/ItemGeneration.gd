@@ -73,7 +73,9 @@ func generateWeapon(options := {}) -> Dictionary:
 		var familyKeys = weaponData.weaponFamilies.keys()
 		weaponFamily = familyKeys[_randomIndex(rng, familyKeys.size())]
 	var weaponBases = weaponData.weaponFamilies[weaponFamily]
-	var weaponBase = weaponBases[_randomIndex(rng, weaponBases.size())]
+	var weaponBase = _findWeaponBase(weaponBases, str(options.get("definitionId", "")))
+	if weaponBase.is_empty():
+		weaponBase = weaponBases[_randomIndex(rng, weaponBases.size())]
 
 	var item = {
 		"definitionId": weaponBase["id"],
@@ -86,6 +88,7 @@ func generateWeapon(options := {}) -> Dictionary:
 		"stats": {},
 		"zone": options.get("zone", "anywhere"),
 	}
+	_applyGrantedMoves(item, weaponBase)
 	_rollRarityAndAffixes(item, options)
 	# WeaponData has no per-base damage values yet; roll the base damage from
 	# the family's damage range for the rolled rarity (PLACEHOLDER values, see
@@ -93,6 +96,26 @@ func generateWeapon(options := {}) -> Dictionary:
 	item["baseDamage"] = _rollAffixValue(weaponFamily + "Damage", item["rarity"], rng)
 	_assembleName(item)
 	return item
+
+
+## Authored base lookup for a forced `definitionId` (tests and deterministic
+## previews). An unknown id falls back to the normal random pick.
+func _findWeaponBase(weaponBases: Array, definitionId: String) -> Dictionary:
+	if definitionId == "":
+		return {}
+	for baseValue in weaponBases:
+		if baseValue is Dictionary and str((baseValue as Dictionary).get("id", "")) == definitionId:
+			return baseValue as Dictionary
+	return {}
+
+
+## Item-granted Moves are authored on the base definition and copied to the
+## instance (Docs/System Design/First Steps Implementation Plan.md, commit 11):
+## a rolled item keeps its grants through purchase, loot, Bank and equipment.
+func _applyGrantedMoves(item: Dictionary, base: Dictionary) -> void:
+	var granted = base.get("grantedMoves", null)
+	if granted is Array and !(granted as Array).is_empty():
+		item["grantedMoves"] = (granted as Array).duplicate()
 
 func generateEquipment(options := {}) -> Dictionary:
 	_loadData()
@@ -109,6 +132,7 @@ func generateEquipment(options := {}) -> Dictionary:
 			}
 			if entry.has("beltSpace"):
 				zoneEntry["beltSpace"] = int(entry["beltSpace"])
+			_applyGrantedMoves(zoneEntry, entry)
 			pool.append(zoneEntry)
 	for zoneKey in equipmentData.zones:
 		for entry in equipmentData.zones[zoneKey]["items"]:
@@ -121,6 +145,7 @@ func generateEquipment(options := {}) -> Dictionary:
 				}
 				if entry.has("beltSpace"):
 					anywhereEntry["beltSpace"] = int(entry["beltSpace"])
+				_applyGrantedMoves(anywhereEntry, entry)
 				pool.append(anywhereEntry)
 	for slot in equipmentData.slots:
 		var generic = equipmentData.genericBases[slot]
@@ -132,6 +157,7 @@ func generateEquipment(options := {}) -> Dictionary:
 		}
 		if generic.has("beltSpace"):
 			genericEntry["beltSpace"] = int(generic["beltSpace"])
+		_applyGrantedMoves(genericEntry, generic)
 		pool.append(genericEntry)
 
 	var base = pool[_randomIndex(rng, pool.size())]
@@ -147,6 +173,7 @@ func generateEquipment(options := {}) -> Dictionary:
 	}
 	if base.has("beltSpace"):
 		item["beltSpace"] = base["beltSpace"]
+	_applyGrantedMoves(item, base)
 	_rollRarityAndAffixes(item, options)
 	_assembleName(item)
 	return item

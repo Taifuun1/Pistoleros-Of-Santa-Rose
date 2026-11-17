@@ -17,6 +17,7 @@ const RodeoManagerScript = preload("res://Shootout/ShootoutRodeoManager.gd")
 const CylinderManagerScript = preload("res://Shootout/ShootoutCylinderManager.gd")
 const EffectManagerScript = preload("res://Shootout/ShootoutEffectManager.gd")
 const LootGeneratorScript = preload("res://Globals/ItemGeneration.gd")
+const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
 const HPIndicatorScene = preload("res://Nodes/HP Indicator/HPIndicator.tscn")
 
 # Let the act presentation settle before the next fighter moves.
@@ -260,25 +261,31 @@ static func actorSpawnPlan(teams: Dictionary) -> Array:
 func spawnActor(actorSide: String, actorType: String, actorName: String, actorPosition, actorNameIndexed: String) -> void:
 	var newShootoutActor = ShootoutActorScene.instantiate()
 	actorsRoot.add_child(newShootoutActor)
-	if Party.party.has(actorName):
+	var isPartyActor := Party.party.has(actorName)
+	var actorData := {}
+	if isPartyActor:
 		newShootoutActor.init(Party.getFightData(actorName))
 	else:
-		newShootoutActor.init(load("res://Data/Actors/{actorType}/{actorName}.gd".format({
+		actorData = load("res://Data/Actors/{actorType}/{actorName}.gd".format({
 			"actorType": actorType,
 			"actorName": actorName.capitalize().replace(" ", "")
-		})).new().data)
+		})).new().data
+		newShootoutActor.init(actorData)
 	newShootoutActor.initShootoutActor(actorType, actorNameIndexed, actorPosition, actorSide)
 	# World-space HP bar below the actor (Docs/System Design/Shootout/Shootout UI.md).
 	var hpIndicator = HPIndicatorScene.instantiate()
 	newShootoutActor.add_child(hpIndicator)
 	hpIndicator.init(newShootoutActor)
 	var classData = cylinderManager.classesData.get(newShootoutActor.characterClass, {})
-	if Party.party.has(actorName):
+	if isPartyActor:
 		# Party fight data already trims reservations to the effective belt
 		# space. One reservation can hold quantity > 1, so belt space must not
 		# cap the projected item-name count.
 		newShootoutActor.applyLoadoutLimits(-1)
 	else:
+		# Direct enemy content keeps its authored Move order and gains any class
+		# or equipment grants through the same projector (commit 11).
+		newShootoutActor.moves = CombatLoadoutProjectorScript.resolvedDirectMoves(actorData, classData)
 		newShootoutActor.applyLoadoutLimits(int(classData.get("beltSpace", -1)))
 	newShootoutActor.actorSelected.connect(selectActor.bind(actorNameIndexed))
 	newShootoutActor.actorHovered.connect(showHoveredActorStats.bind(actorNameIndexed))

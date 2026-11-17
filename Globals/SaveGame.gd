@@ -22,16 +22,19 @@ const QuestsScript = preload("res://Globals/Quests.gd")
 const CutsceneScript = preload("res://Globals/Cutscene.gd")
 const InventoryRulesScript = preload("res://Globals/InventoryRules.gd")
 const ItemGenerationScript = preload("res://Globals/ItemGeneration.gd")
+const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProjector.gd")
 
 ## Current file/domain format. Version 1 is the pre-service payload the vendor
 ## persistence audit pinned (Party money/inventory, vendor and discovery states
-## and one scalar departure id); version 2 is the coordinated save.
-const SAVE_FORMAT_VERSION := 2
+## and one scalar departure id); version 2 is the coordinated save; version 3
+## adds the per-member active Move loadout.
+const SAVE_FORMAT_VERSION := 3
 const LEGACY_FORMAT_VERSION := 1
 ## Migration steps by source version. Every step returns the next full payload
 ## (or an empty Dictionary when the payload cannot be migrated).
 const MIGRATION_STEPS := {
 	LEGACY_FORMAT_VERSION: "migrateLegacyVendorAudit",
+	2: "migrateMoveLoadouts",
 }
 const DEFAULT_SAVE_PATH := "user://savegame.json"
 const TEMP_SUFFIX := ".tmp"
@@ -311,6 +314,19 @@ func _auditParty(partyState: Dictionary) -> Dictionary:
 		var reservationsValue = memberValue.get("beltReservations", null)
 		if !(reservationsValue is Array):
 			return _fail("invalid_state")
+		# Selected active Moves: unique non-empty strings within the cap. The
+		# Party importer resolves them against real class/equipment grants.
+		var movesValue = memberValue.get("moves", null)
+		if !(movesValue is Array):
+			return _fail("invalid_state")
+		var memberMoves := {}
+		for moveValue in movesValue:
+			if typeof(moveValue) != TYPE_STRING:
+				return _fail("invalid_state")
+			var moveName := str(moveValue)
+			if moveName.is_empty() or memberMoves.has(moveName) or memberMoves.size() >= int(CombatLoadoutProjectorScript.MOVE_CAP):
+				return _fail("invalid_state")
+			memberMoves[moveName] = true
 		var memberReserved := {}
 		for reservationValue in reservationsValue:
 			if !(reservationValue is Dictionary):
@@ -531,11 +547,42 @@ func migratePayload(payload) -> Dictionary:
 	return { "success": true, "reason": "", "payload": working, "migratedFrom": migratedFrom }
 
 
-## Version 1 -> 2. The legacy payload carried Party money/inventory, vendor and
-## discovery states and one scalar departure id, and no quest, cutscene, Trail or
-## position data. Missing domains come from the canonical New Game snapshot; belt
-## reservations that no longer reference a carried stack are dropped and the
-## instance-id counter is raised past every carried id.
+## Version 2 -> 3. Version 2 saved Party money/inventory/equipment/reservations
+## but no selected Move loadout, so each member defaults to its canonical New
+## Game selection. Grants are never invented; the domain importer then resolves
+## the selection against the real class and equipment.
+func migrateMoveLoadouts(payload: Dictionary) -> Dictionary:
+	var partyValue = payload.get("party", null)
+	if !(partyValue is Dictionary):
+		return {}
+	var partyState: Dictionary = (partyValue as Dictionary).duplicate(true)
+	var membersValue = partyState.get("members", null)
+	if !(membersValue is Dictionary):
+		return {}
+	var canonical := _canonicalPartySnapshot()
+	var canonicalMembers = canonical.get("members", {}) if canonical is Dictionary else {}
+	for memberKeyValue in membersValue:
+		var memberValue = membersValue[memberKeyValue]
+		if !(memberValue is Dictionary):
+			return {}
+		var member: Dictionary = memberValue
+		if member.has("moves"):
+			continue
+		var canonicalMember = canonicalMembers.get(str(memberKeyValue), null)
+		member["moves"] = (canonicalMember as Dictionary).get("moves", []).duplicate() if canonicalMember is Dictionary else []
+	partyState["formatVersion"] = int(PartyScript.STATE_FORMAT_VERSION)
+	var migrated: Dictionary = payload.duplicate(true)
+	migrated["party"] = partyState
+	migrated["formatVersion"] = SAVE_FORMAT_VERSION
+	return migrated
+
+
+## Version 1 (the pre-service vendor-audit payload) -> current. It carried Party
+## money/inventory, vendor and discovery states and one scalar departure id, and
+## no quest, cutscene, Trail or position data. Missing domains come from the
+## canonical New Game snapshot; belt reservations that no longer reference a
+## carried stack are dropped and the instance-id counter is raised past every
+## carried id.
 func migrateLegacyVendorAudit(legacy: Dictionary) -> Dictionary:
 	var partyPayload = legacy.get("party", null)
 	if !(partyPayload is Dictionary):

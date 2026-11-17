@@ -4,9 +4,11 @@ extends Node
 var data = {
 	"name": "Bottle Courage Bulldozer",
 	"magazine": [0, 2, 0, -1],
-	"abilities": [
+	"moves": [
+		"Duck Down"
+	],
+	"futureAbilities": [
 		"Self-increase damage type defense",
-		"Self-taunt position",
 		"Cylinder increase application",
 		"Disrupt second and third position positioning"
 	],

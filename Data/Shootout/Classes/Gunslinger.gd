@@ -2,11 +2,19 @@ extends Node
 
 
 # Class data (decided: dedicated Data/Shootout/Classes folder).
-# Magazine/abilities/beltSpace are placeholders for balancing.
+# Magazine/moves/beltSpace are placeholders for balancing. `moves` grants real
+# canonical Move ids; `futureAbilities` keeps the unimplemented design prose out
+# of the runtime loadout (Docs/System Design/First Steps Implementation Plan.md,
+# commit 11).
 var data = {
 	"name": "Gunslinger",
 	"magazine": [1, 0, 1, -1],
-	"abilities": [
+	"moves": [
+		"Sharp Shot",
+		"Hold Steady",
+		"Duck Down"
+	],
+	"futureAbilities": [
 		"Attack and self cylinder increase",
 		"Attack and bleed affliction",
 		"Self-increase damage type",
