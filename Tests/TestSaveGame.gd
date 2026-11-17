@@ -40,6 +40,7 @@ func _run() -> void:
 	testMalformedRollback()
 	testMigration()
 	testAtomicReplacementAndDelete()
+	testSaveSlots()
 
 	print("")
 	if failures == 0:
@@ -276,6 +277,87 @@ func testAtomicReplacementAndDelete() -> void:
 	_check(!FileAccess.file_exists(SAVE_PATH) and !context.saveGame.hasValidSave(), "a deleted save reports no valid save")
 	_check(!context.saveGame.deleteSave(), "deleting a missing save is a no-op")
 	_release(context)
+
+
+## Save slots (commit 14): slot files under user://saves with an active-slot
+## index; the payload schema is untouched. The slot directory is wiped before
+## and after so the shared user:// directory stays clean.
+func testSaveSlots() -> void:
+	print("")
+	print("--- Save slots ---")
+	_wipeSlots()
+	var context := _makeContext()
+	var saveGame = context.saveGame
+	_check(saveGame.listSlots().is_empty(), "no slots exist before the first save")
+	_check(!saveGame.hasValidSave(), "an empty slot store reports no valid save")
+
+	var created: Dictionary = saveGame.createSlot()
+	_check(bool(created.get("success", false)) and str(created.get("activeSlot", "")) == "slot1", "createSlot picks the first free id")
+	_check(saveGame.getActivePath().ends_with("saves/slot1.json"), "the active path points into the slot directory")
+	_check(saveGame.listSlots().is_empty(), "a created slot appears in listings only after its first save")
+	_check(!saveGame.hasValidSave(), "a fresh slot has no valid save yet")
+	_check(bool(saveGame.save().get("success", false)), "a checkpoint save writes into the active slot")
+	_check(FileAccess.file_exists("user://saves/slot1.json"), "the slot file exists under user://saves")
+	var slots: Array = saveGame.listSlots()
+	_check(slots.size() == 1 and str(slots[0].id) == "slot1" and bool(slots[0].valid), "the saved slot lists as valid, got %s" % [slots])
+	var moneyA: int = context.party.money
+
+	_check(bool(saveGame.createSlot("run B").get("success", false)), "an explicit id with a space is honored")
+	_check(saveGame.getActivePath().ends_with("run B.json"), "the explicit slot becomes the active path")
+	_dirtySession(context)
+	_check(bool(saveGame.save().get("success", false)), "the second slot saves independently")
+	slots = saveGame.listSlots()
+	_check(slots.size() == 2, "both slots list, got %d" % slots.size())
+
+	_check(str(saveGame.selectSlot("missing_slot").get("reason", "")) == "unknown_slot", "selecting an unknown slot fails closed")
+	_check(saveGame.getActivePath().ends_with("run B.json"), "a failed selection keeps the active slot")
+	_check(bool(saveGame.selectSlot("slot1").get("success", false)), "selecting slot1 succeeds")
+	_check(bool(saveGame.loadSave().get("success", false)), "the selected slot restores")
+	_check(context.party.money == moneyA, "the restore matches slot1's session, not slot2's")
+
+	_check(str(saveGame.createSlot("../evil").get("reason", "")) == "invalid_slot_id", "path traversal ids are rejected")
+	_check(str(saveGame.createSlot("slot1").get("reason", "")) == "slot_exists", "creating over an existing slot file is rejected")
+
+	var deleted: Dictionary = saveGame.deleteSlot("run B")
+	_check(bool(deleted.get("success", false)) and !FileAccess.file_exists("user://saves/run B.json"), "deleting a slot removes its file")
+	_check(saveGame.getActivePath().ends_with("slot1.json"), "deleting a non-active slot keeps the selection")
+	deleted = saveGame.deleteSlot("slot1")
+	_check(bool(deleted.get("success", false)) and str(saveGame.activeSlot) == "", "deleting the active slot clears the selection")
+	_check(!saveGame.hasValidSave(), "no slot left means no valid save")
+
+	_check(str(saveGame.migrationNotice("unsupported_version")).contains("newer"), "a future-version slot explains itself")
+	_check(str(saveGame.migrationNotice("malformed_save")).contains("damaged"), "a damaged slot explains itself")
+	_check(saveGame.migrationNotice("no_save").is_empty(), "a missing slot needs no notice")
+	_release(context)
+
+	# Legacy import: a pre-slot save is adopted as slot1 on the first listing.
+	var legacy := _makeContext()
+	_check(bool(legacy.saveGame.save().get("success", false)), "the legacy single-file save is written")
+	var importer := _makeContext()
+	var imported: Array = importer.saveGame.listSlots()
+	_check(imported.size() == 1 and str(imported[0].id) == "slot1" and bool(imported[0].valid), "the legacy save is imported as slot1, got %s" % [imported])
+	_check(str(importer.saveGame.activeSlot) == "slot1", "the imported slot becomes active")
+	_check(bool(importer.saveGame.loadSave().get("success", false)), "the imported slot restores")
+	_release(importer)
+	_release(legacy)
+	_wipeSlots()
+	_check(!FileAccess.file_exists(SAVE_PATH), "the legacy test file is cleaned up")
+
+
+func _wipeSlots() -> void:
+	if !DirAccess.dir_exists_absolute("user://saves"):
+		return
+	var directory := DirAccess.open("user://saves")
+	if directory == null:
+		return
+	directory.list_dir_begin()
+	var fileName := directory.get_next()
+	while fileName != "":
+		if !directory.current_is_dir():
+			DirAccess.remove_absolute("user://saves/" + fileName)
+		fileName = directory.get_next()
+	directory.list_dir_end()
+	DirAccess.remove_absolute("user://saves")
 
 
 

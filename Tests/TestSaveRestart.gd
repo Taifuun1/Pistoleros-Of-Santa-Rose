@@ -110,6 +110,28 @@ func _run() -> void:
 		_check(coordinates.cellToChunkTile(coordinates.worldToCell(restoredPlayer.global_position)) == expectedCell, "the resumed player stands on the restored position's cell")
 	coordinates.dispose()
 
+	print("\n--- A slot selection survives a restart (commit 14) ---")
+	# The played session is live after Continue: store it in slot A, then a
+	# different session in slot B, and prove both that a fresh process restores
+	# through the slot index and that the untouched sibling keeps its own session.
+	# The resumed Overworld re-anchors the provider position, so the child args
+	# describe the session as slot A actually stores it.
+	expectedPosition = Overworld.getOverworldMapPosition().world_position
+	_check(bool(SaveGame.createSlot("run a").get("success", false)), "slot A is created for the played session")
+	_check(bool(SaveGame.save().get("success", false)), "slot A stores the played session")
+	Party.money = 111
+	_check(bool(SaveGame.createSlot("run b").get("success", false)), "slot B is created")
+	_check(bool(SaveGame.save().get("success", false)), "slot B stores the dirtied session")
+	_check(bool(SaveGame.selectSlot("run a").get("success", false)), "slot A is selected again")
+	var slotExitCode: int = await _runVerifyProcess()
+	_check(slotExitCode == 0, "a fresh process restored slot A through the slot index (exit code %d)" % slotExitCode)
+	_check(bool(SaveGame.selectSlot("run b").get("success", false)), "slot B is selected in this process")
+	_check(bool(SaveGame.loadSave().get("success", false)), "slot B restores its own session")
+	_check(Party.money == 111, "slot B was untouched by the slot A restore")
+	SaveGame.deleteSlot("run a")
+	SaveGame.deleteSlot("run b")
+	SaveGame.deleteSlot("slot1")
+
 	print("\n--- New Game stays independent of the stored save ---")
 	sceneManager.startNewGame(TEST_VENDOR_SEED)
 	_check(await _awaitSceneKey("overworld"), "New Game loads the Overworld")
@@ -118,6 +140,7 @@ func _run() -> void:
 	_check(!Locations.isOnTrail(), "New Game starts Off Trail")
 	_check(Overworld.spawnChunk == Overworld.DEFAULT_SPAWN_CHUNK and Overworld.spawnTile == Overworld.DEFAULT_SPAWN_TILE, "New Game restores the default Overworld anchor")
 	_check(SaveGame.readPayload().success, "New Game leaves a valid save behind for the new session")
+	SaveGame.deleteSlot("slot1")
 
 
 ## The played session the second process verifies: a Town resupply purchase, a
