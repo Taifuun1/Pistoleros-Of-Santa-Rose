@@ -4,14 +4,13 @@
 
 **Global rules (unchanged):** disk ownership stays in `Globals/SaveGame.gd`; no transient combat state in saves; no new Zone/Party/boss invented to pad a slice; every commit ships its tests and updates Testing.md, the gap register and the affected design docs; commits stay logically grouped (code → wiring/UI → proof → docs).
 
-## Commit 14 — Save slots and save-management UI
+## ✅ Commit 14 — Save slots and save-management UI
 
-**Goal:** players can choose, create, overwrite and delete saves with a migration prompt instead of one implicit file.
+**Implemented.** `Globals/SaveGame.gd` gains slot APIs with no payload schema change: slot files live under `user://saves/<id>.json` (ids restricted to letters, digits, underscore, dash and space), an `index.json` carries only the active slot id, and an empty selection keeps the legacy single-file path fully functional. `listSlots()` returns one validated entry per slot (id, timestamp, format version, valid flag and a human-readable notice — a legacy pre-slot save is imported as `slot1` on first listing so existing players keep it); `selectSlot` fails closed on unknown ids; `createSlot` picks the first free id and only appears in listings after its first checkpoint; `deleteSlot` removes the file and clears the selection when it was active; `migrationNotice` translates failure reasons into player text ("newer version" / "damaged"). Save, load, Continue and checkpoints route through the active slot transparently, and the selection is restored from the index in every fresh process. The Main Menu gains a Saves overlay: one row per slot with timestamp and active marker, Play (select + Continue, disabled for damaged slots), two-step Delete confirmation, New Save and Back, with status text for empty stores and refusals.
 
-1. Extend `Globals/SaveGame.gd` with slot APIs only — no schema change: `listSlots()` (id, timestamp, version, location/summary), `activeSlot`, `selectSlot(id)`, `saveToActiveSlot()`, `deleteSlot(id)`, `createSlot()` (new empty slot made active), and `migrationNotice(payload)` describing a rejected/older-version slot. `SceneManager.continueGame()` reads the active slot; New Game never deletes slots.
-2. `UI/Main Menu` gets a slots screen (list, New/Continue/Delete with confirmation, migration text for invalid slots) wired through the existing main-menu controller; Continue goes through the active slot's restore route, not a second load path.
-3. Tests: `TestSaveGame` for slot listing/selection/deletion/overwrite and migration notices (unknown slot ids fail closed); `TestSaveRestart` proves slot A restores after restart while slot B is untouched; a new `TestSaveSlots.tscn` drives the real menu (create → continue → delete).
-4. Exit gate: a second process restores the selected slot exactly; deleting the active slot leaves Continue disabled until another slot is chosen; a corrupt/older slot is reported, never loaded.
+**Tests:** `Tests/TestSaveGame` covers slot creation/selection/deletion, path isolation between slots, restore-exactness, id sanitization (traversal and duplicate rejection), notices and the legacy import; `Tests/TestSaveRestart` adds a slot section — slot A stores the played session, slot B a dirtied one, a fresh process restores slot A through the slot index while slot B stays untouched; the new `Tests/TestSaveSlots.tscn` drives the real Main Menu overlay (empty-store text, New Save, checkpoint → playable row, Play selection, two-step delete, Back leaves Continue truthful).
+
+**Exit gate:** ✅ a second process restores the selected slot exactly while slot B is untouched; deleting the active slot disables Continue until another slot is chosen; a corrupt or newer-version slot is reported in player text and never loaded; no combat transient state enters the payload.
 
 ## Commit 15 — User settings
 
