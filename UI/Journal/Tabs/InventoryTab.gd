@@ -49,6 +49,7 @@ const REASON_TEXT = {
 	"invalid_quantity": "Choose a valid quantity.",
 	"not_droppable": "That item cannot be dropped.",
 	"belt_loadout_too_large": "That belt cannot hold the current belt loadout.",
+	"move_grant_lost": "That swap would remove an active equipped Move.",
 	"belt_full": "That belt is full.",
 	"not_consumable": "Only consumables can go on a belt.",
 	"exceeds_owned": "Not enough of that item is carried.",
@@ -516,13 +517,17 @@ func _renderInventoryDetail(item: Dictionary) -> void:
 		return
 	_renderComparison(previewValue.get("deltas", []))
 	var beltValid = bool(previewValue.get("beltValid", false))
-	equipButton.disabled = !managementAllowed or !beltValid
+	var moveValid = bool(previewValue.get("moveValid", true))
+	equipButton.disabled = !managementAllowed or !beltValid or !moveValid
 	if !managementAllowed:
 		equipButton.tooltip_text = REASON_TEXT["management_unavailable"]
 		feedbackLabel.setRichTextLabel(REASON_TEXT["management_unavailable"])
 	elif !beltValid:
 		equipButton.tooltip_text = REASON_TEXT["belt_loadout_too_large"]
 		feedbackLabel.setRichTextLabel(REASON_TEXT["belt_loadout_too_large"])
+	elif !moveValid:
+		equipButton.tooltip_text = REASON_TEXT["move_grant_lost"]
+		feedbackLabel.setRichTextLabel(REASON_TEXT["move_grant_lost"])
 	else:
 		equipButton.tooltip_text = "Equip to %s" % _selectedMember().get("actorName", _selectedMemberKey)
 		feedbackLabel.setRichTextLabel("")

@@ -15,6 +15,23 @@ const STAT_VALUE_WIDTH = 48.0
 const CONDITION_KINDS = ["injury", "knockout"]
 const MODIFIER_KINDS = ["injury", "knockout", "class", "equipment"]
 const STAT_FORMATS = ["integer", "percent", "text"]
+## Move loadout (Docs/System Design/First Steps Implementation Plan.md, commit
+## 11): the tab renders the provider's projection and sends activation commands
+## back through it. It never owns the loadout.
+const MOVE_CAP := 4
+const MOVE_ORIGIN_LABELS = { "direct": "personal", "class": "class", "equipment": "equipment" }
+const MOVE_REASON_TEXT = {
+	"data_unavailable": "Move data unavailable.",
+	"management_unavailable": "Loadout changes are unavailable here.",
+	"unknown_member": "That party member is unavailable.",
+	"unknown_move": "That Move is not authored.",
+	"move_not_available": "That Move is not granted to this member.",
+	"already_active": "That Move is already active.",
+	"not_active": "That Move is not active.",
+	"move_cap_reached": "Activated Move limit reached (4).",
+	"last_offensive_move": "At least one offensive Move must stay active.",
+	"invalid_loadout": "The stored loadout is unavailable.",
+}
 
 ## Provider Node contract: isCharacterDataAvailable(),
 ## getCharacterJournalSnapshot(), and partyChanged(memberKey: String).
@@ -48,6 +65,9 @@ var _focusRegion := ""
 @onready var rodeoDescriptionText = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/RodeoDescriptionText
 @onready var conditionRows: Control = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/ConditionRows
 @onready var modifierRows: Control = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/ModifierRows
+@onready var movesHeader = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/MovesHeader
+@onready var moveRows: Control = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/MoveRows
+@onready var moveFeedbackText = $ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent/MoveFeedbackText
 @onready var stateView: Control = $StateView
 @onready var stateTabSprite: TabSprite = $StateView/StateLayout/StateTabSprite
 @onready var stateMessageLabel = $StateView/StateLayout/StateMessageLabel
@@ -55,7 +75,7 @@ var _focusRegion := ""
 
 func _ready() -> void:
 	stateTabSprite.tabIcon = tabIcon
-	for label in [nameText, classLevelText, hpText, downedText, rodeoNameText, rodeoDescriptionText, stateMessageLabel]:
+	for label in [nameText, classLevelText, hpText, downedText, rodeoNameText, rodeoDescriptionText, moveFeedbackText, stateMessageLabel]:
 		label.setRichTextLabel("")
 	downedText.visible = false
 	_showStateMessage(STATE_UNAVAILABLE)
@@ -223,6 +243,38 @@ func _normalizeMember(value) -> Dictionary:
 		"statRows": rows,
 		"modifiers": modifiers,
 		"rodeo": rodeo,
+		"moveLoadout": _normalizeMoveLoadout(member.get("moveLoadout", null)),
+	}
+
+
+## Provider loadout projection, normalized for rendering. A missing or failed
+## projection renders the unavailable state instead of invalidating the member.
+func _normalizeMoveLoadout(value) -> Dictionary:
+	if !(value is Dictionary):
+		return {}
+	var loadout = value as Dictionary
+	if !bool(loadout.get("success", false)):
+		return {}
+	var available := []
+	for entryValue in loadout.get("available", []):
+		if !(entryValue is Dictionary):
+			continue
+		var entry: Dictionary = entryValue
+		var entryName := str(entry.get("name", ""))
+		if entryName.is_empty():
+			continue
+		available.append({
+			"name": entryName,
+			"origin": str(entry.get("origin", "")),
+			"active": bool(entry.get("active", false)),
+			"offensive": bool(entry.get("offensive", false)),
+		})
+	return {
+		"success": true,
+		"available": available,
+		"used": int(loadout.get("used", 0)),
+		"cap": int(loadout.get("cap", MOVE_CAP)),
+		"managementAllowed": bool(loadout.get("managementAllowed", false)),
 	}
 
 
@@ -438,6 +490,90 @@ func _renderDetails(member: Dictionary) -> void:
 		for modifier in modifiers:
 			var colorKey = "offense" if str(modifier.kind) == "class" else "defense"
 			_addDetailRow(modifierRows, _modifierText(modifier), colorKey)
+	_renderMoves(member)
+
+
+## Move loadout rows: one Activate/Deactivate action per granted Move, driven by
+## the provider's projection (never a second loadout list in the tab).
+func _renderMoves(member: Dictionary) -> void:
+	_clearChildren(moveRows)
+	moveFeedbackText.setRichTextLabel("")
+	var loadoutValue = member.get("moveLoadout", null)
+	var loadout: Dictionary = loadoutValue if loadoutValue is Dictionary else {}
+	if !bool(loadout.get("success", false)):
+		movesHeader.visible = true
+		_addDetailRow(moveRows, "Move data unavailable.", null)
+		return
+	var availableValue = loadout.get("available", null)
+	var available: Array = availableValue if availableValue is Array else []
+	var managementAllowed := bool(loadout.get("managementAllowed", false))
+	var activeCount := int(loadout.get("used", 0))
+	var cap := int(loadout.get("cap", MOVE_CAP))
+	var offensiveActive := 0
+	for entryValue in available:
+		if entryValue is Dictionary and bool(entryValue.get("active", false)) and bool(entryValue.get("offensive", false)):
+			offensiveActive += 1
+	movesHeader.visible = true
+	if available.is_empty():
+		_addDetailRow(moveRows, "No granted Moves.", null)
+		return
+	for entryValue in available:
+		if entryValue is Dictionary:
+			moveRows.add_child(_makeMoveRow(entryValue, managementAllowed, activeCount, cap, offensiveActive))
+	if !managementAllowed:
+		moveFeedbackText.setRichTextLabel(MOVE_REASON_TEXT["management_unavailable"], "defense")
+
+
+func _makeMoveRow(entry: Dictionary, managementAllowed: bool, activeCount: int, cap: int, offensiveActive: int) -> Button:
+	var moveName := str(entry.get("name", ""))
+	var isActive := bool(entry.get("active", false))
+	var origin := str(MOVE_ORIGIN_LABELS.get(str(entry.get("origin", "")), "granted"))
+	var row := Button.new()
+	row.text = ("Active: " if isActive else "Inactive: ") + moveName + " (" + origin + ")"
+	row.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	row.focus_mode = Control.FOCUS_ALL
+	row.tooltip_text = row.text
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.set_meta("move_name", moveName)
+	row.pressed.connect(_onMoveRowPressed.bind(moveName))
+	var reason := ""
+	if !managementAllowed:
+		reason = MOVE_REASON_TEXT["management_unavailable"]
+	elif isActive and bool(entry.get("offensive", false)) and offensiveActive <= 1:
+		reason = MOVE_REASON_TEXT["last_offensive_move"]
+	elif !isActive and activeCount >= cap:
+		reason = MOVE_REASON_TEXT["move_cap_reached"]
+	if reason != "":
+		row.disabled = true
+		row.tooltip_text = reason
+	return row
+
+
+## One Activate/Deactivate command through the resolved provider; the provider's
+## partyChanged signal owns the re-render.
+func _onMoveRowPressed(moveName: String) -> void:
+	var provider := _resolveCharacterProvider()
+	if !_providerCanRead(provider) or !provider.has_method("getMoveLoadoutSnapshot") or _selectedMemberKey == "":
+		moveFeedbackText.setRichTextLabel(MOVE_REASON_TEXT["data_unavailable"], "defense")
+		return
+	var loadout: Dictionary = provider.getMoveLoadoutSnapshot(_selectedMemberKey)
+	if !bool(loadout.get("success", false)):
+		moveFeedbackText.setRichTextLabel(MOVE_REASON_TEXT["data_unavailable"], "defense")
+		return
+	var isActive := false
+	for entryValue in loadout.get("available", []):
+		if entryValue is Dictionary and str(entryValue.get("name", "")) == moveName:
+			isActive = bool(entryValue.get("active", false))
+	var result := {}
+	if isActive and provider.has_method("deactivateMove"):
+		result = provider.deactivateMove(_selectedMemberKey, moveName)
+	elif !isActive and provider.has_method("activateMove"):
+		result = provider.activateMove(_selectedMemberKey, moveName)
+	if !bool(result.get("success", false)):
+		var reason := str(result.get("reason", ""))
+		moveFeedbackText.setRichTextLabel(str(MOVE_REASON_TEXT.get(reason, "That change was refused.")), "defense")
+		return
+	refreshTab()
 
 
 func _renderRodeo(rodeo) -> void:
@@ -533,6 +669,7 @@ func _clearView() -> void:
 	_clearChildren(statRows)
 	_clearChildren(conditionRows)
 	_clearChildren(modifierRows)
+	_clearChildren(moveRows)
 	_memberButtons = {}
 	_statValueLabels = {}
 	_statGroupRows = []
@@ -544,12 +681,16 @@ func _clearView() -> void:
 	downedText.visible = false
 	rodeoNameText.setRichTextLabel("")
 	rodeoDescriptionText.setRichTextLabel("")
+	moveFeedbackText.setRichTextLabel("")
 
 
+## Remove every child and delete it deferred: a refresh can run inside a child's
+## own signal (a Move row press), and freeing the emitting node immediately is a
+## locked-object error.
 func _clearChildren(container: Node) -> void:
 	for child in container.get_children():
 		container.remove_child(child)
-		child.free()
+		child.queue_free()
 
 func _onMemberPressed(memberKey: String) -> void:
 	if !_membersByKey.has(memberKey):

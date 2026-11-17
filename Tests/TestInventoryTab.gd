@@ -305,8 +305,15 @@ func testEquipAndComparison() -> void:
 	tab._onInventoryItemPressed("p_duster")
 	check(tab.equipButton.disabled and tab.feedbackLabel.get_parsed_text().contains("belt"), "invalid belt loadout disables Equip")
 	provider.previewResult = {
+		"success": true, "reason": "move_grant_lost", "memberKey": "walker", "slot": "duster",
+		"beltValid": true, "moveValid": false, "managementAllowed": true, "deltas": [],
+	}
+	await refreshTab()
+	tab._onInventoryItemPressed("p_duster")
+	check(tab.equipButton.disabled and tab.feedbackLabel.get_parsed_text().contains("Move"), "a loadout-invalid swap disables Equip")
+	provider.previewResult = {
 		"success": true, "reason": "", "memberKey": "walker", "slot": "duster",
-		"beltValid": true, "managementAllowed": true, "deltas": [],
+		"beltValid": true, "moveValid": true, "managementAllowed": true, "deltas": [],
 	}
 
 func testDropFlow() -> void:

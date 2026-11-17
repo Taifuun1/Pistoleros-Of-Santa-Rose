@@ -185,6 +185,18 @@ text = "Modifiers"
 [node name="ModifierRows" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent"]
 layout_mode = 2
 
+[node name="MovesHeader" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+text = "Moves"
+
+[node name="MoveRows" type="VBoxContainer" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="MoveFeedbackText" parent="ContentView/BodyColumns/DetailPanel/DetailMargin/DetailLayout/DetailScroll/DetailContent" instance=ExtResource("3_text")]
+layout_mode = 2
+autowrap_mode = 3
+
 [node name="StateView" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
