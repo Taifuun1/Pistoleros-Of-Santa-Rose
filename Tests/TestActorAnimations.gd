@@ -73,6 +73,15 @@ func _run() -> void:
 	walker.initAnimations("Idle", -1)
 	walker.playAnimation("Idle")
 	_check(walker.get_node("AnimationSprite").animation == &"Idle", "playAnimation drives the generated playback")
+	# Attack acts must not loop: Animations.gd's finished->replay handler owns
+	# looping, and the sequencer closes each act on animation_finished.
+	_check(walker.get_node("AnimationPlayer").get_animation("Shoot Revolver").loop_mode == Animation.LOOP_NONE, "act animations stay LOOP_NONE like the legacy library")
+	var finishedAct := [false]
+	walker.get_node("AnimationPlayer").animation_finished.connect(func(_n): finishedAct[0] = true)
+	walker.playAnimation("Shoot Revolver", true, true)
+	await create_timer(2.0).timeout
+	_check(finishedAct[0], "a one-shot act reaches animation_finished")
+	_check(walker.get_node("AnimationSprite").animation == &"Idle", "a finished one-shot act returns to idle")
 	walker.queue_free()
 
 	print("\n--- Legacy fallback keeps unregistered actors working ---")

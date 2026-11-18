@@ -114,7 +114,10 @@ func _buildStateAnimation(frames: SpriteFrames, stateName: String, actorId: Stri
 	for frameIndex in frameCount:
 		animation.track_insert_key(track, frameIndex * step, frameIndex)
 	animation.length = frameCount * step
-	animation.loop_mode = Animation.LOOP_LINEAR if bool(frames.get_animation_loop(stateName)) else Animation.LOOP_NONE
+	# The legacy library is LOOP_NONE across the board: looping behavior lives
+	# in Animations.gd's finished->replay handler, and one-shot acts must fire
+	# animation_finished so the sequencer can close the act.
+	animation.loop_mode = Animation.LOOP_NONE
 	return animation
 
 
@@ -144,9 +147,11 @@ func _mergeLegacy(actorId: String, actorType: String, options: Dictionary, frame
 			frames.add_frame(animName, legacyFrames.get_frame_texture(animName, frameIndex))
 		if player == null:
 			continue
-		var legacyAnimation = legacyPlayer.get_animation(animName)
-		if legacyAnimation != null:
-			player.get_animation_library("").add_animation(animName, legacyAnimation.duplicate(true))
+		if !legacyPlayer.has_animation(animName):
+			# Newer sprite states the legacy scene has not authored player
+			# animations for yet: the frames still merge, playback comes later.
+			continue
+		player.get_animation_library("").add_animation(animName, legacyPlayer.get_animation(animName).duplicate(true))
 
 
 ## The legacy scene path for an actor: the Shootout layout by default, the
