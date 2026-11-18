@@ -28,6 +28,16 @@ var definitions = {
 		"droppable": true,
 		"sprite": "",
 	},
+	"gold_nugget": {
+		"definitionId": "gold_nugget",
+		"itemType": "resources",
+		"name": "Gold Nugget",
+		"category": "treasure",
+		"description": "A heavy nugget of cache gold. Proof the old stories were true.",
+		"stackLimit": 5,
+		"droppable": true,
+		"sprite": "",
+	},
 	"canyon_cache_map": {
 		"definitionId": "canyon_cache_map",
 		"itemType": "map",

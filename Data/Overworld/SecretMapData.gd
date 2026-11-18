@@ -24,6 +24,7 @@ var targets = {
 		"kind": "location",
 		"displayName": "Gold Run",
 		"icon": "secret_location",
+		"reward": "gold_nugget",
 	},
 }
 
@@ -95,6 +96,11 @@ func validate(itemCatalog = null, mapData = null) -> Array:
 			errors.append("target '%s': missing displayName" % targetId)
 		if str(target.get("icon", "")) == "":
 			errors.append("target '%s': missing icon" % targetId)
+		var reward = str(target.get("reward", ""))
+		if reward == "":
+			errors.append("target '%s': missing reward definition" % targetId)
+		elif itemCatalog != null and !itemCatalog.definitions.has(reward):
+			errors.append("target '%s': reward '%s' is not a known item" % [targetId, reward])
 		if kind == "location":
 			if mapData != null:
 				var entry: Dictionary = mapData.resolveSecretLocation(targetId)

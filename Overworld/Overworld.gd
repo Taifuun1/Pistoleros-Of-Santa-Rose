@@ -123,7 +123,7 @@ func setChunk(chunkLocation: Vector2i = currentChunk) -> bool:
 	var locations = chunkRead["locations"]
 	for location in locations:
 		if !isOverworldObjectLoaded(location, "Locations"):
-			createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated, bool(locations[location].get("isTown", false)))
+			createLocation(location, chunkLocation, locations[location].tiles, locations[location].pregenerated, bool(locations[location].get("isTown", false)), str(locations[location].get("secret_id", "")))
 	var spawnPoints = chunkRead["spawnPoints"]
 	for actorName in spawnPoints:
 		if !isOverworldObjectLoaded(actorName, "Spawnpoints"):
@@ -264,13 +264,17 @@ func unloadChunk(chunk: Vector2i) -> void:
 ### Location functions ###
 ##########################
 
-func enterLocation(body: Node2D, locationName: String, pregenerated: bool, isTown: bool):
+func enterLocation(body: Node2D, locationName: String, pregenerated: bool, isTown: bool, secretId := ""):
 	if body.name != "PlayerOverworldActor":
 		return
-	# Off Trail only Towns are enterable. The player stays on the Overworld;
-	# leaving and re-entering the Location area retries after a Trail starts.
+	# Trail eligibility first (commit 16): Off-Trail secrets cannot be entered
+	# or claimed. The player stays on the Overworld; leaving and re-entering
+	# the Location area retries after a Trail starts.
 	if !Locations.canAccessLocation(isTown):
 		push_warning("Overworld: '%s' is a non-town Location and requires an active Trail." % locationName)
+		return
+	if secretId != "":
+		_enterSecretCache(locationName, secretId)
 		return
 	if isTown:
 		Locations.enterTown(locationName)
@@ -282,7 +286,25 @@ func enterLocation(body: Node2D, locationName: String, pregenerated: bool, isTow
 		HelperFunctions.changeScene("wfc_location", { "location": locationName })
 
 
-func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool, isTown := false):
+## A revealed secret cache is claimed in place (commit 16): the Discovery
+## service validates the one-shot claim and grants its authored reward through
+## the Party inventory; the player stays on the Overworld. An unrevealed cache
+## is hidden — walking onto it does nothing until its map reveals it.
+func _enterSecretCache(locationName: String, secretId: String) -> void:
+	var discovery = get_node_or_null("/root/Discovery")
+	if discovery == null or !discovery.has_method("claimSecretTarget"):
+		push_warning("Overworld: Discovery is unavailable; the '%s' cache cannot be claimed." % locationName)
+		return
+	if !discovery.has_method("isRevealed") or !discovery.isRevealed(secretId):
+		return
+	var claim: Dictionary = discovery.claimSecretTarget(secretId)
+	if bool(claim.get("success", false)):
+		print("Overworld: the '%s' cache is looted (%s)." % [locationName, str(claim.get("reward", ""))])
+	else:
+		push_warning("Overworld: the '%s' cache refuses: %s" % [locationName, str(claim.get("reason", ""))])
+
+
+func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array, pregenerated: bool, isTown := false, secretId := ""):
 	var area = Area2D.new()
 	area.name = locationName
 	$Locations.add_child(area)
@@ -290,7 +312,7 @@ func createLocation(locationName: String, chunkPosition: Vector2i, tiles: Array,
 	for tile in tiles:
 		area.add_child(createCollisionWithPosition(tile, chunkPosition))
 	
-	area.body_entered.connect(enterLocation.bind(locationName, pregenerated, isTown))
+	area.body_entered.connect(enterLocation.bind(locationName, pregenerated, isTown, secretId))
 
 func createSpawnPoint(actorName, actorType, spawnPosition, spawnChance, spawnMaximum):
 	var newSpawnPoint = spawnPointInstance.instantiate()

@@ -319,6 +319,22 @@ func addItem(item: Dictionary) -> Dictionary:
 	return addItems([item])
 
 
+## All-or-nothing capacity pre-check (commit 16): true when the whole batch
+## would be accepted with no overflow and no partial acceptance. Nothing is
+## mutated — callers use it to refuse before granting (secret reward claims).
+func canAddItems(items: Array) -> bool:
+	if !isInventoryDataAvailable():
+		return false
+	var plan = _inventoryRules.planAdd(
+		inventory,
+		items,
+		INVENTORY_CAPACITY,
+		_itemCatalog,
+		_nextInstanceNumber
+	)
+	return bool(plan.success) and (plan.overflow as Array).is_empty() and !(plan.accepted as Array).is_empty()
+
+
 ## Atomic vendor purchase (Docs/System Design/Location Vendors Implementation.md,
 ## patch 2): the whole batch must fit before money or inventory changes. Partial
 ## acceptance is failure here, unlike loot overflow.

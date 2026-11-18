@@ -12,7 +12,9 @@ const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
 const HelperVariablesScript = preload("res://Globals/HelperVariables.gd")
 
 const MAP_DATA_PATH := "res://Data/Overworld/OverworldMapData.tres"
-const STATE_FORMAT_VERSION := 1
+## Snapshot version 2 adds the one-shot claimed target ids (commit 16); version
+## 1 payloads migrate with an empty claim set.
+const STATE_FORMAT_VERSION := 2
 const SUPPORTED_EFFECT_KIND := "reveal_map"
 const MAP_ITEM_TYPE := "map"
 
@@ -23,8 +25,11 @@ var secretMaps = null
 var itemCatalog = null
 var mapData: OverworldMapData = null
 var coordinates = null
+var locations = null
 
 var _revealedIds := {}
+var _claimedTargetIds := {}
+var _lastClaimFailure := {}
 var _commandInProgress := false
 var _initialized := false
 
@@ -33,6 +38,7 @@ func _ready() -> void:
 	secretMaps = SecretMapDataScript.new()
 	itemCatalog = ItemCatalogScript.new()
 	party = get_node_or_null("/root/Party")
+	locations = get_node_or_null("/root/Locations")
 	mapData = _loadMapData()
 	coordinates = OverworldCoordinates.makeHeadless()
 	_initialized = true
@@ -40,13 +46,15 @@ func _ready() -> void:
 
 ## Test/headless initialization seam. `coordinateService` may be shared with a
 ## caller that already owns one.
-func configure(partyNode = null, secretMapData = null, itemCatalogData = null, mapDataResource = null, coordinateService = null) -> void:
+func configure(partyNode = null, secretMapData = null, itemCatalogData = null, mapDataResource = null, coordinateService = null, locationsService = null) -> void:
 	party = partyNode
 	secretMaps = secretMapData if secretMapData != null else SecretMapDataScript.new()
 	itemCatalog = itemCatalogData if itemCatalogData != null else ItemCatalogScript.new()
 	mapData = mapDataResource
 	coordinates = coordinateService if coordinateService != null else OverworldCoordinates.makeHeadless()
+	locations = locationsService
 	_revealedIds = {}
+	_claimedTargetIds = {}
 	_commandInProgress = false
 	_initialized = true
 
@@ -164,6 +172,69 @@ func isRevealed(targetId: String) -> bool:
 	return bool(_revealedIds.get(targetId, false))
 
 
+## One-shot claim of a revealed secret's reward (commit 16). Validation order is
+## the contract: Trail eligibility first (Off-Trail secrets cannot be claimed),
+## then known/revealed/one-shot checks, then the all-or-nothing capacity
+## pre-check — a full inventory refuses before anything is granted, and the
+## cache stays claimable for a later attempt. Nothing is ever silently dropped.
+func claimSecretTarget(targetId: String) -> Dictionary:
+	if !isDiscoveryDataAvailable():
+		return _claimFailure(targetId, "data_unavailable")
+	if locations == null or !locations.has_method("isOnTrail"):
+		return _claimFailure(targetId, "data_unavailable")
+	if !bool(locations.isOnTrail()):
+		return _claimFailure(targetId, "off_trail")
+	var target = secretMaps.getTarget(targetId) if secretMaps != null else {}
+	if target.is_empty():
+		return _claimFailure(targetId, "unknown_target")
+	if !isRevealed(targetId):
+		return _claimFailure(targetId, "not_revealed")
+	if isClaimed(targetId):
+		return _claimFailure(targetId, "already_claimed")
+	var reward := str(target.get("reward", ""))
+	if reward == "":
+		return _claimFailure(targetId, "no_reward")
+	var rewardItem = itemCatalog.makeStackable(reward, 1) if itemCatalog != null and itemCatalog.has_method("makeStackable") else {}
+	if rewardItem.is_empty():
+		return _claimFailure(targetId, "invalid_reward")
+	if party == null or !party.has_method("canAddItems") or !party.canAddItems([rewardItem]):
+		# All-or-nothing: nothing is granted and nothing is consumed, so the
+		# unique reward is never silently dropped.
+		return _claimFailure(targetId, "inventory_full")
+
+	_commandInProgress = true
+	var added: Dictionary = party.addItem(rewardItem)
+	var accepted: Array = added.get("acceptedInstanceIds", []) if added is Dictionary else []
+	if (accepted as Array).is_empty():
+		_commandInProgress = false
+		return _claimFailure(targetId, "inventory_full")
+	_claimedTargetIds[targetId] = true
+	_commandInProgress = false
+	discoveryChanged.emit()
+	return {
+		"success": true,
+		"reason": "",
+		"targetId": targetId,
+		"reward": reward,
+		"instanceId": str((accepted as Array)[0]),
+	}
+
+
+func isClaimed(targetId: String) -> bool:
+	return bool(_claimedTargetIds.get(targetId, false))
+
+
+func getClaimedTargetIds() -> Array:
+	var ids: Array = _claimedTargetIds.keys()
+	ids.sort()
+	return ids
+
+
+func _claimFailure(targetId: String, reason: String) -> Dictionary:
+	_lastClaimFailure = { "targetId": targetId, "reason": reason }
+	return { "success": false, "reason": reason, "targetId": targetId, "reward": "", "instanceId": "" }
+
+
 ## True when a map has targets and every one of them is already known. Vendors
 ## uses this to hide owned/exhausted map offers.
 func isMapFullyRevealed(mapId: String) -> bool:
@@ -209,17 +280,25 @@ func getRevealedSecretMarkers() -> Array:
 func exportState() -> Dictionary:
 	var ids: Array = _revealedIds.keys()
 	ids.sort()
-	return { "formatVersion": STATE_FORMAT_VERSION, "revealedIds": ids }
+	var claimed: Array = _claimedTargetIds.keys()
+	claimed.sort()
+	return {
+		"formatVersion": STATE_FORMAT_VERSION,
+		"revealedIds": ids,
+		"claimedTargetIds": claimed,
+	}
 
 
 ## Validates the whole payload before committing; malformed imports leave the
-## current reveals untouched.
+## current reveals untouched. Version 1 payloads migrate with an empty claim
+## set; version 2 adds the one-shot claimed target ids (commit 16).
 func importState(state) -> Dictionary:
 	if !isDiscoveryDataAvailable():
 		return _failure("data_unavailable")
 	if !(state is Dictionary):
 		return _failure("invalid_state")
-	if int(state.get("formatVersion", -1)) != STATE_FORMAT_VERSION:
+	var version := int(state.get("formatVersion", -1))
+	if version != STATE_FORMAT_VERSION and version != 1:
 		return _failure("invalid_state")
 	var idsValue = state.get("revealedIds", null)
 	if !(idsValue is Array):
@@ -232,14 +311,31 @@ func importState(state) -> Dictionary:
 		if targetId == "" or secretMaps.getTarget(targetId).is_empty() or validated.has(targetId):
 			return _failure("invalid_state")
 		validated[targetId] = true
+	var claimed := {}
+	if version >= 2:
+		var claimedValue = state.get("claimedTargetIds", null)
+		if !(claimedValue is Array):
+			return _failure("invalid_state")
+		for idValue in claimedValue:
+			if typeof(idValue) != TYPE_STRING:
+				return _failure("invalid_state")
+			var targetId := str(idValue)
+			if targetId == "" or secretMaps.getTarget(targetId).is_empty() or claimed.has(targetId):
+				return _failure("invalid_state")
+			if !validated.has(targetId):
+				return _failure("invalid_state")
+			claimed[targetId] = true
 	_revealedIds = validated
+	_claimedTargetIds = claimed
 	discoveryChanged.emit()
 	return { "success": true, "reason": "" }
 
 
-## New Game: forget every reveal without touching Party, vendors or the world.
+## New Game: forget every reveal and claim without touching Party, vendors or
+## the world.
 func resetForNewGame() -> void:
 	_revealedIds = {}
+	_claimedTargetIds = {}
 	_commandInProgress = false
 	discoveryChanged.emit()
 

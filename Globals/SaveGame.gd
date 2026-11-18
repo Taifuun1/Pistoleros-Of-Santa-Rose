@@ -656,6 +656,20 @@ func _auditDiscovery(discoveryState: Dictionary) -> Dictionary:
 		if targetId.is_empty() or seen.has(targetId):
 			return _fail("invalid_state")
 		seen[targetId] = true
+	# Commit 16: the optional one-shot claim list must be unique non-empty
+	# strings; the semantic reveal/known-target checks happen in the Discovery
+	# import, where content drift rolls back the whole commit.
+	var claimedValue = discoveryState.get("claimedTargetIds", [])
+	if !(claimedValue is Array):
+		return _fail("invalid_state")
+	var claimedSeen := {}
+	for idValue in claimedValue:
+		if typeof(idValue) != TYPE_STRING:
+			return _fail("invalid_state")
+		var targetId := str(idValue)
+		if targetId.is_empty() or claimedSeen.has(targetId):
+			return _fail("invalid_state")
+		claimedSeen[targetId] = true
 	return { "success": true, "reason": "" }
 
 
