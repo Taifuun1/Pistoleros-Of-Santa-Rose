@@ -12,14 +12,14 @@
 
 **Exit gate:** ✅ a second process restores the selected slot exactly while slot B is untouched; deleting the active slot disables Continue until another slot is chosen; a corrupt or newer-version slot is reported in player text and never loaded; no combat transient state enters the payload.
 
-## Commit 15 — User settings
+## ✅ Commit 15 — User settings
 
-**Goal:** volume and display preferences persist independently of any save slot.
+**Implemented.** A `Globals/UserSettings.gd` autoload owns `user://settings.json` — separate from any save slot — with defaults, validation, clamped writes and an atomic replacement (temp file + verified read-back + rename). Settings: music volume (0–1, applied to the Master audio bus with an explicit mute at zero since music is the game's only audio) and fullscreen (window mode toggle; headless-safe no-op). A malformed, unknown-keyed or wrong-typed payload falls back to the defaults and never breaks the session; `resetToDefaults` restores and persists. The Journal Settings tab now exposes a Music volume slider (with percentage read-out, controller focus entry point) and a Fullscreen toggle with immediate effect and immediate persistence, keeping the production quit-to-menu confirmation flow unchanged; settings never touch a save slot and New Game/Continue never touch settings.
 
-1. `user://settings.json` (separate from slot payloads): master/music volume, integer-scale toggle/fullscreen, and the current gamepad layout. A small `Globals/UserSettings.gd` autoload (defaults, validation, clamping, atomic write) owns it; audio applies through `Globals/MusicPlayer.gd`, display through the existing window/scale setup.
-2. Settings UI in the Journal/pause settings view: sliders + toggles with immediate effect and no save-slot writes. New Game and Continue leave settings alone.
-3. Tests: `TestUserSettings` (defaults, clamp, malformed-payload rejection, round trip), `TestMusicPlayer` volume application, a scene test for the settings view.
-4. Exit gate: changing a slider takes effect immediately and survives restart; no save payload gains settings fields.
+**Tests:** the new `Tests/TestUserSettings.gd` covers defaults, round trips, clamping, invalid-input rejection, five malformed-payload cases (not-JSON, non-dictionary, unknown key, wrong volume type, wrong fullscreen type) falling back to defaults, atomic writes, Master-bus application (decibels and mute-at-zero) and the real Settings tab wiring (slider drives service + bus + disk, fullscreen applies, quit flow unchanged); `Tests/TestJournal` still passes its settings return-to-menu contract.
+
+**Exit gate:** ✅ changing the slider or toggle takes effect immediately and survives restart; no save payload gained settings fields; settings and saves never intersect. Gamepad-layout persistence stays deferred until a remapping system exists (the standard bindings are project-level).
+
 
 ## Commit 16 — Secret destinations and reward claims
 
