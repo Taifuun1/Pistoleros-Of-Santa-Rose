@@ -8,8 +8,9 @@ extends Node
 ## OverworldZoneCatalog/ZoneData. Every switch crossfades (a switch from a
 ## silent state begins the new song at full volume instead of fading in), and
 ## each song fades out shortly before its end, blending into the next song of
-## the playlist or back to the beginning of the loop. Volume controls arrive
-## with the Settings implementation; everything plays on the Master bus.
+## the playlist or back to the beginning of the loop. Playback runs on the
+## Master bus; the user's volume lives in Globals/UserSettings.gd (commit 15)
+## and is applied to that bus, not here.
 
 signal track_changed(trackId)
 
