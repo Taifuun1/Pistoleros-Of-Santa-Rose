@@ -21,14 +21,14 @@
 **Exit gate:** ✅ changing the slider or toggle takes effect immediately and survives restart; no save payload gained settings fields; settings and saves never intersect. Gamepad-layout persistence stays deferred until a remapping system exists (the standard bindings are project-level).
 
 
-## Commit 16 — Secret destinations and reward claims
+## ✅ Commit 16 — Secret destinations and reward claims
 
-**Goal:** purchased secret maps lead to real, claimable one-shot rewards.
+**Implemented.** A revealed secret cache is claimable for its authored reward through the Discovery service: `claimSecretTarget(targetId)` validates in contract order — Trail eligibility first (an Off-Trail claim is refused), then known target, revealed, and one-shot (already-claimed) checks, then an all-or-nothing capacity pre-check (`Party.canAddItems`) before anything is granted — so a full inventory refuses with nothing consumed and the cache stays claimable for a later attempt; the unique reward is never silently dropped. On success the authored reward item is granted through `Party.addItem` and the one-shot `claimedTargetIds` persist in the Discovery snapshot, which moves to version 2 (version 1 payloads migrate with no phantom claims; imports validate claimed ids as known, unique and revealed). The Gold Run target authors its reward (`gold_nugget`, added to the ItemCatalog as a treasure resource) and `SecretMapData.validate` requires every target to carry a known reward definition. The Overworld wires the real interaction: chunk locations carry their `secret_id` into `createLocation`/`enterLocation`, and a revealed secret cache is claimed in place — the player stays on the Overworld, an unrevealed cache is hidden (no interaction), and a spent cache refuses a second attempt; the Trail gate ahead of the branch keeps Off-Trail entry refused as before. `SaveGame`'s discovery audit accepts the claim list (unique non-empty strings) while content drift still rolls back through the Discovery import.
 
-1. A secret-cache interaction at revealed secret Locations: Trail-eligibility check first (Off-Trail secrets cannot be claimed), then the claim command — refuse all-or-nothing when inventory is full before anything is granted, grant the authored secret item through `Party.addItem`, persist the one-shot `claimedTargetId` in the Discovery snapshot (v2 migration), and mark the map spent.
-2. Never silently drop a unique reward: a full-inventory claim keeps the cache available for a later attempt; nothing is consumed on refusal.
-3. Tests: `TestSecretClaims` (eligibility, full-inventory refusal, one-shot idempotency, duplicate-claim rejection, snapshot round trip), a flow scene test through the real interaction, `TestSaveRestart` for the claimed id across restart.
-4. Exit gate: one secret claim succeeds once per map and persists; a second attempt or a full inventory changes nothing.
+**Tests:** `Tests/TestDiscovery` covers the full chain (Off-Trail, unrevealed, unknown target, full-inventory refusal with an unchanged state, successful grant of exactly one gold nugget, repeat refusal, snapshot v2 round trips, the v1 migration and nine malformed-claim rejections); `Tests/TestSecretClaims.tscn` runs the chain against the real autoloads and drives the real Overworld `enterLocation` handler on the Gold Run cache (claim then spent-cache refusal in place); `Tests/TestSaveRestart` claims the cache in the played session and its second-process verify asserts the claimed id, its reveal and the granted nugget all survive the restart; `Tests/TestSaveGame` audits claim lists.
+
+**Exit gate:** ✅ one secret claim succeeds once per map and persists across a restart; a second attempt or a full inventory changes nothing; the reward never drops silently.
+
 
 ## Commit 17 — Combat content breadth
 
