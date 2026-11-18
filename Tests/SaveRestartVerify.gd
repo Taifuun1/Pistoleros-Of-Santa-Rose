@@ -31,6 +31,12 @@ func _ready() -> void:
 	_check(Quests.getCurrentObjectiveId(QUEST_ID) == _expectString("objective", ""), "the current quest objective is restored")
 	_check(Discovery.isRevealed(_expectString("reveal", "")), "the map reveal is restored")
 	_check(bool(Cutscene.playedCutscenes.get("Finch Pond", false)), "the played cutscene flag is restored")
+	# Commit 16: the one-shot secret claim and its granted reward survive.
+	var claimedTarget := _expectString("claimed", "")
+	_check(claimedTarget != "" and Discovery.isClaimed(claimedTarget), "the claimed target id is restored")
+	_check(Discovery.isRevealed(claimedTarget), "the claimed target stays revealed")
+	var nuggets = Party.inventory.filter(func(entry): return entry.definitionId == "gold_nugget")
+	_check(nuggets.size() == 1, "the granted secret reward is restored, got %s" % str(Party.inventory))
 	_check(int(Vendors.exportState().baseSeed) == _expectInt("seed", -1), "the vendor run seed is restored")
 	_check(int(Vendors.exportState().activeDepartureId) == Locations.trailDepartureId, "the vendor stock cycle stays synchronized with the Trail")
 
