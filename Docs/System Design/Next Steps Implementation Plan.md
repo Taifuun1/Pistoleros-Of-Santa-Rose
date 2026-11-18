@@ -30,12 +30,24 @@
 **Exit gate:** ✅ one secret claim succeeds once per map and persists across a restart; a second attempt or a full inventory changes nothing; the reward never drops silently.
 
 
+## Commit 17a — Shared actor animation service and manifest registry (design first)
+
+**Goal:** replace the per-actor hand-authored `*Animations.tscn` scenes with one data-driven animation service, so commit 17's new actors need only small data entries instead of duplicated scene editing.
+
+1. New `Data/Actors/ActorAnimationRegistry.gd`: per-actor states as data (sheet path, frame size, frame count/indices, speed, loop, optional hit frame/next state) with the same `SpriteFrames` semantics as the current scenes — Walker Langley and Squeky rat converted first with identical visuals.
+2. New `Globals/ActorAnimationService.gd` builder: `forActor(actorType, actorName)` instantiates `res://Animations/BaseAnimation.tscn` and injects one cached `SpriteFrames` per actor id; `idleForWeapon` reads `idleByWeapon` (default Idle otherwise), and unknown actors/states degrade to Idle with a warning rather than aborting a spawn.
+3. Route the three call sites — `Actors/Shootout/ShootoutActor.gd`, `Actors/Overworld/OverworldActor.gd`, `Actors/Location/PlayerLocationActor.gd` — through the service with a legacy-scene fallback; the Location built-in Idle/Run joins the same runtime. `FrameData` stays the combat hit-frame read (no duplicate contract).
+4. Tests: new `Tests/TestActorAnimations.gd` (built `SpriteFrames` counts/loop/speed, weapon-idle selection and default fallback, unknown actor/state degradation, legacy-scene fallback), `Tests/TestContentLint` registry checks (sheet paths exist, positive speed, hit frames in range, canonical state names).
+5. Exit gate: an actor authored purely through the registry animates identically to its old scene; legacy scenes fall back cleanly for unregistered actors; no per-actor `.tscn` is needed for new content. Legacy scenes are deleted only in a later cleanup commit.
+
+Design doc: [Actor Animations](Actor%20Animations.md).
+
 ## Commit 17 — Combat content breadth
 
 **Goal:** the representative fight is no longer Walker-plus-rats.
 
 1. Author executable Moves for the classes that still only carry `futureAbilities` prose (Bobtail Guard, Dust Whisperer, Line Rider, Bottle Courage Bulldozer) and move their implemented lines into canonical `moves`; grants resolve through the existing projector/lint unchanged.
-2. New actor files + animation sets and profiled `ai` blocks for the added roles (support/tank archetypes use the per-family weights from commit 13); boss `ai` scripts where a role warrants a priority override.
+2. New actor files + animation sets **through the commit-17a registry** and profiled `ai` blocks for the added roles (support/tank archetypes use the per-family weights from commit 13); boss `ai` scripts where a role warrants a priority override.
 3. Re-record `EncounterMetricsBaseline.json` after authored health/stat changes and record the new measured deviation, if any — no test expectations edited to force a pass.
 4. Exit gate: the new classes field real loadouts in real encounters with measured, reproducible metrics.
 
