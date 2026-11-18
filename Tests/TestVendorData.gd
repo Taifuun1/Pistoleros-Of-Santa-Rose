@@ -117,7 +117,7 @@ func _testSecretMaps(secretMaps, itemCatalog, mapData) -> void:
 	_check(!secretMaps.validate(badItem, mapData).is_empty(), "item reveal referencing a missing map fails cross-data lint")
 
 	var secretItem = SecretMapDataScript.new()
-	secretItem.targets["cache_one"] = { "targetId": "cache_one", "kind": "secret_item", "displayName": "Cache", "icon": "secret_item", "chunk": Vector2i(3, 14), "tile": Vector2i(40, 40) }
+	secretItem.targets["cache_one"] = { "targetId": "cache_one", "kind": "secret_item", "displayName": "Cache", "icon": "secret_item", "chunk": Vector2i(3, 14), "tile": Vector2i(40, 40), "reward": "paregoric" }
 	secretItem.maps["cache_map"] = { "mapId": "cache_map", "targetIds": ["cache_one"] }
 	_check(secretItem.validate(null, null).is_empty(), "valid secret-item target passes schema lint")
 	secretItem.targets["cache_one"]["tile"] = Vector2i(99, 99)

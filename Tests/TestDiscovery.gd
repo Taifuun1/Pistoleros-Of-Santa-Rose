@@ -99,14 +99,17 @@ func _run() -> void:
 
 	print("\n--- Snapshots ---")
 	var exported = _makeContext(SecretMapDataScript.new())
-	exported.discovery.importState({ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run"] })
+	exported.discovery.importState({ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run"], "claimedTargetIds": ["Gold Run"] })
 	var state = exported.discovery.exportState()
-	_check(state.formatVersion == DiscoveryScript.STATE_FORMAT_VERSION and state.revealedIds == ["Gold Run"], "export lists sorted revealed ids")
+	_check(state.formatVersion == DiscoveryScript.STATE_FORMAT_VERSION and state.revealedIds == ["Gold Run"] and state.claimedTargetIds == ["Gold Run"], "export lists sorted reveals and claims")
 	var imported = _makeContext(SecretMapDataScript.new())
 	_check(imported.discovery.importState(state).success, "valid state imports")
-	_check(imported.discovery.isRevealed("Gold Run"), "import restores reveals")
+	_check(imported.discovery.isRevealed("Gold Run") and imported.discovery.isClaimed("Gold Run"), "import restores reveals and claims")
 	_check(imported.discovery.exportState() == state, "export/import/export is stable")
 	_check(imported.party.inventory.is_empty(), "import grants nothing")
+	var legacyImport = _makeContext(SecretMapDataScript.new())
+	_check(bool(legacyImport.discovery.importState({ "formatVersion": 1, "revealedIds": ["Gold Run"] }).get("success", false)), "a version 1 snapshot migrates")
+	_check(legacyImport.discovery.isRevealed("Gold Run") and !legacyImport.discovery.isClaimed("Gold Run"), "the v1 migration keeps reveals without phantom claims")
 	var baseline = imported.discovery.exportState()
 	for malformedState in [
 		{ "formatVersion": 999, "revealedIds": ["Gold Run"] },
@@ -114,12 +117,18 @@ func _run() -> void:
 		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["unknown_target"] },
 		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": [7] },
 		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run", "Gold Run"] },
+		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run"], "claimedTargetIds": "Gold Run" },
+		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run"], "claimedTargetIds": ["unknown_target"] },
+		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": [], "claimedTargetIds": ["Gold Run"] },
+		{ "formatVersion": DiscoveryScript.STATE_FORMAT_VERSION, "revealedIds": ["Gold Run"], "claimedTargetIds": ["Gold Run", "Gold Run"] },
 	]:
 		var importResult = imported.discovery.importState(malformedState)
 		_check(!importResult.success and importResult.reason == "invalid_state", "malformed state %s is rejected" % [malformedState])
 		_check(imported.discovery.exportState() == baseline, "malformed state leaves reveals unchanged")
 	imported.discovery.resetForNewGame()
-	_check(imported.discovery.exportState().revealedIds.is_empty(), "New Game clears every reveal")
+	_check(imported.discovery.exportState().revealedIds.is_empty() and imported.discovery.exportState().claimedTargetIds.is_empty(), "New Game clears every reveal and claim")
+
+	testSecretClaims()
 
 	_freeContext(malformed)
 	_freeContext(secretItem)
@@ -132,6 +141,47 @@ func _run() -> void:
 	else:
 		print("\n%d CHECK(S) FAILED" % failures)
 	quit(failures)
+
+
+## Secret reward claims (commit 16): Trail eligibility first, revealed and
+## one-shot only, with the all-or-nothing full-inventory refusal in between.
+func testSecretClaims() -> void:
+	print("\n--- Secret claims (commit 16) ---")
+	var claims := _makeContext(SecretMapDataScript.new())
+	claims.discovery.locations = FakeLocations.new()
+	claims.discovery.locations.onTrail = false
+	_check(str(claims.discovery.claimSecretTarget("Gold Run").reason) == "off_trail", "an Off-Trail claim is refused first")
+	claims.discovery.locations.onTrail = true
+	_check(str(claims.discovery.claimSecretTarget("Gold Run").reason) == "not_revealed", "an unrevealed cache cannot be claimed")
+	_check(str(claims.discovery.claimSecretTarget("Mystery Cave").reason) == "unknown_target", "an unknown target fails closed")
+	var claimMap = _giveMap(claims)
+	_check(bool(claims.discovery.useMap(claimMap).get("success", false)), "the map reveals the cache")
+
+	var filler := 0
+	while claims.party.canAddItems([claims.itemCatalog.makeStackable("canyon_cache_map", 1)]) and filler < 40:
+		claims.party.addItem(claims.itemCatalog.makeStackable("canyon_cache_map", 1))
+		filler += 1
+	_check(!claims.party.canAddItems([claims.itemCatalog.makeStackable("gold_nugget", 1)]), "the inventory is full")
+	var beforeClaim = _state(claims)
+	var refused: Dictionary = claims.discovery.claimSecretTarget("Gold Run")
+	_check(!refused.success and refused.reason == "inventory_full", "a full inventory refuses the claim all-or-nothing")
+	_check(_state(claims) == beforeClaim, "the refused claim grants nothing and keeps the cache available")
+	claims.party.inventory.clear()
+	_check(bool(claims.discovery.claimSecretTarget("Gold Run").get("success", false)), "with space free the claim grants the authored reward")
+	_check(claims.discovery.isClaimed("Gold Run") and claims.discovery.getClaimedTargetIds() == ["Gold Run"], "the claim is one-shot and recorded")
+	var nuggets = claims.party.inventory.filter(func(entry): return entry.definitionId == "gold_nugget")
+	_check(nuggets.size() == 1 and int(nuggets[0].quantity) == 1, "exactly one gold nugget was granted")
+	var repeat: Dictionary = claims.discovery.claimSecretTarget("Gold Run")
+	_check(!repeat.success and repeat.reason == "already_claimed", "a repeat claim is refused")
+	_check(claims.party.inventory.size() == 1, "the refused repeat grants nothing")
+	_freeContext(claims)
+
+
+class FakeLocations:
+	var onTrail := true
+
+	func isOnTrail() -> bool:
+		return onTrail
 
 
 ## A Party with a working inventory plus a Discovery service over the production

@@ -68,6 +68,16 @@ func testPayloadAssembly() -> void:
 	withVector.overworld.position = Vector2(1, 2)
 	_check(context.saveGame.validatePayload(withVector).reason == "invalid_state", "engine types (Vector2) are rejected as not JSON-safe")
 
+	var withClaims := payload.duplicate(true)
+	withClaims.discovery["claimedTargetIds"] = ["Gold Run"]
+	_check(context.saveGame.validatePayload(withClaims).success, "the one-shot claim list passes the audit")
+	var withDuplicateClaims := payload.duplicate(true)
+	withDuplicateClaims.discovery["claimedTargetIds"] = ["Gold Run", "Gold Run"]
+	_check(context.saveGame.validatePayload(withDuplicateClaims).reason == "invalid_state", "duplicate claims are rejected")
+	var withClaimType := payload.duplicate(true)
+	withClaimType.discovery["claimedTargetIds"] = [7]
+	_check(context.saveGame.validatePayload(withClaimType).reason == "invalid_state", "non-string claims are rejected")
+
 	var futureVersion := payload.duplicate(true)
 	futureVersion.formatVersion = context.saveGame.SAVE_FORMAT_VERSION + 1
 	_check(context.saveGame.validatePayload(futureVersion).reason == "invalid_state", "validatePayload only accepts the current format version")

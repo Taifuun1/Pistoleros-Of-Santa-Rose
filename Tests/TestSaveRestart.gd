@@ -174,6 +174,11 @@ func _playSession() -> void:
 	expectedObjective = Quests.getCurrentObjectiveId(QUEST_ID)
 	_check(!expectedObjective.is_empty(), "the quest advances to its next objective")
 	_check(bool(Discovery.importState({ "formatVersion": 1, "revealedIds": [EXPECTED_REVEAL] }).get("success", false)), "a map reveal is stored")
+	# The revealed cache is claimed in the played session (commit 16): the
+	# one-shot id and the granted reward must both survive the restart.
+	var claim: Dictionary = Discovery.claimSecretTarget(EXPECTED_REVEAL)
+	_check(bool(claim.get("success", false)), "the revealed secret cache is claimed: %s" % str(claim))
+	_check(Discovery.isClaimed(EXPECTED_REVEAL), "the claimed target id is recorded")
 	Cutscene.playedCutscenes["Finch Pond"] = true
 
 
@@ -205,6 +210,7 @@ func _runVerifyProcess() -> int:
 		"departure=1",
 		"objective=%s" % expectedObjective,
 		"reveal=%s" % EXPECTED_REVEAL,
+		"claimed=%s" % EXPECTED_REVEAL,
 		"seed=%d" % int(Vendors.baseSeed),
 		"belt=%d" % int(Party.getBeltSnapshot("Walker Langley").get("used", 0)),
 		"moves=%s" % "|".join(Party.party["Walker Langley"]["moves"]),
