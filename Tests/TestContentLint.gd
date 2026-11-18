@@ -16,6 +16,7 @@ const CombatLoadoutProjectorScript = preload("res://Globals/CombatLoadoutProject
 const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
 const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
 const ShootoutEnemyAIScript = preload("res://Shootout/ShootoutEnemyAI.gd")
+const ActorAnimationRegistryScript = preload("res://Data/Actors/ActorAnimationRegistry.gd")
 
 ## Every folder whose files expose a `data` Dictionary identified by `data.name`.
 const CONTENT_FOLDERS := [
@@ -72,6 +73,7 @@ func _run() -> void:
 	_testMoveGrants()
 	_testAffixSupport()
 	_testAiProfiles()
+	_testActorAnimationRegistry()
 	_testLintHasTeeth()
 
 	if failures == 0:
@@ -214,6 +216,59 @@ func _aiProfileErrors(profile: Dictionary, scriptNames: Dictionary, moveNames: D
 	if scriptName != "":
 		if !scriptNames.has(scriptName):
 			errors.append("unknown AI script '%s'" % scriptName)
+	return errors
+
+
+## Commit 17a: the animation registry is data, so the lint validates it like
+## content — sheets must exist, states must be playable, and the idle
+## selections must point at authored states.
+func _testActorAnimationRegistry() -> void:
+	print("\n--- Actor animation registry ---")
+	var registry = ActorAnimationRegistryScript.new()
+	for actorId in registry.actors:
+		var errors := _animationRegistryErrors(actorId, registry.getActor(actorId), registry)
+		_check(errors.is_empty(), "actor '%s' has a valid animation registry entry: %s" % [actorId, errors])
+	var brokenEntry := {
+		"states": {
+			"Ghost": { "sheet": "res://missing_sheet.png", "frames": 0, "step": 0.0 },
+		},
+		"defaultIdle": "Phantom",
+		"idleByWeapon": { "revolver": "Phantom" },
+	}
+	var broken := _animationRegistryErrors("Broken", brokenEntry, registry)
+	_check(broken.size() == 5, "a broken registry entry trips every rule: %s" % [broken])
+	_check(_animationRegistryErrors("SquekyRat", registry.getActor("SquekyRat"), registry).is_empty(), "a valid registry actor passes")
+
+
+## Pure per-actor checker so the lint can prove it rejects broken entries.
+func _animationRegistryErrors(actorId: String, entry: Dictionary, registry) -> Array:
+	var errors := []
+	if entry.is_empty():
+		errors.append("actor '%s' is not in the registry" % actorId)
+		return errors
+	var states: Dictionary = entry.get("states", {})
+	if states.is_empty():
+		errors.append("actor '%s' has no states" % actorId)
+	for stateName in states:
+		var state: Dictionary = states[stateName]
+		var sheetPath := str(state.get("sheet", ""))
+		if sheetPath == "" or !FileAccess.file_exists(sheetPath):
+			errors.append("state '%s': missing sheet '%s'" % [stateName, sheetPath])
+		if !bool(state.get("wholeSheet", false)):
+			var frameCount := int(state.get("frames", 0))
+			if frameCount <= 0:
+				errors.append("state '%s': frames must be positive" % stateName)
+		var step := float(state.get("step", registry.DEFAULT_STEP))
+		if step <= 0.0:
+			errors.append("state '%s': step must be positive" % stateName)
+	var defaultIdle := str(entry.get("defaultIdle", "Idle"))
+	if !states.has(defaultIdle):
+		errors.append("defaultIdle '%s' is not an authored state" % defaultIdle)
+	if entry.has("idleByWeapon"):
+		var idleByWeapon: Dictionary = entry.get("idleByWeapon", {})
+		for weaponId in idleByWeapon:
+			if !states.has(str(idleByWeapon[weaponId])):
+				errors.append("idleByWeapon['%s'] is not an authored state" % str(weaponId))
 	return errors
 
 

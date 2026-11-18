@@ -1,6 +1,6 @@
 # Actor Animations
 
-Design for one generic way to build and drive actor animations. **Status: design (not yet implemented); scheduled as commit 17a in [Next Steps Implementation Plan](Next%20Steps%20Implementation%20Plan.md).** Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push.
+Design for one generic way to build and drive actor animations. **Status: implemented (commit 17a); the Shootout spawn routes through the service, Overworld animal scenes and the player actors stay on their runtimes for a follow-up (see §Scope of commit 17a).** Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push.
 
 ## Problem
 
@@ -20,7 +20,7 @@ Design for one generic way to build and drive actor animations. **Status: design
 ## Decisions
 
 1. **One data registry, not per-actor scenes.** New `Data/Actors/ActorAnimationRegistry.gd` maps each actor id to its states. An entry per state is data-only: sprite-sheet path, frame size (default 40 px), frame count or explicit frame indices, playback speed, loop, optional hit frame, optional next state. Sheets and fps/loop semantics match the existing `SpriteFrames` resource exactly, so visuals are unchanged.
-2. **One builder/service.** New `Globals/ActorAnimationService.gd` exposes `forActor(actorType, actorName) -> BaseAnimation`: it instantiates `res://Animations/BaseAnimation.tscn`, injects generated `SpriteFrames` and calls `initAnimations(defaultIdle, hitFrame)` — the same object the old scenes produced. `idleForWeapon(actorId, weaponId)` returns the weapon's idle when `idleByWeapon` is authored, else the default Idle. No new autoload is needed: the service is a `RefCounted` builder created where it is used (or an autoload if cross-scene caching proves necessary).
+2. **One builder/service.** New `Globals/ActorAnimationService.gd` exposes `forActor(actorType, actorName) -> BaseAnimation`: it builds the `Node2D` + `Animations.gd` runtime in code (root, `AnimationSprite` with generated `SpriteFrames`, `AnimationPlayer` with generated per-state frame tracks — the same shape the authored scenes produce) and returns it ready for `initAnimations`/`playAnimation`. `idleForWeapon(actorId, weaponId)` returns the weapon's idle when `idleByWeapon` is authored, else the default Idle. No new autoload is needed: the service is a `RefCounted` builder created where it is used (or an autoload if cross-scene caching proves necessary).
 3. **Shared cached resources.** The builder constructs one `SpriteFrames` per actor id and reuses it across instances, so 100 rats share one resource instead of 100 scene parses. Sprite-sheet textures load through Godot's shared texture cache.
 4. **Legacy fallback during migration.** A call site that finds no registry entry falls back to the legacy `.tscn` path (if present) and logs the fallback once. New content is registry-first; legacy scenes are deleted only after every consumer is migrated (cleanup commit after commit 17).
 5. **Canonical state names.** `Idle`, `IdleRevolver`, `IdleRifle`, `Run`, `Walk`, `Attack`, `Shoot`, `Duck` (plus the existing Overworld direction names). Unknown states fall back to `Idle` with a warning instead of breaking a spawn. `idleByWeapon` covers revolver/rifle/shotgun-specific idles without code branches.
@@ -29,7 +29,12 @@ Design for one generic way to build and drive actor animations. **Status: design
 ## Efficiency answers to the open questions
 
 - *More efficient than separate animation files?* Yes: the registry is one data file; adding an actor is a small dictionary entry per state instead of a hand-edited scene. Building `SpriteFrames` once per actor id and caching them removes the per-instance scene parse cost and keeps one texture per sheet in memory.
-- *Generic way to set animations for every actor?* The three call sites (Shootout spawn, OverworldActor, Location/PlayerLocationActor) all ask the service for a `BaseAnimation` by actor id; weapon idles come from data (`idleByWeapon`), and unknown actors/states degrade to Idle with a warning rather than aborting the spawn.
+- *Generic way to set animations for every actor?* Call sites ask the service for a `BaseAnimation` runtime by actor id; weapon idles come from data (`idleByWeapon`), and unknown actors/states degrade to Idle with a warning rather than aborting the spawn.
+
+## Scope of commit 17a (decided)
+
+- **Routed:** the Shootout actor spawn (`Actors/Shootout/ShootoutActor.gd`) — Walker Langley and Squeky rat resolve through the registry, with the legacy scene merged in for any state the registry does not cover.
+- **Deferred with reasons:** `Animations/Overworld/*` animal scenes carry `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); the player actors (`PlayerOverworldActor`/`PlayerLocationActor`) embed directional Move states plus the shadow-coverage contract and were mid-art-rework when this landed. Both migrate in a follow-up once the registry supports per-state scene/normal data and the art rework settles.
 
 ## Tests
 

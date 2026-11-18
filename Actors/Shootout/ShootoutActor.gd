@@ -1,6 +1,7 @@
 extends ActorBase
 
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
+const AnimationServiceScript = preload("res://Globals/ActorAnimationService.gd")
 
 var outlineShader = load("res://Shaders/Outline.tres")
 var actorOutlineMaterial = null
@@ -15,15 +16,16 @@ var characterUIHidden = false
 
 
 func initShootoutActor(actorType, actorNameInit, actorPosition, actorSide) -> void:
-	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })).instantiate()
+	# Commit 17a: animation states resolve through the shared registry/service;
+	# the legacy per-actor scene merges in anything the registry does not cover.
+	var actorId := str(actorNameInit).capitalize().replace(" ", "")
+	var animationService = AnimationServiceScript.new()
+	var animations = animationService.forActor(actorType, actorNameInit)
+	if animations == null:
+		push_warning("ShootoutActor: no animations for '%s'; the fighter spawns without visuals." % actorNameInit)
+		return
 	var frameHit = FrameData.frameData.animationHits[weapon.weapon]
-	var idleAnimation
-	if weapon.weapon == "revolver":
-		idleAnimation = "Idle Revolver"
-	elif weapon.weapon == "rifle":
-		idleAnimation = "Idle Rifle"
-	else:
-		idleAnimation = "Idle"
+	var idleAnimation := animationService.idleForWeapon(actorId, str(weapon.weapon), "Idle")
 	animations.initAnimations(idleAnimation, frameHit)
 	animations.name = actorNameInit
 	if actorSide == "enemy team":

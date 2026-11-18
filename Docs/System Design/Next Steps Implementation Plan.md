@@ -30,15 +30,19 @@
 **Exit gate:** ✅ one secret claim succeeds once per map and persists across a restart; a second attempt or a full inventory changes nothing; the reward never drops silently.
 
 
-## Commit 17a — Shared actor animation service and manifest registry (design first)
+## Commit 17a — Shared actor animation service and manifest registry (design first) ✅ **implemented**
 
 **Goal:** replace the per-actor hand-authored `*Animations.tscn` scenes with one data-driven animation service, so commit 17's new actors need only small data entries instead of duplicated scene editing.
 
-1. New `Data/Actors/ActorAnimationRegistry.gd`: per-actor states as data (sheet path, frame size, frame count/indices, speed, loop, optional hit frame/next state) with the same `SpriteFrames` semantics as the current scenes — Walker Langley and Squeky rat converted first with identical visuals.
-2. New `Globals/ActorAnimationService.gd` builder: `forActor(actorType, actorName)` instantiates `res://Animations/BaseAnimation.tscn` and injects one cached `SpriteFrames` per actor id; `idleForWeapon` reads `idleByWeapon` (default Idle otherwise), and unknown actors/states degrade to Idle with a warning rather than aborting a spawn.
-3. Route the three call sites — `Actors/Shootout/ShootoutActor.gd`, `Actors/Overworld/OverworldActor.gd`, `Actors/Location/PlayerLocationActor.gd` — through the service with a legacy-scene fallback; the Location built-in Idle/Run joins the same runtime. `FrameData` stays the combat hit-frame read (no duplicate contract).
-4. Tests: new `Tests/TestActorAnimations.gd` (built `SpriteFrames` counts/loop/speed, weapon-idle selection and default fallback, unknown actor/state degradation, legacy-scene fallback), `Tests/TestContentLint` registry checks (sheet paths exist, positive speed, hit frames in range, canonical state names).
-5. Exit gate: an actor authored purely through the registry animates identically to its old scene; legacy scenes fall back cleanly for unregistered actors; no per-actor `.tscn` is needed for new content. Legacy scenes are deleted only in a later cleanup commit.
+**Implemented as designed**, with two honest scope cuts (see [Actor Animations](Actor%20Animations.md) §Scope):
+- The Shootout spawn routes through the service; the Overworld animal scenes (they carry `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime) and the player actors (directional Move states + shadow contract, mid-art-rework) stay on their runtimes and migrate in a follow-up.
+- The registry initially covers the committed Walker Langley sheets plus all Squeky rat states; the service's legacy merge supplies every state the registry does not cover, so conversion can land as the art lands. Spawn-index suffixes ("Squeky rat0") are stripped for the registry lookup — the old code silently failed its indexed scene load, so this also fixes fighters spawning without visuals.
+
+1. ✅ `Data/Actors/ActorAnimationRegistry.gd`: per-actor states as data (sheet path, frame size or whole-sheet, frame count, step, loop) with the same `SpriteFrames` semantics as the current scenes — Walker Langley and Squeky rat converted.
+2. ✅ `Globals/ActorAnimationService.gd`: `forActor(actorType, actorName)` builds the `Animations.gd` runtime in code (root, `AnimationSprite` with one cached `SpriteFrames` per actor id, `AnimationPlayer` with generated per-state frame tracks); `idleForWeapon` reads `idleByWeapon` (default Idle otherwise), and unknown actors degrade to Idle with a warning rather than aborting a spawn; legacy-only actors keep their scene via the fallback.
+3. ✅ (scoped) `Actors/Shootout/ShootoutActor.gd` routes through the service with the legacy-scene merge; `FrameData` stays the combat hit-frame read (no duplicate contract).
+4. ✅ `Tests/TestActorAnimations.gd` (built frames counts/loop/speed, generated playback library, weapon-idle selection and default fallback, indexed-id resolution, cache sharing, unknown-actor degradation, legacy fallback) and `Tests/TestContentLint` registry checks (sheet paths exist, positive frames/step, idle selections point at authored states, broken-entry fixture proof).
+5. ✅ Exit gate: registry-authored actors animate identically to their old scenes; legacy scenes fall back cleanly; no per-actor `.tscn` is needed for new content. Legacy scenes are deleted only in a later cleanup commit.
 
 Design doc: [Actor Animations](Actor%20Animations.md).
 
