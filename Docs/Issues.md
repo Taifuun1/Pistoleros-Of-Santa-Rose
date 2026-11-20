@@ -7,10 +7,18 @@ Markdown file for listing issues that pop up.
 
 - When having the journal open for a minute or two, music starts playing
 - Move and Flee icons should be positioned to the right always in Shootout UI
-- Move by clicking on the actor position instead of icons in the UI
+- Move to a different column by clicking on the actor position instead of icons in the UI
 - Inventory party icons seems taller than the icon dimensions
 - Music transition and menu/controller integration fixes are in place, but their manual 640×360 audio and gamepad reconfirmation is pending
 - Buying a map doesn't seem to reveal Gold Run (purchase alone only adds the item; Inventory **Use** should consume one copy and reveal the target)
+- Hovering over character icons in the charcter turn list should highlight the actor
+    - Minor visual feed back on the icon when hovering, remove transparency
+- Hovering the actor order icons, the tooltip has an unknown character
+- Attack and Item icons should not be visible when a player actor is not currently acting
+- Highlight on actors when selecting the target for a Move should be a highlight or an icon
+- Sometimes, the actor that is acting, when zoomed in, is behind the other actors
+- Which Chamber is currently active is not displayed, the line indicator is not shown
+- Remove Squeky Rat Shootout actors and related files
 
 ## Fixed
 

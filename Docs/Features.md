@@ -10,7 +10,9 @@ Markdown file for listing first-iteration features.
     - Different parties can spawn, animals, people etc.
     - Groups of multiple actors can spawn
     - Different spawns have different spawn rates
-    - Spawns are only visual, they don't interact with the player
+    - Spawns are only visual flavour, they don't interact with the player
+- Locations and Towns in the Overworld don't have an icon to indicate where they are
+    - When approaching a Location, an icon should fade in above the Overworld Location tile as the player gets closer
 - Journal
     - Houses all information, quests, map, character stats, inventory and equipment, settings
     - Tabs for each category
@@ -86,6 +88,7 @@ Markdown file for listing first-iteration features.
     - Fix apple pie pathfinding test not supposed to be there
     - Placement bug where chunk is changed and the player is instantly thrown to the next chunk?
     - Fix camera not clamping to chunk borders
+    - Change leaving the Location to an interactable
     - Add minigames for herb picking
     - Add flavour and variety to chunks
         - Use bushes or empty tiles instead of just trees
