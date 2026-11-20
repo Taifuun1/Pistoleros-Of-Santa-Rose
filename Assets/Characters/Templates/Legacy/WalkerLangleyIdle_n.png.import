@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cp64fv8xfinm7"
-path="res://.godot/imported/WalkerLangleyIdle_n.png-3678db557ee682f9dc93fa48005e3c03.ctex"
+path="res://.godot/imported/WalkerLangleyIdle_n.png-68e26cbae35d2613d4f640c70365a174.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Characters/Test/Legacy/WalkerLangleyIdle_n.png"
-dest_files=["res://.godot/imported/WalkerLangleyIdle_n.png-3678db557ee682f9dc93fa48005e3c03.ctex"]
+source_file="res://Assets/Characters/Templates/Legacy/WalkerLangleyIdle_n.png"
+dest_files=["res://.godot/imported/WalkerLangleyIdle_n.png-68e26cbae35d2613d4f640c70365a174.ctex"]
 
 [params]
 

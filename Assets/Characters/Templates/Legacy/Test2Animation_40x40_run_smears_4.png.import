@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f832jy7jp7ti"
-path="res://.godot/imported/Test2Animation_40x40_run_smears_4.png-d39a4455378b94bf26ad344b406702db.ctex"
+path="res://.godot/imported/Test2Animation_40x40_run_smears_4.png-4f5f93f65e19b750e698fcbd7b3ec5a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Characters/Test/Legacy/Test2Animation_40x40_run_smears_4.png"
-dest_files=["res://.godot/imported/Test2Animation_40x40_run_smears_4.png-d39a4455378b94bf26ad344b406702db.ctex"]
+source_file="res://Assets/Characters/Templates/Legacy/Test2Animation_40x40_run_smears_4.png"
+dest_files=["res://.godot/imported/Test2Animation_40x40_run_smears_4.png-4f5f93f65e19b750e698fcbd7b3ec5a3.ctex"]
 
 [params]
 
