@@ -2,22 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://byv5p1rpgphoa"
-path="res://.godot/imported/WalkerLangleyRunSmears.png-0fae417523f1f30dbe071a0fff3893d9.ctex"
+uid="uid://br4402xkrqo1k"
+path="res://.godot/imported/AiyanaAnimationIdleRevolver.png-72d4439901c741ad560e94bbb087e64d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Characters/Named People/Walker Langley/WalkerLangleyRunSmears.png"
-dest_files=["res://.godot/imported/WalkerLangleyRunSmears.png-0fae417523f1f30dbe071a0fff3893d9.ctex"]
+source_file="res://Assets/Characters/Named People/Aiyana/AiyanaAnimationIdleRevolver.png"
+dest_files=["res://.godot/imported/AiyanaAnimationIdleRevolver.png-72d4439901c741ad560e94bbb087e64d.ctex"]
 
 [params]
 
 compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
@@ -25,6 +27,10 @@ mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
