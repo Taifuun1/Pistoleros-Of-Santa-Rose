@@ -175,8 +175,8 @@ var zones = {
 			{ "id": "cracked_leather_boots", "name": "Cracked-Leather Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
-	"pine_forest": {
-		"displayName": "Pine Forest",
+	"whispering_pines_reach": {
+		"displayName": "Whispering Pines Reach",
 		"items": [
 			{ "id": "woodsman_flannel_coat", "name": "Woodsman Flannel Coat", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "pine_pitch_stetson", "name": "Pine Pitch Stetson", "slot": "headwear", "dropsAnywhere": false },

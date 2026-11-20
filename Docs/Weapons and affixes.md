@@ -190,7 +190,7 @@ Sun-Bleached Stetson
 Dust Devil's Duster
 Cracked-Leather Boots
 
-### Pine Forest
+### Whispering Pines Reach
 
 Woodsman's Flannel Coat
 Needle-Stitched Boots

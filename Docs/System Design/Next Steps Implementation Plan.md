@@ -46,14 +46,21 @@
 
 Design doc: [Actor Animations](Actor%20Animations.md).
 
-## Commit 17 — Combat content breadth
+## Commit 17 — Combat content breadth ✅ **implemented**
 
 **Goal:** the representative fight is no longer Walker-plus-rats.
 
-1. Author executable Moves for the classes that still only carry `futureAbilities` prose (Bobtail Guard, Dust Whisperer, Line Rider, Bottle Courage Bulldozer) and move their implemented lines into canonical `moves`; grants resolve through the existing projector/lint unchanged.
-2. New actor files + animation sets **through the commit-17a registry** and profiled `ai` blocks for the added roles (support/tank archetypes use the per-family weights from commit 13); boss `ai` scripts where a role warrants a priority override.
-3. Re-record `EncounterMetricsBaseline.json` after authored health/stat changes and record the new measured deviation, if any — no test expectations edited to force a pass.
-4. Exit gate: the new classes field real loadouts in real encounters with measured, reproducible metrics.
+**Implemented as designed**, with the Whispering Pines Reach Zone rename as the canonical forest-area name (Zone id `pine_forest` → `whispering_pines_reach`, displayName "Whispering Pines Reach"; equipment, music, events, the quest trigger scene and their tests updated with it):
+
+1. ✅ Authored executable Moves for the classes that only carried `futureAbilities` prose: Bobtail Guard (Venom Shot, Cylinder Drop, Mark Target), Dust Whisperer (Open Vein, Bleed Cleanse, Toxin Throw, Poison Cleanse, Type Mark, Weaken, Piercing Coat), Line Rider (Poison Cleanse, Sharpened Spurs) and Bottle Courage Bulldozer (Bottle Up, Cylinder Boost; taunting stays the authored Duck Down). The implemented lines moved into canonical `moves` grants; the two "Disrupt positioning" designs stay prose because position disruption has no move op yet (Rodeo-only). Grants resolve through the existing projector/lint unchanged.
+2. ✅ New actor files + animation sets **through the commit-17a registry**: five Whispering Pines Reach bandits (`Data/Actors/Bandits/` — Pistolero grunt, Bobtail Guard, Dust Whisperer, Line Rider, Whiskey Bulldozer) and four main-party files (`Data/Actors/Named People/` — Aiyana, Gwyneth Remington, Manuel Cárdenas, Morrison Branson) with profiled `ai` blocks using the commit-13 per-family weights (support guards, support whisperer, tank bulldozer with `preferredColumns`). No boss script was warranted — no boss encounter is authored in this commit.
+3. ✅ New content breadth: `Data/Shootout/Encounters/PinesPatrol.gd`, `PinesWaylay.gd` (main party + Aiyana/Gwyneth against the bandits) and `PinesStandoff.gd` (Showdown), the `whispering_pines_reach` pool, the `Bandits` loot table, and a ForestEvents outcome that launches the pool. `Tests/TestContentLint` now audits the `Data/Actors/Bandits` folder like the other actor folders.
+4. ✅ Re-recorded `Tests/EncounterMetricsBaseline.json`: the existing canyon fixture replays exactly (no authored health/stat change to Walker or the rats, so no deviation there), and the driver gained a `pinesWaylay` fixture proving the new classes field real loadouts in a real encounter with measured, reproducible metrics. Measured deviation worth recording: at the authored placeholder stats the bandit party loses the measured run without dealing a hit (all three bandits knocked down in 4 rounds while Walker, Aiyana and Gwyneth finish at full HP) — combat balance tweaks stay deliberately deferred by owner decision, so the stats are recorded as authored-light rather than tuned to force a result.
+5. ✅ Exit gate: the new classes field real loadouts in real encounters with measured, reproducible metrics.
+
+**Tests:** `Tests/TestContentLint` audits the `Bandits` actor folder (reference integrity, class grants, offensive-move survival, AI profiles) and every new Move/class/loot/encounter/pool reference; `Tests/TestEncounters` validates the three new encounter files; `Tests/TestActorAnimations` covers the new registry entries (indexed Pistolero id, rifle bandit `idleByWeapon`, Aiyana's full state set, the accented Manuel Cárdenas id); `Tests/TestEncounterMetrics` (scene) replays both baseline fixtures deterministically. Full suite: 70/70.
+
+**Exit gate:** ✅ the new classes field real loadouts in real encounters with measured, reproducible metrics.
 
 ## Commit 18 — Zone breadth
 

@@ -57,15 +57,41 @@ func _run() -> void:
 		# First run on a fresh checkout: record the fixture from the verified
 		# replay above rather than asserting a handpicked outcome.
 		baselineRun = first.duplicate(true)
+		baseline["canyonRats"] = baselineRun
 		var file := FileAccess.open(BASELINE_PATH, FileAccess.WRITE)
 		if file != null:
-			file.store_string(JSON.stringify({ "canyonRats": baselineRun }, "  "))
+			file.store_string(JSON.stringify(baseline, "  "))
 			file.close()
 		print("NOTE: recorded a new metric baseline from seed %s" % str(baselineRun.get("seed", "?")))
 	_check(not baselineRun.is_empty(), "the machine-readable baseline exists")
 	_check(str(baselineRun.get("encounter", "")) == "Canyon Rats" and int(baselineRun.get("seed", -1)) >= 0, "the baseline records real source data")
 	var measured := await measureEncounter(canyonRats, int(baselineRun.get("seed", 20261117)), MAX_TURNS, "canyon")
 	_check(measured == baselineRun, "the baseline replays exactly")
+
+	print("\n--- Commit 17 fixture: the new classes field real loadouts ---")
+	var pinesWaylayScript = preload("res://Data/Shootout/Encounters/PinesWaylay.gd")
+	var pinesWaylayHolder = pinesWaylayScript.new()
+	var pinesWaylay: Dictionary = pinesWaylayHolder.data
+	pinesWaylayHolder.free()
+	var pinesPath := "res://Data/Shootout/Encounters/PinesWaylay.gd"
+	var firstPines := await measureEncounter(pinesWaylay, 20261119, MAX_TURNS, "whispering_pines_reach", pinesPath)
+	_check(not bool(firstPines.get("guardTripped", true)), "PinesWaylay terminates inside the turn budget (%s turns, %s rounds)" % [str(firstPines.get("turns")), str(firstPines.get("rounds"))])
+	_check(str(firstPines.get("outcome", "")) in ["victory", "vamoose"], "the bandit fight reports a real outcome, got '%s'" % str(firstPines.get("outcome")))
+	var pinesReplay := await measureEncounter(pinesWaylay, 20261119, MAX_TURNS, "whispering_pines_reach", pinesPath)
+	_check(firstPines == pinesReplay, "the same seed replays the bandit fight identically")
+	var baselinePines: Dictionary = baseline.get("pinesWaylay", {})
+	if baselinePines.is_empty():
+		# First run on a fresh checkout: record the fixture from the verified
+		# replay above rather than asserting a handpicked outcome.
+		baselinePines = firstPines.duplicate(true)
+		baseline["pinesWaylay"] = baselinePines
+		var file := FileAccess.open(BASELINE_PATH, FileAccess.WRITE)
+		if file != null:
+			file.store_string(JSON.stringify(baseline, "  "))
+			file.close()
+		print("NOTE: recorded a new Whispering Pines Reach metric fixture from seed %s" % str(baselinePines.get("seed", "?")))
+	var measuredPines := await measureEncounter(pinesWaylay, int(baselinePines.get("seed", 20261119)), MAX_TURNS, "whispering_pines_reach", pinesPath)
+	_check(measuredPines == baselinePines, "the Whispering Pines Reach fixture replays exactly")
 
 	print("\n--- Batch with a max-turn guard ---")
 	var batch := []
@@ -95,7 +121,7 @@ func _run() -> void:
 
 
 ## Drives one full fight with the production turn sequence, minus presentation.
-func measureEncounter(encounterData: Dictionary, seedValue: int, maxTurns: int, zoneId: String) -> Dictionary:
+func measureEncounter(encounterData: Dictionary, seedValue: int, maxTurns: int, zoneId: String, encounterPath := "res://Data/Shootout/Encounters/CanyonRats.gd") -> Dictionary:
 	var shootout = ShootoutScene.instantiate()
 	shootout.autoInit = false
 	add_child(shootout)
@@ -104,7 +130,7 @@ func measureEncounter(encounterData: Dictionary, seedValue: int, maxTurns: int, 
 		"seed": seedValue,
 		"encounter": str(encounterData.get("name", "")),
 		"kind": str(encounterData.get("kind", "dustup")),
-		"encounterPath": "res://Data/Shootout/Encounters/CanyonRats.gd",
+		"encounterPath": encounterPath,
 		"zoneId": zoneId,
 		"source": "measurement_driver",
 		"teams": shootout.actorSpawnPlan(encounterData.get("teams", {})).map(func(entry): return str(entry.name)),
@@ -254,19 +280,20 @@ func _readBaseline() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(BASELINE_PATH))
 	if !(parsed is Dictionary):
 		return {}
-	# JSON has no int type: coerce the numeric counters back so the comparison
-	# is against the measured integer metrics.
+	# JSON has no int type: coerce the numeric counters of every fixture row
+	# back so the comparison is against the measured integer metrics.
 	var baseline: Dictionary = parsed
-	var run: Dictionary = baseline.get("canyonRats", {})
-	if run.is_empty():
-		return baseline
-	for key in ["seed", "turns", "rounds", "hits", "knockdowns"]:
-		run[key] = int(run.get(key, 0))
-	var remaining: Dictionary = run.get("remainingHealth", {})
-	for actorName in remaining:
-		if remaining[actorName] is Dictionary:
-			(remaining[actorName] as Dictionary)["hp"] = int((remaining[actorName] as Dictionary).get("hp", 0))
-			(remaining[actorName] as Dictionary)["maxHp"] = int((remaining[actorName] as Dictionary).get("maxHp", 0))
-	run["remainingHealth"] = remaining
-	baseline["canyonRats"] = run
+	for fixtureName in baseline.keys():
+		var run: Dictionary = baseline[fixtureName] if baseline[fixtureName] is Dictionary else {}
+		if run.is_empty():
+			continue
+		for key in ["seed", "turns", "rounds", "hits", "knockdowns"]:
+			run[key] = int(run.get(key, 0))
+		var remaining: Dictionary = run.get("remainingHealth", {})
+		for actorName in remaining:
+			if remaining[actorName] is Dictionary:
+				(remaining[actorName] as Dictionary)["hp"] = int((remaining[actorName] as Dictionary).get("hp", 0))
+				(remaining[actorName] as Dictionary)["maxHp"] = int((remaining[actorName] as Dictionary).get("maxHp", 0))
+		run["remainingHealth"] = remaining
+		baseline[fixtureName] = run
 	return baseline

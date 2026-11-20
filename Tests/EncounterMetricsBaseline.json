@@ -34,5 +34,41 @@
     ],
     "turns": 6,
     "zoneId": "canyon"
+  },
+  "pinesWaylay": {
+    "encounter": "Whispering Pines Waylay",
+    "encounterPath": "res://Data/Shootout/Encounters/PinesWaylay.gd",
+    "guardTripped": false,
+    "hits": 8,
+    "kind": "dustup",
+    "knockdowns": 3,
+    "outcome": "victory",
+    "remainingHealth": {
+      "Aiyana0": {
+        "hp": 10,
+        "maxHp": 10
+      },
+      "Gwyneth Remington0": {
+        "hp": 11,
+        "maxHp": 11
+      },
+      "Walker Langley0": {
+        "hp": 12,
+        "maxHp": 12
+      }
+    },
+    "rounds": 4,
+    "seed": 20261119,
+    "source": "measurement_driver",
+    "teams": [
+      "Walker Langley",
+      "Aiyana",
+      "Gwyneth Remington",
+      "Pistolero",
+      "Pistolero",
+      "Bobtail Guard"
+    ],
+    "turns": 15,
+    "zoneId": "whispering_pines_reach"
   }
 }

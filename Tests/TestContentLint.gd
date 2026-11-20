@@ -27,6 +27,14 @@ const CONTENT_FOLDERS := [
 	"res://Data/Shootout/Rodeos",
 	"res://Data/Shootout/Classes",
 	"res://Data/Actors/Animals",
+	"res://Data/Actors/Bandits",
+	"res://Data/Actors/Named People",
+]
+
+## Enemy/party actor folders, merged wherever actor content is audited.
+const ACTOR_FOLDERS := [
+	"res://Data/Actors/Animals",
+	"res://Data/Actors/Bandits",
 	"res://Data/Actors/Named People",
 ]
 
@@ -164,12 +172,11 @@ func _testAiProfiles() -> void:
 	for fileName in _gdFiles("res://Data/Shootout/AI"):
 		scriptNames[fileName.get_basename()] = true
 	var actorNames := {}
-	for folder in ["res://Data/Actors/Animals", "res://Data/Actors/Named People"]:
+	for folder in ACTOR_FOLDERS:
 		for entry in _collectData(folder).entries:
 			actorNames[str(entry.data.get("actorName", ""))] = true
 
-	var actors := _collectData("res://Data/Actors/Animals")
-	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+	var actors := _collectActors()
 	var profiled := 0
 	for entry in actors.entries:
 		var label := str(entry.data.get("actorName", entry.file))
@@ -301,8 +308,7 @@ func _testMoveGrants() -> void:
 				var errors := _grantErrors(str(itemValue.get("id", "?")), itemValue.get("grantedMoves", null), moves.names)
 				_check(errors.is_empty(), "equipment '%s' grants authored Moves: %s" % [itemValue.get("id", "?"), errors])
 
-	var actors := _collectData("res://Data/Actors/Animals")
-	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+	var actors := _collectActors()
 	for entry in actors.entries:
 		var actorLabel := str(entry.data.get("actorName", entry.file))
 		var classRecord := _recordNamed(classes.entries, str(entry.data.get("characterClass", "")))
@@ -415,8 +421,7 @@ func _testReferenceIntegrity() -> void:
 	var classes := _collectData("res://Data/Shootout/Classes")
 	var rodeos := _collectData("res://Data/Shootout/Rodeos")
 	var encounters := _collectData("res://Data/Shootout/Encounters")
-	var actors := _collectData("res://Data/Actors/Animals")
-	actors.entries.append_array(_collectData("res://Data/Actors/Named People").entries)
+	var actors := _collectActors()
 
 	var effectTypes := _knownEffectTypes()
 	for entry in moves.entries:
@@ -529,8 +534,18 @@ func _testTrailAndAccessGates() -> void:
 	_check(locationCount > 0, "the access gate guards authored Locations (found %d)" % locationCount)
 
 
-## Loads every `.gd` in a folder that exposes a `data` Dictionary, tracking
-## `data.name` so a duplicate is an error instead of a silent overwrite.
+## Merges every actor folder's data entries for the actor-wide audits.
+func _collectActors() -> Dictionary:
+	var merged := { "entries": [], "names": {}, "errors": [] }
+	for folder in ACTOR_FOLDERS:
+		var collected := _collectData(folder)
+		merged.entries.append_array(collected.entries)
+		merged.errors.append_array(collected.errors)
+	merged.names = _namesFor(merged.entries)
+	merged.errors.append_array(_duplicateNameErrors(merged.entries))
+	return merged
+
+
 func _collectData(folder: String) -> Dictionary:
 	var result := { "entries": [], "names": {}, "errors": [] }
 	if !DirAccess.dir_exists_absolute(folder):

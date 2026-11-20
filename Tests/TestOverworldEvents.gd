@@ -15,7 +15,7 @@ const CADENCE_TICK_BOUND := 50000
 ## Representative chunk per canonical Zone (matches the ZoneData bands).
 const ZONE_CHUNKS := {
 	"grassy_plains": Vector2i(0, 0),
-	"pine_forest": Vector2i(2, 0),
+	"whispering_pines_reach": Vector2i(2, 0),
 	"hilly_mining": Vector2i(4, 0),
 	"snowy_mountain": Vector2i(6, 0),
 	"canyon": Vector2i(8, 0),

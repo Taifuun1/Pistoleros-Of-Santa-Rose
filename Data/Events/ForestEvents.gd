@@ -17,7 +17,11 @@ var events = {
 		"choices": [
 			{ "label": "Introduce yourself peacefully", "result": "greet_trapper" },
 			{ "label": "Ask if he knows the area well", "result": "question_trapper" },
-			{ "label": "Keep moving and say nothing", "result": "ignore_trapper" }
+			{
+				"label": "Keep moving and say nothing",
+				"result": "ignore_trapper",
+				"outcome": { "kind": "encounter", "poolZone": "whispering_pines_reach" }
+			}
 		]
 	},
 	"Fallen Tree": {

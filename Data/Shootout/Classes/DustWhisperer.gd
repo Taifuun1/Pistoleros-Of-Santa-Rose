@@ -1,17 +1,22 @@
 extends Node
 
 
+# Dust Whisperer (Docs/Combat.md classes): support/affliction class. The
+# cleanse/affliction/mark prose is executable now (commit 17); offense comes
+# from the actor's own authored Moves because the class list is utility-only.
 var data = {
 	"name": "Dust Whisperer",
 	"magazine": [-1, 0, 1, 0],
-	"moves": [],
-	"futureAbilities": [
-		"Bleed cleanse and affliction",
-		"Poison cleanse and affliction",
-		"Damage type mark applications",
-		"Damage decrease applications",
-		"Damage piercing application"
+	"moves": [
+		"Open Vein",
+		"Bleed Cleanse",
+		"Toxin Throw",
+		"Poison Cleanse",
+		"Type Mark",
+		"Weaken",
+		"Piercing Coat"
 	],
+	"futureAbilities": [],
 	"beltSpace": 5,
 	"defense": { "sand": 0 },
 	"explosiveBase": 3,

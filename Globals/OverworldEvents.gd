@@ -18,7 +18,7 @@ const EVENT_CHANCE_PER_TICK: float = 0.15
 ## events only; it never falls back to another Zone's pool.
 const ZONE_EVENT_FILES: Dictionary = {
 	"grassy_plains": "res://Data/Events/GrasslandEvents.gd",
-	"pine_forest": "res://Data/Events/ForestEvents.gd",
+	"whispering_pines_reach": "res://Data/Events/ForestEvents.gd",
 	"desert_prairie": "res://Data/Events/DesertEvents.gd",
 	"swamp": "res://Data/Events/SwampEvents.gd",
 	"canyon": "res://Data/Events/CanyonEvents.gd",

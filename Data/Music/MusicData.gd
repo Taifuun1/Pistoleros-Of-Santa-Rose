@@ -27,7 +27,7 @@ var data = {
 			"Overworld/WildWest1",
 			"Overworld/WildWest2"
 		],
-		"pine_forest": [
+		"whispering_pines_reach": [
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Chill/Birdsong Window"
 		],
@@ -93,7 +93,7 @@ var data = {
 		"hilly_mining": ["Shootout/Dusty Cartridge Duel"],
 		"desert_prairie": ["Shootout/Clash on Beat One"],
 		"snowy_mountain": ["Shootout/Wily Core"],
-		"pine_forest": ["Shootout/Pixel Duel"],
+		"whispering_pines_reach": ["Shootout/Pixel Duel"],
 		"swamp": ["Shootout/Last Bullet Canyon"],
 		"canyon": ["Shootout/Steel Cannon Run"],
 		"ghost_town": ["Shootout/Shootout2"],

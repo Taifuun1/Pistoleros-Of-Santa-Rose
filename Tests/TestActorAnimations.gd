@@ -65,6 +65,32 @@ func _run() -> void:
 	_check(service.idleForWeapon("SquekyRat", "melee") == "Idle", "unprofiled actors use their default idle")
 	_check(service.idleForWeapon("UnknownActor", "revolver") == "Idle", "unregistered actors fall back to the default idle")
 
+	print("\n--- Commit 17 registry actors ---")
+	var pistolero = service.forActor("Bandits", "Pistolero0")
+	_check(pistolero != null, "the indexed Pistolero spawn id resolves through the registry")
+	if pistolero != null:
+		var pistoleroFrames: SpriteFrames = pistolero.get_node("AnimationSprite").sprite_frames
+		_check(pistoleroFrames.has_animation("Idle Revolver") and pistoleroFrames.get_frame_count("Idle Revolver") == 8, "the Pistolero builds its authored revolver states")
+		_check(pistoleroFrames.has_animation("Shoot Revolver") and pistoleroFrames.get_frame_count("Shoot Revolver") == 11, "the Pistolero Draw Revolver sheet slices 11 frames")
+	pistolero.free()
+	var guard = service.forActor("Bandits", "Bobtail Guard")
+	_check(guard != null, "the Bobtail Guard resolves through the registry")
+	if guard != null:
+		guard.free()
+	_check(service.idleForWeapon("BobtailGuard", "rifle") == "Idle Rifle", "the rifle bandit's idle comes from idleByWeapon")
+	_check(service.idleForWeapon("BobtailGuard", "revolver") == "Idle Rifle", "the rifle bandit's default idle matches its carried weapon")
+	var aiyana = service.forActor("Named People", "Aiyana")
+	_check(aiyana != null, "Aiyana resolves through the registry")
+	if aiyana != null:
+		var aiyanaFrames: SpriteFrames = aiyana.get_node("AnimationSprite").sprite_frames
+		for state in ["Idle", "Idle Revolver", "Idle Rifle", "Run", "Walk", "Shoot Revolver", "Shoot Rifle", "Throw"]:
+			_check(aiyanaFrames.has_animation(state), "Aiyana builds '%s'" % state)
+		aiyana.free()
+	var cardenas = service.forActor("Named People", "Manuel Cárdenas")
+	_check(cardenas != null, "Manuel Cárdenas resolves through the registry (accented id)")
+	if cardenas != null:
+		cardenas.free()
+
 	print("\n--- Unknown actors and the runtime contract ---")
 	_check(service.forActor("Animals", "Squeky rat0") != null, "indexed spawn ids resolve to the un-indexed registry entry")
 	_check(service.forActor("Named People", "Nobody") == null, "an unregistered actor without a legacy scene resolves to null")

@@ -38,7 +38,7 @@ func _testGeography(catalog) -> void:
 	print("\n--- Band resolution and default ---")
 	_check(catalog.zoneForChunk(Vector2i(0, 0)) == "grassy_plains", "top-left chunk is grassy plains")
 	_check(catalog.zoneForChunk(Vector2i(1, 23)) == "grassy_plains", "grassy plains band includes its far corner")
-	_check(catalog.zoneForChunk(Vector2i(2, 0)) == "pine_forest", "pine forest starts at x=2")
+	_check(catalog.zoneForChunk(Vector2i(2, 0)) == "whispering_pines_reach", "Whispering Pines Reach starts at x=2")
 	_check(catalog.zoneForChunk(Vector2i(4, 23)) == "hilly_mining", "hilly mining includes its far corner")
 	_check(catalog.zoneForChunk(Vector2i(6, 0)) == "snowy_mountain", "snowy mountain starts at x=6")
 	_check(catalog.zoneForChunk(Vector2i(8, 23)) == "canyon", "canyon band includes its far corner")

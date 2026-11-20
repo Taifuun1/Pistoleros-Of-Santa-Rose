@@ -1,15 +1,18 @@
 extends Node
 
 
+# Bottle Courage Bulldozer (Docs/Combat.md classes): tank. The defense/cylinder
+# prose is executable now (commit 17) and taunting is the authored Duck Down;
+# the position-disruption design has no move op yet and stays deferred.
 var data = {
 	"name": "Bottle Courage Bulldozer",
 	"magazine": [0, 2, 0, -1],
 	"moves": [
+		"Bottle Up",
+		"Cylinder Boost",
 		"Duck Down"
 	],
 	"futureAbilities": [
-		"Self-increase damage type defense",
-		"Cylinder increase application",
 		"Disrupt second and third position positioning"
 	],
 	"beltSpace": 1,

@@ -289,7 +289,7 @@ func _testQuestEncounterProgression() -> void:
 	}
 	var requestOptions := {
 		"encounterPath": LITTLEHILL_APPROACH,
-		"zoneId": "pine_forest",
+		"zoneId": "whispering_pines_reach",
 		"source": "quest",
 		"sourceId": "%s:find_morrison" % QUEST_ID,
 		"origin": { "sceneKey": "overworld" },

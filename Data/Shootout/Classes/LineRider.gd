@@ -1,13 +1,17 @@
 extends Node
 
 
+# Line Rider (Docs/Combat.md classes): anti-Sand rider. Poison cleanse and the
+# self piercing buff are executable now (commit 17); the position-disruption
+# design has no move op yet and stays in futureAbilities.
 var data = {
 	"name": "Line Rider",
 	"magazine": [1, 1, -1, 0],
-	"moves": [],
+	"moves": [
+		"Poison Cleanse",
+		"Sharpened Spurs"
+	],
 	"futureAbilities": [
-		"Poison cleanse",
-		"Self-increase damage piercing",
 		"Disrupt first and second position positioning"
 	],
 	"beltSpace": 2,

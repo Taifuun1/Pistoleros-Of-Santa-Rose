@@ -1,6 +1,6 @@
 # Actor Animations
 
-Design for one generic way to build and drive actor animations. **Status: implemented (commit 17a); the Shootout spawn routes through the service, Overworld animal scenes and the player actors stay on their runtimes for a follow-up (see §Scope of commit 17a).** Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push.
+Design for one generic way to build and drive actor animations. **Status: implemented (commit 17a); the Shootout spawn routes through the service, Overworld animal scenes and the player actors stay on their runtimes for a follow-up (see §Scope of commit 17a).** Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push. Commit 17 authored every new combat actor as registry data only — the four main-party members and the five Whispering Pines Reach bandits needed no per-actor `.tscn` (see `Data/Actors/ActorAnimationRegistry.gd`, "Main party" and "Whispering Pines Reach bandits" sections).
 
 ## Problem
 

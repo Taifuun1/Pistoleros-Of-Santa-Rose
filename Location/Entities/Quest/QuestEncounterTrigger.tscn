@@ -13,7 +13,7 @@ interactionPrompt = "Clear the approach"
 questId = "pistoleros_regroup"
 objectiveId = "find_morrison"
 encounterPath = "res://Data/Shootout/Encounters/LittlehillApproach.gd"
-zoneId = "pine_forest"
+zoneId = "whispering_pines_reach"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_questencounter")
