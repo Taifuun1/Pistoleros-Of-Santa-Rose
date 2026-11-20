@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=25 format=3 uid="uid://3cjwhqd8trvl"]
+[gd_resource type="TileSet" format=3 uid="uid://3cjwhqd8trvl"]
 
 [ext_resource type="Texture2D" uid="uid://b3hnjspbmgq0a" path="res://Assets/Outdoor Objects/Lilypad.png" id="1_bxkts"]
 [ext_resource type="Texture2D" uid="uid://80lm0dvu82xn" path="res://Assets/Outdoor Objects/LilypadFlower.png" id="2_lurqt"]
