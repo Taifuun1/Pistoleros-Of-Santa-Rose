@@ -30,6 +30,31 @@ var zones = {
 			],
 		},
 	},
+	"whispering_pines_reach": {
+		"zoneId": "whispering_pines_reach",
+		"headline": "Masked Bandits Waylay the Pine Roads",
+		"editorial": "The pines have kept their quiet, but the roads through them have not. Hold-up crews work the treeline now: rifles from the deep columns, a taunting bull up front, and somebody in the back who dusts your eyes and your cylinder. Travel armed, travel together, and shoot the marks off you first.",
+		"generalTips": [
+			"Their guard loves the back columns: a rifle reaches anywhere, so closing distance does not shake him.",
+			"Poison and marks stack quietly. Cleanse before you trade shots, not after.",
+			"When a big man walks to the front and dares you to shoot, the whisperer behind him is the real problem.",
+		],
+		"encounterTips": {
+			"PinesPatrol": [
+				"Three revolvers, no tricks: they shoot sharp and duck when hurt.",
+				"Each carries one paregoric, so a wounded Pistolero can undo your best shot.",
+			],
+			"PinesWaylay": [
+				"Two pistols keep your front busy while the guard marks and poisons from column three.",
+				"His Cylinder Drop rattles your shots; reload beats fighting a dead cylinder.",
+			],
+			"PinesStandoff": [
+				"The bulldozer taunts and hardens his Sand — aim around him or pierce him.",
+				"The rider spurs his own shots through armor; drop him before he settles in.",
+				"The whisperer weakens and poisons from the rear; she barely fights, so she dies last or first, your choice.",
+			],
+		},
+	},
 }
 
 

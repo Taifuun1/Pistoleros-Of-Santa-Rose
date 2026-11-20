@@ -93,6 +93,43 @@ func _run() -> void:
 	var measuredPines := await measureEncounter(pinesWaylay, int(baselinePines.get("seed", 20261119)), MAX_TURNS, "whispering_pines_reach", pinesPath)
 	_check(measuredPines == baselinePines, "the Whispering Pines Reach fixture replays exactly")
 
+	print("\n--- Commit 18: the measurement batch covers the new Zone ---")
+	var pinesStandoffScript = preload("res://Data/Shootout/Encounters/PinesStandoff.gd")
+	var pinesStandoffHolder = pinesStandoffScript.new()
+	var pinesStandoff: Dictionary = pinesStandoffHolder.data
+	pinesStandoffHolder.free()
+	var standoffPath := "res://Data/Shootout/Encounters/PinesStandoff.gd"
+	var firstStandoff := await measureEncounter(pinesStandoff, 20261121, MAX_TURNS, "whispering_pines_reach", standoffPath)
+	_check(not bool(firstStandoff.get("guardTripped", true)), "PinesStandoff terminates inside the turn budget (%s turns, %s rounds)" % [str(firstStandoff.get("turns")), str(firstStandoff.get("rounds"))])
+	_check(str(firstStandoff.get("outcome", "")) in ["victory", "vamoose"], "the standoff reports a real outcome, got '%s'" % str(firstStandoff.get("outcome")))
+	var standoffReplay := await measureEncounter(pinesStandoff, 20261121, MAX_TURNS, "whispering_pines_reach", standoffPath)
+	_check(firstStandoff == standoffReplay, "the same seed replays the standoff identically")
+	var baselineStandoff: Dictionary = baseline.get("pinesStandoff", {})
+	if baselineStandoff.is_empty():
+		# First run on a fresh checkout: record the fixture from the verified
+		# replay above rather than asserting a handpicked outcome.
+		baselineStandoff = firstStandoff.duplicate(true)
+		baseline["pinesStandoff"] = baselineStandoff
+		var file := FileAccess.open(BASELINE_PATH, FileAccess.WRITE)
+		if file != null:
+			file.store_string(JSON.stringify(baseline, "  "))
+			file.close()
+		print("NOTE: recorded a new Whispering Pines Reach standoff fixture from seed %s" % str(baselineStandoff.get("seed", "?")))
+	var measuredStandoff := await measureEncounter(pinesStandoff, int(baselineStandoff.get("seed", 20261121)), MAX_TURNS, "whispering_pines_reach", standoffPath)
+	_check(measuredStandoff == baselineStandoff, "the Whispering Pines Reach standoff fixture replays exactly")
+
+	var pinesPatrolScript = preload("res://Data/Shootout/Encounters/PinesPatrol.gd")
+	var pinesPatrolHolder = pinesPatrolScript.new()
+	var pinesPatrol: Dictionary = pinesPatrolHolder.data
+	pinesPatrolHolder.free()
+	var patrolPath := "res://Data/Shootout/Encounters/PinesPatrol.gd"
+	var pinesBatch := []
+	for seedValue in [31, 32, 33]:
+		pinesBatch.append(await measureEncounter(pinesPatrol, seedValue, MAX_TURNS, "whispering_pines_reach", patrolPath))
+	_check(pinesBatch.size() == 3 and not pinesBatch.any(func(entry): return bool(entry.get("guardTripped", true))), "every batched pines fight terminates on its own")
+	for entry in pinesBatch:
+		_check(str(entry.get("encounterPath", "")) == patrolPath and str(entry.get("zoneId", "")) == "whispering_pines_reach", "each pines batch row records its request path and Zone")
+
 	print("\n--- Batch with a max-turn guard ---")
 	var batch := []
 	for seedValue in [11, 12, 13]:

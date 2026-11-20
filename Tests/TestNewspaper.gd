@@ -71,6 +71,22 @@ func _run() -> void:
 		names.append(str(party.name))
 	_check(!names.has("Testing Encounter"), "the debug RatAmbush encounter is never published as news")
 
+	print("\n--- The second authored Zone projects real news ---")
+	var pinesReport = builder.buildReport("whispering_pines_reach", productionPools, _resolver(), productionCopy)
+	_check(pinesReport.success and pinesReport.available, "the Whispering Pines Reach report is available")
+	_check(pinesReport.zoneId == "whispering_pines_reach", "the pines report keeps its Zone")
+	_check(str(pinesReport.headline) == productionCopy.getHeadline("whispering_pines_reach"), "the pines headline comes from the authored copy")
+	_check(pinesReport.parties.size() == productionPools.getPublicEntries("whispering_pines_reach").size(), "every published Whispering Pines Reach entry is projected")
+	for party in pinesReport.parties:
+		_check(!party.composition.is_empty(), "pines party '%s' lists at least one enemy" % party.encounterId)
+		_check(!party.damageTypes.is_empty(), "pines party '%s' names its damage types" % party.encounterId)
+		_check(party.mechanics == productionCopy.getEncounterTips("whispering_pines_reach", str(party.encounterId)) and !party.mechanics.is_empty(), "pines party '%s' carries its authored tips" % party.encounterId)
+	var pinesNames := []
+	for party in pinesReport.parties:
+		pinesNames.append(str(party.encounterId))
+	pinesNames.sort()
+	_check(pinesNames == ["PinesPatrol", "PinesStandoff", "PinesWaylay"], "the three authored pines encounters are published, got %s" % [pinesNames])
+
 	print("\n--- Aggregation, ordering and exclusions ---")
 	var fixturePools = EncounterPoolDataScript.new()
 	fixturePools.pools["canyon"] = { "zoneId": "canyon", "entries": [

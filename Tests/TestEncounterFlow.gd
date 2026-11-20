@@ -11,12 +11,21 @@ const RequestScript = preload("res://Shootout/EncounterRequest.gd")
 const PoolScript = preload("res://Data/Shootout/EncounterPoolData.gd")
 const ResolverScript = preload("res://Overworld/OverworldEventOutcomeResolver.gd")
 const CanyonEventsScript = preload("res://Data/Events/CanyonEvents.gd")
+const ForestEventsScript = preload("res://Data/Events/ForestEvents.gd")
 const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 const CoordinatesScript = preload("res://Overworld/OverworldCoordinates.gd")
+const ItemCatalogScript = preload("res://Data/Items/ItemCatalog.gd")
+const EquipmentDataScript = preload("res://Data/Items/EquipmentData.gd")
+const WeaponDataScript = preload("res://Data/Items/WeaponData.gd")
+const ItemGenerationScript = preload("res://Globals/ItemGeneration.gd")
 
 const CANYON_RATS := "res://Data/Shootout/Encounters/CanyonRats.gd"
 const CANYON_RAT_NEST := "res://Data/Shootout/Encounters/CanyonRatNest.gd"
 const LITTLEHILL_APPROACH := "res://Data/Shootout/Encounters/LittlehillApproach.gd"
+const PINES_PATROL := "res://Data/Shootout/Encounters/PinesPatrol.gd"
+const PINES_WAYLAY := "res://Data/Shootout/Encounters/PinesWaylay.gd"
+const PINES_STANDOFF := "res://Data/Shootout/Encounters/PinesStandoff.gd"
+const PINES_ZONE := "whispering_pines_reach"
 const PRODUCTION_QUEST_CATALOG := "res://Data/Quests/QuestCatalog.tres"
 const QUEST_ID := "pistoleros_regroup"
 
@@ -44,6 +53,7 @@ func _run() -> void:
 	_testRequestValidation()
 	_testPoolSelection()
 	_testEventOutcomeDispatch()
+	await _testWhisperingPinesRoute()
 	await _testSceneRouter()
 	await _testQuestEncounterProgression()
 
@@ -127,6 +137,21 @@ func _testPoolSelection() -> void:
 	_check(pools.selectEncounter("not_a_zone", rng, catalog).reason == "invalid_zone", "a non-canonical Zone fails closed")
 	_check(pools.selectEncounter("canyon", null, catalog).reason == "invalid_rng", "selection requires an injected RNG")
 
+	print("\n--- Deterministic Whispering Pines Reach pool selection ---")
+	_check(pools.hasZone(PINES_ZONE), "the Whispering Pines Reach pool is authored")
+	var pinesFirst: Dictionary = pools.selectEncounter(PINES_ZONE, _seededRng(12345), catalog)
+	var pinesSecond: Dictionary = pools.selectEncounter(PINES_ZONE, _seededRng(12345), catalog)
+	_check(pinesFirst.success and pinesSecond.success, "valid pines pools select an encounter")
+	_check(pinesFirst.encounterPath == pinesSecond.encounterPath, "the same seed selects the same pines encounter")
+	_check(pinesFirst.encounterPath in [PINES_PATROL, PINES_WAYLAY, PINES_STANDOFF], "selection returns an authored pines encounter")
+	var pinesSeen := {}
+	var pinesRng := _seededRng(999)
+	for index in 90:
+		var pinesSelected: Dictionary = pools.selectEncounter(PINES_ZONE, pinesRng, catalog)
+		_check(pinesSelected.success, "pines random selection %d succeeds" % index)
+		pinesSeen[pinesSelected.encounterPath] = true
+	_check(pinesSeen.size() == 3, "all three weighted pines encounters can be selected, got %s" % [pinesSeen])
+
 func _testEventOutcomeDispatch() -> void:
 	print("\n--- Canonical Zone pools and event outcomes ---")
 	var catalog = ZoneCatalogScript.new()
@@ -187,6 +212,121 @@ func _testEventOutcomeDispatch() -> void:
 	_check(autoloadResult.success and autoloadLaunches.size() == 1, "the production popup path launches through the dispatcher")
 	OverworldEvents.encounterLauncher = Callable()
 	canyonData.free()
+
+	print("\n--- The Whispering Pines Reach event outcome launches its pool ---")
+	var pinesPool = PoolScript.new()
+	pinesPool.loadProductionPools()
+	var forestData = ForestEventsScript.new()
+	var trapperData: Dictionary = forestData.events["Hidden Trapper"]
+	var trapperChoice: Dictionary = trapperData.choices[2]
+	_check(resolver.canResolve(trapperChoice, catalog).success, "the pines encounter choice validates")
+	var pinesLaunches := []
+	var pinesContext := {
+		"zoneId": PINES_ZONE,
+		"zoneCatalog": catalog,
+		"origin": { "sceneKey": "overworld" },
+		"trailState": Locations.exportState(),
+		"progression": {},
+		"rng": _seededRng(8642),
+		"encounterPools": pinesPool,
+		"launchEncounter": func(request): pinesLaunches.append(request); return true,
+	}
+	var pinesResult: Dictionary = resolver.resolve("Hidden Trapper", trapperData, trapperChoice, pinesContext)
+	_check(pinesResult.success and pinesResult.launched, "the trapper encounter choice launches")
+	_check(pinesLaunches.size() == 1 and pinesLaunches[0].isValid(), "the launched pines request is valid")
+	_check(pinesLaunches[0].encounterPath in [PINES_PATROL, PINES_WAYLAY, PINES_STANDOFF], "the request resolves through the Whispering Pines Reach pool")
+	_check(pinesLaunches[0].zoneId == PINES_ZONE and pinesLaunches[0].source == "overworld_event", "the request keeps Zone and source")
+	_check(pinesLaunches[0].sourceId == "Hidden Trapper", "the request keeps the event identity")
+	forestData.free()
+
+
+## Commit 18 exit gate: a seeded encounter from the new Zone runs the real
+## launch/return route, and its fight loot rolls through the production
+## generator with the Zone propagated into equipment selection.
+func _testWhisperingPinesRoute() -> void:
+	print("\n--- Whispering Pines Reach launch, loot and return ---")
+	var catalog = ZoneCatalogScript.new()
+	sceneManager.change_scene("overworld")
+	_check(await _awaitSceneKey("overworld"), "the Overworld loads for the pines launch")
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var request = RequestScript.make({
+		"encounterPath": PINES_WAYLAY,
+		"zoneId": PINES_ZONE,
+		"source": "overworld_event",
+		"sourceId": "ignore_trapper",
+		"origin": { "sceneKey": "overworld" },
+		"progression": { "band": "early" },
+		"trailState": Locations.exportState(),
+		"seed": 1357,
+	}, catalog, Locations)
+	_check(request.isValid(), "the seeded pines request validates")
+	_check(sceneManager.launchShootout(request), "the router accepts the pines request")
+	_check(await _awaitSceneKey("shootout"), "the pines Shootout scene loads")
+	var shootout = sceneManager.get_current_scene()
+	_check(shootout.encounterName == "Whispering Pines Waylay", "the authored pines encounter initializes instead of the debug fallback")
+	_check(shootout.encounterZoneId == PINES_ZONE and shootout.encounterSeed == 1357, "the Shootout keeps the pines Zone and seed")
+	_check(shootout.combatRng.seed == 1357, "the request seed drives the combat RNG")
+
+	# Real fight loot through the production generator.
+	var itemCatalog = ItemCatalogScript.new()
+	var weaponData = WeaponDataScript.new()
+	var weaponIds := {}
+	for family in weaponData.weaponFamilies:
+		for baseValue in weaponData.weaponFamilies[family]:
+			if baseValue is Dictionary:
+				weaponIds[str(baseValue.get("id", ""))] = true
+	var loot: Dictionary = shootout.generateLootForFight({}, Shootout.TEAM_PLAYER)
+	_check(int(loot.get("money", -1)) >= 0, "the pines fight rolls valid money")
+	for item in loot.get("items", []):
+		var lootId := str(item.get("definitionId", ""))
+		var lootType := str(item.get("itemType", ""))
+		if lootType == "equipment":
+			# Equipment ids live in EquipmentData, not the ItemCatalog; the
+			# Zone-lock check below owns their validity.
+			_check(str(item.get("zone", "")) in [PINES_ZONE, "anywhere"], "pines fight equipment '%s' drops in-Zone or anywhere" % str(item.get("baseName", "")))
+		else:
+			_check(itemCatalog.hasDefinition(lootId) or weaponIds.has(lootId), "pines fight loot '%s' resolves in the item catalogs" % lootId)
+
+	# Seeded sweep: Zone propagation restricts equipment rolls to the authored
+	# Whispering Pines Reach items and the generic bases.
+	var generator = ItemGenerationScript.new()
+	var banditsHolder = load("res://Data/Shootout/LootTables/Bandits.gd").new()
+	var banditsTable: Dictionary = banditsHolder.data
+	banditsHolder.free()
+	var equipmentData = EquipmentDataScript.new()
+	var pinesEquipmentIds := {}
+	for entry in equipmentData.zones[PINES_ZONE]["items"]:
+		pinesEquipmentIds[str(entry["id"])] = true
+	for slot in equipmentData.slots:
+		pinesEquipmentIds[str(equipmentData.genericBases[slot]["id"])] = true
+	var sweepRng := _seededRng(24680)
+	var sawEquipment := false
+	for roll in 30:
+		var rolled: Dictionary = generator.generateLoot(banditsTable, {}, sweepRng, PINES_ZONE)
+		for item in rolled.get("items", []):
+			var rolledId := str(item.get("definitionId", ""))
+			var rolledType := str(item.get("itemType", ""))
+			if rolledType == "equipment":
+				sawEquipment = true
+				_check(pinesEquipmentIds.has(rolledId), "seeded pines equipment '%s' stays Zone-locked" % str(item.get("baseName", "")))
+			else:
+				_check(itemCatalog.hasDefinition(rolledId) or weaponIds.has(rolledId), "seeded pines loot '%s' resolves in the item catalogs" % rolledId)
+	_check(sawEquipment, "the seeded sweep rolls at least one equipment item")
+
+	shootout.battleOver = true
+	shootout.presentFightResults({
+		"winningSide": Shootout.TEAM_PLAYER,
+		"fled": false,
+		"outcome": "victory",
+		"party": {},
+		"rodeoLoot": {},
+		"loot": { "money": 0, "items": [] },
+	})
+	shootout._on_end_screen_continue_pressed()
+	_check(await _awaitSceneKey("overworld"), "the pines result returns to the launch origin")
+	_check(!sceneManager.hasPendingShootout(), "the pines return context is consumed once")
 
 
 func _testSceneRouter() -> void:

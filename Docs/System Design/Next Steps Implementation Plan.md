@@ -62,13 +62,20 @@ Design doc: [Actor Animations](Actor%20Animations.md).
 
 **Exit gate:** ✅ the new classes field real loadouts in real encounters with measured, reproducible metrics.
 
-## Commit 18 — Zone breadth
+## Commit 18 — Zone breadth ✅ **implemented**
 
 **Goal:** at least one more Zone beyond canyon has coherent encounters, loot and newspaper data.
 
-1. Author the Zone's encounter pools, loot tables, actors and newspaper reports; vendor catalogs keep failing closed for un-authored Zones.
-2. Zone-specific equipment (`dropsAnywhere` rules), affix content within the supported registry, and the measurement batch extended to the new Zone.
-3. Exit gate: a seeded encounter from the new Zone runs through the real launch/return route with valid loot and newspaper projections; the content lint covers every new reference.
+**Implemented for Whispering Pines Reach** (the commit-17 zone), with vendor catalogs deliberately staying authored for the canyon towns only — every un-authored Zone keeps failing closed:
+
+1. ✅ Newspaper copy: `Data/Vendors/NewspaperData.gd` authors the Zone's headline, editorial, general tips and per-encounter tips for all three published encounters (`PinesPatrol`, `PinesWaylay`, `PinesStandoff`); composition is never copied — the report builder projects it from the shared pool and actor data, and `NewspaperData.validate` rejects tips the pool does not publish. `Tests/TestNewspaper` proves the production report is available, projects exactly the three published parties and carries the authored tips.
+2. ✅ Zone-specific equipment and loot: the authored Whispering Pines Reach items (Woodsman Flannel Coat, Pine Pitch Stetson, Needle-Stitched Boots) roll through the existing `dropsAnywhere` rules — `generateLoot(zoneId: "whispering_pines_reach")` restricts equipment to the Zone's own items plus generic bases, verified by a seeded sweep in `Tests/TestEncounterFlow`; affix content stays inside the supported `CombatStatRegistry` (generation and lint unchanged).
+3. ✅ Measurement batch extended: `Tests/TestEncounterMetrics` gains a committed `pinesStandoff` Showdown baseline fixture (seeded replay + exact replay against `EncounterMetricsBaseline.json`, now three fixtures) and a three-seed `PinesPatrol` batch with the max-turn guard and real source-data rows in the new Zone.
+4. ✅ Exit gate: a seeded encounter from the new Zone runs the real launch/return route — `Tests/TestEncounterFlow` launches `Whispering Pines Waylay` through `SceneManager` with a validated seeded request, proves the Shootout keeps the Zone and combat-RNG seed, rolls the fight's loot through `generateLootForFight` with Zone propagation, and returns to the origin exactly once.
+
+**Tests:** `Tests/TestNewspaper` (second authored Zone projects real news), `Tests/TestEncounterFlow` (pines pool selection, ForestEvents dispatch, launch/loot/return route), `Tests/TestEncounterMetrics` (standoff fixture + new-Zone batch). All existing suites pass unchanged.
+
+**Exit gate:** ✅ a seeded encounter from the new Zone runs through the real launch/return route with valid loot and newspaper projections; the content lint covers every new reference.
 
 ## Explicitly still deferred
 

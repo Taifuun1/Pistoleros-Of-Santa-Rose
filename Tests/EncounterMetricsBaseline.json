@@ -35,6 +35,42 @@
     "turns": 6,
     "zoneId": "canyon"
   },
+  "pinesStandoff": {
+    "encounter": "Whiskey Bend Standoff",
+    "encounterPath": "res://Data/Shootout/Encounters/PinesStandoff.gd",
+    "guardTripped": false,
+    "hits": 15,
+    "kind": "showdown",
+    "knockdowns": 3,
+    "outcome": "victory",
+    "remainingHealth": {
+      "Manuel Cárdenas0": {
+        "hp": 7,
+        "maxHp": 13
+      },
+      "Morrison Branson0": {
+        "hp": 5,
+        "maxHp": 11
+      },
+      "Walker Langley0": {
+        "hp": 7,
+        "maxHp": 12
+      }
+    },
+    "rounds": 7,
+    "seed": 20261121,
+    "source": "measurement_driver",
+    "teams": [
+      "Walker Langley",
+      "Morrison Branson",
+      "Manuel Cárdenas",
+      "Whiskey Bulldozer",
+      "Line Rider",
+      "Dust Whisperer"
+    ],
+    "turns": 35,
+    "zoneId": "whispering_pines_reach"
+  },
   "pinesWaylay": {
     "encounter": "Whispering Pines Waylay",
     "encounterPath": "res://Data/Shootout/Encounters/PinesWaylay.gd",
