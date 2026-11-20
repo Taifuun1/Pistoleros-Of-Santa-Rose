@@ -110,7 +110,7 @@ A boss encounter is a Showdown with: unique enemy actor files (higher stats, uni
 3. ✅ Win conditions.
 4. Region pools + ambush wiring: the shared Zone pool data and loader are implemented (`EncounterPoolData.loadProductionPools()`, `selectEncounter()`), and Overworld events launch through it — the `canyon` pool (`CanyonRats`/`CanyonRatNest`) and, since commit 17, the `whispering_pines_reach` pool (`PinesPatrol`/`PinesWaylay`/`PinesStandoff`) via a ForestEvents outcome. Location-ambush wiring and further Zone pools remain pending with those systems.
 5. ✅ Combat-rule migrations (commit 4): max-HP fight starts with Trail-gated attrition, combined-stack bleed, Moves-only enemy AI with the rat's `Scratch`, per-actor `hp_below`, class-authored Jammed payloads, no on-hit effects on Miss, and Zone-aware loot.
-6. First boss encounter content (pending).
+6. First boss encounter content (pending — sequenced as post-18 backlog commit 21).
 
 ## Open Questions
 

@@ -225,8 +225,7 @@ These values are implemented and tunable, but changing them requires a code edit
 
 - `Data/Overworld/SpawnData.gd`, `OverworldSpawnDirector.gd`, and the `VisualSpawns` hierarchy are only specified in [Dynamic Overworld spawns](Overworld%20Spawns.md). Do not author the proposed party schema expecting it to run; the current system still uses legacy per-chunk `spawnPoints`.
 - [Flairs](Shootout/Flairs.md) specifies `Shootout.FLAIR_POOLS`, a `UI/Flair` scene and a SceneManager layer. None exists; current flavor text is an in-combat banner with separate pools.
-- Save management and Settings have no service/UI beyond disabled or unavailable placeholders. Versioned Vendors/Discovery snapshots are inputs to that future service, not proof of persistence.
-- Equipment-granted Moves, shared-inventory belt editing, quest reward execution, event outcome execution, and secret-cache rewards need their domain contracts before content can be considered functional.
+- Shared-inventory belt editing and event outcome kinds beyond `none`/`encounter` still need their domain contracts before content can be considered functional. Equipment-granted Moves (commit 11), save-slot management and Settings (commits 14–15), and secret-cache reward claims (commit 16) are now implemented and no longer block content.
 
 ## 8. Content review checklist
 

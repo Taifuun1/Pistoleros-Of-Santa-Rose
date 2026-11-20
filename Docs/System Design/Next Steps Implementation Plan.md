@@ -1,6 +1,6 @@
 # Next Steps Implementation Plan
 
-**Status: planned.** The [First steps implementation plan](First%20Steps%20Implementation%20Plan.md) is fully delivered (commits 1–13, suite 66/66). This plan sequences the remaining product features and the phase-4 content expansion, ordered by dependency: save slots before settings (settings should not live in a slot), then secret rewards (builds on the save contract), then content breadth. Combat balance tweaks and manual acceptance are deliberately deferred by owner decision.
+**Status: commits 14–18 implemented (suite 70/70).** The [First steps implementation plan](First%20Steps%20Implementation%20Plan.md) is fully delivered (commits 1–13, suite 66/66). This plan delivered save slots before settings (settings do not live in a slot), secret rewards on the save contract, and the phase-4 content expansion. The post-18 backlog is sequenced below. Combat balance tweaks and manual acceptance remain deliberately deferred by owner decision.
 
 **Global rules (unchanged):** disk ownership stays in `Globals/SaveGame.gd`; no transient combat state in saves; no new Zone/Party/boss invented to pad a slice; every commit ships its tests and updates Testing.md, the gap register and the affected design docs; commits stay logically grouped (code → wiring/UI → proof → docs).
 
@@ -77,6 +77,50 @@ Design doc: [Actor Animations](Actor%20Animations.md).
 
 **Exit gate:** ✅ a seeded encounter from the new Zone runs through the real launch/return route with valid loot and newspaper projections; the content lint covers every new reference.
 
-## Explicitly still deferred
+## Post-18 backlog (next steps)
 
-Dynamic spawns (VisualParty director), Flair, Poker integration, the excluded-affix backlog (mxEn/lasso/gems/affliction-duration stats need systems first), vendor schedules/haggling/buyback, general fog of war/fast travel, and all manual visual/controller acceptance passes. These stay in the gap register's deferred rows and are not blockers for commits 14–18.
+Ordered by dependency, same global rules: every commit ships its tests and updates Testing.md, the gap register and the affected design docs; no new Zone/Party/boss is invented to pad a slice (content reuses the canonical eight Zones and the already-authored actor files); disk ownership stays in `Globals/SaveGame.gd` and no transient combat state enters saves.
+
+### Commit 19 — Animation service completion and legacy-scene cleanup
+
+**Goal:** finish the commit-17a migration so the registry is the one animation source, then delete migrated legacy scenes.
+
+1. Extend the registry schema for the deferred runtimes: Overworld animal scenes carry `CanvasTexture` normal maps and their `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); player actors carry directional Move states plus the shadow contract (`Tests/TestActorShadow`). Migrate both, then remove the legacy `*Animations.tscn` files that nothing references anymore.
+2. Tests: `Tests/TestActorAnimations` (normal-map/directional entries, runtime parity), `Tests/TestActorShadow` (shadow geometry unchanged), `Tests/TestContentLint` (new entry kinds validated with teeth).
+3. **Exit gate:** every Shootout/Overworld actor resolves through the registry with identical visuals and shadow behavior; no migrated legacy scene remains referenced.
+
+### Commit 20 — Third Zone breadth
+
+**Goal:** repeat the proven Whispering Pines Reach pattern for one more canonical Zone (proposed: Grassy Plains).
+
+1. Author actors (registry-only animation entries), encounters, a pool, a loot table and newspaper copy; reuse existing sheets where the art exists, no new Zone ids.
+2. Tests: `Tests/TestNewspaper`, `Tests/TestEncounterFlow` (seeded launch/return with Zone-propagated loot), `Tests/TestEncounterMetrics` (new fixture), content lint.
+3. **Exit gate:** a seeded encounter from the third Zone runs the real launch/return route with valid loot and newspaper projections.
+
+### Commit 21 — First boss encounter content
+
+**Goal:** use the implemented boss machinery for real (the only boss-free system left).
+
+1. Author one Showdown boss: a unique enemy actor (higher stats, unique Rodeo), a non-rout win condition (`defeat_actor`/`hp_below`/`survive_rounds`), its own loot table, and a `Data/Shootout/AI/*.gd` priority script where the role warrants it.
+2. Tests: `Tests/TestEnemyAI` (script priority/fallthrough against the production script), `Tests/TestEncounters` (the boss win condition), `Tests/TestEncounterMetrics` (boss baseline fixture), content lint.
+3. **Exit gate:** the boss fight runs deterministically through the real launch/return route, its priority rule beats scoring, and its fixture replays exactly.
+
+### Commit 22 — Positioning-disruption move op and the last class prose
+
+**Goal:** close the two remaining `futureAbilities` lines (Line Rider, Bottle Courage Bulldozer).
+
+1. Add a positioning-disruption effect op for Moves (position movement is currently Rodeo-only) with targeting/AI scoring, then author the two class lines as canonical `moves` grants.
+2. Tests: `Tests/TestActs`/`Tests/TestEffects` (disruption application, bounds, taunt interaction), `Tests/TestEnemyAI` (disruption scoring), content lint.
+3. **Exit gate:** every class line in `Docs/Combat.md` is executable; no `futureAbilities` prose remains for these classes.
+
+### Commit 23 — Prologue continuation and party recruitment
+
+**Goal:** the prologue chain becomes a real playable continuation.
+
+1. Author valid `map_target_id`s for the five Pistoleros Regroup objectives (quest map markers currently never appear), recruit the four already-authored main-party members into `Globals/Party.gd` (actor data files alone do not make a party), and decide/implement the Littlehill Grove onward exit and final quest completion/payout.
+2. Tests: `Tests/TestQuestTriggers` (markers and recruitment through the real chain), `Tests/TestOverworldMapTab` (marker identity), Party snapshot round trips (`Tests/TestSaveGame`/`Tests/TestSaveRestart`).
+3. **Exit gate:** the recruited party persists across a restart, quest markers resolve to real manifest targets, and the continuation is reachable in the production scene chain.
+
+### Deferred unchanged
+
+Dynamic spawns (VisualParty director), Flair, Poker integration, the excluded-affix backlog (mxEn/lasso/gems/affliction-duration stats need systems first), vendor schedules/haggling/buyback, general fog of war/fast travel, and all manual visual/controller acceptance passes. Combat balance stays deferred by owner decision; the recorded `pinesWaylay` deviation (the bandit party loses the measured run without dealing a hit at placeholder stats) is the measured input for any future balance pass. These stay in the gap register's deferred rows and are not blockers for commits 19–23.

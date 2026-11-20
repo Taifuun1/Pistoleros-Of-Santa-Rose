@@ -34,7 +34,7 @@ Design for one generic way to build and drive actor animations. **Status: implem
 ## Scope of commit 17a (decided)
 
 - **Routed:** the Shootout actor spawn (`Actors/Shootout/ShootoutActor.gd`) — Walker Langley and Squeky rat resolve through the registry, with the legacy scene merged in for any state the registry does not cover.
-- **Deferred with reasons:** `Animations/Overworld/*` animal scenes carry `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); the player actors (`PlayerOverworldActor`/`PlayerLocationActor`) embed directional Move states plus the shadow-coverage contract and were mid-art-rework when this landed. Both migrate in a follow-up once the registry supports per-state scene/normal data and the art rework settles.
+- **Deferred with reasons:** `Animations/Overworld/*` animal scenes carry `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); the player actors (`PlayerOverworldActor`/`PlayerLocationActor`) embed directional Move states plus the shadow-coverage contract and were mid-art-rework when this landed. Both migrate in the post-18 backlog commit 19, which also deletes the migrated legacy scenes.
 
 ## Tests
 

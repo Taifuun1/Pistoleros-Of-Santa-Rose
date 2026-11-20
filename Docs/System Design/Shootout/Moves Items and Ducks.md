@@ -122,7 +122,7 @@ Rationale for not adding `ACT_TYPE_DUCKS`: the UI already has a Moves menu; Duck
 3. ✅ `category` field + effect dispatch in the resolver.
 4. ✅ First Ducks (taunt, heal-over-time) on top of [Effects](Effects.md).
 5. ✅ Silence + position filtering.
-6. Class ability lists + equipment abilities when class/equipment data lands (pending; see [Cylinders](Cylinders.md) for class data).
+6. Class ability lists + equipment abilities: class grants are authored (commit 11), and commit 17 made every Bobtail Guard, Dust Whisperer, Line Rider and Bottle Courage Bulldozer prose line executable; only the two positioning-disruption designs remain, sequenced as post-18 backlog commit 22.
 
 ## Open Questions
 

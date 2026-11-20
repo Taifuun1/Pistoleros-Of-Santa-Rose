@@ -102,7 +102,7 @@ This deletes the special-cased enemy attack and routes everything through the an
 2. ✅ Scoring + archetypes + randomness.
 3. ✅ Move/item/Duck usage (with [Effects](Effects.md) and [Moves Items and Ducks](Moves%20Items%20and%20Ducks.md)).
 4. ✅ Repositioning (with [Positions and Targeting](Positions%20and%20Targeting.md)).
-5. Boss scripts: machinery ✅; first boss script content pending with [Encounters](Encounters.md).
+5. Boss scripts: machinery ✅; first boss script content sequenced as post-18 backlog commit 21 with [Encounters](Encounters.md).
 
 ## Open Questions
 
