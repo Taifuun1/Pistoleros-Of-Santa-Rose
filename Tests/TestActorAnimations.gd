@@ -31,13 +31,15 @@ func _run() -> void:
 	_check(walker != null, "Walker Langley resolves through the registry")
 	if walker != null:
 		var frames: SpriteFrames = walker.get_node("AnimationSprite").sprite_frames
-		for state in ["Idle", "Idle Revolver", "Idle Rifle", "Run", "Shoot Revolver", "Shoot Rifle", "Snap"]:
+		# Commit 19: the full hand-authored state set is converted to data, so
+		# the legacy Walker scene could be deleted.
+		for state in ["Idle", "Idle Look", "Idle Revolver", "Idle Rifle", "Run", "Walk", "Ponder", "Push Hat", "Tip", "Throw", "Shoot Revolver", "Shoot Rifle", "Snap", "Draw Revolver Cool", "Draw Revolver Super Cool"]:
 			_check(frames.has_animation(state), "the registry builds '%s'" % state)
 		_check(frames.get_frame_count("Idle") == 8 and !frames.get_animation_loop("Idle"), "Idle keeps its frame count and non-looping flag")
+		_check(frames.get_frame_count("Ponder") == 18 and frames.get_frame_count("Draw Revolver Super Cool") == 30, "the converted extra states keep their frame counts")
+		_check(frames.get_frame_count("Shoot Rifle") == 9, "Shoot Rifle follows the shrunken 360px sheet (9 frames)")
 		var idleFrame: Texture2D = frames.get_frame_texture("Idle", 0)
 		_check(idleFrame is AtlasTexture and is_equal_approx((idleFrame as AtlasTexture).region.size.x, 40.0), "registry frames slice 40px cells from the sheet")
-		# States the registry does not cover merge in from the legacy scene.
-		_check(frames.has_animation("Ponder") or frames.has_animation("Draw Revolver Cool"), "the legacy merge supplies registry-uncovered states")
 		var player: AnimationPlayer = walker.get_node("AnimationPlayer")
 		_check(player.has_animation("Idle"), "the generated playback library drives the states")
 		var idleAnimation: Animation = player.get_animation("Idle")
@@ -113,10 +115,48 @@ func _run() -> void:
 	print("\n--- Legacy fallback keeps unregistered actors working ---")
 	var legacy = service.forActor("Named People", "Some Gunslinger")
 	_check(legacy == null, "an actor with neither registry nor legacy scene resolves to null")
-	# A registered actor type with a legacy scene but no registry entry keeps
-	# working through the fallback (Overworld animal scenes keep their runtime).
-	var overworldLegacy = service.forActor("Animals", "FluffyRabbit", { "overworld": true })
-	_check(overworldLegacy != null, "a legacy-only Overworld actor still resolves through the fallback")
+	# The migrated Overworld rabbit now resolves through the overworld
+	# registry runtime instead of its deleted scene (commit 19).
+	var overworldRabbit = service.forActor("Animals", "FluffyRabbit", { "overworld": true })
+	_check(overworldRabbit != null, "the Overworld rabbit resolves through the overworld registry runtime")
+	if overworldRabbit != null:
+		var idleSprite = overworldRabbit.get_node_or_null("Idle")
+		_check(idleSprite != null and idleSprite is Sprite2D, "the overworld runtime builds a per-state Sprite2D")
+		if idleSprite != null:
+			var canvas = idleSprite.texture
+			_check(canvas is CanvasTexture and canvas.normal_texture != null, "the overworld state keeps its CanvasTexture normal map")
+			_check(idleSprite.hframes == 4, "the overworld state keeps its hframes")
+		var rabbitPlayer: AnimationPlayer = overworldRabbit.get_node("AnimationPlayer")
+		_check(rabbitPlayer.has_animation("Idle") and rabbitPlayer.get_animation("Idle").loop_mode == Animation.LOOP_LINEAR, "overworld states loop like the legacy scenes")
+		_check(rabbitPlayer.autoplay == "Idle", "the overworld runtime autoplays its idle")
+		var unregisteredOverworld = service.forActor("Animals", "Some Rabbit", { "overworld": true })
+		_check(unregisteredOverworld == null, "an unregistered Overworld actor with no legacy scene resolves to null")
+		overworldRabbit.free()
+
+	print("\n--- Commit 19: the player actors are registry data ---")
+	var locationPlayer = service.forActor("Player", "Player Location")
+	_check(locationPlayer != null, "the location player resolves through the registry")
+	if locationPlayer != null:
+		var locationFrames: SpriteFrames = locationPlayer.get_node("AnimationSprite").sprite_frames
+		for state in ["Idle", "Idle2", "Run", "Run2"]:
+			_check(locationFrames.has_animation(state), "the location player builds '%s'" % state)
+		_check(locationFrames.get_frame_count("Idle") == 8 and locationFrames.get_frame_count("Run") == 8, "the location states keep their frame counts")
+		if locationPlayer.get_node("AnimationPlayer").has_animation("Idle"):
+			_check(is_equal_approx(locationPlayer.get_node("AnimationPlayer").get_animation("Idle").length, 0.8), "Idle keeps its authored 0.8s length")
+		_check(locationPlayer.get_node("AnimationSprite").offset == Vector2(0, -15), "the location player keeps its sprite offset")
+		locationPlayer.free()
+	var wagon = service.forActor("Player", "Player Overworld")
+	_check(wagon != null, "the overworld wagon resolves through the registry")
+	if wagon != null:
+		var wagonFrames: SpriteFrames = wagon.get_node("AnimationSprite").sprite_frames
+		for state in ["Move Down", "Move Down Side", "Move Side", "Move Up", "Move Up Side"]:
+			_check(wagonFrames.has_animation(state), "the wagon builds '%s'" % state)
+		_check(wagonFrames.get_frame_count("Move Down") == 2 and wagonFrames.get_frame_count("Move Side") == 4, "the wagon states keep their frame counts")
+		var sideFrame: Texture2D = wagonFrames.get_frame_texture("Move Side", 0)
+		_check(sideFrame is AtlasTexture and is_equal_approx((sideFrame as AtlasTexture).region.size.x, 24.0), "the wagon slices 24px cells")
+		_check(is_equal_approx(wagon.get_node("AnimationPlayer").get_animation("Move Side").length, 2.0), "the wagon keeps its slow authored steps")
+		_check(wagon.get_node("AnimationSprite").offset == Vector2(0, -24), "the wagon keeps its sprite offset")
+		wagon.free()
 
 	print("")
 	if failures == 0:

@@ -1,16 +1,18 @@
 extends OverworldActorBase
 
+const AnimationServiceScript = preload("res://Globals/ActorAnimationService.gd")
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 
 func initOverworldActor(actorName, actorType, actorPosition) -> bool:
-	var animationsPath = "res://Animations/Overworld/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorName.capitalize().replace(" ", "") })
-	# New actor types without an animations scene aborted the spawn with
-	# load() returning null; skip the actor with a warning instead.
-	if !ResourceLoader.exists(animationsPath):
-		push_warning("OverworldActor: no animations scene at '{animationsPath}' for '{actorName}'".format({ "animationsPath": animationsPath, "actorName": actorName }))
+	# Commit 19: overworld wanderers resolve through the shared registry
+	# (normal maps included); the per-actor scenes are deleted. Unregistered
+	# actors still fall back to a legacy scene inside the service, and
+	# unresolvable actors skip the spawn with a warning instead of crashing.
+	var animations = AnimationServiceScript.new().forActor(actorType, actorName, { "overworld": true })
+	if animations == null:
+		push_warning("OverworldActor: no animations for '{actorName}' ({actorType})".format({ "actorName": actorName, "actorType": actorType }))
 		return false
-	var animations = load(animationsPath).instantiate()
 	name = actorName + str(Overworld.overworldActorIdCount)
 	animations.name = actorName
 	animations.playAnimation("Idle")

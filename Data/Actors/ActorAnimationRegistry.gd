@@ -20,12 +20,20 @@ var actors = {
 		"spriteOffset": Vector2(0, -15),
 		"states": {
 			"Idle": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdle.png", "frames": 8, "loop": false },
+			"Idle Look": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdle.png", "frames": 8 },
 			"Idle Revolver": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdleRevolver.png", "frames": 8 },
 			"Idle Rifle": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyIdleRifle.png", "frames": 8 },
 			"Run": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyRun.png", "frames": 8 },
+			"Walk": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyWalk.png", "frames": 8 },
+			"Ponder": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyPonder.png", "frames": 18 },
+			"Push Hat": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyPushHat.png", "frames": 16 },
+			"Tip": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyTip.png", "frames": 14 },
+			"Throw": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyThrow.png", "frames": 7 },
 			"Shoot Revolver": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDrawRevolver.png", "frames": 11 },
-			"Shoot Rifle": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDrawRifle.png", "frames": 10 },
+			"Shoot Rifle": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDrawRifle.png", "frames": 9 },
 			"Snap": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleySnap.png", "frames": 13 },
+			"Draw Revolver Cool": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDrawRevolverCool.png", "frames": 19 },
+			"Draw Revolver Super Cool": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyDrawRevolverSuperCool.png", "frames": 30 },
 		},
 	},
 	"SquekyRat": {
@@ -147,6 +155,50 @@ var actors = {
 		"states": {
 			"Idle Revolver": { "sheet": "res://Assets/Characters/Bandits/Whispering Pines Reach/PistoleroAnimationWhisperingPinesReachIdleRevolver.png", "frames": 8 },
 			"Shoot Revolver": { "sheet": "res://Assets/Characters/Bandits/Whispering Pines Reach/PistoleroAnimationWhisperingPinesReachDrawRevolver.png", "frames": 11 },
+		},
+	},
+	# Location player (commit 19): the embedded Idle/Idle2/Run/Run2 set of
+	# PlayerLocationActor.tscn converted to data. Only Idle/Run are played
+	# today; Idle2/Run2 stay available for the art swap.
+	"PlayerLocation": {
+		"defaultIdle": "Idle",
+		"spriteOffset": Vector2(0, -15),
+		"states": {
+			"Idle": { "sheet": "res://Assets/Characters/Templates/Legacy/Test2Animation_40x40.png", "frames": 8, "step": 0.1, "loop": true },
+			"Idle2": { "sheet": "res://Assets/Characters/Templates/Legacy/Test2Animation_40x40_run_smears_4_outline.png", "frames": 8, "step": 0.1, "loop": true },
+			"Run": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangleyRun.png", "frames": 8, "step": 0.15, "loop": true },
+			"Run2": { "sheet": "res://Assets/Characters/Named People/Walker Langley/WalkerLangeyRun2.png", "frames": 8, "step": 0.15, "loop": true },
+		},
+	},
+	# Overworld wagon player (commit 19): the directional Move set of
+	# PlayerOverworldActor.tscn. The wagon's slow steps (0.5s/1.0s per frame)
+	# are authored data; the per-view shadow coverage stays in the actor
+	# script (shadow geometry itself unchanged).
+	"PlayerOverworld": {
+		"defaultIdle": "Move Down Side",
+		"spriteOffset": Vector2(0, -24),
+		"states": {
+			"Move Down": { "sheet": "res://Assets/Map Entities/Wagon/WagonDown.png", "frameSize": Vector2i(24, 24), "frames": 2, "step": 1.0, "loop": true },
+			"Move Down Side": { "sheet": "res://Assets/Map Entities/Wagon/WagonDownSide.png", "frameSize": Vector2i(24, 24), "frames": 4, "step": 0.5, "loop": true },
+			"Move Side": { "sheet": "res://Assets/Map Entities/Wagon/WagonSide.png", "frameSize": Vector2i(24, 24), "frames": 4, "step": 0.5, "loop": true },
+			"Move Up": { "sheet": "res://Assets/Map Entities/Wagon/WagonUp.png", "frameSize": Vector2i(24, 24), "frames": 2, "step": 1.0, "loop": true },
+			"Move Up Side": { "sheet": "res://Assets/Map Entities/Wagon/WagonUpSide.png", "frameSize": Vector2i(24, 24), "frames": 4, "step": 0.5, "loop": true },
+		},
+	},
+	# Overworld wanderer (commit 19): the first "runtime": "overworld" entry.
+	# The service builds the OverworldAnimations runtime with per-state
+	# Sprite2D nodes, so CanvasTexture normal maps survive the migration.
+	"FluffyRabbit": {
+		"runtime": "overworld",
+		"defaultIdle": "Idle",
+		"states": {
+			"Idle": {
+				"sheet": "res://Assets/Map Entities/Fluffy Rabbit/FluffyRabbit.png",
+				"normalMap": "res://Assets/Map Entities/Fluffy Rabbit/FluffyRabbit_n.png",
+				"frames": 4,
+				"step": 0.2,
+				"loop": true,
+			},
 		},
 	},
 }

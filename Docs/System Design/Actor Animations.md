@@ -1,6 +1,6 @@
 # Actor Animations
 
-Design for one generic way to build and drive actor animations. **Status: implemented (commit 17a); the Shootout spawn routes through the service, Overworld animal scenes and the player actors stay on their runtimes for a follow-up (see §Scope of commit 17a).** Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push. Commit 17 authored every new combat actor as registry data only — the four main-party members and the five Whispering Pines Reach bandits needed no per-actor `.tscn` (see `Data/Actors/ActorAnimationRegistry.gd`, "Main party" and "Whispering Pines Reach bandits" sections).
+Design for one generic way to build and drive actor animations. **Status: fully implemented.** The Shootout spawn has routed through the service since commit 17a; commit 17 authored every new combat actor as registry data only (the four main-party members and the five Whispering Pines Reach bandits needed no per-actor `.tscn`); commit 19 completed the migration — the Overworld wanderers (CanvasTexture normal maps via a per-state `normalMap` and the `"runtime": "overworld"` schema), the two player actors (directional Move/Idle-Run sets) and the cutscene performers all resolve through the registry, and the migrated legacy scenes (`WalkerLangleyAnimations.tscn`, `SquekyRatAnimations.tscn`, `FluffyRabbitAnimations.tscn`) are deleted. Requirements came from reviewing the hand-authored Walker Langley scenes and the built-in Location/Overworld actor animations before the commit-17 content push.
 
 ## Problem
 
@@ -11,10 +11,8 @@ Design for one generic way to build and drive actor animations. **Status: implem
 
 ## Current state inventory
 
-- `Animations/BaseAnimation.gd` + `.tscn`: the shared runtime — `initAnimations(idleAnimation, frameHit)`, `playAnimation(name, isOneshot, lookForFrameHit, next)`, `flipAnimation`, `onAnimationFrameHit`. All three consumers instantiate this shape and drive it with names.
-- `Actors/Shootout/ShootoutActor.gd`: loads `res://Animations/{type}/{actorName}Animations.tscn` and picks the idle by weapon in code.
-- `Actors/Overworld/OverworldActor.gd`: loads `res://Animations/Overworld/{type}/{actorName}Animations.tscn`; a missing scene aborts the spawn with a warning.
-- `Actors/Location/PlayerLocationActor.gd`: built-in Idle/Run playback on an `AnimatedSprite2D`.
+- `Animations/BaseAnimation.gd` + `.tscn`: the shared runtime — `initAnimations(idleAnimation, frameHit)`, `playAnimation(name, isOneshot, lookForFrameHit, next)`, `flipAnimation`, `onAnimationFrameHit`. All consumers instantiate this shape and drive it with names. `Animations/Overworld/OverworldAnimations.gd` is the lighter overworld runtime: `playAnimation(animation)` with replay-on-finish.
+- `Actors/Shootout/ShootoutActor.gd`, `Actors/Cutscene/CutsceneActor.gd`, `Actors/Overworld/OverworldActor.gd` and both player actors resolve their animation node through `Globals/ActorAnimationService.gd` (commit 19); no call site loads a per-actor scene anymore.
 - `Globals/FrameData.gd`: per-weapon combat hit frames (unchanged combat read).
 
 ## Decisions
@@ -31,10 +29,10 @@ Design for one generic way to build and drive actor animations. **Status: implem
 - *More efficient than separate animation files?* Yes: the registry is one data file; adding an actor is a small dictionary entry per state instead of a hand-edited scene. Building `SpriteFrames` once per actor id and caching them removes the per-instance scene parse cost and keeps one texture per sheet in memory.
 - *Generic way to set animations for every actor?* Call sites ask the service for a `BaseAnimation` runtime by actor id; weapon idles come from data (`idleByWeapon`), and unknown actors/states degrade to Idle with a warning rather than aborting the spawn.
 
-## Scope of commit 17a (decided)
+## Scope of commit 17a (decided; completed by commit 19)
 
 - **Routed:** the Shootout actor spawn (`Actors/Shootout/ShootoutActor.gd`) — Walker Langley and Squeky rat resolve through the registry, with the legacy scene merged in for any state the registry does not cover.
-- **Deferred with reasons:** `Animations/Overworld/*` animal scenes carry `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); the player actors (`PlayerOverworldActor`/`PlayerLocationActor`) embed directional Move states plus the shadow-coverage contract and were mid-art-rework when this landed. Both migrate in the post-18 backlog commit 19, which also deletes the migrated legacy scenes.
+- **Deferred with reasons (commit 17a), completed in commit 19:** `Animations/Overworld/*` animal scenes carried `CanvasTexture` normal maps and their own `OverworldAnimations.gd` runtime — the registry gained a per-state `normalMap` and a `"runtime": "overworld"` entry kind whose service build produces the same Sprite2D + looping-track structure. The player actors (`PlayerOverworldActor`/`PlayerLocationActor`) embedded directional Move/Idle-Run states plus the shadow contract — both sets moved into the registry (`PlayerOverworld`, `PlayerLocation`) with the scenes rebuilt without their embedded sprite/animation nodes; the shadow contract is unchanged (`ShadowScript.attachTo` still finds the sprite, and the wagon's per-view coverage logic stays in the actor script). The legacy actor scenes (`WalkerLangleyAnimations.tscn`, `SquekyRatAnimations.tscn`, `FluffyRabbitAnimations.tscn`) are deleted; the service's legacy-scene merge remains as a fallback for future unregistered actors.
 
 ## Tests
 

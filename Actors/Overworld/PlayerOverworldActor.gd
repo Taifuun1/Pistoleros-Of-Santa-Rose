@@ -1,8 +1,12 @@
 extends OverworldActorBase
 
+const AnimationServiceScript = preload("res://Globals/ActorAnimationService.gd")
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 var _previous_position: Vector2 = Vector2.ZERO
+# Commit 19: the wagon's directional animation set resolves through the
+# shared registry; the per-view shadow coverage below is unchanged.
+var animations: Node = null
 
 ## Each wagon view has its own ground footprint: diagonal moves use DIAGONAL
 ## coverage, straight vertical moves use VERTICAL, and horizontal moves keep
@@ -15,6 +19,11 @@ const BODY_SHADOW_ANIMATIONS_VERTICAL = ["Move Up", "Move Down"]
 func _ready():
 	speed = 350
 	_previous_position = position
+	animations = AnimationServiceScript.new().forActor("Player", "Player Overworld")
+	if animations != null:
+		animations.name = "Animations"
+		add_child(animations)
+		_playAnimation("Move Down Side")
 	# Drop shadow under the player (see Nodes/Actor Shadow/ActorShadow.gd).
 	ShadowScript.attachTo(self)
 
@@ -24,9 +33,9 @@ func get_input():
 	velocity = Vector2(input_direction.x * speed, input_direction.y * speed / 1.4)
 	
 	if velocity == Vector2(0, 0):
-		pass
-		#$AnimationPlayer.play("Idle Outline")
-		$AnimationPlayer.pause()
+		# Stopping keeps the last animation's frame (the legacy pause).
+		if animations != null:
+			animations.get_node("AnimationPlayer").pause()
 	elif (
 		(
 			velocity.x < 0 and
@@ -37,12 +46,8 @@ func get_input():
 			velocity.y < 0
 		)
 	):
-		$AnimationPlayer.play("Move Up Side")
-		$AnimatedSprite2D.animation = "Move Up Side"
-		if velocity.x < 0:
-			$AnimatedSprite2D.set_flip_h(true)
-		else:
-			$AnimatedSprite2D.set_flip_h(false)
+		_playAnimation("Move Up Side")
+		_setFlip(velocity.x < 0)
 	elif (
 		(
 			velocity.x < 0 and
@@ -53,26 +58,33 @@ func get_input():
 			velocity.y > 0
 		)
 	):
-		$AnimationPlayer.play("Move Down Side")
-		$AnimatedSprite2D.animation = "Move Down Side"
-		if velocity.x < 0:
-			$AnimatedSprite2D.set_flip_h(true)
-		else:
-			$AnimatedSprite2D.set_flip_h(false)
+		_playAnimation("Move Down Side")
+		_setFlip(velocity.x < 0)
 	elif velocity.y < 0:
-		$AnimationPlayer.play("Move Up")
-		$AnimatedSprite2D.animation = "Move Up"
+		_playAnimation("Move Up")
 	elif velocity.y > 0:
-		$AnimationPlayer.play("Move Down")
-		$AnimatedSprite2D.animation = "Move Down"
+		_playAnimation("Move Down")
 	elif velocity.x < 0 or velocity.x > 0:
-		$AnimationPlayer.play("Move Side")
-		$AnimatedSprite2D.animation = "Move Side"
-		if velocity.x < 0:
-			$AnimatedSprite2D.set_flip_h(true)
-		else:
-			$AnimatedSprite2D.set_flip_h(false)
-	_updateShadowCoverage($AnimatedSprite2D.animation)
+		_playAnimation("Move Side")
+		_setFlip(velocity.x < 0)
+
+## Plays a registry state without restarting it every physics frame (the
+## legacy AnimationPlayer.play() kept playing; a forced restart would pin
+## the wagon on its first frame).
+func _playAnimation(animationName: String) -> void:
+	if animations == null:
+		return
+	var player: AnimationPlayer = animations.get_node("AnimationPlayer")
+	if player.current_animation == animationName and player.is_playing():
+		_updateShadowCoverage(animationName)
+		return
+	animations.playAnimation(animationName)
+	_updateShadowCoverage(animationName)
+
+func _setFlip(flip: bool) -> void:
+	if animations == null:
+		return
+	animations.get_node("AnimationSprite").set_flip_h(flip)
 
 ## Select the shadow geometry that matches the wagon's current view.
 func _updateShadowCoverage(animationName: String) -> void:

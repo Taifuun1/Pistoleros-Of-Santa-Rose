@@ -9,6 +9,7 @@ class_name ActorAnimationService
 
 const RegistryScript = preload("res://Data/Actors/ActorAnimationRegistry.gd")
 const AnimationsScript = preload("res://Animations/Animations.gd")
+const OverworldAnimationsScript = preload("res://Animations/Overworld/OverworldAnimations.gd")
 
 const DEFAULT_IDLE := "Idle"
 
@@ -24,6 +25,11 @@ var _warnedActors := {}
 ## `res://Animations/Overworld/{type}/{name}` instead of the Shootout layout.
 func forActor(actorType: String, actorName: String, options := {}) -> Node:
 	var actorId := _actorId(actorName)
+	# "runtime": "overworld" entries build the OverworldAnimations runtime:
+	# one Sprite2D per state carrying the CanvasTexture (diffuse + normal
+	# map), looping frame tracks and the autoplay idle (commit 19).
+	if registry.hasActor(actorId) and str(registry.getActor(actorId).get("runtime", "")) == "overworld":
+		return _buildOverworldRuntime(actorId)
 	var frames := _spriteFramesFor(actorId)
 	if frames == null:
 		# No registry entry: the legacy scene keeps the actor working unchanged.
@@ -63,6 +69,62 @@ func idleForWeapon(actorId: String, weaponId: String, fallback := DEFAULT_IDLE) 
 	if registry.hasActor(actorId):
 		return registry.idleForWeapon(actorId, weaponId, fallback)
 	return fallback
+
+
+## Builds the OverworldAnimations runtime for a "runtime": "overworld" entry:
+## one Sprite2D per state (named after the state) carrying a CanvasTexture
+## with the authored normal map, looping frame tracks on "{state}:frame" and
+## the autoplay idle — the same shape the hand-authored Overworld scenes
+## produce. The runtime only drives the AnimationPlayer, so only the default
+## idle state's sprite is visible (multi-state overworld actors need a
+## visibility switch in the runtime first).
+func _buildOverworldRuntime(actorId: String) -> Node:
+	var entry := registry.getActor(actorId)
+	var states: Dictionary = entry.get("states", {})
+	var defaultIdle := registry.defaultIdleFor(actorId)
+	var node := Node2D.new()
+	node.name = "Animation"
+	node.set_script(OverworldAnimationsScript)
+	var player := AnimationPlayer.new()
+	player.name = "AnimationPlayer"
+	node.add_child(player)
+	var library := AnimationLibrary.new()
+	var reset := Animation.new()
+	reset.length = 0.001
+	library.add_animation("RESET", reset)
+	for stateName in states:
+		var state: Dictionary = states[stateName]
+		var sheetPath := str(state.get("sheet", ""))
+		if sheetPath == "" or !FileAccess.file_exists(sheetPath):
+			push_warning("ActorAnimationService: sheet missing for '%s/%s' (%s); state skipped." % [actorId, stateName, sheetPath])
+			continue
+		var sprite := Sprite2D.new()
+		sprite.name = str(stateName)
+		var canvas := CanvasTexture.new()
+		canvas.diffuse_texture = load(sheetPath)
+		var normalPath := str(state.get("normalMap", ""))
+		if normalPath != "" and FileAccess.file_exists(normalPath):
+			canvas.normal_texture = load(normalPath)
+		sprite.texture = canvas
+		sprite.hframes = maxi(1, int(state.get("frames", 1)))
+		sprite.visible = stateName == defaultIdle
+		node.add_child(sprite)
+		var frameCount := sprite.hframes
+		var step := float(state.get("step", registry.DEFAULT_STEP))
+		var animation := Animation.new()
+		animation.length = frameCount * step
+		var track := animation.add_track(Animation.TYPE_VALUE)
+		animation.track_set_path(track, "%s:frame" % stateName)
+		animation.track_set_interpolation_type(track, Animation.INTERPOLATION_LINEAR)
+		animation.value_track_set_update_mode(track, Animation.UPDATE_DISCRETE)
+		for frameIndex in frameCount:
+			animation.track_insert_key(track, frameIndex * step, frameIndex)
+		animation.loop_mode = Animation.LOOP_LINEAR
+		library.add_animation(str(stateName), animation)
+	if !player.has_animation_library(""):
+		player.add_animation_library("", library)
+	player.autoplay = defaultIdle
+	return node
 
 
 func _spriteFramesFor(actorId: String) -> SpriteFrames:

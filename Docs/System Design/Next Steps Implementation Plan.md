@@ -81,13 +81,17 @@ Design doc: [Actor Animations](Actor%20Animations.md).
 
 Ordered by dependency, same global rules: every commit ships its tests and updates Testing.md, the gap register and the affected design docs; no new Zone/Party/boss is invented to pad a slice (content reuses the canonical eight Zones and the already-authored actor files); disk ownership stays in `Globals/SaveGame.gd` and no transient combat state enters saves.
 
-### Commit 19 — Animation service completion and legacy-scene cleanup
+### Commit 19 — Animation service completion and legacy-scene cleanup ✅ **implemented**
 
 **Goal:** finish the commit-17a migration so the registry is the one animation source, then delete migrated legacy scenes.
 
-1. Extend the registry schema for the deferred runtimes: Overworld animal scenes carry `CanvasTexture` normal maps and their `OverworldAnimations.gd` runtime (lighting data the registry does not model yet); player actors carry directional Move states plus the shadow contract (`Tests/TestActorShadow`). Migrate both, then remove the legacy `*Animations.tscn` files that nothing references anymore.
-2. Tests: `Tests/TestActorAnimations` (normal-map/directional entries, runtime parity), `Tests/TestActorShadow` (shadow geometry unchanged), `Tests/TestContentLint` (new entry kinds validated with teeth).
-3. **Exit gate:** every Shootout/Overworld actor resolves through the registry with identical visuals and shadow behavior; no migrated legacy scene remains referenced.
+**Implemented as designed:**
+
+1. ✅ Registry schema extended and runtimes migrated: per-state `normalMap` plus the `"runtime": "overworld"` entry kind — the service builds the `OverworldAnimations` runtime (per-state `Sprite2D` carrying the `CanvasTexture` diffuse+normal map, looping frame tracks on `{state}:frame`, autoplay idle, `RESET`) with the default idle state's sprite visible. `FluffyRabbit` migrated onto it. Both player actors moved into the registry (`PlayerLocation`: Idle/Idle2/Run/Run2 at their authored 0.1s/0.15s steps; `PlayerOverworld`: the five directional wagon states at 0.5s/1.0s steps, 24px cells, offset (0, −24)) and their scenes rebuilt without the embedded `AnimatedSprite2D`/`AnimationPlayer`. The Walker Langley entry now carries the complete hand-authored set (Idle Look, Walk, Ponder, Push Hat, Tip, Throw, Draw Revolver Cool, Draw Revolver Super Cool); `Shoot Rifle` follows the shrunken 360px sheet (9 frames — the old scene still sliced 10, off the sheet's end). Actors' scripts (`OverworldActor`, `CutsceneActor`, both players) resolve through the service, keeping the play-without-restart, pause-on-stop, flip and per-view shadow-coverage behaviors; cutscene actors now degrade with a warning instead of crashing on a missing scene. The three migrated legacy scenes (`WalkerLangleyAnimations.tscn`, `SquekyRatAnimations.tscn`, `FluffyRabbitAnimations.tscn`) are deleted; the service's legacy merge/fallback remains for future unregistered actors.
+2. ✅ Tests: `Tests/TestActorAnimations` (full Walker state set, converted frame counts, the overworld runtime's CanvasTexture/hframes/LOOP_LINEAR/autoplay, both player sets with authored lengths and offsets, unregistered-actor degradation); `Tests/TestContentLint` registry checks extended (normalMap paths must exist, only the `overworld` runtime is supported, broken fixture trips all seven rules); `Tests/TestActorShadow` unchanged (the shadow contract is preserved by construction).
+3. ✅ Exit gate: every Shootout/Overworld/Location/cutscene actor resolves through the registry; no migrated legacy scene remains referenced.
+
+**Tests:** `Tests/TestActorAnimations`, `Tests/TestContentLint` (registry validation with teeth), full suite unchanged.
 
 ### Commit 20 — Third Zone breadth
 

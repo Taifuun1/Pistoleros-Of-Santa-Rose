@@ -236,14 +236,15 @@ func _testActorAnimationRegistry() -> void:
 		var errors := _animationRegistryErrors(actorId, registry.getActor(actorId), registry)
 		_check(errors.is_empty(), "actor '%s' has a valid animation registry entry: %s" % [actorId, errors])
 	var brokenEntry := {
+		"runtime": "cutscene",
 		"states": {
-			"Ghost": { "sheet": "res://missing_sheet.png", "frames": 0, "step": 0.0 },
+			"Ghost": { "sheet": "res://missing_sheet.png", "normalMap": "res://missing_normal.png", "frames": 0, "step": 0.0 },
 		},
 		"defaultIdle": "Phantom",
 		"idleByWeapon": { "revolver": "Phantom" },
 	}
 	var broken := _animationRegistryErrors("Broken", brokenEntry, registry)
-	_check(broken.size() == 5, "a broken registry entry trips every rule: %s" % [broken])
+	_check(broken.size() == 7, "a broken registry entry trips every rule: %s" % [broken])
 	_check(_animationRegistryErrors("SquekyRat", registry.getActor("SquekyRat"), registry).is_empty(), "a valid registry actor passes")
 
 
@@ -253,6 +254,9 @@ func _animationRegistryErrors(actorId: String, entry: Dictionary, registry) -> A
 	if entry.is_empty():
 		errors.append("actor '%s' is not in the registry" % actorId)
 		return errors
+	var runtime := str(entry.get("runtime", ""))
+	if runtime != "" and runtime != "overworld":
+		errors.append("unsupported runtime '%s'" % runtime)
 	var states: Dictionary = entry.get("states", {})
 	if states.is_empty():
 		errors.append("actor '%s' has no states" % actorId)
@@ -261,6 +265,9 @@ func _animationRegistryErrors(actorId: String, entry: Dictionary, registry) -> A
 		var sheetPath := str(state.get("sheet", ""))
 		if sheetPath == "" or !FileAccess.file_exists(sheetPath):
 			errors.append("state '%s': missing sheet '%s'" % [stateName, sheetPath])
+		var normalPath := str(state.get("normalMap", ""))
+		if normalPath != "" and !FileAccess.file_exists(normalPath):
+			errors.append("state '%s': missing normalMap '%s'" % [stateName, normalPath])
 		if !bool(state.get("wholeSheet", false)):
 			var frameCount := int(state.get("frames", 0))
 			if frameCount <= 0:

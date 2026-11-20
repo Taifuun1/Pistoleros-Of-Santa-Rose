@@ -1,12 +1,18 @@
 extends Node2D
 
+const AnimationServiceScript = preload("res://Globals/ActorAnimationService.gd")
 const ShadowScript = preload("res://Nodes/Actor Shadow/ActorShadow.gd")
 
 var actorName
 
 
 func initCutsceneActor(actorType, actorNameInit, actorPosition, actorFlip, actorIdleAnimation):
-	var animations = load("res://Animations/{actorType}/{actorName}Animations.tscn".format({ "actorType": actorType, "actorName": actorNameInit.capitalize().replace(" ", "") })).instantiate()
+	# Commit 19: cutscene performers resolve through the shared registry
+	# service; the per-actor legacy scenes are deleted.
+	var animations = AnimationServiceScript.new().forActor(actorType, actorNameInit)
+	if animations == null:
+		push_warning("CutsceneActor: no animations for '{actorName}' ({actorType})".format({ "actorName": actorNameInit, "actorType": actorType }))
+		return
 	animations.initAnimations(actorIdleAnimation)
 	name = actorNameInit
 	animations.name = actorNameInit
