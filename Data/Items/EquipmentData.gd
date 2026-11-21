@@ -141,16 +141,8 @@ var spritePools = {
 
 
 var zones = {
-	"grassy_plains": {
-		"displayName": "Grassy Plains / Forest",
-		"items": [
-			{ "id": "prairie_rider_duster", "name": "Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
-			{ "id": "green_hollow_bandana", "name": "Green Hollow Bandana", "slot": "bandana", "dropsAnywhere": false },
-			{ "id": "meadowlark_boots", "name": "Meadowlark Boots", "slot": "justins", "dropsAnywhere": false },
-		],
-	},
-	"hilly_mining": {
-		"displayName": "Hilly Mining Area",
+	"rocky_hills": {
+		"displayName": "Rocky Hills",
 		"items": [
 			{ "id": "prospector_britches", "name": "Prospector Britches", "slot": "trousers", "dropsAnywhere": false },
 			{ "id": "silver_vein_belt", "name": "Silver Vein Belt", "slot": "belt", "dropsAnywhere": false },
@@ -166,13 +158,18 @@ var zones = {
 			{ "id": "ice_crusted_bandolier", "name": "Ice-Crusted Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
-	"desert_prairie": {
-		"displayName": "Desert Prairie",
+	"prairie": {
+		"displayName": "Prairie",
 		"items": [
 			{ "id": "sandstorm_veil", "name": "Sandstorm Veil", "slot": "bandana", "dropsAnywhere": false },
 			{ "id": "sun_bleached_stetson", "name": "Sun-Bleached Stetson", "slot": "headwear", "dropsAnywhere": false },
 			{ "id": "dust_devil_duster", "name": "Dust Devil Duster", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "cracked_leather_boots", "name": "Cracked-Leather Boots", "slot": "justins", "dropsAnywhere": false },
+			# Former Grassy Plains items (commit 20 prep): the zone folded into
+			# the Prairie; placement is placeholder until the boundary pass.
+			{ "id": "prairie_rider_duster", "name": "Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "green_hollow_bandana", "name": "Green Hollow Bandana", "slot": "bandana", "dropsAnywhere": false },
+			{ "id": "meadowlark_boots", "name": "Meadowlark Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
 	"whispering_pines_reach": {
@@ -192,17 +189,14 @@ var zones = {
 			{ "id": "mossy_bandolier", "name": "Mossy Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
-	"canyon": {
-		"displayName": "Canyon",
+	"wild_west": {
+		"displayName": "Wild West",
 		"items": [
 			{ "id": "echo_walker_boots", "name": "Echo Walker Boots", "slot": "justins", "dropsAnywhere": false },
 			{ "id": "red_rock_duster", "name": "Red Rock Duster", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "canyon_wind_bandana", "name": "Canyon Wind Bandana", "slot": "bandana", "dropsAnywhere": false },
-		],
-	},
-	"ghost_town": {
-		"displayName": "Ghost Town",
-		"items": [
+			# Former Ghost Town items (commit 20 prep): the zone folded into
+			# the Wild West; placement is placeholder until the boundary pass.
 			{ "id": "undertaker_black_coat", "name": "Undertaker Black Coat", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "hangman_neckerchief", "name": "Hangman Neckerchief", "slot": "bandana", "dropsAnywhere": false },
 			{ "id": "phantom_rider_spurs", "name": "Phantom Rider Spurs", "slot": "justins", "dropsAnywhere": false },

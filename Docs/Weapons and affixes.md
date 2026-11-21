@@ -164,13 +164,7 @@ W.W. Greener
 
 Zone-tiered item names are purely flavour, they have no impact on the equipments stats or look. They are either tied to only dropping in their respective zones or anywhere.
 
-### Grassy Plains / Forest
-
-Prairie Rider's Duster
-Green Hollow Bandana
-Meadowlark Boots
-
-### Hilly Mining Area
+### Rocky Hills
 
 Prospector's Britches
 Silver Vein Belt
@@ -183,8 +177,11 @@ Frostbit Duster
 Snowshoe Trail Boots
 Ice-Crusted Bandolier
 
-### Desert Prairie
+### Prairie
 
+Prairie Rider's Duster
+Green Hollow Bandana
+Meadowlark Boots
 Sandstorm Veil
 Sun-Bleached Stetson
 Dust Devil's Duster
@@ -202,14 +199,11 @@ Gator-Hide Belt
 Swamp Rat's Poncho
 Mossy Bandolier
 
-### Canyon
+### Wild West
 
 Echo Walker's Boots
 Red Rock Duster
 Canyon Wind Bandana
-
-### Ghost Town
-
 Undertaker's Black Coat
 Hangman's Neckerchief
 Phantom Rider's Spurs

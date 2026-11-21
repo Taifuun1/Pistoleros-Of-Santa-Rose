@@ -44,8 +44,8 @@ func _run() -> void:
 	}
 
 	print("\n--- Determinism: the same seed replays the same encounter ---")
-	var first := await measureEncounter(canyonRats, 20261117, MAX_TURNS, "canyon")
-	var replay := await measureEncounter(canyonRats, 20261117, MAX_TURNS, "canyon")
+	var first := await measureEncounter(canyonRats, 20261117, MAX_TURNS, "wild_west")
+	var replay := await measureEncounter(canyonRats, 20261117, MAX_TURNS, "wild_west")
 	_check(not bool(first.get("guardTripped", true)), "CanyonRats terminates inside the turn budget (%s turns, %s rounds)" % [str(first.get("turns")), str(first.get("rounds"))])
 	_check(str(first.get("outcome", "")) in ["victory", "vamoose"], "the fight reports a real outcome, got '%s'" % str(first.get("outcome")))
 	_check(first == replay, "the same seed and request replay identical metrics")
@@ -65,7 +65,7 @@ func _run() -> void:
 		print("NOTE: recorded a new metric baseline from seed %s" % str(baselineRun.get("seed", "?")))
 	_check(not baselineRun.is_empty(), "the machine-readable baseline exists")
 	_check(str(baselineRun.get("encounter", "")) == "Canyon Rats" and int(baselineRun.get("seed", -1)) >= 0, "the baseline records real source data")
-	var measured := await measureEncounter(canyonRats, int(baselineRun.get("seed", 20261117)), MAX_TURNS, "canyon")
+	var measured := await measureEncounter(canyonRats, int(baselineRun.get("seed", 20261117)), MAX_TURNS, "wild_west")
 	_check(measured == baselineRun, "the baseline replays exactly")
 
 	print("\n--- Commit 17 fixture: the new classes field real loadouts ---")
@@ -133,14 +133,14 @@ func _run() -> void:
 	print("\n--- Batch with a max-turn guard ---")
 	var batch := []
 	for seedValue in [11, 12, 13]:
-		batch.append(await measureEncounter(canyonRats, seedValue, MAX_TURNS, "canyon"))
+		batch.append(await measureEncounter(canyonRats, seedValue, MAX_TURNS, "wild_west"))
 	_check(batch.size() == 3 and not batch.any(func(entry): return bool(entry.get("guardTripped", true))), "every batched fight terminates on its own")
-	var guarded := await measureEncounter(canyonRats, 11, 1, "canyon")
+	var guarded := await measureEncounter(canyonRats, 11, 1, "wild_west")
 	_check(int(guarded.get("turns", 0)) == 1 and bool(guarded.get("guardTripped", false)), "the explicit max-turn guard terminates the driver")
 
 	print("\n--- Metrics carry real source data ---")
 	for entry in batch:
-		_check(str(entry.get("encounterPath", "")).ends_with("CanyonRats.gd") and str(entry.get("zoneId", "")) == "canyon", "each metric row records its request path and Zone")
+		_check(str(entry.get("encounterPath", "")).ends_with("CanyonRats.gd") and str(entry.get("zoneId", "")) == "wild_west", "each metric row records its request path and Zone")
 		_check(int(entry.get("hits", -1)) >= 0 and int(entry.get("knockdowns", -1)) >= 0, "each metric row records combat counters")
 		_check(not (entry.get("remainingHealth", {}) as Dictionary).is_empty(), "each metric row records remaining health")
 

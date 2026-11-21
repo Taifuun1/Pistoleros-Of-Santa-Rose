@@ -10,7 +10,7 @@ const SceneManagerScene = preload("res://Nodes/Scene Manager/SceneManager.tscn")
 const RequestScript = preload("res://Shootout/EncounterRequest.gd")
 const PoolScript = preload("res://Data/Shootout/EncounterPoolData.gd")
 const ResolverScript = preload("res://Overworld/OverworldEventOutcomeResolver.gd")
-const CanyonEventsScript = preload("res://Data/Events/CanyonEvents.gd")
+const CanyonEventsScript = preload("res://Data/Events/WildWestEvents.gd")
 const ForestEventsScript = preload("res://Data/Events/ForestEvents.gd")
 const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 const CoordinatesScript = preload("res://Overworld/OverworldCoordinates.gd")
@@ -62,7 +62,7 @@ func _testRequestValidation() -> void:
 	print("--- Encounter request validation ---")
 	var validOptions := {
 		"encounterPath": CANYON_RATS,
-		"zoneId": "canyon",
+		"zoneId": "wild_west",
 		"source": "overworld_event",
 		"sourceId": "fight_cache_rats",
 		"origin": { "sceneKey": "overworld" },
@@ -75,7 +75,7 @@ func _testRequestValidation() -> void:
 	_check(request.isValid(), "a complete request validates")
 	_check(request.reason() == "", "a valid request has no failure reason")
 	var dictionary: Dictionary = request.toDictionary()
-	_check(dictionary.encounterPath == CANYON_RATS and dictionary.zoneId == "canyon", "the snapshot keeps the encounter and Zone")
+	_check(dictionary.encounterPath == CANYON_RATS and dictionary.zoneId == "wild_west", "the snapshot keeps the encounter and Zone")
 	_check(dictionary.source == "overworld_event" and dictionary.seed == 7, "the snapshot keeps source and seed")
 
 	var badPath = validOptions.duplicate(true)
@@ -111,15 +111,15 @@ func _testPoolSelection() -> void:
 	print("\n--- Deterministic canyon pool selection ---")
 	var pools = PoolScript.new()
 	_check(pools.loadProductionPools().is_empty(), "production pools load without errors")
-	_check(pools.hasZone("canyon"), "the canyon pool is authored")
+	_check(pools.hasZone("wild_west"), "the canyon pool is authored")
 	var catalog = ZoneCatalogScript.new()
 
 	var firstRng := RandomNumberGenerator.new()
 	firstRng.seed = 12345
 	var secondRng := RandomNumberGenerator.new()
 	secondRng.seed = 12345
-	var first: Dictionary = pools.selectEncounter("canyon", firstRng, catalog)
-	var second: Dictionary = pools.selectEncounter("canyon", secondRng, catalog)
+	var first: Dictionary = pools.selectEncounter("wild_west", firstRng, catalog)
+	var second: Dictionary = pools.selectEncounter("wild_west", secondRng, catalog)
 	_check(first.success and second.success, "valid pools select an encounter")
 	_check(first.encounterPath == second.encounterPath, "the same seed selects the same encounter")
 	_check(first.encounterPath in [CANYON_RATS, CANYON_RAT_NEST], "selection returns an authored canyon encounter")
@@ -128,14 +128,14 @@ func _testPoolSelection() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 999
 	for index in 40:
-		var selected: Dictionary = pools.selectEncounter("canyon", rng, catalog)
+		var selected: Dictionary = pools.selectEncounter("wild_west", rng, catalog)
 		_check(selected.success, "random selection %d succeeds" % index)
 		seen[selected.encounterPath] = true
 	_check(seen.size() == 2, "both weighted canyon encounters can be selected")
 
-	_check(pools.selectEncounter("ghost_town", rng, catalog).reason == "no_pool", "a canonical Zone without a pool fails closed")
+	_check(pools.selectEncounter("snowy_mountain", rng, catalog).reason == "no_pool", "a canonical Zone without a pool fails closed")
 	_check(pools.selectEncounter("not_a_zone", rng, catalog).reason == "invalid_zone", "a non-canonical Zone fails closed")
-	_check(pools.selectEncounter("canyon", null, catalog).reason == "invalid_rng", "selection requires an injected RNG")
+	_check(pools.selectEncounter("wild_west", null, catalog).reason == "invalid_rng", "selection requires an injected RNG")
 
 	print("\n--- Deterministic Whispering Pines Reach pool selection ---")
 	_check(pools.hasZone(PINES_ZONE), "the Whispering Pines Reach pool is authored")
@@ -155,8 +155,8 @@ func _testPoolSelection() -> void:
 func _testEventOutcomeDispatch() -> void:
 	print("\n--- Canonical Zone pools and event outcomes ---")
 	var catalog = ZoneCatalogScript.new()
-	_check(OverworldEvents.get_zone_for_chunk(Vector2i(8, 12)) == "canyon", "the spawn chunk resolves through the shared Zone catalog")
-	var canyonPool: Dictionary = OverworldEvents.get_event_pool_for_zone("canyon")
+	_check(OverworldEvents.get_zone_for_chunk(Vector2i(8, 12)) == "wild_west", "the spawn chunk resolves through the shared Zone catalog")
+	var canyonPool: Dictionary = OverworldEvents.get_event_pool_for_zone("wild_west")
 	_check(canyonPool.has("Canyon Cache Raiders"), "the canyon event pool includes its authored event")
 	_check(canyonPool.has("Rattlesnake"), "generic events are merged into every Zone pool")
 	var swampPool: Dictionary = OverworldEvents.get_event_pool_for_zone("swamp")
@@ -177,7 +177,7 @@ func _testEventOutcomeDispatch() -> void:
 	pools.loadProductionPools()
 	var launches := []
 	var context := {
-		"zoneId": "canyon",
+		"zoneId": "wild_west",
 		"zoneCatalog": catalog,
 		"origin": { "sceneKey": "overworld" },
 		"trailState": Locations.exportState(),
@@ -192,7 +192,7 @@ func _testEventOutcomeDispatch() -> void:
 	var launched = launches[0]
 	_check(launched.isValid(), "the launched request is valid")
 	_check(launched.encounterPath in [CANYON_RATS, CANYON_RAT_NEST], "the request resolves through the canyon pool")
-	_check(launched.zoneId == "canyon" and launched.source == "overworld_event", "the request keeps Zone and source")
+	_check(launched.zoneId == "wild_west" and launched.source == "overworld_event", "the request keeps Zone and source")
 	_check(launched.sourceId == "Canyon Cache Raiders", "the request keeps the event identity")
 	_check(launched.trailState.onTrail == false, "the request captures the Off-Trail state")
 
@@ -334,7 +334,7 @@ func _testSceneRouter() -> void:
 	var catalog = ZoneCatalogScript.new()
 	var invalid = RequestScript.make({
 		"encounterPath": "res://Data/Shootout/Encounters/DoesNotExist.gd",
-		"zoneId": "canyon",
+		"zoneId": "wild_west",
 		"source": "overworld_event",
 	}, catalog, Locations)
 	_check(!sceneManager.launchShootout(invalid), "an invalid request never transitions")
@@ -351,7 +351,7 @@ func _testSceneRouter() -> void:
 
 	var request = RequestScript.make({
 		"encounterPath": CANYON_RATS,
-		"zoneId": "canyon",
+		"zoneId": "wild_west",
 		"source": "overworld_event",
 		"sourceId": "fight_cache_rats",
 		"progression": { "band": "early" },
@@ -362,7 +362,7 @@ func _testSceneRouter() -> void:
 	_check(sceneManager.launchShootout(request), "the router accepts the request")
 	_check(sceneManager.hasPendingShootout(), "the router keeps a pending return context")
 	var repeated = RequestScript.make({
-		"encounterPath": CANYON_RATS, "zoneId": "canyon", "source": "overworld_event",
+		"encounterPath": CANYON_RATS, "zoneId": "wild_west", "source": "overworld_event",
 	}, catalog, Locations)
 	_check(!sceneManager.launchShootout(repeated), "a second launch during transition is rejected")
 
@@ -370,7 +370,7 @@ func _testSceneRouter() -> void:
 	var shootout = sceneManager.get_current_scene()
 	_check(shootout.encounterName == "Canyon Rats", "the selected encounter initializes instead of the debug fallback")
 	_check(shootout.encounterRequest != null and shootout.encounterRequest.encounterPath == CANYON_RATS, "the Shootout consumes the request once")
-	_check(shootout.encounterZoneId == "canyon" and shootout.encounterSourceId == "fight_cache_rats", "the Shootout keeps request context")
+	_check(shootout.encounterZoneId == "wild_west" and shootout.encounterSourceId == "fight_cache_rats", "the Shootout keeps request context")
 	_check(shootout.encounterSeed == 2468 and shootout.combatRng.seed == 2468, "the request seed drives the combat RNG")
 	_check(Shootout.pendingRequest == null, "the global pending request is cleared after consumption")
 

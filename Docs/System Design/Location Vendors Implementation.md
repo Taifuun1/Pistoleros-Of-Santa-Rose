@@ -13,7 +13,7 @@ This document implements [Location vendors](Location%20Vendors.md). It describes
 - `Location/Entities/Interactable/Interactable.gd` polls `INTERACT`, assumes `PlayerActor`, pauses that player, and frees itself. It is gathering/minigame-specific and must not be reused unchanged for persistent vendor actors or doors.
 - Pregenerated Locations such as `Location/Locations/Lazysprings/Lazysprings.tscn` contain a static `Entities/Actors/PlayerActor` and currently have no vendor-return initializer. Quest Locations use `BaseLocation.gd` and a Dictionary `Locations.currentLocation`; Overworld/pregenerated entry uses a String. Vendor navigation must preserve both forms rather than introduce a third.
 - The shared `Data/Overworld/ZoneData.gd`/`OverworldZoneCatalog` catalog is implemented (patch 1); `MusicData` now contains only Zone-id-keyed track lists and vendor code consumes canonical ids rather than its own geometry.
-- Region encounter pools: the shared pool loader, the real `canyon` pool with its `CanyonRats`/`CanyonRatNest` encounters (patch 6) and the `whispering_pines_reach` pool with its `PinesPatrol`/`PinesWaylay`/`PinesStandoff` encounters plus authored newspaper copy (commit 18) landed, so two Zone reports are now projected from production data. The remaining Zones still have no authored pool/copy and are reported as unavailable rather than fabricated; the section in [Encounters](Shootout/Encounters.md) tracks that.
+- Region encounter pools: the shared pool loader, the real `wild_west` pool with its `CanyonRats`/`CanyonRatNest` encounters (patch 6) and the `whispering_pines_reach` pool with its `PinesPatrol`/`PinesWaylay`/`PinesStandoff` encounters plus authored newspaper copy (commit 18) landed, so two Zone reports are now projected from production data. The remaining Zones still have no authored pool/copy and are reported as unavailable rather than fabricated; the section in [Encounters](Shootout/Encounters.md) tracks that.
 - `Overworld Map` currently treats all manifest Locations as visible and has only Location, player, and quest overlays. Hidden/revealed markers require additive manifest metadata and a discovery provider.
 - Save support does not exist yet. All new state lives in domain services and `Vendors`/`Locations` already expose validated export/import/reset snapshots rather than hiding state in menu nodes.
 
@@ -126,7 +126,7 @@ var vendors = {
         "kind": "gun", # general | gun | equipment | bank | newspaper
         "displayName": "Lazysprings Gunsmith",
         "parentLocationId": "Lazysprings",
-        "zoneId": "canyon",
+        "zoneId": "wild_west",
         "roomScene": "res://Location/Vendors/Interiors/LazyspringsGunsmith.tscn",
         "stock": {"mode": "rolled", "itemType": "weapon", "count": 6},
     },
@@ -135,7 +135,7 @@ var vendors = {
         "kind": "general",
         "displayName": "Lazysprings General Store",
         "parentLocationId": "Lazysprings",
-        "zoneId": "canyon",
+        "zoneId": "wild_west",
         "roomScene": "res://Location/Vendors/Interiors/LazyspringsGeneral.tscn",
         "stock": {"mode": "fixed", "offers": [
             {"offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20},
@@ -362,7 +362,7 @@ Return a view model such as:
 
 ```gdscript
 {
-    "success": true, "available": true, "reason": "", "zoneId": "canyon",
+    "success": true, "available": true, "reason": "", "zoneId": "wild_west",
     "headline": "...",
     "parties": [{
         "encounterId": "rat_ambush", "name": "Rat Ambush", "kind": "dustup",
@@ -519,17 +519,17 @@ Land the following as reviewable patches. Run focused tests and the existing ful
 
 ### ✅ Patch 6 — Newspaper reports (implemented)
 
-1. ✅ Authored the real shared Zone pool (`Data/Shootout/EncounterPools/canyon.gd`) plus its genuine encounters (`CanyonRats`, `CanyonRatNest`, both against the authored Squeky rat actor) and the per-Zone copy in `Data/Vendors/NewspaperData.gd` (headline, editorial, per-encounter tips, general tips). `EncounterPoolData.loadProductionPools()` merges every authored pool file, so the future encounter launcher and the newspaper read the same data.
+1. ✅ Authored the real shared Zone pool (`Data/Shootout/EncounterPools/wild_west.gd`) plus its genuine encounters (`CanyonRats`, `CanyonRatNest`, both against the authored Squeky rat actor) and the per-Zone copy in `Data/Vendors/NewspaperData.gd` (headline, editorial, per-encounter tips, general tips). `EncounterPoolData.loadProductionPools()` merges every authored pool file, so the future encounter launcher and the newspaper read the same data.
 2. ✅ `NewspaperReportBuilder.buildReport(zoneId, encounterPools, actorResolver, newspaperData)` resolves exactly the requested Zone's public entries, aggregates repeated enemy actor references into counts, projects name/kind/composition/damage types/mechanics/tips, and performs no roll, no mutation and no fallback. `Vendors.getNewspaperReport()` resolves the vendor's own Zone through it, and the read-only newspaper view renders the editorial, each party, wrapped tips and the general-tips block inside its scroll region, with the intentional unavailable state for Zones that publish nothing.
 3. ✅ `Tests/TestNewspaper.gd` (new) covers the production lint, exact-Zone resolution, composition aggregation against the authored enemy teams, quest/private exclusion, determinism, side-effect and RNG isolation, and every failure state; `TestVendorData` lints the authored pools and copy, `TestVendors` proves the service boundary, and `TestVendorUI` renders both a published report and an unpublished Zone.
 
-**Implemented files:** `Vendors/NewspaperReportBuilder.gd`, `Data/Vendors/NewspaperData.gd`, `Data/Shootout/EncounterPools/canyon.gd`, the `CanyonRats`/`CanyonRatNest` encounters, `EncounterPoolData.loadProductionPools()`/`validateAuthoredPools()`, the newspaper collaborators and report wiring in `Globals/Vendors.gd`, the `lazysprings_gazette` catalog entry with its interior/door, the newspaper rendering in `UI/Vendors/VendorMenu.gd`, and `Tests/TestNewspaper.gd`.
+**Implemented files:** `Vendors/NewspaperReportBuilder.gd`, `Data/Vendors/NewspaperData.gd`, `Data/Shootout/EncounterPools/wild_west.gd`, the `CanyonRats`/`CanyonRatNest` encounters, `EncounterPoolData.loadProductionPools()`/`validateAuthoredPools()`, the newspaper collaborators and report wiring in `Globals/Vendors.gd`, the `lazysprings_gazette` catalog entry with its interior/door, the newspaper rendering in `UI/Vendors/VendorMenu.gd`, and `Tests/TestNewspaper.gd`.
 
 **Gate:** ✅ reports resolve the parent Location's Zone from the vendor definition and the shared pool, with no Zone fallback; ✅ compositions aggregate repeated enemies to the authored counts and match the real actor data; ✅ private/quest entries never reach a report; ✅ reporting is deterministic, mutates neither pools nor copy, and never advances the RNG; ✅ an unpublished Zone (and the debug `RatAmbush` encounter) is never presented as local news. Full suite: 48/48.
 
 ### ⏳ Patch 7 — Content completion, persistence audit, and release verification (partially implemented)
 
-1. ⏳ **Content:** all five kinds are authored and placed in Lazysprings (general store, gunsmith, outfitter, bank, gazette) with real prices/stock counts, working interiors and one production Zone report. The remaining authoring is blocked on **art and world content, not code**: every vendor actor still shares the `Character_24px` sprite, only the `canyon` Zone has a real pool and copy (further Zones need authored encounters and actor animation sets), and production secret *items* still have no reachable cache interaction to reveal. No incomplete offer ships — `TestVendorContent` fails the run if a fixed offer cannot deliver its effect.
+1. ⏳ **Content:** all five kinds are authored and placed in Lazysprings (general store, gunsmith, outfitter, bank, gazette) with real prices/stock counts, working interiors and one production Zone report. The remaining authoring is blocked on **art and world content, not code**: every vendor actor still shares the `Character_24px` sprite, only the `wild_west` Zone has a real pool and copy (further Zones need authored encounters and actor animation sets), and production secret *items* still have no reachable cache interaction to reveal. No incomplete offer ships — `TestVendorContent` fails the run if a fixed offer cannot deliver its effect.
 2. ✅ **Persistence audit:** `Tests/TestVendorPersistence.gd` (new) drives the documented coordinator order end to end. A real session (stack purchase, map purchase → reveal, Bank deposit, rolled stock, explicit trail departure) is exported as one payload, restored into a fresh session, deep-compared, and re-exported byte-identically. It pins the legacy coordinator seams: invalid or partial vendor/discovery/departure payloads leave their live services untouched, and the New Game resets clear stock/Bank/reveals/departure while deliberately leaving Party untouched. The real Save/Continue path is now implemented by `Globals/SaveGame.gd`; `TestSaveGame` and `TestSaveRestart` additionally prove rollback, migration and process-restart persistence.
 3. ✅ **Docs:** this plan, `Location Vendors.md`, `Testing.md` and `Inventory and Equipment.md` now state actual results, and every high-level acceptance criterion carries recorded evidence.
 4. ⏳ **Verification:** the full `Tests/RunAll.gd` suite passes **50/50** (patch 7 added `TestVendorPersistence` and `TestVendorContent`). The manual pass is reduced below to what automation cannot judge and remains outstanding.
@@ -618,7 +618,7 @@ Automation now covers the data behaviour of every step below; what remains is wh
 - ✅ The initial town's **Leave for the trail** interaction is implemented as `TrailDeparture`, which calls `Locations.departForTrail()` exactly once for that explicit transition; incidental Overworld scene entries still must not reset random selections.
 - ✅ The town also has an Off-Trail exit: `Location/Entities/Town/TownExit.tscn` (**Leave town**) leaves through `Locations.enterOverworld()` without starting a Trail, so the party can return to the Overworld, reach other Towns and run quests Off Trail. It shares the door/trail marker convention and sits one activation area away from the `TrailDeparture`; neither exit resets random selections. Covered by `Tests/TestTownExit.tscn`.
 - Explosives, magazines, cigar packs, and secret caches require real mechanics/world content. They are content blockers for completion, not reasons to add no-op purchases: `TestVendorContent` fails the run if a fixed offer cannot deliver its effect.
-- Shared Zone migration and real encounter pools are cross-feature dependencies. Do not fork their data to make vendor progress appear complete — `canyon` is the only authored Zone so far, and other Zones must report themselves unavailable.
+- Shared Zone migration and real encounter pools are cross-feature dependencies. Do not fork their data to make vendor progress appear complete — `wild_west` is the only authored Zone so far, and other Zones must report themselves unavailable.
 - ✅ Vendor NPC art, bespoke interior art and enemy actor animation sets are the remaining authoring blockers for patch 7's content item; the placed content reuses existing art deliberately rather than shipping placeholder claims.
 - Bank’s unlimited capacity is intentional for this iteration but should be playtested alongside the 24-slot carried inventory; change it only through a new design decision, not a UI-only cap.
 - ✅ Save snapshots are audited end to end (`TestVendorPersistence`), including the ordered validate-before-commit coordinator contract. `Globals/SaveGame.gd` now coordinates Party and vendor/discovery payloads on disk; Party has its validated export/import, and `TestSaveGame` plus `TestSaveRestart` prove rollback, migration and application-restart behavior.

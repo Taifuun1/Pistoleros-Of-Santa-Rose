@@ -161,7 +161,7 @@ func _run() -> void:
 	_check(testScene.rarityOption.item_count == 5, "rarity options not populated")
 	_check(testScene.typeOption.item_count == 3, "type options not populated")
 	_check(testScene.familyOption.item_count == 4, "family options not populated")
-	_check(testScene.zoneOption.item_count == 10, "zone options not populated")
+	_check(testScene.zoneOption.item_count == 8, "zone options not populated")
 	_check(testScene.legendaryOption.item_count == 13, "legendary options not populated")
 	_check(testScene.infoLabel.rawText != "", "info label empty after initial generate")
 

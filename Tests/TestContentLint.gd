@@ -484,7 +484,7 @@ func _testZoneReferences() -> void:
 	var pools = EncounterPoolDataScript.new()
 	var poolErrors: Array = pools.validateAuthoredPools(catalog)
 	_check(poolErrors.is_empty(), "authored encounter pools use canonical Zone ids: %s" % [poolErrors])
-	_check(pools.hasZone("canyon"), "the authored pools load (sanity check)")
+	_check(pools.hasZone("wild_west"), "the authored pools load (sanity check)")
 
 	var lootTables := _collectData("res://Data/Shootout/LootTables")
 	for entry in lootTables.entries:

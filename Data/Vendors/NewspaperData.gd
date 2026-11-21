@@ -10,10 +10,10 @@ class_name NewspaperData
 const ZoneCatalogScript = preload("res://Overworld/OverworldZoneCatalog.gd")
 
 var zones = {
-	"canyon": {
-		"zoneId": "canyon",
-		"headline": "Rats Run the Canyon Caches",
-		"editorial": "Travellers out of the canyon tell the same story: small, fast, and never alone. The vermin have learned where the caches are kept, and they do not wait for dark any more. Keep your hands where you can see them and count the teeth before you count the coin.",
+	"wild_west": {
+		"zoneId": "wild_west",
+		"headline": "Rats Run the Wild West Caches",
+		"editorial": "Travellers out of the Wild West tell the same story: small, fast, and never alone. The vermin have learned where the caches are kept, and they do not wait for dark any more. Keep your hands where you can see them and count the teeth before you count the coin.",
 		"generalTips": [
 			"Everything in a pack dies easier than the pack does: thin them before you get surrounded.",
 			"Scratches add up. Break line of sight and let your wounds clot.",

@@ -140,12 +140,12 @@ func _run() -> void:
 	] }
 	var zoneRng = RandomNumberGenerator.new()
 	zoneRng.seed = 4242
-	var canyonLoot = lootGenerator.generateLoot(zoneTable, {}, zoneRng, "canyon")
+	var canyonLoot = lootGenerator.generateLoot(zoneTable, {}, zoneRng, "wild_west")
 	_check(canyonLoot.items.size() == 20, "zone-aware generation rolls the requested count")
 	var sawCanyon = false
 	for item in canyonLoot.items:
-		_check(item.zone == "canyon" or item.zone == "anywhere", "no foreign-zone equipment drops, got %s" % item.zone)
-		if item.zone == "canyon":
+		_check(item.zone == "wild_west" or item.zone == "anywhere", "no foreign-zone equipment drops, got %s" % item.zone)
+		if item.zone == "wild_west":
 			sawCanyon = true
 	_check(sawCanyon, "at least one canyon-locked equipment base can drop in canyon")
 

@@ -36,7 +36,7 @@ func _run() -> void:
 		offerIds[offer.offerId] = true
 		_check(offer.offerId == "test_gunsmith:0:%d" % (offerIds.size() - 1), "offer id is vendor:departure:index")
 		_check(offer.item.itemType == "weapon", "gun vendor rolls weapons")
-		_check(offer.item.zone == "canyon", "rolled item carries the vendor Zone")
+		_check(offer.item.zone == "wild_west", "rolled item carries the vendor Zone")
 		_check(typeof(offer.unitPrice) == TYPE_INT and offer.unitPrice > 0, "offers are priced")
 	var third = generator.generateStock("test_gunsmith", 1, 12345)
 	_check(third.success and third != first, "a new departure changes the selection")
@@ -72,29 +72,29 @@ func _makeCatalog():
 	catalog.vendors = {
 		"test_gunsmith": {
 			"vendorId": "test_gunsmith", "kind": "gun", "displayName": "Test Gunsmith",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 6 },
 		},
 		"test_equipment": {
 			"vendorId": "test_equipment", "kind": "equipment", "displayName": "Test Outfitter",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "equipment", "count": 4 },
 		},
 		"test_general": {
 			"vendorId": "test_general", "kind": "general", "displayName": "Test General",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "fixed", "offers": [
 				{ "offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20 },
 			] },
 		},
 		"bad_count": {
 			"vendorId": "bad_count", "kind": "gun", "displayName": "Bad Count",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 0 },
 		},
 		"bad_type": {
 			"vendorId": "bad_type", "kind": "equipment", "displayName": "Bad Type",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 2 },
 		},
 	}

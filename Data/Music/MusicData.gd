@@ -9,21 +9,16 @@ var data = {
 	# Overworld ambience per zone; the lists loop with a fade before each song
 	# end blending into the next song.
 	"zone_tracks": {
-		"grassy_plains": [
-			"Overworld/Grasslands1",
-			"Overworld/Grasslands2",
-			"Overworld/Grasslands3"
-		],
-		"hilly_mining": [
+		"rocky_hills": [
 			"Overworld/RockyHills1",
 			"Overworld/RockyHills2"
 		],
-		"desert_prairie": [
+		"prairie": [
 			"Overworld/Prairie1",
 			"Overworld/Prairie2",
 			"Overworld/Prairie3"
 		],
-		"canyon": [
+		"wild_west": [
 			"Overworld/WildWest1",
 			"Overworld/WildWest2"
 		],
@@ -39,11 +34,6 @@ var data = {
 		"swamp": [
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Mysterious/Dust on the Cartridge"
-		],
-		"ghost_town": [
-			"Thematic/Somber/Dusty Cartridge",
-			"Thematic/Somber/Rain Over Dusty Trail",
-			"Thematic/Somber/Rainy Saloon Loop"
 		],
 	},
 	# Town / location music by location name.
@@ -89,14 +79,12 @@ var data = {
 	# Fights tied to an Overworld zone (encounter data "zone"). Zone ids match
 	# Data/Overworld/ZoneData.gd.
 	"zone_shootout_tracks": {
-		"grassy_plains": ["Shootout/Dusty Hex Duel"],
-		"hilly_mining": ["Shootout/Dusty Cartridge Duel"],
-		"desert_prairie": ["Shootout/Clash on Beat One"],
+		"rocky_hills": ["Shootout/Dusty Cartridge Duel"],
+		"prairie": ["Shootout/Clash on Beat One"],
 		"snowy_mountain": ["Shootout/Wily Core"],
 		"whispering_pines_reach": ["Shootout/Pixel Duel"],
 		"swamp": ["Shootout/Last Bullet Canyon"],
-		"canyon": ["Shootout/Steel Cannon Run"],
-		"ghost_town": ["Shootout/Shootout2"],
+		"wild_west": ["Shootout/Steel Cannon Run"],
 	},
 	# End-of-fight stingers for the Shootout end screen, keyed by the fight
 	# outcome. The victory jingle settles into a warm afterglow while the

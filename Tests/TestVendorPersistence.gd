@@ -210,7 +210,7 @@ func _makeVendors() -> Dictionary:
 	return {
 		"test_general": {
 			"vendorId": "test_general", "kind": "general", "displayName": "Test General",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "fixed", "offers": [
 				{ "offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20 },
 				{ "offerId": "canyon_cache_map", "definitionId": "canyon_cache_map", "unitPrice": 75 },
@@ -218,12 +218,12 @@ func _makeVendors() -> Dictionary:
 		},
 		"test_gunsmith": {
 			"vendorId": "test_gunsmith", "kind": "gun", "displayName": "Test Gunsmith",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 3 },
 		},
 		"test_bank": {
 			"vendorId": "test_bank", "kind": "bank", "displayName": "Test Bank",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 	}
 

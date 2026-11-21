@@ -288,7 +288,7 @@ func _testSafeFailures() -> void:
 	var savedVendors = vendors.catalog.vendors.duplicate(true)
 	vendors.catalog.vendors["broken_room"] = {
 		"vendorId": "broken_room", "kind": "general", "displayName": "Broken",
-		"parentLocationId": "Lazysprings", "zoneId": "canyon",
+		"parentLocationId": "Lazysprings", "zoneId": "wild_west",
 		"roomScene": "res://Location/Vendors/Interiors/DoesNotExist.tscn",
 		"stock": { "mode": "fixed", "offers": [] },
 	}

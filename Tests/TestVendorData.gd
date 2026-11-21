@@ -133,12 +133,12 @@ func _testEncounterPools(zoneCatalog) -> void:
 	_check(productionPools.getEntries("swamp").is_empty() and productionPools.getPublicEntries("swamp").is_empty(), "missing pools never fall back to a default encounter")
 
 	var pools = EncounterPoolDataScript.new()
-	pools.pools["canyon"] = { "zoneId": "canyon", "entries": [
+	pools.pools["wild_west"] = { "zoneId": "wild_west", "entries": [
 		{ "encounter": "res://Data/Shootout/Encounters/RatAmbush.gd", "weight": 1 },
 		{ "encounter": "res://Data/Shootout/Encounters/RatAmbush.gd", "weight": 2, "newspaperPublic": false },
 	] }
 	_check(pools.validate(zoneCatalog, ["RatAmbush"]).is_empty(), "valid pool fixture passes lint")
-	_check(pools.getPublicEntries("canyon").size() == 1, "newspaperPublic=false entries are excluded from reports")
+	_check(pools.getPublicEntries("wild_west").size() == 1, "newspaperPublic=false entries are excluded from reports")
 
 	var badPools = EncounterPoolDataScript.new()
 	badPools.pools["unknown_zone"] = { "zoneId": "unknown_zone", "entries": [{ "encounter": "res://missing.gd", "weight": 0 }] }
@@ -150,23 +150,23 @@ func _testNewspaperData(zoneCatalog, encounterPools) -> void:
 	var copy = NewspaperDataScript.new()
 	var errors := copy.validate(zoneCatalog, encounterPools)
 	_check(errors.is_empty(), "authored newspaper copy validates: %s" % [errors])
-	_check(copy.hasZone("canyon") and copy.getHeadline("canyon") != "" and copy.getEditorial("canyon") != "", "the canyon Zone has a headline and editorial")
-	_check(!copy.getGeneralTips("canyon").is_empty(), "the canyon Zone has general tips")
-	for entry in encounterPools.getPublicEntries("canyon"):
+	_check(copy.hasZone("wild_west") and copy.getHeadline("wild_west") != "" and copy.getEditorial("wild_west") != "", "the canyon Zone has a headline and editorial")
+	_check(!copy.getGeneralTips("wild_west").is_empty(), "the canyon Zone has general tips")
+	for entry in encounterPools.getPublicEntries("wild_west"):
 		var encounterId := str(entry.get("encounter", "")).get_file().get_basename()
-		_check(!copy.getEncounterTips("canyon", encounterId).is_empty(), "published encounter '%s' has authored tips" % encounterId)
+		_check(!copy.getEncounterTips("wild_west", encounterId).is_empty(), "published encounter '%s' has authored tips" % encounterId)
 
 	var badCopy = NewspaperDataScript.new()
 	badCopy.zones["missing_zone"] = { "zoneId": "missing_zone", "headline": "H", "editorial": "E" }
 	_check(!badCopy.validate(zoneCatalog, null).is_empty(), "an unknown Zone fails copy lint")
 	badCopy = NewspaperDataScript.new()
-	badCopy.zones["canyon"]["headline"] = ""
+	badCopy.zones["wild_west"]["headline"] = ""
 	_check(!badCopy.validate(zoneCatalog, null).is_empty(), "a missing headline fails copy lint")
 	badCopy = NewspaperDataScript.new()
-	badCopy.zones["canyon"]["generalTips"] = [""]
+	badCopy.zones["wild_west"]["generalTips"] = [""]
 	_check(!badCopy.validate(zoneCatalog, null).is_empty(), "an empty tip fails copy lint")
 	badCopy = NewspaperDataScript.new()
-	badCopy.zones["canyon"]["encounterTips"] = { "DoesNotExist": ["tip"] }
+	badCopy.zones["wild_west"]["encounterTips"] = { "DoesNotExist": ["tip"] }
 	_check(!badCopy.validate(zoneCatalog, encounterPools).is_empty(), "tips for an unpublished encounter fail copy lint")
 
 
@@ -204,7 +204,7 @@ func _testVendorFixtures(zoneCatalog, itemCatalog, secretMaps, mapData) -> void:
 	var mapOfferCatalog = VendorCatalogScript.new()
 	mapOfferCatalog.vendors = { "test_general": {
 		"vendorId": "test_general", "kind": "general", "displayName": "General", "parentLocationId": "Lazysprings",
-		"zoneId": "canyon", "roomScene": ROOM_SCENE,
+		"zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		"stock": { "mode": "fixed", "offers": [{ "offerId": "map", "definitionId": "canyon_cache_map", "unitPrice": 75 }] },
 	}}
 	_check(!mapOfferCatalog.validate({ "zoneCatalog": zoneCatalog, "itemCatalog": itemCatalog, "secretMapData": emptyMaps }).is_empty(), "map offer without reveal data fails lint")
@@ -214,7 +214,7 @@ func _validVendors() -> Dictionary:
 	return {
 		"test_general": {
 			"vendorId": "test_general", "kind": "general", "displayName": "Test General",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "fixed", "offers": [
 				{ "offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20 },
 				{ "offerId": "canyon_cache_map", "definitionId": "canyon_cache_map", "unitPrice": 75 },
@@ -222,12 +222,12 @@ func _validVendors() -> Dictionary:
 		},
 		"test_gunsmith": {
 			"vendorId": "test_gunsmith", "kind": "gun", "displayName": "Test Gunsmith",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 6 },
 		},
 		"test_bank": {
 			"vendorId": "test_bank", "kind": "bank", "displayName": "Test Bank",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 	}
 

@@ -367,7 +367,7 @@ func _testNewspaperBoundary() -> void:
 	var context = _makeContext(4321, 0)
 	var report = context.vendors.getNewspaperReport("test_news")
 	_check(report.success and report.available, "a Zone with a published pool reports")
-	_check(report.zoneId == "canyon" and report.parties.size() > 0, "the report resolves the vendor's own Zone")
+	_check(report.zoneId == "wild_west" and report.parties.size() > 0, "the report resolves the vendor's own Zone")
 	_check(report.generalTips.size() > 0 and str(report.headline) != "", "the report carries the authored copy")
 	_check(context.party.inventory.is_empty() and context.party.money == 0, "reading a report mutates nothing")
 	_check(context.vendors.getNewspaperReport("test_news_remote").reason == "no_pool", "a Zone without a pool reports unavailable, never another Zone")
@@ -404,7 +404,7 @@ func _makeCatalog():
 	catalog.vendors = {
 		"test_general": {
 			"vendorId": "test_general", "kind": "general", "displayName": "Test General",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "fixed", "offers": [
 				{ "offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20 },
 				{ "offerId": "canyon_cache_map", "definitionId": "canyon_cache_map", "unitPrice": 75 },
@@ -412,21 +412,21 @@ func _makeCatalog():
 		},
 		"test_gunsmith": {
 			"vendorId": "test_gunsmith", "kind": "gun", "displayName": "Test Gunsmith",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 4 },
 		},
 		"test_outfitter": {
 			"vendorId": "test_outfitter", "kind": "equipment", "displayName": "Test Outfitter",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "equipment", "count": 3 },
 		},
 		"test_bank": {
 			"vendorId": "test_bank", "kind": "bank", "displayName": "Test Bank",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 		"test_news": {
 			"vendorId": "test_news", "kind": "newspaper", "displayName": "Test Newspaper",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 		# A Zone with no published pool: the report must stay unavailable.
 		"test_news_remote": {

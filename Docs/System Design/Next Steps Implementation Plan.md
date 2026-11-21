@@ -79,7 +79,7 @@ Design doc: [Actor Animations](Actor%20Animations.md).
 
 ## Post-18 backlog (next steps)
 
-Ordered by dependency, same global rules: every commit ships its tests and updates Testing.md, the gap register and the affected design docs; no new Zone/Party/boss is invented to pad a slice (content reuses the canonical eight Zones and the already-authored actor files); disk ownership stays in `Globals/SaveGame.gd` and no transient combat state enters saves.
+Ordered by dependency, same global rules: every commit ships its tests and updates Testing.md, the gap register and the affected design docs; no new Zone/Party/boss is invented to pad a slice (content reuses the canonical six Zones and the already-authored actor files); disk ownership stays in `Globals/SaveGame.gd` and no transient combat state enters saves.
 
 ### Commit 19 — Animation service completion and legacy-scene cleanup ✅ **implemented**
 
@@ -93,9 +93,18 @@ Ordered by dependency, same global rules: every commit ships its tests and updat
 
 **Tests:** `Tests/TestActorAnimations`, `Tests/TestContentLint` (registry validation with teeth), full suite unchanged.
 
+### Commit 20 preamble — Zone canonicalization ✅ **implemented**
+
+**Goal:** make the Zone set canonical before the third-Zone commit.
+
+**Implemented as designed:**
+
+1. ✅ The canonical set is six Zones: the five-progression chain (`whispering_pines_reach` is the starting Zone and `default_zone`, then `rocky_hills`, `snowy_mountain`, `prairie`, `swamp` in progression order) plus the generic non-progression `wild_west` mid-map Zone. `canyon` → `wild_west`, `hilly_mining` → `rocky_hills`, `desert_prairie` → `prairie`; `grassy_plains` and `ghost_town` leave the canonical set (their equipment folded into `prairie`/`wild_west`, the Grassland events file deleted, their music playlists unmapped until the boundary pass). The Canyon Rats encounter files keep their names as Wild West content. Chunk-band boundaries are unchanged placeholders — the owner defines the canonical boundaries before commit 20 lands.
+2. ✅ Every consumer renamed with the ids: pool file (`EncounterPools/wild_west.gd`), `WildWestEvents.gd` (+ mapping), NewspaperData, vendor catalogs, music zone keys, equipment zone keys, metrics baseline/fixture ids and the Zone-referencing suites. Full suite 70/70 after the rename.
+
 ### Commit 20 — Third Zone breadth
 
-**Goal:** repeat the proven Whispering Pines Reach pattern for one more canonical Zone (proposed: Grassy Plains).
+**Goal:** repeat the proven Whispering Pines Reach pattern for one more canonical Zone (next in progression order: Rocky Hills), after the owner-defined canonical Zone boundaries replace the placeholder bands.
 
 1. Author actors (registry-only animation entries), encounters, a pool, a loot table and newspaper copy; reuse existing sheets where the art exists, no new Zone ids.
 2. Tests: `Tests/TestNewspaper`, `Tests/TestEncounterFlow` (seeded launch/return with Zone-propagated loot), `Tests/TestEncounterMetrics` (new fixture), content lint.

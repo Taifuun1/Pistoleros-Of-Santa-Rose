@@ -202,7 +202,7 @@ func _launchVamooseFight() -> bool:
 	var catalog = ZoneCatalogScript.new()
 	var request = RequestScript.make({
 		"encounterPath": CANYON_RATS,
-		"zoneId": "canyon",
+		"zoneId": "wild_west",
 		"source": "overworld_event",
 		"sourceId": "vamoose_test",
 		"progression": { "band": "early" },

@@ -2,7 +2,7 @@ extends Node
 
 
 # Whispering Pines Reach regular-encounter pool (commit 17; same shared
-# pool schema as canyon). The event outcome dispatcher and the
+# pool schema as wild_west). The event outcome dispatcher and the
 # NewspaperReportBuilder read this same file; weights are authored balance
 # data. Only encounters whose enemy composition really exists are listed.
 var data = {

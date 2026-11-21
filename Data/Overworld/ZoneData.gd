@@ -7,14 +7,19 @@ extends RefCounted
 
 var data = {
 	"zones": [
-		{ "zone": "ghost_town", "displayName": "Ghost Town", "min": Vector2i(10, 0), "max": Vector2i(10, 3) },
-		{ "zone": "grassy_plains", "displayName": "Grassy Plains", "min": Vector2i(0, 0), "max": Vector2i(1, 23) },
+		# The five progression zones in progression order (commit 20 prep).
+		# Whispering Pines Reach is the canonical starting zone; the other
+		# progression zones keep generic names until they are canonically
+		# named. Wild West is the generic mid-map zone outside the
+		# progression. Band boundaries are unchanged; the canonical
+		# boundaries are defined separately.
 		{ "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach", "min": Vector2i(2, 0), "max": Vector2i(3, 23) },
-		{ "zone": "hilly_mining", "displayName": "Hilly Mining Area", "min": Vector2i(4, 0), "max": Vector2i(5, 23) },
+		{ "zone": "rocky_hills", "displayName": "Rocky Hills", "min": Vector2i(4, 0), "max": Vector2i(5, 23) },
 		{ "zone": "snowy_mountain", "displayName": "Snowy Mountain", "min": Vector2i(6, 0), "max": Vector2i(7, 23) },
-		{ "zone": "canyon", "displayName": "Canyon", "min": Vector2i(8, 0), "max": Vector2i(9, 23) },
-		{ "zone": "desert_prairie", "displayName": "Desert Prairie", "min": Vector2i(10, 0), "max": Vector2i(11, 11) },
+		{ "zone": "prairie", "displayName": "Prairie", "min": Vector2i(10, 0), "max": Vector2i(11, 11) },
 		{ "zone": "swamp", "displayName": "Swamp", "min": Vector2i(10, 12), "max": Vector2i(11, 23) },
+		# Mid-map generic zone, not part of the progression.
+		{ "zone": "wild_west", "displayName": "Wild West", "min": Vector2i(8, 0), "max": Vector2i(9, 23) },
 	],
-	"default_zone": "canyon",
+	"default_zone": "whispering_pines_reach",
 }

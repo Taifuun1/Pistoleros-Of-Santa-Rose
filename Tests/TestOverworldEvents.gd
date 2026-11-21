@@ -14,13 +14,11 @@ const GENERIC_EVENT_FILE := "res://Data/Events/GenericEvents.gd"
 const CADENCE_TICK_BOUND := 50000
 ## Representative chunk per canonical Zone (matches the ZoneData bands).
 const ZONE_CHUNKS := {
-	"grassy_plains": Vector2i(0, 0),
 	"whispering_pines_reach": Vector2i(2, 0),
-	"hilly_mining": Vector2i(4, 0),
+	"rocky_hills": Vector2i(4, 0),
 	"snowy_mountain": Vector2i(6, 0),
-	"canyon": Vector2i(8, 0),
-	"ghost_town": Vector2i(10, 1),
-	"desert_prairie": Vector2i(10, 4),
+	"wild_west": Vector2i(8, 0),
+	"prairie": Vector2i(10, 4),
 	"swamp": Vector2i(10, 12),
 }
 
@@ -123,7 +121,7 @@ func _testZonePoolMapping() -> void:
 	var authoredByZone := {}
 	for zoneId in zoneFiles:
 		authoredByZone[zoneId] = _loadEvents(zoneFiles[zoneId]).keys()
-	_check(catalog.zoneIds().size() == 8, "the catalog still declares eight Zones")
+	_check(catalog.zoneIds().size() == 6, "the catalog declares the six canonical Zones")
 	for zoneId in catalog.zoneIds():
 		var pool: Dictionary = OverworldEvents.get_event_pool_for_zone(zoneId)
 		for genericId in generic:

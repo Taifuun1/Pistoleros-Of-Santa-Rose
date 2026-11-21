@@ -233,7 +233,7 @@ func _makeCatalogVendors() -> Dictionary:
 	return {
 		"test_general": {
 			"vendorId": "test_general", "kind": "general", "displayName": "Test General",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "fixed", "offers": [
 				{ "offerId": "paregoric", "definitionId": "paregoric", "unitPrice": 20 },
 				{ "offerId": "canyon_cache_map", "definitionId": "canyon_cache_map", "unitPrice": 75 },
@@ -241,16 +241,16 @@ func _makeCatalogVendors() -> Dictionary:
 		},
 		"test_gunsmith": {
 			"vendorId": "test_gunsmith", "kind": "gun", "displayName": "Test Gunsmith",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 			"stock": { "mode": "rolled", "itemType": "weapon", "count": 4 },
 		},
 		"test_bank": {
 			"vendorId": "test_bank", "kind": "bank", "displayName": "Test Bank",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 		"test_news": {
 			"vendorId": "test_news", "kind": "newspaper", "displayName": "Test Newspaper",
-			"parentLocationId": "Lazysprings", "zoneId": "canyon", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "wild_west", "roomScene": ROOM_SCENE,
 		},
 		"test_news_remote": {
 			"vendorId": "test_news_remote", "kind": "newspaper", "displayName": "Test Remote Newspaper",
@@ -434,7 +434,7 @@ func _testNewspaperView() -> void:
 	print("\n--- Newspaper: published report and unavailable Zone ---")
 	_check(shopMenu.open("test_news"), "the newspaper vendor opens")
 	_check(shopMenu.newspaperView.visible and !shopMenu.shopView.visible and !shopMenu.bankView.visible, "only the newspaper view is shown")
-	_check(shopMenu.zoneLabel.text == "Canyon", "the view names the vendor's Zone")
+	_check(shopMenu.zoneLabel.text == "Wild West", "the view names the vendor's Zone")
 	_check(shopMenu.headlineLabel.text != "", "a published Zone shows its headline")
 	var bodyText := _reportBodyText(shopMenu)
 	_check(bodyText.contains("3 x Squeky rat"), "the report gives the enemy composition with counts")

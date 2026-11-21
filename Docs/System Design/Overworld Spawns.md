@@ -80,7 +80,7 @@ A party root makes cleanup atomic and removes the need for per-type roots or nod
 ```gdscript
 {
     "definitionId": "rabbit_pair",
-    "zone": "canyon",
+    "zone": "wild_west",
     "chunk": Vector2i(8, 16),
     "actorCount": 2,
     "expiresAt": 73.5,             # monotonic planner time in seconds
@@ -93,7 +93,7 @@ Keep `Overworld.overworldActorIdCount` if indexed actor names remain useful. Rem
 
 ## Single shared Zone dataset
 
-`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component** (implemented). The existing `zones` and `default_zone` values were extracted from `MusicData` without changing their current geography; canonical snake_case ids were applied while display names remain presentation data:
+`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component** (implemented). The dataset is canonically six Zones — the five-progression chain (`whispering_pines_reach` starting, then `rocky_hills`, `snowy_mountain`, `prairie`, `swamp`) plus the non-progression `wild_west`; band boundaries are placeholder until the owner-defined canonical boundaries land:
 
 ```gdscript
 # Data/Overworld/ZoneData.gd
@@ -102,10 +102,11 @@ extends RefCounted
 var data = {
     # Inclusive chunk-coordinate corners; first match wins.
     "zones": [
-        { "zone": "ghost_town", "displayName": "Ghost Town", "min": Vector2i(10, 0), "max": Vector2i(10, 3) },
-        # Remaining bands follow with canonical ids and display names.
+        { "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach", "min": Vector2i(2, 0), "max": Vector2i(3, 23) },
+        # Remaining progression bands follow: rocky_hills, snowy_mountain,
+        # prairie, swamp — plus the wild_west mid-map band.
     ],
-    "default_zone": "canyon",
+    "default_zone": "whispering_pines_reach",
 }
 ```
 
@@ -158,7 +159,7 @@ var data = {
     "offscreen_margin_pixels": 32.0,
     "minimum_player_distance": 96.0,
     "zones": {
-        "canyon": {
+        "wild_west": {
             "spawn_chance": 0.35,
             "max_parties": 4,
             "max_actors": 12,
@@ -382,7 +383,7 @@ Use small fake chunk/placement contexts for planner tests instead of loading the
 
 ### Manual checks
 
-1. Start near the existing canyon rabbit area. Confirm no legacy fixed triple-rabbit point remains and new parties appear only after travelling toward off-screen spawn positions.
+1. Start near the existing Wild West rabbit area. Confirm no legacy fixed triple-rabbit point remains and new parties appear only after travelling toward off-screen spawn positions.
 2. Stand still through several ticks. Confirm Zone caps hold, no actor pops into or out of view, and off-screen expired parties are eventually replaced using the weighted table.
 3. Cross a Zone boundary. Confirm each side retains its own party table and music still changes exactly once using the shared Zone lookup.
 4. Cross chunk boundaries repeatedly and enter/leave a Location. Confirm whole parties clean up, no actors survive in unloaded chunks, and node counts do not grow indefinitely.

@@ -36,22 +36,23 @@ func _run() -> void:
 
 func _testGeography(catalog) -> void:
 	print("\n--- Band resolution and default ---")
-	_check(catalog.zoneForChunk(Vector2i(0, 0)) == "grassy_plains", "top-left chunk is grassy plains")
-	_check(catalog.zoneForChunk(Vector2i(1, 23)) == "grassy_plains", "grassy plains band includes its far corner")
 	_check(catalog.zoneForChunk(Vector2i(2, 0)) == "whispering_pines_reach", "Whispering Pines Reach starts at x=2")
-	_check(catalog.zoneForChunk(Vector2i(4, 23)) == "hilly_mining", "hilly mining includes its far corner")
+	_check(catalog.zoneForChunk(Vector2i(3, 23)) == "whispering_pines_reach", "Whispering Pines Reach includes its far corner")
+	_check(catalog.zoneForChunk(Vector2i(4, 23)) == "rocky_hills", "rocky hills includes its far corner")
 	_check(catalog.zoneForChunk(Vector2i(6, 0)) == "snowy_mountain", "snowy mountain starts at x=6")
-	_check(catalog.zoneForChunk(Vector2i(8, 23)) == "canyon", "canyon band includes its far corner")
-	_check(catalog.zoneForChunk(Vector2i(10, 1)) == "ghost_town", "earlier ghost town band wins the overlap")
-	_check(catalog.zoneForChunk(Vector2i(10, 4)) == "desert_prairie", "desert prairie follows the ghost town band")
-	_check(catalog.zoneForChunk(Vector2i(11, 11)) == "desert_prairie", "desert prairie ends at (11,11)")
+	_check(catalog.zoneForChunk(Vector2i(8, 23)) == "wild_west", "the Wild West band includes its far corner")
+	_check(catalog.zoneForChunk(Vector2i(10, 4)) == "prairie", "the prairie band covers the old ghost town corner")
+	_check(catalog.zoneForChunk(Vector2i(11, 11)) == "prairie", "the prairie ends at (11,11)")
 	_check(catalog.zoneForChunk(Vector2i(10, 12)) == "swamp", "swamp starts at y=12")
 	_check(catalog.zoneForChunk(Vector2i(11, 23)) == "swamp", "swamp includes its far corner")
-	_check(catalog.zoneForChunk(Vector2i(99, 99)) == "canyon", "chunks outside every band use the default Zone")
-	_check(catalog.zoneForChunk(Vector2i(-1, -1)) == "canyon", "negative chunks use the default Zone")
-	_check(catalog.zoneIds().size() == 8, "eight declared Zones")
-	_check(catalog.hasZone("canyon") and !catalog.hasZone("town"), "hasZone checks canonical ids only")
-	_check(catalog.displayName("ghost_town") == "Ghost Town", "display names come from ZoneData")
+	# The former Grassy Plains columns are uncovered until the canonical
+	# boundary pass, so they fall through to the starting Zone.
+	_check(catalog.zoneForChunk(Vector2i(0, 0)) == "whispering_pines_reach", "uncovered chunks use the starting Zone")
+	_check(catalog.zoneForChunk(Vector2i(99, 99)) == "whispering_pines_reach", "chunks outside every band use the default Zone")
+	_check(catalog.zoneForChunk(Vector2i(-1, -1)) == "whispering_pines_reach", "negative chunks use the default Zone")
+	_check(catalog.zoneIds().size() == 6, "six declared Zones")
+	_check(catalog.hasZone("wild_west") and !catalog.hasZone("town"), "hasZone checks canonical ids only")
+	_check(catalog.displayName("rocky_hills") == "Rocky Hills", "display names come from ZoneData")
 
 
 func _testConsumerIds(catalog) -> void:
@@ -84,7 +85,7 @@ func _testInjectionIsolation() -> void:
 	_check(injected.loadError == "", "injected data does not load production data")
 	_check(injected.zoneForChunk(Vector2i(0, 0)) == "test_zone", "injected band resolves")
 	_check(injected.zoneForChunk(Vector2i(99, 99)) == "test_zone", "injected default resolves")
-	_check(!injected.hasZone("canyon"), "production Zones are absent from an injected dataset")
+	_check(!injected.hasZone("wild_west"), "production Zones are absent from an injected dataset")
 
 
 func _testMalformedData() -> void:
