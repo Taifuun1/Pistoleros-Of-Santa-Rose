@@ -44,6 +44,16 @@ func _run() -> void:
 		_check(player.has_animation("Idle"), "the generated playback library drives the states")
 		var idleAnimation: Animation = player.get_animation("Idle")
 		_check(int(idleAnimation.track_get_key_value(0, 0)) == 0, "the playback track keys frame indices")
+		# Recovered legacy timings (commit 19^ history): uniform states play at
+		# their authored step, non-uniform states keep the hand-held key times.
+		_check(is_equal_approx(player.get_animation("Ponder").length, 18 * 0.2), "SpriteFrames-only states keep the legacy 5fps step")
+		var shootRevolver: Animation = player.get_animation("Shoot Revolver")
+		_check(is_equal_approx(shootRevolver.track_get_key_time(0, 1), 0.5) and is_equal_approx(shootRevolver.track_get_key_time(0, 8), 1.35), "Shoot Revolver keeps the legacy draw and recoil holds")
+		_check(is_equal_approx(shootRevolver.length, 1.65), "Shoot Revolver keeps the legacy total length")
+		var shootRifle: Animation = player.get_animation("Shoot Rifle")
+		_check(shootRifle.track_get_key_count(0) == 10 and int(shootRifle.track_get_key_value(0, 9)) == 0, "Shoot Rifle plays the legacy ten-entry sequence ending on the return-to-ready frame 0")
+		_check(is_equal_approx(shootRifle.track_get_key_time(0, 6), 0.3) and is_equal_approx(shootRifle.track_get_key_time(0, 7), 0.65) and is_equal_approx(shootRifle.track_get_key_time(0, 9), 0.75) and is_equal_approx(shootRifle.length, 1.0), "Shoot Rifle keeps the fired-frame hold, the return-to-ready hold and the legacy 1.0s length")
+		_check(is_equal_approx(player.get_animation("Snap").length, 1.6), "Snap keeps the legacy total length")
 	_check(walker.get_node("AnimationSprite").offset == Vector2(0, -15), "the authored sprite offset is preserved")
 
 	print("\n--- Whole-sheet and small-cell states ---")
@@ -75,19 +85,26 @@ func _run() -> void:
 		_check(pistoleroFrames.has_animation("Idle Revolver") and pistoleroFrames.get_frame_count("Idle Revolver") == 8, "the Pistolero builds its authored revolver states")
 		_check(pistoleroFrames.has_animation("Shoot Revolver") and pistoleroFrames.get_frame_count("Shoot Revolver") == 11, "the Pistolero Draw Revolver sheet slices 11 frames")
 	pistolero.free()
-	var guard = service.forActor("Bandits", "Bobtail Guard")
-	_check(guard != null, "the Bobtail Guard resolves through the registry")
-	if guard != null:
-		guard.free()
-	_check(service.idleForWeapon("BobtailGuard", "rifle") == "Idle Rifle", "the rifle bandit's idle comes from idleByWeapon")
-	_check(service.idleForWeapon("BobtailGuard", "revolver") == "Idle Rifle", "the rifle bandit's default idle matches its carried weapon")
 	var aiyana = service.forActor("Named People", "Aiyana")
 	_check(aiyana != null, "Aiyana resolves through the registry")
 	if aiyana != null:
 		var aiyanaFrames: SpriteFrames = aiyana.get_node("AnimationSprite").sprite_frames
 		for state in ["Idle", "Idle Revolver", "Idle Rifle", "Run", "Walk", "Shoot Revolver", "Shoot Rifle", "Throw"]:
 			_check(aiyanaFrames.has_animation(state), "Aiyana builds '%s'" % state)
+		# The draw timings are the recovered legacy data, shared by every
+		# actor whose draw sheets slice the same frame counts.
+		var aiyanaRevolver: Animation = aiyana.get_node("AnimationPlayer").get_animation("Shoot Revolver")
+		_check(is_equal_approx(aiyanaRevolver.track_get_key_time(0, 1), 0.5) and is_equal_approx(aiyanaRevolver.length, 1.65), "Aiyana's Shoot Revolver carries the shared legacy timing")
+		_check(is_equal_approx(aiyana.get_node("AnimationPlayer").get_animation("Shoot Rifle").track_get_key_time(0, 6), 0.3), "Aiyana's Shoot Rifle carries the shared legacy timing")
 		aiyana.free()
+	var guard = service.forActor("Bandits", "Bobtail Guard")
+	_check(guard != null, "the Bobtail Guard resolves through the registry")
+	if guard != null:
+		var guardRifle: Animation = guard.get_node("AnimationPlayer").get_animation("Shoot Rifle")
+		_check(guardRifle.track_get_key_count(0) == 10 and is_equal_approx(guardRifle.track_get_key_time(0, 9), 0.75), "the rifle bandit's Shoot Rifle carries the shared legacy sequence")
+		guard.free()
+	_check(service.idleForWeapon("BobtailGuard", "rifle") == "Idle Rifle", "the rifle bandit's idle comes from idleByWeapon")
+	_check(service.idleForWeapon("BobtailGuard", "revolver") == "Idle Rifle", "the rifle bandit's default idle matches its carried weapon")
 	var cardenas = service.forActor("Named People", "Manuel Cárdenas")
 	_check(cardenas != null, "Manuel Cárdenas resolves through the registry (accented id)")
 	if cardenas != null:

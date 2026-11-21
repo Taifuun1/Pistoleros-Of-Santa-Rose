@@ -272,9 +272,29 @@ func _animationRegistryErrors(actorId: String, entry: Dictionary, registry) -> A
 			var frameCount := int(state.get("frames", 0))
 			if frameCount <= 0:
 				errors.append("state '%s': frames must be positive" % stateName)
+		var sequence = state.get("sequence", null)
+		var playedCount := int(state.get("frames", 0))
+		if sequence != null:
+			if !(sequence is Array) or sequence.is_empty():
+				errors.append("state '%s': sequence must be a non-empty Array of frame indices" % stateName)
+			else:
+				playedCount = sequence.size()
+				for sequenceEntry in sequence:
+					if int(sequenceEntry) < 0 or int(sequenceEntry) >= int(state.get("frames", 0)):
+						errors.append("state '%s': sequence index %d is outside the sheet's %d frames" % [stateName, int(sequenceEntry), int(state.get("frames", 0))])
+						break
 		var step := float(state.get("step", registry.DEFAULT_STEP))
 		if step <= 0.0:
 			errors.append("state '%s': step must be positive" % stateName)
+		var frameTimes = state.get("frameTimes", null)
+		if frameTimes != null:
+			if !(frameTimes is Array) or frameTimes.is_empty() or frameTimes.size() != playedCount:
+				errors.append("state '%s': frameTimes must list exactly one duration per played frame (%d)" % [stateName, playedCount])
+			else:
+				for frameTime in frameTimes:
+					if float(frameTime) <= 0.0:
+						errors.append("state '%s': frameTimes entries must be positive" % stateName)
+						break
 	var defaultIdle := str(entry.get("defaultIdle", "Idle"))
 	if !states.has(defaultIdle):
 		errors.append("defaultIdle '%s' is not an authored state" % defaultIdle)

@@ -10,6 +10,11 @@ extends SceneTree
 ##   godot --headless --script res://Tests/RunAll.gd
 ## Narrow to matching tests (substring, case-insensitive) with user args:
 ##   godot --headless --script res://Tests/RunAll.gd -- Music Targeting
+## Or run a named dev bundle (see GROUPS) for a fast iteration loop:
+##   godot --headless --script res://Tests/RunAll.gd -- @animations
+## Bundles and substrings combine: plain args are ANDed, bundles are ORed
+## with each other, e.g. `-- @zone Quests` runs the zone bundle's Quest tests
+## only. The full run (no args) stays the CI gate.
 ##
 ## Discovered automatically: Tests/Test*.gd (headless --script) and
 ## Tests/Test*.tscn (run as scenes). When a test has both forms, only the
@@ -39,22 +44,57 @@ const EXTRA_SCENE_TESTS = [
 	"res://Minigames/Gold Rush/Test/RobbingTest.tscn",
 ]
 
+## Named dev bundles for quick iteration: `-- @name` selects every suite whose
+## name contains one of the bundle's substrings (OR within a bundle, AND with
+## plain substring args). Kept small enough to run during development; the
+## unfiltered run remains the merge gate.
+const GROUPS = {
+	"animations": ["ActorAnimations", "ActorShadow", "Acts", "AnimationSequencer"],
+	"combat": ["Encounters", "EncounterFlow", "EncounterMetrics", "EnemyAI", "Shootout", "Acts", "AnimationSequencer", "Targeting", "Cylinders", "Damage", "Effects", "TurnOrder", "MoveGrant", "MultiTarget", "Injury", "HPIndicator", "Vamoose"],
+	"overworld": ["ZoneCatalog", "Overworld", "Quest", "Discovery", "SecretClaims", "TrailState", "TownExit"],
+	"vendors": ["Vendor", "Newspaper", "Loot", "ItemGeneration", "SecretClaims"],
+	"progression": ["Save", "NewGameReset", "BeltOwnership", "Rodeos", "Journal", "CharacterSheet", "CharacterTab"],
+	"ui": ["Tab", "HPIndicator", "DamageNumber", "ShootoutUI", "InputMap", "UserSettings", "Inventory", "EquipmentStats"],
+}
+
 
 func _init() -> void:
 	call_deferred("_run")
 
 
 func _run() -> void:
-	var filters = []
+	var required: Array = []
+	var bundles: Array = []
 	for arg in OS.get_cmdline_user_args():
-		filters.append(str(arg).to_lower())
+		var argText := str(arg).to_lower()
+		if argText.begins_with("@"):
+			var bundle: Array = GROUPS.get(argText.substr(1), [])
+			if bundle.is_empty():
+				printerr("RunAll: unknown test bundle '%s' (known: %s)" % [str(arg), str(GROUPS.keys())])
+				quit(1)
+				return
+			bundles.append_array(bundle.map(func(name): return str(name).to_lower()))
+		else:
+			required.append(argText)
 
 	var tests = _discoverTests()
-	for filter in filters:
-		tests = tests.filter(func(test): return test.name.to_lower().contains(filter))
+	tests = tests.filter(func(test):
+		var testName: String = str(test.name).to_lower()
+		for filter in required:
+			if !testName.contains(filter):
+				return false
+		if !bundles.is_empty():
+			var matched := false
+			for filter in bundles:
+				if testName.contains(filter):
+					matched = true
+					break
+			if !matched:
+				return false
+		return true)
 
 	if tests.is_empty():
-		printerr("RunAll: no tests match %s" % str(filters))
+		printerr("RunAll: no tests match %s" % str(OS.get_cmdline_user_args()))
 		quit(1)
 		return
 	_cleanLogDir()

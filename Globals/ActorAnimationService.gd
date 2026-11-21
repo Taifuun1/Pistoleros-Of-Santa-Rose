@@ -110,15 +110,17 @@ func _buildOverworldRuntime(actorId: String) -> Node:
 		sprite.visible = stateName == defaultIdle
 		node.add_child(sprite)
 		var frameCount := sprite.hframes
-		var step := float(state.get("step", registry.DEFAULT_STEP))
 		var animation := Animation.new()
-		animation.length = frameCount * step
 		var track := animation.add_track(Animation.TYPE_VALUE)
 		animation.track_set_path(track, "%s:frame" % stateName)
 		animation.track_set_interpolation_type(track, Animation.INTERPOLATION_LINEAR)
 		animation.value_track_set_update_mode(track, Animation.UPDATE_DISCRETE)
-		for frameIndex in frameCount:
-			animation.track_insert_key(track, frameIndex * step, frameIndex)
+		var plan := _playbackPlan(state, frameCount, stateName, actorId)
+		var time := 0.0
+		for index in plan.frames.size():
+			animation.track_insert_key(track, time, int(plan.frames[index]))
+			time += float(plan.times[index])
+		animation.length = time
 		animation.loop_mode = Animation.LOOP_LINEAR
 		library.add_animation(str(stateName), animation)
 	if !player.has_animation_library(""):
@@ -162,25 +164,62 @@ func _spriteFramesFor(actorId: String) -> SpriteFrames:
 
 
 ## Mirrors the legacy scenes' playback: one discrete value track per state on
-## `AnimationSprite:frame`, one key per frame at the state's step.
+## `AnimationSprite:frame`, one key per played frame. Key spacing uses the
+## authored `frameTimes` durations when present (recovered hand-held timings),
+## otherwise the state's uniform `step`.
 func _buildStateAnimation(frames: SpriteFrames, stateName: String, actorId: String) -> Animation:
 	var states: Dictionary = registry.getStates(actorId)
 	var state: Dictionary = states.get(stateName, {})
-	var step := float(state.get("step", registry.DEFAULT_STEP))
 	var frameCount := maxi(1, frames.get_frame_count(stateName))
 	var animation := Animation.new()
 	var track := animation.add_track(Animation.TYPE_VALUE)
 	animation.track_set_path(track, "AnimationSprite:frame")
 	animation.track_set_interpolation_type(track, Animation.INTERPOLATION_NEAREST)
 	animation.value_track_set_update_mode(track, Animation.UPDATE_DISCRETE)
-	for frameIndex in frameCount:
-		animation.track_insert_key(track, frameIndex * step, frameIndex)
-	animation.length = frameCount * step
+	var plan := _playbackPlan(state, frameCount, stateName, actorId)
+	var time := 0.0
+	for index in plan.frames.size():
+		animation.track_insert_key(track, time, int(plan.frames[index]))
+		time += float(plan.times[index])
+	animation.length = time
 	# The legacy library is LOOP_NONE across the board: looping behavior lives
 	# in Animations.gd's finished->replay handler, and one-shot acts must fire
 	# animation_finished so the sequencer can close the act.
 	animation.loop_mode = Animation.LOOP_NONE
 	return animation
+
+
+## The state's playback plan: parallel frame-index and duration arrays. An
+## authored `sequence` lists the frame indices to play in order — indices may
+## repeat, e.g. Shoot Rifle's legacy return-to-ready tail that replays frame
+## 0. Without a sequence every sheet frame plays once. Durations come from
+## `frameTimes` (one per played entry) or the uniform `step`; a frameTimes
+## array shorter than the plan keeps its entries and plays the tail at the
+## step (the lint catches the mismatch, the runtime stays playable).
+func _playbackPlan(state: Dictionary, frameCount: int, stateName: String, actorId: String) -> Dictionary:
+	var step := float(state.get("step", registry.DEFAULT_STEP))
+	var frames: Array = []
+	var sequence: Array = state.get("sequence", [])
+	if sequence.is_empty():
+		for frameIndex in frameCount:
+			frames.append(frameIndex)
+	else:
+		for entry in sequence:
+			var frameIndex := int(entry)
+			if frameIndex < 0 or frameIndex >= frameCount:
+				push_warning("ActorAnimationService: state '%s' of '%s' sequences frame %d outside the sheet's %d frames; entry skipped." % [stateName, actorId, frameIndex, frameCount])
+				continue
+			frames.append(frameIndex)
+	var frameTimes: Array = state.get("frameTimes", [])
+	var times: Array = []
+	for index in frames.size():
+		if index < frameTimes.size():
+			times.append(maxf(0.001, float(frameTimes[index])))
+		else:
+			if !frameTimes.is_empty() and index == frameTimes.size():
+				push_warning("ActorAnimationService: state '%s' of '%s' has %d frameTimes entries for %d keys; the tail plays at the uniform step." % [stateName, actorId, frameTimes.size(), frames.size()])
+			times.append(step)
+	return { "frames": frames, "times": times }
 
 
 func _mergeLegacy(actorId: String, actorType: String, options: Dictionary, frames: SpriteFrames, player: AnimationPlayer) -> void:
