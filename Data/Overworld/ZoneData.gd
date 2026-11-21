@@ -22,37 +22,36 @@ const MAP_LEGEND = {
 	"W": "wild_west",
 }
 
-## The drawn Zone map (y = row index, x = character index). Placeholder
-## geography carried over from the rectangle bands: snowy_mountain caps the
-## northwest across (0,0)-(7,6) around the pine and rocky-hills columns, and
-## the chunks the old default-Zone fallback used to answer (the west columns
-## and x6-7 below the snowy cap) are written explicitly as pines. Redraw rows
-## here to move a boundary; the legend is the only other place to touch.
+## The drawn Zone map (y = row index, x = character index). Canonical owner-
+## defined boundaries: the snowy mountain caps the north above the wild west's
+## open middle band; rocky hills climb the southwest; Whispering Pines Reach
+## and the swamp fill the south. Redraw rows here to move a boundary; the
+## legend is the only other place to touch.
 var zoneMap = [
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"SSPPRRSSWWAA",
-	"PPPPRRPPWWAA",
-	"PPPPRRPPWWAA",
-	"PPPPRRPPWWAA",
-	"PPPPRRPPWWAA",
-	"PPPPRRPPWWAA",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
-	"PPPPRRPPWWMM",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"SSSSSSSSAAAA",
+	"WWWWWSSSAAAA",
+	"WWWWWWWWWWWW",
+	"WWWWWWWWWWWW",
+	"WWWWWWWWWWWW",
+	"WWWWWWWWWWWW",
+	"WWWWWWWWWWWW",
+	"RRRRWWWWWWWW",
+	"RRRRRWWWWWWW",
+	"RRRRRPPPPPPW",
+	"RRRRRPPPPPPW",
+	"RRRRRPPPPPPP",
+	"RRRRRPPPPPPP",
+	"RRRRRPPPPPPP",
+	"RRRRRPPPMMMM",
+	"RRRRRPPPMMMM",
+	"RRRRRPPPMMMM",
+	"RRRRRPPPMMMM",
 ]
 
 var data = {

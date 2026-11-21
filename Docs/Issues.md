@@ -19,6 +19,9 @@ Markdown file for listing issues that pop up.
 - Sometimes, the actor that is acting, when zoomed in, is behind the other actors
 - Which Chamber is currently active is not displayed, the line indicator is not shown
 - Remove Squeky Rat Shootout actors and related files
+- Actors in Shootouts show the base idle animation when they should show based on worn weapon
+    - Base idle only when wielding a lasso
+    - Rifle idle with both rifle and shotgun
 
 ## Fixed
 

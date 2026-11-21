@@ -14,12 +14,12 @@ const GENERIC_EVENT_FILE := "res://Data/Events/GenericEvents.gd"
 const CADENCE_TICK_BOUND := 50000
 ## Representative chunk per canonical Zone (matches the ZoneData bands).
 const ZONE_CHUNKS := {
-	"whispering_pines_reach": Vector2i(2, 0),
-	"rocky_hills": Vector2i(4, 0),
-	"snowy_mountain": Vector2i(6, 0),
-	"wild_west": Vector2i(8, 0),
-	"prairie": Vector2i(10, 4),
-	"swamp": Vector2i(10, 12),
+	"whispering_pines_reach": Vector2i(5, 15),
+	"rocky_hills": Vector2i(0, 13),
+	"snowy_mountain": Vector2i(0, 0),
+	"wild_west": Vector2i(0, 8),
+	"prairie": Vector2i(9, 0),
+	"swamp": Vector2i(9, 20),
 }
 
 
