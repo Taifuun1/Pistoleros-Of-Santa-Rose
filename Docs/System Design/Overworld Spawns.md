@@ -103,8 +103,8 @@ const MAP_WIDTH := 12   # cross-checked against WorldData.CHUNK_GRID
 const MAP_HEIGHT := 24
 
 const MAP_LEGEND = {
-	"P": "whispering_pines_reach",
-	# R rocky_hills, S snowy_mountain, A prairie, M swamp, W wild_west
+	"P": "kipley_wilds",
+	# R cassidy_hills, S oakley_peak, A urie_prairie, M tillhill_marsh, W wild_west
 }
 
 var zoneMap = [
@@ -119,10 +119,10 @@ var data = {
 	"legend": MAP_LEGEND,
 	"zone_map": zoneMap,
 	"zones": [
-		{ "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach" },
+		{ "zone": "kipley_wilds", "displayName": "Kipley Wilds" },
 		# Remaining progression zones + wild_west, ids and display names only.
 	],
-	"default_zone": "whispering_pines_reach",
+	"default_zone": "kipley_wilds",
 }
 ```
 

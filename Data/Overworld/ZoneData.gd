@@ -14,18 +14,18 @@ const MAP_HEIGHT := 24
 
 # Map legend: character -> canonical Zone id.
 const MAP_LEGEND = {
-	"P": "whispering_pines_reach",
-	"R": "rocky_hills",
-	"S": "snowy_mountain",
-	"A": "prairie",
-	"M": "swamp",
+	"P": "kipley_wilds",
+	"R": "cassidy_hills",
+	"S": "oakley_peak",
+	"A": "urie_prairie",
+	"M": "tillhill_marsh",
 	"W": "wild_west",
 }
 
 ## The drawn Zone map (y = row index, x = character index). Canonical owner-
-## defined boundaries: the snowy mountain caps the north above the wild west's
-## open middle band; rocky hills climb the southwest; Whispering Pines Reach
-## and the swamp fill the south. Redraw rows here to move a boundary; the
+## defined boundaries: Oakley Peak caps the north above the Wild West's
+## open middle band; Cassidy Hills climb the southwest; Kipley Wilds
+## and Tillhill Marsh fill the south. Redraw rows here to move a boundary; the
 ## legend is the only other place to touch.
 var zoneMap = [
 	"SSSSSSSSAAAA",
@@ -60,16 +60,15 @@ var data = {
 	"legend": MAP_LEGEND,
 	"zone_map": zoneMap,
 	"zones": [
-		# The five progression zones in progression order (commit 20 prep);
-		# the non-progression Wild West last. Whispering Pines Reach is the
-		# canonical starting zone; the other progression zones keep generic
-		# names until they are canonically named.
-		{ "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach" },
-		{ "zone": "rocky_hills", "displayName": "Rocky Hills" },
-		{ "zone": "snowy_mountain", "displayName": "Snowy Mountain" },
-		{ "zone": "prairie", "displayName": "Prairie" },
-		{ "zone": "swamp", "displayName": "Swamp" },
+		# The five progression zones in progression order; the
+		# non-progression Wild West last. Kipley Wilds is the canonical
+		# starting zone.
+		{ "zone": "kipley_wilds", "displayName": "Kipley Wilds" },
+		{ "zone": "cassidy_hills", "displayName": "Cassidy Hills" },
+		{ "zone": "oakley_peak", "displayName": "Oakley Peak" },
+		{ "zone": "urie_prairie", "displayName": "Urie Prairie" },
+		{ "zone": "tillhill_marsh", "displayName": "Tillhill Marsh" },
 		{ "zone": "wild_west", "displayName": "Wild West" },
 	],
-	"default_zone": "whispering_pines_reach",
+	"default_zone": "kipley_wilds",
 }

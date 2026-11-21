@@ -65,7 +65,7 @@ const EXPECTED_SHOTS := {
 const QUEST_ENCOUNTER := {
 	"objective_id": "find_morrison",
 	"encounter_path": "res://Data/Shootout/Encounters/LittlehillApproach.gd",
-	"zone_id": "whispering_pines_reach",
+	"zone_id": "kipley_wilds",
 	"trigger_path": "Interaction/LittlehillApproach",
 }
 

@@ -141,16 +141,16 @@ var spritePools = {
 
 
 var zones = {
-	"rocky_hills": {
-		"displayName": "Rocky Hills",
+	"cassidy_hills": {
+		"displayName": "Cassidy Hills",
 		"items": [
 			{ "id": "prospector_britches", "name": "Prospector Britches", "slot": "trousers", "dropsAnywhere": false },
 			{ "id": "silver_vein_belt", "name": "Silver Vein Belt", "slot": "belt", "dropsAnywhere": false },
 			{ "id": "coal_dusted_stetson", "name": "Coal-Dusted Stetson", "slot": "headwear", "dropsAnywhere": false },
 		],
 	},
-	"snowy_mountain": {
-		"displayName": "Snowy Mountain",
+	"oakley_peak": {
+		"displayName": "Oakley Peak",
 		"items": [
 			{ "id": "angora_winter_chaps", "name": "Angora Winter Chaps", "slot": "trousers", "dropsAnywhere": false },
 			{ "id": "frostbit_duster", "name": "Frostbit Duster", "slot": "duster", "dropsAnywhere": false },
@@ -158,34 +158,34 @@ var zones = {
 			{ "id": "ice_crusted_bandolier", "name": "Ice-Crusted Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},
-	"prairie": {
-		"displayName": "Prairie",
+	"urie_prairie": {
+		"displayName": "Urie Prairie",
 		"items": [
 			{ "id": "sandstorm_veil", "name": "Sandstorm Veil", "slot": "bandana", "dropsAnywhere": false },
 			{ "id": "sun_bleached_stetson", "name": "Sun-Bleached Stetson", "slot": "headwear", "dropsAnywhere": false },
 			{ "id": "dust_devil_duster", "name": "Dust Devil Duster", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "cracked_leather_boots", "name": "Cracked-Leather Boots", "slot": "justins", "dropsAnywhere": false },
 			# Former Grassy Plains items (commit 20 prep): the zone folded into
-			# the Prairie; placement is placeholder until the boundary pass.
-			{ "id": "prairie_rider_duster", "name": "Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
+			# the Urie Prairie; placement is placeholder until the boundary pass.
+			{ "id": "prairie_rider_duster", "name": "Urie Prairie Rider Duster", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "green_hollow_bandana", "name": "Green Hollow Bandana", "slot": "bandana", "dropsAnywhere": false },
 			{ "id": "meadowlark_boots", "name": "Meadowlark Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
-	"whispering_pines_reach": {
-		"displayName": "Whispering Pines Reach",
+	"kipley_wilds": {
+		"displayName": "Kipley Wilds",
 		"items": [
 			{ "id": "woodsman_flannel_coat", "name": "Woodsman Flannel Coat", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "pine_pitch_stetson", "name": "Pine Pitch Stetson", "slot": "headwear", "dropsAnywhere": false },
 			{ "id": "needle_stitched_boots", "name": "Needle-Stitched Boots", "slot": "justins", "dropsAnywhere": false },
 		],
 	},
-	"swamp": {
-		"displayName": "Swamp",
+	"tillhill_marsh": {
+		"displayName": "Tillhill Marsh",
 		"items": [
 			{ "id": "mudder_work_boots", "name": "Mudder Work Boots", "slot": "justins", "dropsAnywhere": false },
 			{ "id": "gator_hide_belt", "name": "Gator-Hide Belt", "slot": "belt", "dropsAnywhere": false },
-			{ "id": "swamp_rat_poncho", "name": "Swamp Rat Poncho", "slot": "duster", "dropsAnywhere": false },
+			{ "id": "swamp_rat_poncho", "name": "Tillhill Marsh Rat Poncho", "slot": "duster", "dropsAnywhere": false },
 			{ "id": "mossy_bandolier", "name": "Mossy Bandolier", "slot": "belt", "dropsAnywhere": false },
 		],
 	},

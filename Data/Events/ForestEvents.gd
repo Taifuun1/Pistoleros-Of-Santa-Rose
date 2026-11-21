@@ -20,7 +20,7 @@ var events = {
 			{
 				"label": "Keep moving and say nothing",
 				"result": "ignore_trapper",
-				"outcome": { "kind": "encounter", "poolZone": "whispering_pines_reach" }
+				"outcome": { "kind": "encounter", "poolZone": "kipley_wilds" }
 			}
 		]
 	},

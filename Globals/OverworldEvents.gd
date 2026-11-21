@@ -17,9 +17,9 @@ const EVENT_CHANCE_PER_TICK: float = 0.15
 ## Explicit Zone -> event-file mapping. A Zone without an entry uses generic
 ## events only; it never falls back to another Zone's pool.
 const ZONE_EVENT_FILES: Dictionary = {
-	"whispering_pines_reach": "res://Data/Events/ForestEvents.gd",
-	"prairie": "res://Data/Events/DesertEvents.gd",
-	"swamp": "res://Data/Events/SwampEvents.gd",
+	"kipley_wilds": "res://Data/Events/ForestEvents.gd",
+	"urie_prairie": "res://Data/Events/DesertEvents.gd",
+	"tillhill_marsh": "res://Data/Events/SwampEvents.gd",
 	"wild_west": "res://Data/Events/WildWestEvents.gd",
 }
 

@@ -69,7 +69,7 @@
       "Dust Whisperer"
     ],
     "turns": 35,
-    "zoneId": "whispering_pines_reach"
+    "zoneId": "kipley_wilds"
   },
   "pinesWaylay": {
     "encounter": "Whispering Pines Waylay",
@@ -105,6 +105,6 @@
       "Bobtail Guard"
     ],
     "turns": 15,
-    "zoneId": "whispering_pines_reach"
+    "zoneId": "kipley_wilds"
   }
 }

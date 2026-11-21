@@ -30,8 +30,8 @@ var zones = {
 			],
 		},
 	},
-	"whispering_pines_reach": {
-		"zoneId": "whispering_pines_reach",
+	"kipley_wilds": {
+		"zoneId": "kipley_wilds",
 		"headline": "Masked Bandits Waylay the Pine Roads",
 		"editorial": "The pines have kept their quiet, but the roads through them have not. Hold-up crews work the treeline now: rifles from the deep columns, a taunting bull up front, and somebody in the back who dusts your eyes and your cylinder. Travel armed, travel together, and shoot the marks off you first.",
 		"generalTips": [

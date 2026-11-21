@@ -87,7 +87,7 @@ func _run() -> void:
 
 	print("\n--- Random items (zone 'swamp') ---")
 	for i in 5:
-		var item = generator.generateItem({ "zone": "swamp" })
+		var item = generator.generateItem({ "zone": "tillhill_marsh" })
 		print(item["name"])
 
 	print("\n--- Name format matches doc example shape ---")

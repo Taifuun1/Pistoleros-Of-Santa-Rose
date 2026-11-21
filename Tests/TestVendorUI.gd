@@ -254,7 +254,7 @@ func _makeCatalogVendors() -> Dictionary:
 		},
 		"test_news_remote": {
 			"vendorId": "test_news_remote", "kind": "newspaper", "displayName": "Test Remote Newspaper",
-			"parentLocationId": "Lazysprings", "zoneId": "swamp", "roomScene": ROOM_SCENE,
+			"parentLocationId": "Lazysprings", "zoneId": "tillhill_marsh", "roomScene": ROOM_SCENE,
 		},
 	}
 

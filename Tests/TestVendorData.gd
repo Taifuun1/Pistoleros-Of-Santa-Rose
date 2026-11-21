@@ -130,7 +130,7 @@ func _testEncounterPools(zoneCatalog) -> void:
 	var authoredErrors := productionPools.validateAuthoredPools(zoneCatalog, _encounterNames())
 	_check(authoredErrors.is_empty(), "authored Zone pools validate: %s" % [authoredErrors])
 	_check(!productionPools.pools.is_empty(), "at least one Zone publishes a pool")
-	_check(productionPools.getEntries("swamp").is_empty() and productionPools.getPublicEntries("swamp").is_empty(), "missing pools never fall back to a default encounter")
+	_check(productionPools.getEntries("tillhill_marsh").is_empty() and productionPools.getPublicEntries("tillhill_marsh").is_empty(), "missing pools never fall back to a default encounter")
 
 	var pools = EncounterPoolDataScript.new()
 	pools.pools["wild_west"] = { "zoneId": "wild_west", "entries": [

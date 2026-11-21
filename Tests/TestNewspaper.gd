@@ -35,7 +35,7 @@ func _run() -> void:
 	var copy = NewspaperDataScript.new()
 	var copyErrors := copy.validate(zoneCatalog, pools)
 	_check(copyErrors.is_empty(), "authored newspaper copy validates: %s" % [copyErrors])
-	_check(!copy.hasZone("swamp"), "Zones without copy stay unauthored")
+	_check(!copy.hasZone("tillhill_marsh"), "Zones without copy stay unauthored")
 
 	print("\n--- Every production report matches its own Zone and pool ---")
 	var manifest = load(MAP_MANIFEST)
@@ -62,7 +62,7 @@ func _run() -> void:
 	var productionPools = EncounterPoolDataScript.new()
 	productionPools.loadProductionPools()
 	var productionCopy = NewspaperDataScript.new()
-	_check(builder.buildReport("swamp", productionPools, _resolver(), productionCopy).reason == "no_pool", "an unpublished Zone never falls back to another Zone")
+	_check(builder.buildReport("tillhill_marsh", productionPools, _resolver(), productionCopy).reason == "no_pool", "an unpublished Zone never falls back to another Zone")
 	var productionReport = builder.buildReport("wild_west", productionPools, _resolver(), productionCopy)
 	_check(productionReport.parties.size() == productionPools.getPublicEntries("wild_west").size(), "every published entry appears exactly once")
 	_check(!productionReport.parties.is_empty(), "a real production report is never empty")
@@ -72,15 +72,15 @@ func _run() -> void:
 	_check(!names.has("Testing Encounter"), "the debug RatAmbush encounter is never published as news")
 
 	print("\n--- The second authored Zone projects real news ---")
-	var pinesReport = builder.buildReport("whispering_pines_reach", productionPools, _resolver(), productionCopy)
+	var pinesReport = builder.buildReport("kipley_wilds", productionPools, _resolver(), productionCopy)
 	_check(pinesReport.success and pinesReport.available, "the Whispering Pines Reach report is available")
-	_check(pinesReport.zoneId == "whispering_pines_reach", "the pines report keeps its Zone")
-	_check(str(pinesReport.headline) == productionCopy.getHeadline("whispering_pines_reach"), "the pines headline comes from the authored copy")
-	_check(pinesReport.parties.size() == productionPools.getPublicEntries("whispering_pines_reach").size(), "every published Whispering Pines Reach entry is projected")
+	_check(pinesReport.zoneId == "kipley_wilds", "the pines report keeps its Zone")
+	_check(str(pinesReport.headline) == productionCopy.getHeadline("kipley_wilds"), "the pines headline comes from the authored copy")
+	_check(pinesReport.parties.size() == productionPools.getPublicEntries("kipley_wilds").size(), "every published Whispering Pines Reach entry is projected")
 	for party in pinesReport.parties:
 		_check(!party.composition.is_empty(), "pines party '%s' lists at least one enemy" % party.encounterId)
 		_check(!party.damageTypes.is_empty(), "pines party '%s' names its damage types" % party.encounterId)
-		_check(party.mechanics == productionCopy.getEncounterTips("whispering_pines_reach", str(party.encounterId)) and !party.mechanics.is_empty(), "pines party '%s' carries its authored tips" % party.encounterId)
+		_check(party.mechanics == productionCopy.getEncounterTips("kipley_wilds", str(party.encounterId)) and !party.mechanics.is_empty(), "pines party '%s' carries its authored tips" % party.encounterId)
 	var pinesNames := []
 	for party in pinesReport.parties:
 		pinesNames.append(str(party.encounterId))

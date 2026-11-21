@@ -9,11 +9,11 @@ var data = {
 	# Overworld ambience per zone; the lists loop with a fade before each song
 	# end blending into the next song.
 	"zone_tracks": {
-		"rocky_hills": [
+		"cassidy_hills": [
 			"Overworld/RockyHills1",
 			"Overworld/RockyHills2"
 		],
-		"prairie": [
+		"urie_prairie": [
 			"Overworld/Prairie1",
 			"Overworld/Prairie2",
 			"Overworld/Prairie3"
@@ -22,16 +22,16 @@ var data = {
 			"Overworld/WildWest1",
 			"Overworld/WildWest2"
 		],
-		"whispering_pines_reach": [
+		"kipley_wilds": [
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Chill/Birdsong Window"
 		],
-		"snowy_mountain": [
+		"oakley_peak": [
 			"Thematic/Somber/Rockside Echo",
 			"Thematic/Chill/Chill1",
 			"Thematic/Chill/Chill2"
 		],
-		"swamp": [
+		"tillhill_marsh": [
 			"Thematic/Mysterious/Dust at Dawn",
 			"Thematic/Mysterious/Dust on the Cartridge"
 		],
@@ -79,11 +79,11 @@ var data = {
 	# Fights tied to an Overworld zone (encounter data "zone"). Zone ids match
 	# Data/Overworld/ZoneData.gd.
 	"zone_shootout_tracks": {
-		"rocky_hills": ["Shootout/Dusty Cartridge Duel"],
-		"prairie": ["Shootout/Clash on Beat One"],
-		"snowy_mountain": ["Shootout/Wily Core"],
-		"whispering_pines_reach": ["Shootout/Pixel Duel"],
-		"swamp": ["Shootout/Last Bullet Canyon"],
+		"cassidy_hills": ["Shootout/Dusty Cartridge Duel"],
+		"urie_prairie": ["Shootout/Clash on Beat One"],
+		"oakley_peak": ["Shootout/Wily Core"],
+		"kipley_wilds": ["Shootout/Pixel Duel"],
+		"tillhill_marsh": ["Shootout/Last Bullet Canyon"],
 		"wild_west": ["Shootout/Steel Cannon Run"],
 	},
 	# End-of-fight stingers for the Shootout end screen, keyed by the fight

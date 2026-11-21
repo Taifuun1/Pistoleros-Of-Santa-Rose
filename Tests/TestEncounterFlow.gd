@@ -25,7 +25,7 @@ const LITTLEHILL_APPROACH := "res://Data/Shootout/Encounters/LittlehillApproach.
 const PINES_PATROL := "res://Data/Shootout/Encounters/PinesPatrol.gd"
 const PINES_WAYLAY := "res://Data/Shootout/Encounters/PinesWaylay.gd"
 const PINES_STANDOFF := "res://Data/Shootout/Encounters/PinesStandoff.gd"
-const PINES_ZONE := "whispering_pines_reach"
+const PINES_ZONE := "kipley_wilds"
 const PRODUCTION_QUEST_CATALOG := "res://Data/Quests/QuestCatalog.tres"
 const QUEST_ID := "pistoleros_regroup"
 
@@ -133,7 +133,7 @@ func _testPoolSelection() -> void:
 		seen[selected.encounterPath] = true
 	_check(seen.size() == 2, "both weighted canyon encounters can be selected")
 
-	_check(pools.selectEncounter("snowy_mountain", rng, catalog).reason == "no_pool", "a canonical Zone without a pool fails closed")
+	_check(pools.selectEncounter("oakley_peak", rng, catalog).reason == "no_pool", "a canonical Zone without a pool fails closed")
 	_check(pools.selectEncounter("not_a_zone", rng, catalog).reason == "invalid_zone", "a non-canonical Zone fails closed")
 	_check(pools.selectEncounter("wild_west", null, catalog).reason == "invalid_rng", "selection requires an injected RNG")
 
@@ -159,7 +159,7 @@ func _testEventOutcomeDispatch() -> void:
 	var canyonPool: Dictionary = OverworldEvents.get_event_pool_for_zone("wild_west")
 	_check(canyonPool.has("Canyon Cache Raiders"), "the canyon event pool includes its authored event")
 	_check(canyonPool.has("Rattlesnake"), "generic events are merged into every Zone pool")
-	var swampPool: Dictionary = OverworldEvents.get_event_pool_for_zone("swamp")
+	var swampPool: Dictionary = OverworldEvents.get_event_pool_for_zone("tillhill_marsh")
 	_check(swampPool.has("Quicksand"), "the swamp pool includes its authored event")
 	_check(!swampPool.has("Canyon Cache Raiders"), "a Zone never receives another Zone's event")
 
@@ -429,7 +429,7 @@ func _testQuestEncounterProgression() -> void:
 	}
 	var requestOptions := {
 		"encounterPath": LITTLEHILL_APPROACH,
-		"zoneId": "whispering_pines_reach",
+		"zoneId": "kipley_wilds",
 		"source": "quest",
 		"sourceId": "%s:find_morrison" % QUEST_ID,
 		"origin": { "sceneKey": "overworld" },

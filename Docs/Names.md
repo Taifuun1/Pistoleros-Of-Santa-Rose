@@ -261,6 +261,7 @@ Source: [namingpower.com/cowboy-names](https://namingpower.com/cowboy-names/)
 - Sling!
 - Duel!
 - Shoot!
+- Blast!
 
 ### Quests
 
