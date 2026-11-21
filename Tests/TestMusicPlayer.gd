@@ -43,9 +43,19 @@ func makeMusicPlayer(data: Dictionary):
 
 func makeZoneData() -> Dictionary:
 	return {
+		"map_width": 10,
+		"map_height": 5,
+		"legend": { "G": "grasslands", "A": "prairie" },
+		"zone_map": [
+			"GGGGGAAAAA",
+			"GGGGGAAAAA",
+			"GGGGGAAAAA",
+			"GGGGGAAAAA",
+			"GGGGGAAAAA",
+		],
 		"zones": [
-			{ "zone": "grasslands", "displayName": "Grasslands", "min": Vector2i(0, 0), "max": Vector2i(4, 4) },
-			{ "zone": "prairie", "displayName": "Prairie", "min": Vector2i(5, 0), "max": Vector2i(9, 4) },
+			{ "zone": "grasslands", "displayName": "Grasslands" },
+			{ "zone": "prairie", "displayName": "Prairie" },
 		],
 		"default_zone": "prairie",
 	}
@@ -177,8 +187,8 @@ func _test_same_playlist_guard(music) -> void:
 
 ## Zones resolve by chunk bands; only zone changes switch music.
 func _test_zone_decisions(music) -> void:
-	_check(music.zone_for_chunk(Vector2i(1, 3)) == "grasslands", "chunks inside a band resolve to its zone")
-	_check(music.zone_for_chunk(Vector2i(99, 99)) == "prairie", "chunks outside every band fall back to the default zone")
+	_check(music.zone_for_chunk(Vector2i(1, 3)) == "grasslands", "chunks drawn on the map resolve to their zone")
+	_check(music.zone_for_chunk(Vector2i(99, 99)) == "prairie", "chunks outside the map fall back to the default zone")
 	music.on_overworld_chunk(Vector2i(1, 3))
 	_check(music.currentTrackId == "grass", "entering a zone plays its track list")
 	var generation = music.generation

@@ -32,7 +32,7 @@ The existing implementation is fixed spawn points with independent per-actor rol
 4. Every spawn uses `Actors/Overworld/OverworldActor.tscn`. `initOverworldActor()` resolves `Animations/Overworld/{type}/{name}Animations.tscn`, plays `Idle`, attaches a shadow, and assigns an indexed node name.
 5. `removeFarawayObjects()` frees a spawn point after its chunk leaves the loaded radius. The spawn point's `_on_tree_exiting()` then frees the actor names it recorded. Live actors are otherwise not culled by distance or time.
 6. The only concrete spawn content is the three-rabbit point in `Overworld/Overworld Chunks/#8#16.gd`. The scene currently has an `Actors/Animals` container but no general people container.
-7. There is no shared gameplay Zone service. The current chunk-band definitions live in `Data/Music/MusicData.gd`, and `MusicPlayer.zone_for_chunk()` resolves them. The bands are explicitly provisional.
+7. There is no shared gameplay Zone service. The zone definitions live in `Data/Overworld/ZoneData.gd`, and `OverworldZoneCatalog.zoneForChunk()` resolves them. The drawn boundaries are explicitly provisional.
 
 Additional constraints from the current chunk loader:
 
@@ -47,9 +47,9 @@ Use a **pure spawn planner** plus a thin scene adapter:
 
 | Component | Responsibility |
 | --- | --- |
-| `Data/Overworld/ZoneData.gd` | Shared Zone chunk bands and default Zone; no music or spawn content |
+| `Data/Overworld/ZoneData.gd` | The drawn ASCII Zone map (chunk→Zone geography) and default Zone; no music or spawn content |
 | `Data/Overworld/SpawnData.gd` | Per-Zone spawn cadence, population caps, and weighted party tables |
-| `Overworld/OverworldZoneCatalog.gd` | Pure `zoneForChunk(chunk)` lookup over `ZoneData` |
+| `Overworld/OverworldZoneCatalog.gd` | Pure `zoneForChunk(chunk)` lookup parsing `ZoneData`'s zone map |
 | `Overworld/OverworldSpawnDirector.gd` | Seeded RNG, eligibility checks, weighted party choice, position candidates, and lifetime decisions; no scene-tree or autoload access |
 | `Overworld/Overworld.gd` | Supplies loaded chunks/player visibility, instantiates returned party plans, owns party nodes, and despawns them |
 | `Actors/Overworld/OverworldActor.tscn` / `.gd` | One non-interactive visual actor, initialized with actor name/type and local formation offset |
@@ -93,20 +93,36 @@ Keep `Overworld.overworldActorIdCount` if indexed actor names remain useful. Rem
 
 ## Single shared Zone dataset
 
-`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component** (implemented). The dataset is canonically six Zones — the five-progression chain (`whispering_pines_reach` starting, then `rocky_hills`, `snowy_mountain`, `prairie`, `swamp`) plus the non-progression `wild_west`; band boundaries are placeholder until the owner-defined canonical boundaries land:
+`Data/Overworld/ZoneData.gd` is the **sole authoritative source of Overworld Zone dimensions for every component** (implemented). Geography is an ASCII chunk map — one character per chunk, one fixed-width row per world row — drawn directly in ZoneData and parsed once by the catalog into a chunk→Zone lookup. Every grid chunk is explicitly zoned; `default_zone` only answers lookups outside the map:
 
 ```gdscript
 # Data/Overworld/ZoneData.gd
 extends RefCounted
 
+const MAP_WIDTH := 12   # cross-checked against WorldData.CHUNK_GRID
+const MAP_HEIGHT := 24
+
+const MAP_LEGEND = {
+	"P": "whispering_pines_reach",
+	# R rocky_hills, S snowy_mountain, A prairie, M swamp, W wild_west
+}
+
+var zoneMap = [
+	"SSPPRRSSWWAA",
+	"SSPPRRSSWWAA",
+	# ... one row per world row; redraw rows to move a boundary.
+]
+
 var data = {
-    # Inclusive chunk-coordinate corners; first match wins.
-    "zones": [
-        { "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach", "min": Vector2i(2, 0), "max": Vector2i(3, 23) },
-        # Remaining progression bands follow: rocky_hills, snowy_mountain,
-        # prairie, swamp — plus the wild_west mid-map band.
-    ],
-    "default_zone": "whispering_pines_reach",
+	"map_width": MAP_WIDTH,
+	"map_height": MAP_HEIGHT,
+	"legend": MAP_LEGEND,
+	"zone_map": zoneMap,
+	"zones": [
+		{ "zone": "whispering_pines_reach", "displayName": "Whispering Pines Reach" },
+		# Remaining progression zones + wild_west, ids and display names only.
+	],
+	"default_zone": "whispering_pines_reach",
 }
 ```
 
@@ -116,16 +132,16 @@ This is one shared dataset, not a spawn-specific copy:
 - `OverworldSpawnDirector` resolves Zones through the same catalog. `SpawnData` may key tables by Zone id, but must never contain chunk bounds, a default Zone, or another geometry fallback.
 - Every other current or future Zone consumer—encounters, item generation, quests, maps, and newspaper information—uses the same catalog and `ZoneData`. Consumers store/reference Zone ids, never their own copies of Zone dimensions.
 - Tests inject a replacement dataset into the catalog and pass that same catalog to every consumer under test. They must not maintain separate music/spawn Zone fixtures that can disagree.
-- Changing Zone geography requires editing only `ZoneData.gd`; all consumers then observe the same boundaries. A consumer must not fall back to private bands when the shared data has no match.
+- Changing Zone geography requires redrawing rows only in `ZoneData.gd` (`zone_map` + legend); all consumers then observe the same boundaries. A consumer must not fall back to private geometry when the shared data has no match.
 
-`OverworldZoneCatalog.zoneForChunk(chunk)` preserves the current first-inclusive-band-wins behavior and shared default fallback:
+`OverworldZoneCatalog.zoneForChunk(chunk)` answers from the parsed chunk→Zone lookup and keeps the shared default fallback for chunks outside the map:
 
 ```gdscript
 func _init(zoneData: Dictionary = {}) -> void
 func zoneForChunk(chunk: Vector2i) -> String
 ```
 
-The production catalog loads `ZoneData.gd` by default. `Docs/System Design/Music player.md` identifies it as the source of Zone geography, and `Tests/TestZoneCatalog.gd` covers band resolution, consumer-id alignment and malformed datasets.
+The production catalog loads `ZoneData.gd` by default. `Docs/System Design/Music player.md` identifies it as the source of Zone geography, and `Tests/TestZoneCatalog.gd` covers drawn-map resolution, consumer-id alignment and malformed datasets.
 
 The spawn director resolves **each candidate anchor chunk's Zone**, rather than using only the player's current Zone. This lets parties just across a Zone boundary use their own table and avoids changing an existing party's definition when the player crosses a boundary.
 
@@ -366,7 +382,7 @@ Do not perform director work on the chunk-loading worker path. Background resour
 
 `Tests/TestOverworldSpawns.gd`, run with `godot --headless --script res://Tests/TestOverworldSpawns.gd`, should cover:
 
-- Single Zone source: first matching inclusive band wins; out-of-range chunks use the shared `default_zone`; music, spawns, and other consumers sharing an injected catalog return identical Zone ids; consumer data contains no private Zone dimensions/fallbacks.
+- Single Zone source: the drawn ASCII zone map answers every on-grid chunk; chunks outside the map use the shared `default_zone`; music, spawns, and other consumers sharing an injected catalog return identical Zone ids; consumer data contains no private Zone dimensions/fallbacks.
 - Seeded repeatability: same data, seed, chunks, records, and time produce identical plans; different Dictionary insertion orders do not change results.
 - Weighted choice: with no caps blocking entries, a seeded distribution is reasonably close to relative weights; zero-weight entries never spawn.
 - Chance semantics: `spawn_chance = 0` never spawns and `1` attempts one party per eligible Zone per tick.
